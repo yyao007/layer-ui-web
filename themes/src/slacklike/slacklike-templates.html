@@ -1,0 +1,34 @@
+<template>
+  <style>
+    layer-message-item {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .layer-message-item-main {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+  </style>
+  <div class='layer-list-item' layer-id='innerNode'>
+    <layer-avatar layer-id='avatar'></layer-avatar>
+    <div class='layer-message-item-main'>
+      <div class='layer-sender-info layer-sender-info-before'>
+        <span class='layer-sender-name' layer-id='sender'></span>
+        <layer-date layer-id='date'></layer-date>
+      </div>
+      <div class='layer-message-item-content-outer'>
+        <div class='layer-message-item-content' layer-id='content'></div>
+      </div>
+      <div class='layer-sender-info layer-sender-info-after'>
+        <layer-message-status layer-id='status'></layer-message-status>
+      </div>
+    </div>
+    <layer-delete layer-id='delete'></layer-delete>
+  </div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-message-item',  null, 'layer-message-item-sent');
+  window.layerUI.registerTemplate('layer-message-item',  null, 'layer-message-item-received');
+</script>

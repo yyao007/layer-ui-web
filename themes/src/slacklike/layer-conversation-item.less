@@ -1,0 +1,45 @@
+layer-conversation-item {
+  cursor: pointer;
+  padding: 4px 5px;
+  color: @listcolortext;
+  opacity: @listopacitytext;
+
+  .layer-conversation-item-last-message {
+    display: none;
+  }
+
+  layer-avatar {
+    display: none;
+  }
+
+  &.layer-conversation-unread-messages {
+      opacity: 1;
+  }
+
+  .layer-conversation-item-title {
+    padding: 2px 6px;
+  }
+
+  &.layer-conversation-item-selected {
+    opacity: 1;
+
+    .layer-conversation-item-title {
+       background-color: @conversationlistselectbackground;
+       border-radius: 16px;
+    }
+  }
+
+
+
+  layer-delete {
+    color: #ADB9C1;
+    border: solid 1px transparent;
+    padding: 2px 4px 8px;
+    &:hover {
+      color: white;
+      border-radius: 12px;
+      background-color: #aaa;
+      border: solid 1px #888;
+    }
+  }
+}

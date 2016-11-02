@@ -1,0 +1,26 @@
+/* Customize bubbling look */
+@chatbubbleradius: 16px;
+
+/* Customize chat bubbles for the session owner */
+@chatownerbubbletextcolor: white;
+.chatownerbubble {
+  border: solid 1px rgba(0, 0, 0, 0.05);
+  border-radius: @chatbubbleradius;
+  color: @chatownerbubbletextcolor;
+  margin: 0px 0px 0px 20px;
+}
+@chatownerbubblebackground: #19a5e4;
+
+/* Customize chat bubbles for the people the session owner talks to */
+@chatparticipantbubbletextcolor: black;
+.chatparticipantbubble {
+  border: solid 1px rgba(0, 0, 0, 0.05);
+  border-radius: @chatbubbleradius;
+  color: @chatparticipantbubbletextcolor;
+  margin: 0px 20px 0px 0px;
+}
+@chatparticipantbubblebackground: #eceff1;
+
+/* Customize user-list and conversation-list */
+@listitembottomborder: solid 1px rgb(221,228,231);
+

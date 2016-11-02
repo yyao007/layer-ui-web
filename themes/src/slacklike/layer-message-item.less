@@ -1,0 +1,74 @@
+@import "variables";
+
+// Common to all message-items
+layer-message-item {
+    .layer-parsed-image {
+      height: 200px;
+    }
+
+  margin-bottom: 4px;
+  .layer-sender-info-before, .layer-sender-info-after, .layer-sender-info-before, .layer-sender-info-after * {
+    display: none;
+  }
+  .layer-message-item-content-outer {
+    .layer-message-item-content {
+      padding: 4px 12px;
+      display: inline-block;
+      border-radius: @chatradius;
+    }
+  }
+  layer-avatar {
+    height: 0px;
+    margin-right: 30px;
+    margin-left: 5px;
+    & * {
+      display: none;
+    }
+  }
+
+  layer-message-status {
+    display: none;
+  }
+}
+
+// First message in group
+layer-message-item.layer-list-item-first {
+  layer-avatar {
+    height: @avatarheight;
+    & * {
+      display: block;
+    }
+  }
+  .layer-sender-info-before {
+    display: flex;
+    flex-direction: row;
+    margin-top: 4px;
+    layer-date {
+      display: inline-block;
+      color: #ADB9C1;
+      font-size: 0.8em;
+    }
+    .layer-sender-name {
+      display: inline-block;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+  }
+}
+
+// Last message in group
+layer-message-item.layer-last-message-sent .layer-sender-details {
+  color: #ADB9C1;
+  font-size: 0.8em;
+  layer-message-status {
+    display: inline-block;
+    text-align: right;
+    margin-left: 15px;
+    margin-right: 5px;
+  }
+}
+
+layer-message-item.layer-list-item-last.layer-message-item-sent + layer-message-item.layer-list-item-first.layer-message-item-sent,
+layer-message-item.layer-list-item-last.layer-message-item-received + layer-message-item.layer-list-item-first.layer-message-item-received {
+  margin-top: 35px;
+}

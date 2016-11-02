@@ -1,0 +1,34 @@
+<template>
+  <style>
+    layer-conversation-item {
+      display: flex;
+      flex-direction: column;
+    }
+    layer-conversation-item .layer-list-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    layer-conversation-item .layer-list-item layer-avatar {
+      margin-right: 15px;
+    }
+    layer-conversation-item  .layer-list-item .layer-conversation-item-content {
+      flex-grow: 1;
+      width: 100px; /* Flexbox bug */
+    }
+    layer-conversation-item.layer-item-filtered .layer-list-item {
+      display: none;
+    }
+  </style>
+  <div class='layer-list-item' layer-id='innerNode'>
+    <layer-avatar layer-id='avatar'></layer-avatar>
+    <div class='layer-conversation-item-content'>
+      <layer-conversation-title layer-id='title'></layer-conversation-title>
+      <layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message>
+    </div>
+    <layer-delete layer-id='delete'></layer-delete>
+  </div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-conversation-item');
+</script>

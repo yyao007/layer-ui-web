@@ -1,0 +1,9 @@
+{
+  "framework": "jasmine2",
+  "src_files": [
+    "http://static.layer.com/sdk/layer-dev-3.0.js",
+    "build/layer-ui-web.js",
+    "src/**/test.js"
+  ],
+  "port": 7358
+}

@@ -1,0 +1,22 @@
+<template>
+  <style>
+    layer-user-list {
+      overflow-y: auto;
+      display: block;
+    }
+    layer-user-list .layer-load-indicator {
+      text-align: center;
+      border-top: solid 1px #ccc;
+      font-style: italic;
+      display: none;
+    }
+    layer-user-list.layer-loading-data .layer-load-indicator {
+      display: block;
+    }
+  </style>
+  <div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-user-list');
+</script>
+

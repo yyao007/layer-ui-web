@@ -1,0 +1,35 @@
+<template>
+  <style>
+    layer-user-item {
+      display: flex;
+      flex-direction: column;
+    }
+    layer-user-item .layer-list-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    layer-user-item .layer-list-item layer-avatar {
+      margin-right: 20px;
+    }
+    layer-user-item .layer-list-item label {
+      flex-grow: 1;
+      width: 100px; /* Flexbox bug */
+    }
+    layer-user-item.layer-item-filtered .layer-list-item {
+      display: none;
+    }
+    layer-user-item.layer-user-item-empty {
+      display: none;
+    }
+  </style>
+  <div class='layer-list-item'>
+    <layer-avatar layer-id='avatar'></layer-avatar>
+    <label class='layer-user-name' layer-id='title'></label>
+    <input type='checkbox' layer-id='checkbox'></input>
+  </div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-user-item');
+</script>

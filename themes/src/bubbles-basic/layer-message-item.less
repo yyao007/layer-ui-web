@@ -1,0 +1,161 @@
+/* Styles for Message Items that appear within the Message List Widget */
+
+layer-message-list layer-message-item {
+  .layer-parsed-image {
+    height: 200px;
+  }
+
+  /* Do not show the avatar if there is no user associated with the avatar
+   * or if the message is not the last message in the Message Group.
+   */
+  layer-avatar:not(.layer-has-user),
+  &:not(.layer-list-item-last) layer-avatar {
+    height: 0px;
+    & * {
+      display: none;
+    }
+  }
+
+  /* Hide all information about the message including status, date and sender;
+   * style these all to be smaller than the message itself
+   */
+  .layer-sender-info {
+      display: none;
+      font-size: 0.75rem;
+      opacity: 0.4;
+
+      .layer-sender-name {
+        display: none;
+      }
+  }
+
+  /**
+   * Common layout for all types of messages
+   */
+  .layer-list-item {
+    margin-bottom: 4px;
+
+    /* The Message Content refers to the image, text or other content, and ommits any information about
+     * sender, date, status, etc... */
+    .layer-message-item-content {
+      display: inline-block;
+
+      /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
+       * between text and bubble borders.
+       */
+      layer-message-text-plain {
+        padding: 4px 12px;
+
+        /* Any You tube videos (iframe) and images should be treated as blocks or text flows around it strangely */
+        iframe, img:not(.emoji) {
+          display: block;
+          border-radius: @chatbubbleradius;
+        }
+
+        /* A parsed-url is any url pasted within a message that has been replaced with an <a class='layer-parsed-url'>url</a> */
+        .layer-parsed-url {
+          display: block;
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Custom formatting for Messages received by the session owner.
+   */
+  &.layer-message-item-received {
+
+    /* Give all messages the basic bubble treatment */
+    layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+      .chatparticipantbubble();
+    }
+
+    /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
+    layer-message-text-plain {
+      background-color: @chatparticipantbubblebackground;
+
+      a, a:visited, a:focus, a:active {
+        color: @chatparticipantbubbletextcolor;
+      }
+    }
+
+    /* Position the participant's avatar */
+    layer-avatar {
+      margin-right: 10px;
+      margin-left: 5px;
+    }
+
+    /* Show sender and date info for the last message in each Message Group */
+    &.layer-list-item-last {
+      .layer-sender-info {
+        margin-top: 5px;
+        margin-bottom: 10px;
+        display: block;
+        layer-date {
+          display: inline;
+        }
+      }
+      .layer-sender-name {
+        display: inline-block;
+        margin-right: 5px;
+        margin-left: 55px;
+      }
+      .layer-sender-name:after {
+          content: '-';
+          margin-left: 5px;
+      }
+    }
+  }
+
+
+  /**
+   * Custom formatting for Messages sent by the session owner.
+   */
+  &.layer-message-item-sent {
+    layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+      .chatownerbubble()
+    }
+
+    layer-message-text-plain {
+      background-color: @chatownerbubblebackground;
+
+      a, a:visited, a:focus, a:active {
+        color: @chatownerbubbletextcolor;
+      }
+    }
+
+    layer-avatar {
+      margin-right: 5px;
+      margin-left: 10px;
+    }
+
+    layer-delete {
+      opacity: 0;
+      &.layer-delete-enabled {
+        opacity: 0.1;
+      }
+    }
+  }
+
+  // Last message in group
+  &.layer-list-item-last {
+    .layer-sender-info {
+      margin-right: 85px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      display: block;
+      layer-date {
+        display: inline;
+      }
+    }
+    layer-message-status {
+      display: inline-block;
+      margin-right: 5px;
+    }
+    layer-message-status:after {
+        content: '-';
+        margin-left: 5px;
+    }
+  }
+}

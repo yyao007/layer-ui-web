@@ -1,0 +1,60 @@
+layer-conversation-item {
+  cursor: pointer;
+  padding: 6px 5px;
+  color: black;
+  border-bottom: @listitembottomborder;
+
+
+  .layer-conversation-item-content {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  layer-conversation-last-message {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: #8798a4;
+    display: inline;
+  }
+
+  layer-conversation-title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-right: 15px;
+    font-weight: bold;
+    display: inline;
+  }
+
+  layer-avatar {
+    display: none;
+  }
+
+  &.layer-conversation-unread-messages {
+    layer-conversation-last-message {
+      color: #313f48;
+    }
+  }
+
+  layer-delete {
+    opacity: 0;
+  }
+
+  &.layer-conversation-item-selected {
+    background-color: #19a5e4;
+    layer-conversation-title {
+       color: white;
+       border-radius: 16px;
+    }
+    layer-conversation-last-message {
+      color: white;
+    }
+    layer-delete {
+      opacity: 0.2;
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+<template>
+  <style>
+    layer-message-item {
+      display: flex;
+      flex-direction: column;
+      align-content: stretch;
+    }
+
+    /* Twemoji */
+    img.emoji {
+      margin: 0 .05em 0 .1em;
+      vertical-align: -0.1em;
+    }
+
+    layer-message-item.layer-message-item-sent .layer-list-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    layer-message-item.layer-message-item-sent .layer-list-item .layer-list-item-container {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+    }
+
+    layer-message-item.layer-message-item-sent .layer-message-item-main {
+      text-align: right;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    /* Insure that text, images, videos, etc... are all right aligned */
+    layer-message-item.layer-message-item-sent layer-message-text-plain {
+      display: block;
+      /*display: flex;
+      flex-direction: column;
+      align-items: flex-end;*/
+    }
+  </style>
+
+  <div class='layer-list-item' layer-id='innerNode'>
+    <div class='layer-list-item-container'>
+      <div class='layer-message-item-main'>
+        <div class='layer-message-item-content' layer-id='content'></div>
+      </div>
+      <layer-avatar layer-id='avatar'></layer-avatar>
+      <layer-delete layer-id='delete'></layer-delete>
+    </div>
+    <div class='layer-sender-info layer-sender-details'>
+      <div class='layer-sender-name' layer-id='sender'></div>
+      <layer-message-status layer-id='status'></layer-message-status>
+      <layer-date layer-id='date'></layer-date>
+    </div>
+  </div>
+</template>
+
+<script>
+  window.layerUI.registerTemplate('layer-message-item', null, 'layer-message-item-sent');
+</script>

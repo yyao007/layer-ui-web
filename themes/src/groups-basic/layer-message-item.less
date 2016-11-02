@@ -1,0 +1,81 @@
+
+// Common to all message-items
+layer-message-item {
+  .layer-list-item {
+    padding: 0px 4px;
+  }
+
+  .layer-parsed-image {
+    height: 200px;
+  }
+
+  .layer-sender-info-before, .layer-sender-info-after, .layer-sender-info-before, .layer-sender-info-after * {
+    display: none;
+  }
+  .layer-message-item-content-outer {
+    .layer-message-item-content {
+      display: inline-block;
+    }
+  }
+  layer-avatar:not(.layer-has-user),
+  &:not(.layer-list-item-first) layer-avatar  {
+    height: 0px;
+    margin-right: 10px;
+    & * {
+      display: none;
+    }
+  }
+
+  .layer-sender-info {
+    display: none;
+  }
+
+  layer-delete {
+    cursor: pointer;
+    opacity: 0.2;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// First message in group
+layer-message-item.layer-list-item-first {
+  .layer-list-item {
+    margin-top: 8px;
+  }
+  layer-avatar {
+    margin-right: 10px;
+    & * {
+      display: block;
+    }
+  }
+
+  .layer-sender-info {
+    display: block;
+    margin-top: 4px;
+    color: #adb9c1;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+
+    layer-message-status:after {
+      content: '-';
+      margin-left: 5px;
+    }
+    layer-date {
+      display: inline-block;
+      font-size: 0.8em;
+      margin-left: 5px;
+    }
+
+    .layer-sender-name {
+      color: black;
+      font-size: 1.0rem;
+      display: inline-block;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+  }
+
+
+}
