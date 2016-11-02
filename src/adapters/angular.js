@@ -12,15 +12,15 @@ var layerUI = require('../base');
  *    <layer-conversation-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversation-list>
  * ```
  *
- * Call this function to initialize angular 1.x Directives:
+ * Call this function to initialize angular 1.x Directives which will be part of the "layerUIControllers" controller:
  *
  * ```
- * layerUI.adapters.angular(angular);
+ * layerUI.adapters.angular(angular); // Creates the layerUIControllers controller
  * angular.module('MyApp', ['layerUIControllers']);
  * ```
  *
  *   Now you can put `<layer-conversation>` and other widgets into angular templates and expect them to work.
- *   Prefix ALL property names with `ng-`.
+ *   Prefix ALL property names with `ng-` to insure that scope is evaluated prior to passing the value on to the webcomponent.
  *
  * @class layerUI.adapters.angular
  * @singleton

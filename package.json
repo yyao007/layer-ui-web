@@ -4,6 +4,7 @@
   "description": "The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.",
   "main": "index.js",
   "scripts": {
+    "prepublish": "grunt prepublish"
   },
   "author": "Layer developers <helpdesk@layer.com> (https://layer.com)",
   "license": "Apache-2.0",

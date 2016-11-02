@@ -68,7 +68,7 @@ LUIComponent('layer-typing-indicator', {
      */
     client: {
       set: function(client) {
-        client.on('layer-typing-indicator-change', this.rerender.bind(this));
+        client.on('typing-indicator-change', this.rerender.bind(this));
       }
     },
 

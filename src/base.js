@@ -129,7 +129,18 @@ layerUI.components = {};
  *
  * @property {Object} adapters
  */
-layerUI.adapters = {};
+var adapterError = 'You must call layerUI.init() before you can use an adapter';
+layerUI.adapters = {
+  angular: function() {
+    throw new Error(adapterError);
+  },
+  backbone: function() {
+    throw new Error(adapterError);
+  },
+  react: function() {
+    throw new Error(adapterError);
+  }
+};
 
 /**
  * Provide a handler for a message containing a specific set of mimeTypes.

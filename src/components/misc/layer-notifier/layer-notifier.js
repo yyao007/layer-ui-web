@@ -275,6 +275,7 @@ LUIComponent('layer-notifier', {
           body: text || 'New file received',
           tag: message.conversationId || 'announcement',
           notifyClick: function() {
+            window.focus();
             this.trigger('layer-notification-click', {message: message});
           }.bind(this)
         });

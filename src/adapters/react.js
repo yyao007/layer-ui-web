@@ -4,6 +4,8 @@ var libraryResult;
 /**
  * Call this function to initialize all of the react components needed to handle the Layer UI for Web widgets.
  *
+ * Before using this, please note that layerUI.init() must be called prior to calling layerUI.adapters.react().
+ *
  * Initialize with:
  *
  * ```
@@ -27,6 +29,26 @@ var libraryResult;
  *      on-conversation-selected={this.mySelectHandler}></ConversationList>
  * }
  * ```
+ *
+ * To insure that LayerUI.init() is called before layerUI.adapters.react(), and each is only called once, we
+ * recommend puttings this code in its own module:
+ *
+ * ```
+ * import React, { Component, PropTypes } from 'react';
+ * import ReactDom from 'react-dom';
+ * import * as Layer from 'layer-websdk';
+ * import * as LayerUI from 'layer-ui-web';
+ *
+ * LayerUI.init({
+ *   appId: 'layer:///apps/staging/my-app-id',
+ *   layer: Layer
+ * });
+ * const LayerUIWidgets = LayerUI.adapters.react(React, ReactDom);
+ * module.exports = LayerUIWidgets;
+ * ```
+ *
+ * Now anywhere you need access to the LayerUIWidgets library can import this module and expect everything to
+ * evaluate at the correct time, correct order, and only evaluate once.
  *
  * @class layerUI.adapters.react
  * @singleton

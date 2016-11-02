@@ -34,8 +34,7 @@ function initBackbone(backbone) {
   if (libraryResult) return libraryResult;
   libraryResult = {};
 
-  // Gather all UI Components flagged as Main Components; other components don't require special wrappers that allow properties
-  // embedded in Angular's Templates to correctly handle values.
+  // Gather all UI Components flagged as Main Components; other components don't require special wrappers for direct use by Apps.
   Object.keys(layerUI.components).filter(function(componentName) {
     var component = layerUI.components[componentName];
     return component.properties.filter(function(prop) {

@@ -230,6 +230,7 @@ module.exports = function (grunt) {
   grunt.registerTask('theme', ['less', 'copy']),
   grunt.registerTask('docs', ['jsduck']);
   grunt.registerTask('debug', ['webcomponents', 'browserify']);
-  grunt.registerTask('build', ['debug', 'uglify', 'theme']);
+  grunt.registerTask('build', ['debug', /*'uglify',*/ 'theme']);
   grunt.registerTask('default', ['build', 'docs']);
+  grunt.registerTask('prepublish', ['build']);
 };
