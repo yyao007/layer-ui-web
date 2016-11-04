@@ -342,70 +342,39 @@ layerUI.registerTemplate = function registerTemplate(className, template, templa
 }
 
 /**
- * Register this template; The Gruntfile.js `webcomponents` task generates template files structured for this function.
+ * Register this template by passing in a string representation of the template.
  *
  * This is comparable to layerUI.registerTemplate except that
  *
- * 1. Instead of taking as input an HTMLTemplateElement, it instead takes a string representing a function whose comment block
- *    contains our template.  Why? So we can put our template into javascript code and not have to load multiple files,
- *    And because comment blocks are the easiest way to do multi-line data in javascript.
- * 2. Styles are NOT part of the template string input; its assumed that the build system has already separated it from
- *    the template and called layerUI.buildStyles on it so that parsing can be done at build rather thatn run time.
- *
- * ```
- *    function templateFunc() {/*
- *      <div class="class1 class2">
- *        <a href='#'></a>
- *      </div>
- *    *\/}
- *    layerUI.buildAndRegisterTemplate('layer-avatar', templateFunc.toString())
- * ```
+ * 1. Instead of taking as input an HTMLTemplateElement, it instead takes a string containing the HTML for the template.
+ * 2. Styles should have been removed from the string before calling this; failure to do so will cause the style to be added to your document
+ * once per instanceo of this element.  Having 100 of the same style blocks can be a nuisance.
  *
  * @method buildAndRegisterTemplate
  * @static
  * @protected
  * @param {String} className          The tag name for the widget your setting the template for; 'layer-avatar'
- * @param {String} templateStr        Template string to register.  Specifically, expects the output of `Function.toString()`
- * @param {String} [templateName='']  Typically this is ommitted, but some components have multiple templates, and use names to distinguish them.
+ * @param {String} templateStr        Template string to register.
+ * @param {String} [templateName='']  Typically this is omitted, but some components have multiple templates, and use names to distinguish them.
  */
 layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr, templateName) {
   if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
   if (!templateName) templateName = 'default';
 
-  // Extract the template html from the function's string
-  var html = templateStr.replace(/^.*\/\*\s*([\s\S]*?)\s*\*\/[\s\S]*$/, "$1");
-
   // Generate a template node
   var template = document.createElement('template');
-  template.innerHTML = html;
+  template.innerHTML = templateStr;
 
   // Write it as a static property of the Component
   layerUI.components[className].templates[templateName] = template;
 }
 
 /**
- * Add the style for the template; The Gruntfile.js `webcomponents` task generates template files structured for this function.
+ * Add the style for the template by passing in a string representation of the CSS rules.
  *
  * You do NOT need to call this if using layerUI.registerTemplate.
  *
- * This is comparable to layerUI.registerTemplate except that
- *
- * 1. It only handles styles, not the template itself.
- * 2. Styles are provided via function comments.  Why? So we can put our template into javascript code and not have to load multiple files,
- *    And because comment blocks are the easiest way to do multi-line data in javascript.
- *
- * ```
- *    function styleFunc() {/*
- *      layer-avatar {
- *        width: 40px;
- *        height: 40px;
- *      }
- *      layer-avatar span {
- *        color: blue;
- *      }
- *    *\/}
- *    layerUI.buildStyle('layer-avatar', styleFunc.toString())
- * ```
+ * This is comparable to layerUI.registerTemplate except that It only handles styles, not the template itself.
  *
  * @method buildStyle
  * @static
@@ -419,8 +388,7 @@ layerUI.buildStyle = function buildStyles(className, styleStr, templateName) {
   if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
 
   // Extract the style from the function
-  var style = styleStr.replace(/^.*\/\*\s*([\s\S]*?)\s*\*\/[\s\S]*$/, "$1");
-  layerUI.components[className].styles[templateName] = style;
+  layerUI.components[className].styles[templateName] = styleStr;
   layerUI.components[className].renderedStyles[templateName] = false;
 }
 

@@ -28,6 +28,7 @@
  * @class layerUI.components.misc.Notifier
  * @extends layerUI.components.Component
  */
+var layerUI = require('../../../base');
 var Notify = require('notifyjs').default;
 var LUIComponent = require('../../../components/component');
 LUIComponent('layer-notifier', {
@@ -240,7 +241,7 @@ LUIComponent('layer-notifier', {
      * @private
      */
     notify: function(evt) {
-      var isBackground = window.layerUI.isInBackground();
+      var isBackground = layerUI.isInBackground();
       var notificationType = isBackground ? this.notifyInBackground : this.notifyInForeground;
       if (notificationType && notificationType !== 'none') {
         if (this.trigger('layer-message-notification', {

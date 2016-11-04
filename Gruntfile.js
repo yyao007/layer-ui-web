@@ -61,7 +61,7 @@ module.exports = function (grunt) {
       }
     },
     uglify: {
-    		options: {
+    	options: {
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
     				'<%= grunt.template.today("yyyy-mm-dd") %> */\n',
         sourceMap: false,
@@ -118,6 +118,7 @@ module.exports = function (grunt) {
 
     function createCombinedComponentFile(file, outputPath) {
       var output = grunt.file.read(file);
+
       var templateCount = 0;
       var outputFolder = path.dirname(outputPath);
 
@@ -165,15 +166,10 @@ module.exports = function (grunt) {
           // Strip out white space between tags
           templateContents = templateContents.replace(/>\s+</g, '><');
 
-          // Generate the <template /> object
-          output += 'function f' + templateCount + '() {/*' + templateContents + '*/}\n';
-
+          // Generate the <template /> and <style> objects
           output += 'var layerUI = require("' + pathToBase + '");\n';
-          output += 'layerUI.buildAndRegisterTemplate("' + className + '", f' + templateCount + '.toString(), "' + templateId + '");\n';
-
-          // Generate the templates <style /> value
-          output += 'function fs' + templateCount + '() {/*' + style + '*/}\n';
-          output += 'layerUI.buildStyle("' + className + '", fs' + templateCount + '.toString(), "' + templateId + '");\n';
+          output += 'layerUI.buildAndRegisterTemplate("' + className + '", ' + JSON.stringify(templateContents) + ');\n';
+          output += 'layerUI.buildStyle("' + className + '", ' + JSON.stringify(style) + ', "' + templateId + '");\n';
         });
       });
 
@@ -230,7 +226,7 @@ module.exports = function (grunt) {
   grunt.registerTask('theme', ['less', 'copy']),
   grunt.registerTask('docs', ['jsduck']);
   grunt.registerTask('debug', ['webcomponents', 'browserify']);
-  grunt.registerTask('build', ['debug', /*'uglify',*/ 'theme']);
+  grunt.registerTask('build', ['debug', 'uglify', 'theme']);
   grunt.registerTask('default', ['build', 'docs']);
   grunt.registerTask('prepublish', ['build']);
 };

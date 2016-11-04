@@ -62,4 +62,6 @@ layerUI.init = function(settings) {
   require("./lib/utils/sizing");
 /*** GRUNT END GENERATED CODE ***/
 };
-module.exports = layerUI;
+
+// If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
+module.exports = global.layerUI = layerUI;
