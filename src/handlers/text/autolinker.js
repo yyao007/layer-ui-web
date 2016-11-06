@@ -9,8 +9,7 @@ var autolinker = new Autolinker( {
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
- * @class layerUI.handlers.text.Emoji
- * @extends layerUI.components.Component
+ * @class layerUI.handlers.text.Autolinker
  */
 layerUI.registerTextHandler({
   name: 'autolinker',

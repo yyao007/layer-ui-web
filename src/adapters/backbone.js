@@ -9,20 +9,28 @@ var libraryResult;
  * ```javascript
  * var Backbone = require('backbone');
  * var LayerUIViews = layerUI.adapters.backbone(Backbone);
- * var ConversationView = new LayerUIViews.Conversation(client);
- * var ConversationListView = new LayerUIViews.ConversationList(client);
- * var UserListView = new LayerUIViews.UserList(client);
+ * var ConversationPanelView = new LayerUIViews.Conversation(client);
+ * var ConversationsListView = new LayerUIViews.ConversationList(client);
+ * var IdentitiesListView = new LayerUIViews.UserList(client);
  * var NotifierView = new LayerUIViews.Notifier(client, {notifyInForeground: 'toast'});
  * ```
+ *
+* Calling this will expose the following React Components:
+ *
+ * * ConversationPanelView: A wrapper around a layerUI.components.ConversationPanel
+ * * ConversationsListView: A wrapper around a layerUI.components.ConversationsListPanel
+ * * IdentitiesListView: A wrapper around a layerUI.components.IdentitiesListPanel
+ * * NotifierView: A wrapper around a layerUI.components.misc.Notifier
+ *
  *
  * Any occurances of a layer widget in your html should be associated with these views:
  *
  * ```html
- * <!-- Associated with the NotifierView -->
- * <layer-notifier notify-in-foreground="toast"></layer-notifier>
+ * < !-- Associated with the NotifierView -->
+ * < layer-notifier notify-in-foreground="toast"></layer-notifier>
  *
- * <!-- Associated with the ConversationView -->
- * <layer-conversation conversation-id="layer:///conversations/UUID"></layer-conversation>
+ * < !-- Associated with the ConversationView -->
+ * < layer-conversation-panel conversation-id="layer:///conversations/UUID"></layer-conversation-panel>
  * ```
  *
  * @class layerUI.adapters.backbone

@@ -6,7 +6,6 @@
  * <br/> rather than go to the next line.
  *
  * @class layerUI.handlers.text.NewLine
- * @extends layerUI.components.Component
  */
 var layerUI = require('../../base');
 layerUI.registerTextHandler({

@@ -46,6 +46,7 @@ module.exports = {
      * @property {String}
      */
     appId: {
+      order: 2,
       set: function(value) {
         if (value && value.indexOf('layer:///') === 0) {
           this.client = layer.Client.getClient(value);

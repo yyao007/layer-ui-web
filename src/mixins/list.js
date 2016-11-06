@@ -50,9 +50,9 @@ module.exports = {
      * Suggested practices:
      *
      * * If your not using this query elsewhere in your app, let this widget generate its own Query
-     * * If setting this from an html template, use layerUI.components.Conversation.queryId instead.
-     * * Special case for layerUI.components.Conversation: if providing your own query, you must update its predicate in addition to
-     *   setting the layerUI.components.Conversation.conversationId.
+     * * If setting this from an html template, use layerUI.components.ConversationPanel.queryId instead.
+     * * Special case for layerUI.components.ConversationPanel: if providing your own query, you must update its predicate in addition to
+     *   setting the layerUI.components.ConversationPanel.conversationId.
      *
      * @property {layer.Query}
      */
@@ -303,7 +303,7 @@ module.exports = {
      *
      * @method
      * @private
-     * @param {layerUI.ListItem} widgets
+     * @param {layerUI.mixins.ListItem} widgets
      * @param {Number} firstIndex - Index in the listData array of the first item in the widgets array
      * @param {Boolean} isTopItemNew - If the top item is index 0 and its a new item rather than an "affected" item, this is true.
      */

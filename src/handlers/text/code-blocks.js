@@ -2,7 +2,6 @@
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
  * @class layerUI.handlers.text.CodeBlocks
- * @extends layerUI.components.Component
  */
 var layerUI = require('../../base');
 layerUI.registerTextHandler({

@@ -90,7 +90,7 @@ layerUI.settings = {
   defaultHandler: {
     tagName: 'layer-message-unknown'
   },
-  textHandlers: ['autolinker', 'emoji-handler', 'image-urls', 'newline', 'youtube-urls']
+  textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube']
 };
 
 /**
@@ -217,7 +217,7 @@ layerUI.getHandler = function(message, container) {
  *
  * ```
  * layerUI.registerTextHandler({
- *    name: 'emoji-handler'
+ *    name: 'emoji'
  * });
  * ```
  *
@@ -225,7 +225,7 @@ layerUI.getHandler = function(message, container) {
  *
  * ```
  * layerUI.registerTextHandler({
- *    name: 'youtube-urls',
+ *    name: 'youtube',
  *    order: 200,
  *    handler: function(textData) {
  *    textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {

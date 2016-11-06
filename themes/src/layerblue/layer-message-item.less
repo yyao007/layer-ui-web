@@ -4,15 +4,15 @@
  * or if the message is not the last message in the group.
  * A hidden
  */
-layer-message-list layer-message-item layer-avatar:not(.layer-has-user),
-layer-message-list layer-message-item:not(.layer-list-item-last) layer-avatar {
+layer-messages-list layer-message-item layer-avatar:not(.layer-has-user),
+layer-messages-list layer-message-item:not(.layer-list-item-last) layer-avatar {
   height: 0px;
   & * {
     display: none;
   }
 }
 
-layer-message-list layer-message-item {
+layer-messages-list layer-message-item {
   .layer-sender-info, layer-date {
       display: none;
       color: #ADB9C1;

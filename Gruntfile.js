@@ -168,8 +168,8 @@ module.exports = function (grunt) {
 
           // Generate the <template /> and <style> objects
           output += 'var layerUI = require("' + pathToBase + '");\n';
-          output += 'layerUI.buildAndRegisterTemplate("' + className + '", ' + JSON.stringify(templateContents) + ');\n';
-          output += 'layerUI.buildStyle("' + className + '", ' + JSON.stringify(style) + ', "' + templateId + '");\n';
+          output += 'layerUI.buildAndRegisterTemplate("' + className + '", ' + JSON.stringify(templateContents.replace(/\n/g,'').trim()) + ', "' + templateId + '");\n';
+          output += 'layerUI.buildStyle("' + className + '", ' + JSON.stringify(style.trim()) + ', "' + templateId + '");\n';
         });
       });
 

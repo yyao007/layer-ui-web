@@ -7,8 +7,8 @@ var layerUI = require('../base');
  * for functions, replace `on-` with `ng-`:
  *
  * ```
- *    <layer-conversation ng-query="myscopeProp.query"></layer-conversation>
- *    <layer-conversation-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversation-list>
+ *    <layer-conversation-panel ng-query="myscopeProp.query"></layer-conversation-panel>
+ *    <layer-conversations-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversations-list>
  * ```
  *
  * Call this function to initialize angular 1.x Directives which will be part of the "layerUIControllers" controller:
@@ -18,7 +18,7 @@ var layerUI = require('../base');
  * angular.module('MyApp', ['layerUIControllers']);
  * ```
  *
- *   Now you can put `<layer-conversation>` and other widgets into angular templates and expect them to work.
+ *   Now you can put `<layer-conversation-panel>` and other widgets into angular templates and expect them to work.
  *   Prefix ALL property names with `ng-` to insure that scope is evaluated prior to passing the value on to the webcomponent.
  *
  * @class layerUI.adapters.angular
@@ -58,10 +58,14 @@ function initAngular(angular) {
     props.forEach(function(prop) {
       var ngAttributeName = prop.attributeName.indexOf('on-') === 0 ? 'ng-' + prop.attributeName.substring(3) : 'ng-' + prop.attributeName;
       var ngPropertyName = prop.propertyName.indexOf('on') === 0 ? 'ng' + prop.propertyName.substring(2) : 'ng' + prop.propertyName.substring(0,1).toUpperCase() + prop.propertyName.substring(1);
+
       attrs.$observe(prop.propertyName, function(value) {
-        scope.$watch(value, function(value) {
+        if (elem.props) {
           elem[prop.propertyName] = value;
-        });
+        } else {
+          if (!elem.tmpdata) elem.tmpdata = {};
+          elem.tmpdata[prop.propertyName] = value;
+        }
       });
 
       attrs.$observe(ngPropertyName, function(value) {

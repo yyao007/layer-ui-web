@@ -90,7 +90,7 @@ require("layer-ui-web/lib/components/conversation-panel/layer-compose-button-pan
 require("layer-ui-web/lib/components/conversation-panel/layer-composer/layer-composer");
 require("layer-ui-web/lib/components/conversation-panel/layer-conversation/layer-conversation");
 require("layer-ui-web/lib/components/conversation-panel/layer-message-item/layer-message-item");
-require("layer-ui-web/lib/components/conversation-panel/layer-message-list/layer-message-list");
+require("layer-ui-web/lib/components/conversation-panel/layer-messages-list/layer-messages-list");
 require("layer-ui-web/lib/components/conversation-panel/layer-typing-indicator/layer-typing-indicator");
 require("layer-ui-web/lib/components/misc/layer-avatar/layer-avatar");
 require("layer-ui-web/lib/components/misc/layer-date/layer-date");
@@ -156,9 +156,9 @@ UI assuming some CSS to size and position the widgets:
     </script>
   </head>
   <body>
-    <layer-user-list></layer-user-list>
-    <layer-conversation-list></layer-conversation-list>
-    <layer-conversation ></layer-conversation>
+    <layer-identities-list></layer-identities-list>
+    <layer-conversations-list></layer-conversations-list>
+    <layer-conversation-panel ></layer-conversation-panel>
   </body>
 </html>
 ```
@@ -166,7 +166,7 @@ UI assuming some CSS to size and position the widgets:
 Using a basic Webcomponent Polyfill and implementation means that you can _also_ create an element simply with:
 
 ```javascript
-var conversationWidget = document.createElement('layer-conversation');
+var conversationWidget = document.createElement('layer-conversation-paenl');
 document.body.appendChild(conversationWidget);
 ```
 
@@ -174,12 +174,12 @@ document.body.appendChild(conversationWidget);
 
 There are many widgets in this framework, but mostly you only need to work with the Main Components; these are high level widgets that wrap and manage a set of subcomponents.  Typically you would not directly interact with the subcomponents.
 
-* `<layer-conversation />`: Manages a message list, a typing indicator panel, and a compose bar for typing a message
+* `<layer-conversation-panel />`: Manages a message list, a typing indicator panel, and a compose bar for typing a message
   * This could be your entire UI, a single `layer-conversation` widget hardcoded to a single conversation with a customer support user; no other widgets needed.
   * The key property for this widget is `conversationId` (or used as an attribute: `conversation-id`), which lets you configure which Conversation its being used to interact with.
-* `<layer-conversation-list />`: Manages a Conversation List
+* `<layer-conversations-list />`: Manages a Conversation List
   * Use this present a list of Conversations, and use the `layer-conversation-selected` event to set the `layer-conversation` `conversationId` property to render the selected Conversation.
-* `<layer-user-list />`: Manages a User list
+* `<layer-identities-list />`: Manages a User list
   * Use this to present a list of users to create a Conversation with, and when the user is done, you can call `var conversation = myLayerClient.createConversation([list.selectedUsers]); myConversationList.conversationId = conversation.id;`
 * `<layer-notifier />`: Creates desktop and toast notifications for new messages
 

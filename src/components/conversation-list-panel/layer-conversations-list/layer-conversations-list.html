@@ -1,0 +1,21 @@
+<template>
+  <style>
+    layer-conversations-list {
+      overflow-y: auto;
+    }
+    layer-conversations-list .layer-load-indicator {
+      text-align: center;
+      border-top: solid 1px #ccc;
+      font-style: italic;
+      display: none;
+    }
+    layer-conversations-list.layer-loading-data .layer-load-indicator {
+      display: block;
+    }
+  </style>
+  <div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-conversations-list');
+</script>
+

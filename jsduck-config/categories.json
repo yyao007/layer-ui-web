@@ -1,38 +1,5 @@
 [
   {
-    "name": "WebUI Components",
-    "groups": [
-      {
-        "name": "Main Components",
-        "classes": [
-          "layerUI.components.Conversation",
-          "layerUI.components.ConversationList",
-          "layerUI.components.UserList",
-          "layerUI.components.misc.Notifier"
-        ]
-      },
-      {
-        "name": "Utilities",
-        "classes": [
-          "layerUI",
-          "layerUI.components.Component",
-          "layerUI.adapters.react",
-          "layerUI.adapters.angular",
-          "layerUI.adapters.backbone"
-        ]
-      },
-      {
-        "name": "Message Handlers",
-        "classes": [
-          "layerUI.handlers.message.TextPlain",
-          "layerUI.handlers.message.Image",
-          "layerUI.handlers.message.Video",
-          "layerUI.handlers.message.Unknown"
-        ]
-      }
-    ]
-  },
-  {
     "name": "WebSDK Components",
     "groups": [
       {
@@ -65,6 +32,39 @@
           "layer.TypingIndicators.TypingListener",
           "layer.TypingIndicators.TypingIndicatorListener",
           "layer.SyncManager"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "WebUI Components",
+    "groups": [
+      {
+        "name": "Main Components",
+        "classes": [
+          "layerUI.components.ConversationPanel",
+          "layerUI.components.ConversationsListPanel.List",
+          "layerUI.components.IdentitiesListPanel.List",
+          "layerUI.components.Notifier"
+        ]
+      },
+      {
+        "name": "Utilities",
+        "classes": [
+          "layerUI",
+          "layerUI.components.Component",
+          "layerUI.adapters.react",
+          "layerUI.adapters.angular",
+          "layerUI.adapters.backbone"
+        ]
+      },
+      {
+        "name": "Message Handlers",
+        "classes": [
+          "layerUI.handlers.message.TextPlain",
+          "layerUI.handlers.message.Image",
+          "layerUI.handlers.message.Video",
+          "layerUI.handlers.message.Unknown"
         ]
       }
     ]

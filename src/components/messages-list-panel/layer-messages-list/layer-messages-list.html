@@ -1,0 +1,26 @@
+<template>
+  <style>
+    layer-messages-list {
+      flex-grow: 1;
+      height: 100px; /* flexbox bug */
+      padding-bottom: 15px;
+      overflow-y: scroll; /* has to be scroll, not auto */
+      -webkit-overflow-scrolling: touch;
+    }
+    layer-messages-list .layer-load-indicator {
+      text-align: center;
+      border-bottom: solid 1px #ccc;
+      font-style: italic;
+      opacity: 0;
+    }
+    layer-messages-list.layer-loading-data .layer-load-indicator {
+      opacity: 1;
+    }
+
+  </style>
+  <div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div>
+</template>
+<script>
+  window.layerUI.registerTemplate('layer-messages-list');
+</script>
+

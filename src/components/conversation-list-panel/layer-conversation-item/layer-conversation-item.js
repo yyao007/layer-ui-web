@@ -10,7 +10,7 @@
  * Future Work:
  * * Badges for unread messages (currently just adds a css class so styling can change if there are any unread messages)
  *
- * @class layerUI.components.ConversationList.ConversationItem
+ * @class layerUI.components.ConversationsListPanel.Item
  * @extends layerUI.components.Component
  */
 var LUIComponent = require('../../../components/component');

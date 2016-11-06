@@ -12,7 +12,7 @@ your design goals.  The main customization mechanisms include:
 Most widgets have some custom events that they generate.  A typical event is typically followed by some default handling:
 
 * User clicks on the Conversation Delete button.  User is asked to confirm deletion using `window.confirm`, and then the Conversation is deleted (or not)
-* User clicks to select a Conversation in the `<layer-conversation-list />` and the `selectedConversationId` property value is updated
+* User clicks to select a Conversation in the `<layer-conversations-list />` and the `selectedConversationId` property value is updated
 * User types in a message to send and hits ENTER; and then the Message is sent.
 
 Wherever there is a default behavior baked in, the component will also respond to `evt.preventDefault()`, causing the default behavior NOT to execute.
@@ -58,7 +58,7 @@ Each theme folder in `src` consists of:
 To learn how to theme a component, such as `<layer-avatar />`:
 
 * Open up the theme file for it: `themes/src/basic-bubbles/layer-conversation-item.less` for examples
-* Open up the Component Template for it: `src/conversation-list-panel/layer-conversation-item/layer-conversation-item.html` to see the HTML and CSS Classes available for styling
+* Open up the Component Template for it: `src/conversations-list-panel/layer-conversation-item/layer-conversation-item.html` to see the HTML and CSS Classes available for styling
 
 It is not required that each Component have its own CSS or LESS file, but simply an approach we have taken to help developers understand the theme and build their own.
 
@@ -69,7 +69,7 @@ If building themes within this repository, using the grunt build, The Gruntfile.
 
 Most Components of this library come with a Template, and this Template can be replaced without changing the Component code.  This is useful if you want to style, arrange and layout a component differently from the default, but the basic behaviors remain unchanged.  If you need to change the behaviors, then see [Custom Components](#custom-components).
 
-A basic customization can be shown by customizing the way a Conversation is rendered in the `<layer-conversation-list />`.  Our task: remove `last_message` and the delete button, and put a menu button in its place.
+A basic customization can be shown by customizing the way a Conversation is rendered in the `<layer-conversations-list />`.  Our task: remove `last_message` and the delete button, and put a menu button in its place.
 
 The original template:
 
@@ -350,7 +350,7 @@ If you don't like the default set of handlers being used for your app (perhaps r
 layerUI.init({
   layer: window.layer,
   appId: 'layer:///apps/staging/UUID',
-  textHandlers: ['emoji-handler', 'autolinker']
+  textHandlers: ['emoji', 'autolinker']
 });
 ```
 

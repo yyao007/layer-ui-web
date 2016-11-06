@@ -15,9 +15,9 @@ var libraryResult;
  *
  * Calling this will expose the following React Components:
  *
- * * Conversation: A wrapper around a layerUI.components.Conversation
- * * ConversationList: A wrapper around a layerUI.components.ConversationList
- * * UserList: A wrapper around a layerUI.components.UserList
+ * * ConversationPanel: A wrapper around a layerUI.components.ConversationPanel
+ * * ConversationsList: A wrapper around a layerUI.components.ConversationsListPanel
+ * * IdentitiesList: A wrapper around a layerUI.components.IdentitiesListPanel
  * * Notifier: A wrapper around a layerUI.components.misc.Notifier
  *
  * You can then use:
@@ -77,12 +77,21 @@ function initReact(React, ReactDom) {
        * Copy all properties into the dom node, but never let React recreate this widget.
        */
       shouldComponentUpdate: function(nextProps) {
-        Object.keys(nextProps).forEach(function(propName) {
-          var camelName = layerUI.camelCase(propName);
-          if (nextProps[propName] !== this.props[propName]) {
-            this.node[camelName] = nextProps[propName];
+        var props = component.properties.filter(function(property) {
+          return this.props[property.propertyName] || this.props[property.attributeName];
+        }, this);
+        props.forEach(function(propDef) {
+          var name = propDef.propertyName in this.props ? propDef.propertyName : propDef.attributeName;
+          if (nextProps[name] !== this.props[name]) {
+            this.node[propDef.propertyName] = nextProps[name];
           }
         }, this);
+        // Object.keys(nextProps).forEach(function(propName) {
+        //   var camelName = layerUI.camelCase(propName);
+        //   if (nextProps[propName] !== this.props[propName]) {
+        //     this.node[camelName] = nextProps[propName];
+        //   }
+        // }, this);
         return false;
       },
 
@@ -93,9 +102,12 @@ function initReact(React, ReactDom) {
         this.node = ReactDom.findDOMNode(this);
         // Without this delay, Webcomponents property setters will be blown away in safari and firefox
         layerUI.defer(function() {
-          Object.keys(this.props).forEach(function(propName) {
-            var camelName = layerUI.camelCase(propName);
-            this.node[camelName] = this.props[propName];
+          var props = component.properties.filter(function(property) {
+            return this.props[property.propertyName] || this.props[property.attributeName];
+          }, this);
+          props.forEach(function(propDef) {
+            var value = propDef.propertyName in this.props ? this.props[propDef.propertyName] : this.props[propDef.attributeName];
+            this.node[propDef.propertyName] = value;
           }, this);
         }.bind(this));
       },
