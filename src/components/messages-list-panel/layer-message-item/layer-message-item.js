@@ -132,49 +132,53 @@ LUIComponent('layer-message-item', {
     render: function() {
       if (!this.props.item) return;
       this.innerHTML = '';
+      try {
 
-      // Select and apply the correct template
-      var template = this.getTemplate(this.props.item.sender.sessionOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
-      if (!template) {
-        template = this.getTemplate();
+        // Select and apply the correct template
+        var template = this.getTemplate(this.props.item.sender.sessionOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
+        if (!template) {
+          template = this.getTemplate();
+        }
+        var clone = document.importNode(template.content, true);
+        this.appendChild(clone);
+        this.setupDomNodes();
+        this.innerNode = this.nodes.innerNode;
+
+        // Setup the layer-sender-name
+        if (this.nodes.sender) {
+          this.nodes.sender.innerHTML = this.item.sender.displayName;
+        }
+
+        if (this.nodes.avatar) {
+          this.nodes.avatar.users = [this.item.sender];
+        }
+
+        // Setup the layer-date
+        if (this.nodes.date) {
+          if (this.dateRenderer) this.nodes.date.dateRenderer = this.dateRenderer;
+          this.nodes.date.date = this.item.sentAt;
+        }
+
+        // Setup the layer-message-status
+        if (this.nodes.status) {
+          if (this.messageStatusRenderer) this.nodes.status.messageStatusRenderer = this.messageStatusRenderer;
+          this.nodes.status.message = this.item;
+        }
+
+        // Setup the layer-delete
+        if (this.nodes.delete) {
+          this.nodes.delete.item = this.props.item;
+          this.nodes.delete.enabled = this.getDeleteEnabled ? this.getDeleteEnabled(this.props.item) : true;
+        }
+
+        // Generate the renderer for this Message's MessageParts.
+        this.applyContentTag();
+
+        // Render all mutable data
+        this.rerender();
+      } catch(err) {
+        console.error('layer-message-item.render(): ', err);
       }
-      var clone = document.importNode(template.content, true);
-      this.appendChild(clone);
-      this.setupDomNodes();
-      this.innerNode = this.nodes.innerNode;
-
-      // Setup the layer-sender-name
-      if (this.nodes.sender) {
-        this.nodes.sender.innerHTML = this.item.sender.displayName;
-      }
-
-      if (this.nodes.avatar) {
-        this.nodes.avatar.users = [this.item.sender];
-      }
-
-      // Setup the layer-date
-      if (this.nodes.date) {
-        if (this.dateRenderer) this.nodes.date.dateRenderer = this.dateRenderer;
-        this.nodes.date.date = this.item.sentAt;
-      }
-
-      // Setup the layer-message-status
-      if (this.nodes.status) {
-        if (this.messageStatusRenderer) this.nodes.status.messageStatusRenderer = this.messageStatusRenderer;
-        this.nodes.status.message = this.item;
-      }
-
-      // Setup the layer-delete
-      if (this.nodes.delete) {
-        this.nodes.delete.item = this.props.item;
-        this.nodes.delete.enabled = this.getDeleteEnabled ? this.getDeleteEnabled(this.props.item) : true;
-      }
-
-      // Generate the renderer for this Message's MessageParts.
-      this.applyContentTag();
-
-      // Render all mutable data
-      this.rerender();
     },
 
     /**

@@ -174,7 +174,7 @@ Files.generateImageMessageParts = function(part, maxSizes, callback) {
     };
 
     if (data.imageHead && data.exif) {
-        orientation = options.orientation = data.exif[0x0112];
+        orientation = options.orientation = data.exif[0x0112] || 0;
     }
 
     // STEP 2: Write the image to a canvas with the specified orientation

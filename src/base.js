@@ -250,8 +250,14 @@ layerUI.getHandler = function(message, container) {
  *       and no handler function.  (For Internal use only)
  */
 layerUI.registerTextHandler = function registerTextHandler(options) {
-  if (!options.handler && layerUI.textHandlers[options.name]) {
-    layerUI.textHandlers[options.name].enabled = true;
+  if (layerUI.textHandlers[options.name]) {
+    if (options.handler) {
+      Object.keys(options).forEach(function(optionKey) {
+        layerUI.textHandlers[options.name][optionKey] = options[optionKey];
+      });
+    } else {
+      layerUI.textHandlers[options.name].enabled = true;
+    }
   } else {
     options.enabled = !options.handler || !options.requiresEnable;
     this.textHandlers[options.name] = options;

@@ -11,7 +11,7 @@
   "dependencies": {
     "animated-scrollto": "^1.1.0",
     "autolinker": "^1.2.1",
-    "blueimp-load-image": "^2.6.1",
+    "blueimp-load-image": "^2.9.0",
     "eslint": "^3.2.2",
     "notifyjs": "^2.0.3",
     "remarkable-emoji": "^0.1.3",

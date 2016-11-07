@@ -146,7 +146,7 @@ LUIComponent('layer-message-image', {
             };
 
             if (data.imageHead && data.exif) {
-                options.orientation = data.exif[0x0112];
+                options.orientation = data.exif[0x0112] || 0;
             }
             options.maxWidth = options.minWidth = this.props.sizes.width;
             options.maxHeight = options.minHeight = this.props.sizes.height;
