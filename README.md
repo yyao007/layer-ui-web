@@ -212,3 +212,13 @@ put them in an array and then set `composeButtons` to refer to them.  This is es
 and implemented.
 * Inclusion of standard dom nodes that go between messages, such as Date headers, Headers indicating "read up to here", etc...  For now we just include the capability to build your own.
 * Border radius on the you-tube embedded iframe is pretty sketchy during initialization of the Player
+
+## Testing
+
+This is setup so that you can run testem from the root folder
+
+```console
+> testem
+```
+
+and then test this in any browser with the URL output by the command.
