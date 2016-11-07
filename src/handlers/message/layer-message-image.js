@@ -116,7 +116,7 @@ LUIComponent('layer-message-image', {
      * @private
      */
     render: function() {
-      this.props.sizes = normalizeSize(this.props.meta, {width: Number(this.listWidth), height: Number(this.listHeight), noPadding: this.noPadding});
+      this.props.sizes = normalizeSize(this.props.meta, {width: 256, height: 256, noPadding: this.noPadding});
       this.style.width = this.props.sizes.width + 'px';
       this.style.height = this.props.sizes.height + 'px';
       if (this.props.preview && this.props.preview.body) {

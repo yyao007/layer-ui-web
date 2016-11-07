@@ -35,7 +35,7 @@ Files.DragAndDropFileWatcher = function(options) {
   this.node = typeof options.node === 'string' ? document.getElementById(options.node) : options.node;
   this.callback = options.callback;
   this.allowDocumentDrop = Boolean(options.allowDocumentDrop);
-  this.maxSizes = options.maxSizes || {width: 300, height: 300};
+  this.maxSizes = options.maxSizes || {width: 512, height: 512};
 
   this.onDragOverBound = this.onDragOver.bind(this);
   this.onDragEndBound = this.onDragEnd.bind(this);
@@ -188,7 +188,6 @@ Files.generateImageMessageParts = function(part, maxSizes, callback) {
       height: srcCanvas.height
     };
 
-    // TODO: we should be able to provide listHeight/listWidth, but this code is too separated from the list widgets!
     var size = normalizeSize(originalSize, maxSizes);
     var canvas = document.createElement('canvas');
     canvas.width = size.width;
