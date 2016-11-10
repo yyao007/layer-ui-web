@@ -120,9 +120,7 @@ LUIComponent('layer-conversation-item', {
       }
 
       this.nodes.avatar.users = users;
-
-      // TODO: Support mode where it only looks at unread state of lastMessage
-      this.classList[this.item.unreadCount ? 'add' : 'remove']('layer-conversation-unread-messages');
+      this.classList[this.item.lastMessage && !this.item.lastMessage.isRead ? 'add' : 'remove']('layer-conversation-unread-messages');
     },
 
     /**

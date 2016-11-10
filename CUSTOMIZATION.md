@@ -108,8 +108,6 @@ Lets create a new file, called `my-conversation-item.html`:
   </div>
 </template>
 <script>
-  // Or just document.getElementById if this template is embedded in your index.html file
-  // TODO: See slacklike theme's use of `null`
   window.layerUI.registerTemplate('layer-conversation-item');
 </script>
 ```
@@ -127,7 +125,7 @@ Lets break this down a bit:
 * List Item templates expect to have an outer node `<div class='layer-list-item' layer-id='innerNode'>`; this should be maintained in any template you make for any type of List Item.
 * The `layer-id` attribute allows each widget to find key named components without having to query its children to find a child.  By having `layer-id="title"`, we have told the widget to setup `widget.nodes.title` to access the `layer-conversation-item-title` node.  By adding `layer-id='menu'` we have made it so we can write `widget.nodes.menu` to access our new button.
   * Building a template requires you to know what `layer-id` names the widget expects to have available. Most widgets will test for their existence before using them, but you must insure that required ones have been defined in your html file.
-* Each template within the file has its own `<styles/>` section
+* Each template within the file has its own `<style />` section
 * As we do NOT at this time use Shadow DOM, you should prefix all of your css rules with the component name.  So if your targeting `.custom-conversation-item-menu` in your rule, it should be `layer-conversation-item .custom-conversation-item-menu` in your rule.
 * This example replaces the template but NOT the component.  Adding a custom component would be more elegant for handling a Menu Button, instead, one must wire up event listeners for onClick events on the buttons.
 * A template allows us to customize layout, but for a task such as adding an unread badge count into the dom, the Component would need javascript that knows to set that value for that node... so a Custom Component would then be needed.

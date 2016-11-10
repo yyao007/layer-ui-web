@@ -9,10 +9,10 @@ var libraryResult;
  * ```javascript
  * var Backbone = require('backbone');
  * var LayerUIViews = layerUI.adapters.backbone(Backbone);
- * var ConversationPanelView = new LayerUIViews.Conversation(client);
- * var ConversationsListView = new LayerUIViews.ConversationList(client);
- * var IdentitiesListView = new LayerUIViews.UserList(client);
- * var NotifierView = new LayerUIViews.Notifier(client, {notifyInForeground: 'toast'});
+ * var conversationPanelView = new LayerUIViews.ConversationPanel(client, {conversationId: 'layer:///conversations/UUID'});
+ * var conversationsListView = new LayerUIViews.ConversationsList(client);
+ * var identitiesListView = new LayerUIViews.UserList(client);
+ * var notifierView = new LayerUIViews.Notifier(client, {notifyInForeground: 'toast'});
  * ```
  *
 * Calling this will expose the following React Components:

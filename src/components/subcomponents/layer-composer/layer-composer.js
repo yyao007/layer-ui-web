@@ -195,9 +195,13 @@ LUIComponent('layer-composer', {
      * @private
      */
     onKeyDown: function(event) {
-      if (event.keyCode === ENTER && !event.shiftKey && !event.ctrlKey) {
-        event.preventDefault();
-        this.send();
+      if (event.keyCode === ENTER) {
+        if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
+          this.send();
+        } else {
+          event.target.value += '\n';
+        }
       } else if (!layerUI.settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
         event.preventDefault();
         event.target.value += '\t  ';

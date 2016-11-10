@@ -109,7 +109,7 @@ module.exports = {
      * @property {Number}
      */
     pageSize: {
-      value: 20
+      value: 50
     },
 
     /**

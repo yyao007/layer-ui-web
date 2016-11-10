@@ -4,9 +4,10 @@ var layerUI = require('../base');
  * Call this function to initialize all of the angular 1.x directives needed to handle the Layer UI for Web widgets.
  *
  * When passing scope values/function into widget properties, prefix the property with `ng-`;
- * for functions, replace `on-` with `ng-`:
+ * for functions, replace `on-` with `ng-`.  If passing in a literal, do NOT prefix with `ng-`:
  *
  * ```
+ *    <layer-notifier notify-in-foreground="toast"></layer-notifier>
  *    <layer-conversation-panel ng-query="myscopeProp.query"></layer-conversation-panel>
  *    <layer-conversations-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversations-list>
  * ```

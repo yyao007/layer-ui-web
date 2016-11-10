@@ -36,8 +36,8 @@ Note that if you do not have an `appId` at the time you call `init()` you can in
 ### CDN
 
 ```html
-<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.js'></script>
-<script src='https://cdn.layer.com/ui/0.9/layer-ui-web.js'></script>
+<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
+<script src='https://cdn.layer.com/ui/0.9/layer-ui-web.min.js'></script>
 <link rel='stylesheet' href='https://cdn.layer.com/ui/0.9/themes/basic-bubbles.css' />
 <script>
 window.layerUI.init({
@@ -128,8 +128,8 @@ grunt
 ```
 
 ```html
-<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.js'></script>
-<script src='layer-ui-web/build/layer-ui-web.js'></script>
+<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
+<script src='layer-ui-web/build/layer-ui-web.min.js'></script>
 ```
 
 ## Reference
@@ -146,8 +146,8 @@ UI assuming some CSS to size and position the widgets:
 ```html
 <html>
   <head>
-    <script src='http://cdn.layer.com/sdk/3.0/layer-websdk.js'></script>
-    <script src='https://cdn.layer.com/ui/0.9/layer-ui-web.js'></script>
+    <script src='http://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
+    <script src='https://cdn.layer.com/ui/0.9/layer-ui-web.min.js'></script>
 
     <!-- Code for instantiating a layer.Client and authenticating it: -->
     <script src='my-client-initializer.js'></script>
@@ -163,10 +163,10 @@ UI assuming some CSS to size and position the widgets:
 </html>
 ```
 
-Using a basic Webcomponent Polyfill and implementation means that you can _also_ create an element simply with:
+Using a Webcomponent Polyfill and implementation means that you can _also_ create an element simply with:
 
 ```javascript
-var conversationWidget = document.createElement('layer-conversation-paenl');
+var conversationWidget = document.createElement('layer-conversation-panel');
 document.body.appendChild(conversationWidget);
 ```
 
@@ -178,9 +178,9 @@ There are many widgets in this framework, but mostly you only need to work with 
   * This could be your entire UI, a single `layer-conversation` widget hardcoded to a single conversation with a customer support user; no other widgets needed.
   * The key property for this widget is `conversationId` (or used as an attribute: `conversation-id`), which lets you configure which Conversation its being used to interact with.
 * `<layer-conversations-list />`: Manages a Conversation List
-  * Use this present a list of Conversations, and use the `layer-conversation-selected` event to set the `layer-conversation` `conversationId` property to render the selected Conversation.
+  * Use this to present a list of Conversations, and use the `layer-conversation-selected` event to set the `layer-conversation` `conversationId` property to render the selected Conversation.
 * `<layer-identities-list />`: Manages a User list
-  * Use this to present a list of users to create a Conversation with, and when the user is done, you can call `var conversation = myLayerClient.createConversation([list.selectedUsers]); myConversationList.conversationId = conversation.id;`
+  * Use this to present a list of users to create a Conversation with, and when your user selection is done, you can call `var conversation = myLayerClient.createConversation({ participants: [list.selectedUsers] }); myConversationPanel.conversationId = conversation.id;`
 * `<layer-notifier />`: Creates desktop and toast notifications for new messages
 
 See the [API Documentation](http://static.layer.com/layer-ui-web-beta/docs/) for more information on the parameters of each of these widgets.

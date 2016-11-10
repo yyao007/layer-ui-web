@@ -78,7 +78,8 @@ var layerUI = {};
  *    in which case you can use layerUI.registerTemplate, and leave `customComponents` empty.
  *
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
- *
+ * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'images', 'newline', 'youtube']] Specify which text handlers you want
+ *    Note that any custom handlers you add do not need to be in the settings, they can be called after calling `init()` using layerUI.registerTextHandler.
  * @property {Object} [settings.listNodeDimensions]  The list width/height to use for calculating optimal images/message-part sizes
  */
 layerUI.settings = {
@@ -478,6 +479,9 @@ layerUI.addAdapter = function(name, adapter) {
  * Call init with any custom settings, and to register all components with the dom.
  *
  * Note that `init()` must be called prior to putting any webcomponents into a document.
+ *
+ * Note as well that if passing in your appId, you must have instantiated a layer.Client with that appId
+ * prior to putting any webcomponents into your document.
  *
  * ```javascript
  * layerUI.init({

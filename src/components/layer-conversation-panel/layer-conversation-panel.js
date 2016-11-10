@@ -1,5 +1,5 @@
 /**
- * The Layer Conversation widget provides a panel that includes a Message List, Typing Indicator Panel, and a Compose bar.
+ * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
  * Note that its up to the developer to tell this panel what its showing by setting the `conversationId` property.
  * This property affects what messages are rendered, what typing indicators are sent and rendered, and what Conversations messages are

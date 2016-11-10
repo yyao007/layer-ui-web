@@ -85,7 +85,7 @@ module.exports = {
         this.query = this.client.createQuery({
           model: this.queryModel,
           dataType: layer.Query.InstanceDataType,
-          paginationWindow: 50
+          paginationWindow: this.pageSize || 50
         });
         this.hasGeneratedQuery = true;
       }
