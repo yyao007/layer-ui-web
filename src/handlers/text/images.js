@@ -3,18 +3,18 @@
  *
  * @class layerUI.handlers.text.Images
  */
-var layerUI = require('../../base');
+import layerUI from '../../base';
+import isUrl from '../../utils/is-url';
+
 layerUI.registerTextHandler({
   name: 'images',
   order: 100,
   requiresEnable: true,
-  handler: function(textData) {
-    var isUrl = require('../../utils/is-url');
-    var matches = textData.text.match(isUrl(['png', 'jpg', 'jpeg', 'gif']));
+  handler(textData) {
+    const matches = textData.text.match(isUrl(['png', 'jpg', 'jpeg', 'gif']));
     if (matches) {
-      matches.forEach(function(match) {
-        textData.afterText.push('<img class="layer-parsed-image" src="' + match + '"></img>');
-      });
+      matches.forEach(match =>
+        textData.afterText.push('<img class="layer-parsed-image" src="' + match + '"></img>'));
     }
-  }
+  },
 });

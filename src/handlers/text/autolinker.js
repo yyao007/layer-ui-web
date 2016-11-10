@@ -1,10 +1,11 @@
-var layerUI = require('../../base');
-var Autolinker = require('autolinker');
-var autolinker = new Autolinker( {
-  truncate : {
-    length   : 40,
-    location : 'middle'
-  }
+import Autolinker from 'autolinker';
+import layerUI from '../../base';
+
+const autolinker = new Autolinker({
+  truncate: {
+    length: 40,
+    location: 'middle',
+  },
 });
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
@@ -15,7 +16,7 @@ layerUI.registerTextHandler({
   name: 'autolinker',
   order: 400,
   requiresEnable: true,
-  handler: function(textData) {
+  handler(textData) {
     textData.text = autolinker.link(textData.text);
-  }
+  },
 });

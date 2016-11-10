@@ -21,7 +21,8 @@
  * @class layerUI.components.subcomponents.Avatar
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-avatar', {
   properties: {
 
@@ -31,14 +32,14 @@ LUIComponent('layer-avatar', {
      * @property {layer.Identity[]}
      */
     users: {
-      set: function(value){
+      set(value) {
         if (!value) value = [];
         if (!Array.isArray(value)) value = [value];
         this.users = value;
         this.classList[value.length ? 'add' : 'remove']('layer-has-user');
         this.render();
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -48,8 +49,8 @@ LUIComponent('layer-avatar', {
      * @method created
      * @private
      */
-    created: function() {
-      this.props.users = [];
+    created() {
+      this.properties.users = [];
     },
 
     /**
@@ -58,7 +59,7 @@ LUIComponent('layer-avatar', {
      * @method
      * @private
      */
-    render: function() {
+    render() {
       // Clear the innerHTML if we have rendered something before
       if (this.childNodes.length) {
         this.innerHTML = '';
@@ -77,24 +78,33 @@ LUIComponent('layer-avatar', {
      * @method
      * @private
      */
-    renderUser: function(user) {
+    renderUser(user) {
       if (user.avatarUrl) {
-        var img = document.createElement('img');
-        img.onerror = function() {img.style.display='none';};
+        const img = document.createElement('img');
+        img.onerror = () => { img.style.display = 'none'; };
         img.src = user.avatarUrl;
         this.appendChild(img);
       } else {
-        var span = document.createElement('span');
+        const span = document.createElement('span');
+
+        // Use first and last name if provided
         if (user.firstName && user.lastName) {
-          span.innerHTML =  user.firstName.substring(0,1).toUpperCase() + user.lastName.substring(0,1).toUpperCase();
-        } else if (user.displayName.indexOf(' ') !== -1) {
-          span.innerHTML = user.displayName.substr(0, 1) + user.displayName.substr(user.displayName.indexOf(' ') + 1, 1);
-        } else {
-          span.innerHTML = user.displayName.substring(0,2).toUpperCase();
+          span.innerHTML = user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
+        }
+
+        // Use displayName to try and find a first and last name
+        else if (user.displayName.indexOf(' ') !== -1) {
+          span.innerHTML = user.displayName.substr(0, 1).toUpperCase() +
+            user.displayName.substr(user.displayName.indexOf(' ') + 1, 1).toUpperCase();
+        }
+
+        // If all else fails, use the first two letters
+        else {
+          span.innerHTML = user.displayName.substring(0, 2).toUpperCase();
         }
         this.appendChild(span);
       }
-    }
-  }
+    },
+  },
 });
 

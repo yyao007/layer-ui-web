@@ -17,9 +17,9 @@
 //      */
 //     queryId: {
 //       set: function(value) {
-//         if (value && value.indexOf('layer:///') !== 0) this.props.queryId = '';
-//         if (this.props.client && this.queryId) {
-//           this.query = this.props.client.getQuery(this.queryId);
+//         if (value && value.indexOf('layer:///') !== 0) this.properties.queryId = '';
+//         if (this.properties.client && this.queryId) {
+//           this.query = this.properties.client.getQuery(this.queryId);
 //         }
 //       }
 //     },

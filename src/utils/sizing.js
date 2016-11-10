@@ -1,36 +1,39 @@
-var layerUI = require('../base');
-var messageSizes = {
-  maxHeightRatio: 2/3,
+import layerUI from '../base';
+
+// TODO: We should not be hardcoding stuff like this in.
+const messageSizes = {
+  maxHeightRatio: 2 / 3,
   maxWidthPadding: 65,
-  scrollbarWidth: 18
+  scrollbarWidth: 18,
 };
 
 
 // NOTE: dimensions must contains width and height properties.
-module.exports = function(dimensions, optListNodeDimensions) {
-  var listNodeDimensions = layerUI.settings.listNodeDimensions || optListNodeDimensions;
-  var maxHeight = listNodeDimensions.height * messageSizes.maxHeightRatio;
-  var maxWidth = listNodeDimensions.width - messageSizes.scrollbarWidth - (optListNodeDimensions.noPadding ? 0 : messageSizes.maxWidthPadding);
+module.exports = (dimensions, optListNodeDimensions) => {
+  const listNodeDimensions = layerUI.settings.listNodeDimensions || optListNodeDimensions;
+  const maxHeight = listNodeDimensions.height * messageSizes.maxHeightRatio;
+  const maxWidth = listNodeDimensions.width - messageSizes.scrollbarWidth -
+    (optListNodeDimensions.noPadding ? 0 : messageSizes.maxWidthPadding);
 
 
   if (!dimensions) {
     return {
       height: maxHeight,
-      width: maxWidth
+      width: maxWidth,
     };
   }
 
-  var size = {
+  const size = {
     width: dimensions.width,
-    height: dimensions.height
+    height: dimensions.height,
   };
   if (dimensions.width > maxWidth) {
-    var width = dimensions.width;
+    const width = dimensions.width;
     size.width = maxWidth;
     size.height = size.height * maxWidth / width;
   }
   if (size.height > maxHeight) {
-    var height = size.height;
+    const height = size.height;
     size.height = maxHeight;
     size.width = size.width * maxHeight / height;
   }

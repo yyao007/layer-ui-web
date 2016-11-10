@@ -8,33 +8,35 @@
  * @class layerUI.components.IdentitiesListPanel.Item
  * @extends layerUI.components.Component
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+import ListItem from '../../../mixins/list-item';
+
 LUIComponent('layer-identity-item', {
-  mixins: [require('../../../mixins/list-item')],
+  mixins: [ListItem],
   properties: {
     item: {
-      set: function(value) {
+      set(value) {
         this.render();
         value.on('identities:change', this.render, this);
-      }
+      },
     },
 
     /**
      * Is this user item selected using the checkbox?
      *
-     * @property {Boolean}
+     * @property {Boolean} [selected=false]
      */
     selected: {
       type: Boolean,
-      set: function(value) {
+      set(value) {
         if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
         this.innerNode.classList[value ? 'add' : 'remove']('layer-identity-item-selected');
       },
-      get: function() {
-        return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.props.selected);
-      }
-    }
+      get() {
+        return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.properties.selected);
+      },
+    },
   },
   methods: {
     /**
@@ -43,10 +45,10 @@ LUIComponent('layer-identity-item', {
      * @method created
      * @private
      */
-    created: function() {
-      if (!this.id) this.id = layer.Util.generateUUID();
+    created() {
+      if (!this.id) this.id = LayerAPI.Util.generateUUID();
       this.nodes.checkbox.addEventListener('change', this.onChange.bind(this));
-      this.nodes.checkbox.id = this.id + '-checkbox';
+      this.nodes.checkbox.id = `${this.id}-checkbox`;
       this.nodes.title.setAttribute('for', this.nodes.checkbox.id);
     },
 
@@ -55,14 +57,17 @@ LUIComponent('layer-identity-item', {
      *
      * If the custom event is canceled, roll back the change.
      *
-     * @method
+     * @method onChange
+     * @param {Event} evt
      * @private
      */
-    onChange: function(evt) {
+    onChange(evt) {
       evt.stopPropagation();
-      var checked = this.selected;
+      const checked = this.selected;
+      const identity = this.item;
 
-      var customEventResult = this.trigger('layer-identity-item-' + (checked ? 'selected' : 'deselected'), {identity: this.item});
+      // Trigger the event and see if evt.preventDefault() was called
+      const customEventResult = this.trigger(`layer-identity-item-${checked ? 'selected' : 'deselected'}`, { identity });
 
       if (customEventResult) {
         this.innerNode.classList[checked ? 'add' : 'remove']('layer-identity-item-selected');
@@ -74,10 +79,10 @@ LUIComponent('layer-identity-item', {
     /**
      * Render/rerender the user, showing the avatar and user's name.
      *
-     * @method
+     * @method render
      * @private
      */
-    render: function() {
+    render() {
       this.nodes.avatar.users = [this.item];
       this.nodes.title.innerHTML = this.item.displayName;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);
@@ -86,28 +91,29 @@ LUIComponent('layer-identity-item', {
     /**
      * Run a filter on this item, and hide it if it doesn't match the filter.
      *
-     * @method
+     * @method runFilter
      * @param {String|Regex|Function} filter
      */
-    runFilter: function(filter) {
-      var user = this.props.item;
-      var match;
+    runFilter(filter) {
+      const identity = this.properties.item;
+      let match = false;
       if (!filter) {
         match = true;
       } else if (filter instanceof RegExp) {
-        match = filter.test(user.displayName) || filter.test(user.firstName) || filter.test(user.lastName) || filter.test(user.emailAddress);
+        match = filter.test(identity.displayName) || filter.test(identity.firstName) || filter.test(identity.lastName) || filter.test(identity.emailAddress);
       } else if (typeof filter === 'function') {
-        match = filter(user);
+        match = filter(identity);
       } else {
         filter = filter.toLowerCase();
         match =
-          user.displayName.toLowerCase().indexOf(filter) !== -1 ||
-          user.firstName.toLowerCase().indexOf(filter) !== -1 ||
-          user.lastName.toLowerCase().indexOf(filter) !== -1 ||
-          user.emailAddress.toLowerCase().indexOf(filter) !== -1;
+          identity.displayName.toLowerCase().indexOf(filter) !== -1 ||
+          identity.firstName.toLowerCase().indexOf(filter) !== -1 ||
+          identity.lastName.toLowerCase().indexOf(filter) !== -1 ||
+          identity.emailAddress.toLowerCase().indexOf(filter) !== -1;
       }
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
-    }
-  }
-})
+    },
+  },
+});
+
 

@@ -46,6 +46,7 @@ describe('layer-identities-list', function() {
 
   afterEach(function() {
     try {
+      layerUI.settings.appId = null;
       document.body.removeChild(testRoot);
     } catch(e) {}
   });
@@ -362,27 +363,27 @@ describe('layer-identities-list', function() {
         el.client = client;
         var query2 = client.createQuery({model: layer.Conversation});
         el.query = query2;
-        el.props.hasGeneratedQuery = true;
+        el.properties.hasGeneratedQuery = true;
         el.query = query;
         expect(query2.isDestroyed).toBe(true);
-        expect(el.props.hasGeneratedQuery).toBe(false);
+        expect(el.properties.hasGeneratedQuery).toBe(false);
       });
 
       it("Should not destroy the existing query if hasGeneratedQuery is false", function() {
         el.client = client;
         var query2 = client.createQuery({model: layer.Conversation});
         el.query = query2;
-        el.props.hasGeneratedQuery = false;
+        el.properties.hasGeneratedQuery = false;
         el.query = query;
         expect(query2.isDestroyed).toBe(false);
-        expect(el.props.hasGeneratedQuery).toBe(false);
+        expect(el.properties.hasGeneratedQuery).toBe(false);
         query2.destroy();
       });
     });
 
     describe("The created() method", function() {
       it("Should wire up the scroll event handler", function(done) {
-        el.props.isSelfScrolling = false;
+        el.properties.isSelfScrolling = false;
         spyOn(el, "throttler").and.callFake(function() {
           expect(true).toBe(true);
           done();
@@ -394,7 +395,7 @@ describe('layer-identities-list', function() {
 
       it("Should initialize listData", function() {
         var el = document.createElement('layer-identities-list');
-        expect(el.props.listData).toEqual([]);
+        expect(el.properties.listData).toEqual([]);
       });
     });
 
@@ -404,11 +405,11 @@ describe('layer-identities-list', function() {
           preventDefault: jasmine.createSpy('preventDefault')
         };
 
-        el.props.isSelfScrolling = false;
+        el.properties.isSelfScrolling = false;
         el._onScroll(evt);
         expect(evt.preventDefault).not.toHaveBeenCalled();
 
-        el.props.isSelfScrolling = true;
+        el.properties.isSelfScrolling = true;
         el._onScroll(evt);
         expect(evt.preventDefault).toHaveBeenCalledWith();
       });
@@ -420,11 +421,11 @@ describe('layer-identities-list', function() {
           preventDefault: jasmine.createSpy('preventDefault')
         };
 
-        el.props.isSelfScrolling = true;
+        el.properties.isSelfScrolling = true;
         el._onScroll(evt);
         expect(el.throttler).not.toHaveBeenCalled();
 
-        el.props.isSelfScrolling = false;
+        el.properties.isSelfScrolling = false;
 
         el._onScroll(evt);
         expect(el.throttler).toHaveBeenCalled();
@@ -571,8 +572,8 @@ describe('layer-identities-list', function() {
         var fragment = document.createDocumentFragment();
         el.generateFragmentItem(client.user, fragment);
         var item = fragment.childNodes[0];
-        expect(item.props.listHeight).toEqual(el.clientHeight);
-        expect(item.props.listWidth).toEqual(el.clientWidth);
+        expect(item.properties.listHeight).toEqual(el.clientHeight);
+        expect(item.properties.listWidth).toEqual(el.clientWidth);
         expect(el.clientHeight > 0).toBe(true);
         expect(el.clientWidth > 0).toBe(true);
       });
@@ -605,8 +606,8 @@ describe('layer-identities-list', function() {
         el.onRenderListItem = jasmine.createSpy('renderItem');
         el.processAffectedWidgets([el.childNodes[5], el.childNodes[10]], false);
         expect(el.onRenderListItem.calls.count()).toBe(2);
-        expect(el.onRenderListItem).toHaveBeenCalledWith(el.childNodes[5], el.props.listData, 5, false);
-        expect(el.onRenderListItem).toHaveBeenCalledWith(el.childNodes[10], el.props.listData, 6, false);
+        expect(el.onRenderListItem).toHaveBeenCalledWith(el.childNodes[5], el.properties.listData, 5, false);
+        expect(el.onRenderListItem).toHaveBeenCalledWith(el.childNodes[10], el.properties.listData, 6, false);
       });
     });
 
@@ -671,10 +672,10 @@ describe('layer-identities-list', function() {
 
     describe("The renderResetData() method", function() {
       it("Should reset listData", function() {
-        el.props.listData = query.data;
+        el.properties.listData = query.data;
         query.reset();
-        expect(el.props.listData.length).toEqual(0);
-        expect(query.data).not.toBe(el.props.listData);
+        expect(el.properties.listData.length).toEqual(0);
+        expect(query.data).not.toBe(el.properties.listData);
       });
 
       it("Should reset the scroll position", function() {
@@ -700,9 +701,9 @@ describe('layer-identities-list', function() {
       it("Should update listData", function(done) {
         el.render();
         var initialLength = query.data.length;
-        expect(initialLength).toEqual(el.props.listData.length);
-        expect(el.props.listData).toEqual(query.data);
-        expect(el.props.listData).not.toBe(query.data);
+        expect(initialLength).toEqual(el.properties.listData.length);
+        expect(el.properties.listData).toEqual(query.data);
+        expect(el.properties.listData).not.toBe(query.data);
         spyOn(el, 'renderWithoutRemovedData').and.callThrough();
 
         // Run
@@ -711,9 +712,9 @@ describe('layer-identities-list', function() {
           expect(el.renderWithoutRemovedData).toHaveBeenCalled();
 
           // Posttest
-          expect(el.props.listData).toEqual(query.data);
-          expect(el.props.listData).not.toBe(query.data);
-          expect(initialLength).toEqual(el.props.listData.length + 1);
+          expect(el.properties.listData).toEqual(query.data);
+          expect(el.properties.listData).not.toBe(query.data);
+          expect(initialLength).toEqual(el.properties.listData.length + 1);
           done();
         }, 10);
       });
@@ -768,7 +769,7 @@ describe('layer-identities-list', function() {
         });
 
         // Posttest
-        expect(el.props.listData[el.props.listData.length - 1]).toBe(client.getIdentity('layer:///identities/user' + 10000));
+        expect(el.properties.listData[el.properties.listData.length - 1]).toBe(client.getIdentity('layer:///identities/user' + 10000));
       });
 
       it("Should insert a list item at the proper index", function() {
@@ -916,8 +917,8 @@ describe('layer-identities-list', function() {
 
         // Posttest
         expect(el.renderPagedData).toHaveBeenCalled();
-        expect(el.props.listData[el.props.listData.length - 2].displayName).toEqual("User 10000");
-        expect(el.props.listData[el.props.listData.length - 1].displayName).toEqual("User 10001");
+        expect(el.properties.listData[el.properties.listData.length - 2].displayName).toEqual("User 10000");
+        expect(el.properties.listData[el.properties.listData.length - 1].displayName).toEqual("User 10001");
       });
 
       it("Should append all new items just before the loadIndicator", function() {
@@ -1095,7 +1096,7 @@ describe('layer-identities-list', function() {
       });
 
       it("Should setup the client from the layerUI.appId property", function() {
-        layerUI.appId = client.appId;
+        layerUI.settings.appId = client.appId;
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
         var el = testRoot.firstChild;

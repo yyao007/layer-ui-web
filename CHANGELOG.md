@@ -1,0 +1,15 @@
+# Layer UI for Web Change Log
+
+## 0.9.1
+
+* Fixes bug using the appId passed into `layerUI.init()`
+* Full es6 conversation, babel compile, and eslintification of code base
+* Adds verification that appId refers to a Client
+* Adds a Date Separator component
+* Now uses `!conversation.lastMessage.isRead` instead of `conversation.unreadCount` for flagging a conversation as unread
+
+
+## 0.9.0
+
+* Early Beta Released!
+* Updated Changelog!

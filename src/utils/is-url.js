@@ -6,8 +6,8 @@
  */
 
 module.exports = function isURL(extensions) {
-  var resource = '?';
-  if (extensions) resource = '\.(' + extensions.join('|') + ')';
+  let resource = '?';
+  if (extensions) resource = '.(' + extensions.join('|') + ')';
 
   // Taken from https://gist.github.com/dperini/729294
   return new RegExp(
@@ -42,6 +42,6 @@ module.exports = function isURL(extensions) {
     // port number
     '(?::\\d{2,5})?' +
     // resource path
-    '(?:[/?#]\\S*)' + resource, 'igm'
+    '(?:[/?#]\\S*)' + resource, 'igm',
   );
-}
+};

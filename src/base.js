@@ -28,7 +28,7 @@
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
  */
-var layerUI = {};
+const layerUI = {};
 
 /**
  * The settings object stores a hash of configurable properties to change widget Behaviors.
@@ -87,11 +87,11 @@ layerUI.settings = {
   messageGroupTimeSpan: 1000 * 60 * 30,
   disableTabAsWhiteSpace: false,
   markReadDelay: 2500,
-  customComponents:[],
+  customComponents: [],
   defaultHandler: {
-    tagName: 'layer-message-unknown'
+    tagName: 'layer-message-unknown',
   },
-  textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube']
+  textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
 };
 
 /**
@@ -120,6 +120,116 @@ layerUI.textHandlers = {};
 layerUI.components = {};
 
 /**
+ * Any utilities that need global access will be added here.
+ *
+ * Utils object has no built-in properties, but rather components in the utils
+ * folder will register their utilities here to simplify access to CDN users.
+ *
+ * @property {Object} utils
+ */
+layerUI.utils = {};
+
+
+/**
+ * Utility for getting a node for use in List Item `customNodeAbove` and `customNodeBelow`
+ *
+ * ```
+ * if (!listItem.customNodeAbove) {
+ *    var node = layerUI.createItemSeparator();
+ *    node.appendChild(newSeparatorContent);
+ *    listItem.customNodeAbove = node;
+ * }
+ * ```
+ * @method createItemSeparator
+ * @returns HTMLElement
+ */
+layerUI.createItemSeparator = () => {
+  const node = document.createElement('div');
+  node.classList.add(layerUI.itemSeparatorParentClassName);
+  return node;
+};
+
+/**
+ * Class to use with layerUI.createItemSeparator() created ndoes
+ *
+ * @property {String} [itemSeparatorParentClassName=layer-list-item-separator-parent]
+ */
+layerUI.itemSeparatorParentClassName = 'layer-list-item-separator-parent';
+
+/**
+ * Adds a separator between list items.
+ *
+ * While one can directly assign a node to `listItem.customNodeAbove`, there may be many processes that run
+ * and which consider adding content between two list items. To do this, there should be a parent container,
+ * as well as the ability to find this content and remove it from that parent container.
+ *
+ * ```
+ * layerUI.addListItemSeparator(messageListItem, 'You have read up to here', 'layer-item-separator-read-indicator', true);
+ * ```
+ *
+ * Or
+ *
+ * ```
+ * var node = document.createElement('div');
+ * node.innerHTML = 'You have read up to here';
+ * layerUI.addListItemSeparator(messageListItem, node, 'layer-item-separator-read-indicator', true);
+ * ```
+ *
+ * Both of these calls will result in `messageListItem.customNodeAbove` looking like:
+ *
+ * ```
+ * <div class='layer-list-item-separator-parent'>
+ *     <div class='layer-item-separator-read-indicator'>
+ *         You have read up to here
+ *     </div>
+ * </div>
+ * ```
+ *
+ * @method addListItemSeparator
+ * @param {layerUI.mixins.ListItem} listItem    The List Item that the separator is associated with
+ * @param {String/HTMLElement} content          The content to put in the separator
+ * @param {String} contentClass                 Create a div with this class to put the content into; this allows us to see
+ *                                               if there is already a node of that class.
+ * @param {Boolean} isAboveItem                 If true, `listItem.customNodeAbove` is used, else `listItem.customNodeBelow`
+ */
+layerUI.addListItemSeparator = function addListItemSeparator(listItemNode, content, contentClass, isAboveItem) {
+  const nodeName = isAboveItem ? 'customNodeAbove' : 'customNodeBelow';
+  let node;
+
+  if (content) {
+    node = document.createElement('div');
+    node.classList.add(contentClass);
+  }
+
+  if (content && typeof content === 'string') {
+    node.innerHTML = content;
+  } else {
+    node.appendChild(content);
+  }
+
+  // If there is already a layer-list-item-separator-parent, then we just need to make sure it has this content
+  if (listItemNode[nodeName] && node) {
+    // If it looks like the content already exists, replace it
+    const existingContent = listItemNode[nodeName].querySelector('.' + contentClass);
+    if (existingContent) {
+      existingContent.parentNode.replaceChild(node, existingContent);
+    } else {
+      listItemNode[nodeName].appendChild(node);
+    }
+  } else if (!listItemNode[nodeName] && node) {
+    // Create a parent node and then add this to it
+    const parent = layerUI.createItemSeparator();
+    parent.appendChild(node);
+    listItemNode[nodeName] = parent;
+  } else if (listItemNode[nodeName] && !node) {
+    const existingContent = listItemNode[nodeName].querySelector('.' + contentClass);
+    if (existingContent) {
+      existingContent.parentNode.removeChild(existingContent);
+    }
+  }
+};
+
+/**
  * A library of adapters for working with various Javascript frameworks.
  *
  * The following adapters are provided built-in:
@@ -130,17 +240,17 @@ layerUI.components = {};
  *
  * @property {Object} adapters
  */
-var adapterError = 'You must call layerUI.init() before you can use an adapter';
+const adapterError = 'You must call layerUI.init() before you can use an adapter';
 layerUI.adapters = {
-  angular: function() {
+  angular: () => {
     throw new Error(adapterError);
   },
-  backbone: function() {
+  backbone: () => {
     throw new Error(adapterError);
   },
-  react: function() {
+  react: () => {
     throw new Error(adapterError);
-  }
+  },
 };
 
 /**
@@ -180,9 +290,9 @@ layerUI.adapters = {
  * @param {String} label                                    Label to show when we can't render the whole message.
  *                                                          Typically identifies the type of content to the user.
  */
-layerUI.registerMessageHandler = function(options) {
+layerUI.registerMessageHandler = function registerMessageHandler(options) {
   this.handlers.push(options);
-}
+};
 
 /**
  * Return the handler object needed to render this Message.
@@ -196,11 +306,11 @@ layerUI.registerMessageHandler = function(options) {
  * @param {DOMElement} options.handlesMessage.container     The container that this will be rendered within
  * @return {Object} handler     See layerUI.registerMessageHandler for the structure of a handler.
  */
-layerUI.getHandler = function(message, container) {
-  return layerUI.handlers.filter(function(handler) {
-    return handler.handlesMessage(message, container);
-  }, this)[0] || layerUI.settings.defaultHandler;
-}
+layerUI.getHandler = (message, container) => {
+  const handlers =
+    layerUI.handlers.filter(handler => handler.handlesMessage(message, container));
+  return handlers[0] || layerUI.settings.defaultHandler;
+};
 
 /**
  * Provide a text processor for a `text/plain` message.
@@ -253,7 +363,7 @@ layerUI.getHandler = function(message, container) {
 layerUI.registerTextHandler = function registerTextHandler(options) {
   if (layerUI.textHandlers[options.name]) {
     if (options.handler) {
-      Object.keys(options).forEach(function(optionKey) {
+      Object.keys(options).forEach((optionKey) => {
         layerUI.textHandlers[options.name][optionKey] = options[optionKey];
       });
     } else {
@@ -263,7 +373,7 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
     options.enabled = !options.handler || !options.requiresEnable;
     this.textHandlers[options.name] = options;
   }
-}
+};
 
 /**
  * Register your template for use by an existing Component.
@@ -333,10 +443,10 @@ layerUI.registerTemplate = function registerTemplate(className, template, templa
 
   // Since we aren't doing shadowDOM, and we don't want to insert the template <style/> tag a thousand times
   // for repeated components, remove the style from the template, and instead cache the styles in
-  var styleMatches = template.innerHTML.match(/<style>([\s\S]*?)<\/style>/);
-  var styles = styleMatches && styleMatches[1];
+  const styleMatches = template.innerHTML.match(/<style>([\s\S]*?)<\/style>/);
+  const styles = styleMatches && styleMatches[1];
   if (styles) {
-    template.innerHTML = template.innerHTML.replace(/<style>[\s\S]*?<\/style>/, "")
+    template.innerHTML = template.innerHTML.replace(/<style>[\s\S]*?<\/style>/, '');
   }
 
   // Write template and style as static properties of the Component.
@@ -346,7 +456,7 @@ layerUI.registerTemplate = function registerTemplate(className, template, templa
   // This indicates that <style> has not yet been added to <head>; it will be added when the first of these
   // components is used in the page... and will only be added once.
   layerUI.components[className].renderedStyles[templateName] = false;
-}
+};
 
 /**
  * Register this template by passing in a string representation of the template.
@@ -369,12 +479,12 @@ layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr
   if (!templateName) templateName = 'default';
 
   // Generate a template node
-  var template = document.createElement('template');
+  const template = document.createElement('template');
   template.innerHTML = templateStr;
 
   // Write it as a static property of the Component
   layerUI.components[className].templates[templateName] = template;
-}
+};
 
 /**
  * Add the style for the template by passing in a string representation of the CSS rules.
@@ -397,7 +507,7 @@ layerUI.buildStyle = function buildStyles(className, styleStr, templateName) {
   // Extract the style from the function
   layerUI.components[className].styles[templateName] = styleStr;
   layerUI.components[className].renderedStyles[templateName] = false;
-}
+};
 
 /**
  * Turn a hyphenated name into a camel case name.
@@ -407,11 +517,8 @@ layerUI.buildStyle = function buildStyles(className, styleStr, templateName) {
  * @param {String} str  a-hyphenated-string
  * @returns {String} aCamelCasedString
  */
-layerUI.camelCase = function(str) {
-  return str.replace(/-(.)/g, function(str, value) {
-    return value.toUpperCase();
-  });
-}
+layerUI.camelCase = str =>
+  str.replace(/-(.)/g, (match, value) => value.toUpperCase());
 
 /**
  * Turn a camel case name into a hyphenated name
@@ -421,12 +528,11 @@ layerUI.camelCase = function(str) {
  * @param {String} aCamelCasedString
  * @returns {String} a-hyphenated-string
  */
-var regexHyphenate = /([a-z])([A-Z])/g;
-layerUI.hyphenate = function(str) {
-  return str.replace(regexHyphenate, function(match, part1, part2) {
-    return part1 + '-' + part2.toLowerCase();
-  });
-}
+const regexHyphenate = /([a-z])([A-Z])/g;
+layerUI.hyphenate = str =>
+  str.replace(regexHyphenate, (match, part1, part2) =>
+    part1 + '-' + part2.toLowerCase());
+
 
 /**
  * Utility returns whether or not the window is in the background.
@@ -435,25 +541,23 @@ layerUI.hyphenate = function(str) {
  * @static
  * @returns {Boolean}
  */
-layerUI.isInBackground = function() {
-  return !document.hasFocus() || document.hidden;
-};
+layerUI.isInBackground = () => !document.hasFocus() || document.hidden;
 
-var deferred = [];
-layerUI.defer = function(callback) {
+let deferred = [];
+layerUI.defer = function defer(callback) {
   if (deferred.length) deferred.push(callback);
   else {
     deferred.push(callback);
-    setTimeout(function() {
+    setTimeout(() => {
       try {
-        deferred.forEach(function(callback) {
-          callback();
-        });
-      } catch(e) {}
+        deferred.forEach(aCallback => aCallback());
+      } catch (e) {
+        // Noop
+      }
       deferred = [];
     }, 1);
   }
-}
+};
 
 /**
  * An adapter is a bit of JS Framework specific code for making this framework work with other UI Frameworks.
@@ -471,9 +575,7 @@ layerUI.defer = function(callback) {
  * @param {String} name      Name of the adapter. Namespaces it within layerUI.adapters
  * @param {Function} adapter The adapter to make available to apps
  */
-layerUI.addAdapter = function(name, adapter) {
-  layerUI.adapters[name] = adapter;
-}
+layerUI.addAdapter = (name, adapter) => { layerUI.adapters[name] = adapter; };
 
 /**
  * Call init with any custom settings, and to register all components with the dom.
@@ -497,27 +599,29 @@ layerUI.addAdapter = function(name, adapter) {
  * @static
  * @param {Object} settings     list any settings you want changed from their default values.
  */
-layerUI.init = function(settings) {
+layerUI.init = function init(settings) {
   if (!settings.layer && !layerUI.settings.layer && global.layer) {
     settings.layer = global.layer;
   }
   if (settings.layer) {
     layerUI.layer = settings.layer;
   } else if (!settings.layer && !layerUI.settings.layer) {
-    throw new Error("layer is a required property for init");
+    throw new Error('layer is a required property for init');
   }
-  Object.keys(settings || {}).forEach(function(name) {
+  Object.keys(settings || {}).forEach((name) => {
     layerUI.settings[name] = settings[name];
   });
 
   // Enable the text handlers
-  layerUI.settings.textHandlers.forEach(function(handlerName) {
+  layerUI.settings.textHandlers.forEach((handlerName) => {
     layerUI.registerTextHandler({ name: handlerName });
   });
-}
+};
 
 /**
  * This method is shorthand for accessing layerUI.components.Component.registerComponent
+ *
+ * Note: This code is actually in component.js
  *
  * @method registerComponent
  */

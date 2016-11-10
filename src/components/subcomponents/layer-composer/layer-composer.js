@@ -12,10 +12,12 @@
  * @class layerUI.components.subcomponents.Composer
  * @extends layerUI.components.Component
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
-var ENTER = 13;
-var TAB = 9;
+import layerUI, { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+
+const ENTER = 13;
+const TAB = 9;
+
 LUIComponent('layer-composer', {
   properties: {
 
@@ -25,10 +27,10 @@ LUIComponent('layer-composer', {
      * @property {layer.Conversation}
      */
     conversation: {
-      set: function(value){
+      set(value) {
         this.client = value.getClient();
         this.updateTypingIndicator();
-      }
+      },
     },
 
     /**
@@ -37,12 +39,11 @@ LUIComponent('layer-composer', {
      * @property {layer.Client}
      */
     client: {
-      set: function(value) {
-        // debug; REMOVE THIS before GA
-        if (!this.nodes.input) alert("NO INPUT FOR COMPOSER");
-        this.props.typingListener = this.props.client.createTypingListener(this.nodes.input);
+      set(value) {
+        if (!this.nodes.input) console.error('NO INPUT FOR COMPOSER');
+        this.properties.typingListener = this.properties.client.createTypingListener(this.nodes.input);
         this.updateTypingIndicator();
-      }
+      },
     },
 
     /**
@@ -51,9 +52,9 @@ LUIComponent('layer-composer', {
      * @property {HTMLElement[]}
      */
     buttons: {
-      set: function(value) {
+      set(value) {
         this.nodes.buttonPanel.buttons = value;
-      }
+      },
     },
 
     /**
@@ -62,14 +63,14 @@ LUIComponent('layer-composer', {
      * @property {String}
      */
     value: {
-      set: function(value) {
+      set(value) {
         this.nodes.input.value = value;
         this.resizeNode();
       },
-      get: function() {
+      get() {
         return this.nodes.input.value;
-      }
-    }
+      },
+    },
   },
   methods: {
     /**
@@ -78,11 +79,11 @@ LUIComponent('layer-composer', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
       this.classList.add('layer-composer-one-line-of-text');
 
       // Setting this in the template causes errors in IE 11.
-      this.nodes.input.placeholder = "Enter a message";
+      this.nodes.input.placeholder = 'Enter a message';
       this.nodes.input.addEventListener('keydown', this.onKeyDown.bind(this));
 
       // Event handlers
@@ -94,7 +95,7 @@ LUIComponent('layer-composer', {
      *
      * @method
      */
-    focus: function() {
+    focus() {
       this.nodes.input.focus();
     },
 
@@ -104,8 +105,8 @@ LUIComponent('layer-composer', {
      * @method
      * @private
      */
-    updateTypingIndicator: function() {
-      this.props.typingListener.setConversation(this.conversation);
+    updateTypingIndicator() {
+      this.properties.typingListener.setConversation(this.conversation);
     },
 
     /**
@@ -114,21 +115,21 @@ LUIComponent('layer-composer', {
      * @method
      * @param {layer.MessagePart[]} optionalParts
      */
-    send: function(optionalParts) {
-      var parts = [];
+    send(optionalParts) {
+      let parts = [];
       if (optionalParts) {
         parts = optionalParts;
       } else if (this.nodes.input.value) {
-        parts.push(new layer.MessagePart({
+        parts.push(new LayerAPI.MessagePart({
           type: 'text/plain',
-          body: this.nodes.input.value
+          body: this.nodes.input.value,
         }));
         this.nodes.input.value = '';
       }
 
       if (parts.length === 0) return;
 
-      var message = this.conversation.createMessage({ parts: parts });
+      const message = this.conversation.createMessage({ parts });
 
       /**
        * This event is triggered before any Message is sent; used to control notifications and override sending.
@@ -175,15 +176,12 @@ LUIComponent('layer-composer', {
        * @param {String} evt.detail.notification.title
        * @param {String} evt.detail.notification.sound
        */
-      var textPart = message.parts.filter(function(part) {return part.mimeType === 'text/plain'});
-      var notification = {
+      const textPart = message.parts.filter(part => part.mimeType === 'text/plain');
+      const notification = {
         text: textPart ? textPart.body : 'File received',
-        title: 'New Message from ' + message.sender.displayName
+        title: `New Message from ${message.sender.displayName}`,
       };
-      if (this.trigger('layer-send-message', {
-        message: message,
-        notification: notification
-      })) {
+      if (this.trigger('layer-send-message', { message, notification })) {
         message.send(notification);
       }
     },
@@ -194,7 +192,7 @@ LUIComponent('layer-composer', {
      * @method
      * @private
      */
-    onKeyDown: function(event) {
+    onKeyDown(event) {
       if (event.keyCode === ENTER) {
         if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
           event.preventDefault();
@@ -215,23 +213,19 @@ LUIComponent('layer-composer', {
      * @method
      * @private
      */
-    resizeNode: function() {
-      setTimeout(function() {
+    resizeNode() {
+      setTimeout(() => {
         this.nodes.resizer.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';
-        this.nodes.lineHeighter.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || "&nbsp;";
-        var wasOneLine = this.classList.contains('layer-composer-one-line-of-text');
-        var willBeOneLine = this.nodes.resizer.clientHeight - this.nodes.lineHeighter.clientHeight < 10;
+        this.nodes.lineHeighter.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';
+        const willBeOneLine = this.nodes.resizer.clientHeight - this.nodes.lineHeighter.clientHeight < 10;
 
         // Prevent scrollbar flickering in and then out
         if (willBeOneLine) {
           this.nodes.input.style.overflow = 'hidden';
-          setTimeout(function() {
-            this.nodes.input.style.overflow = '';
-          }.bind(this), 1);
+          setTimeout(() => { this.nodes.input.style.overflow = ''; }, 1);
         }
         this.classList[willBeOneLine ? 'add' : 'remove']('layer-composer-one-line-of-text');
-
-      }.bind(this), 10);
+      }, 10);
     },
 
     /**
@@ -240,9 +234,9 @@ LUIComponent('layer-composer', {
      * @method
      * @private
      */
-    handleAttachments: function(evt) {
-      var parts = evt.detail.parts;
-      this.send(parts);
-    }
-  }
-})
+    handleAttachments(evt) {
+      this.send(evt.detail.parts);
+    },
+  },
+});
+

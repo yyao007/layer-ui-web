@@ -7,7 +7,8 @@
  * @class layerUI.components.subcomponents.Date
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-date', {
   properties: {
 
@@ -17,19 +18,19 @@ LUIComponent('layer-date', {
      * @property {Date}
      */
     date: {
-      set: function(value){
+      set(value) {
         if (value) {
           if (this.dateRenderer) {
             this.value = this.dateRenderer(value);
           } else {
-            var dateStr = value.toLocaleDateString(),
-            timeStr = value.toLocaleTimeString()
-            this.value = new Date().toLocaleDateString() == dateStr ? timeStr : dateStr + ' ' + timeStr;
+            const dateStr = value.toLocaleDateString();
+            const timeStr = value.toLocaleTimeString();
+            this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr + ' ' + timeStr;
           }
         } else {
           this.value = '';
         }
-      }
+      },
     },
 
     /**
@@ -38,9 +39,9 @@ LUIComponent('layer-date', {
      * @property {String}
      */
     value: {
-      set: function(value) {
+      set(value) {
         this.innerHTML = value;
-      }
+      },
     },
 
     /**
@@ -56,7 +57,7 @@ LUIComponent('layer-date', {
      *
      * @property {Function}
      */
-    dateRenderer: {}
+    dateRenderer: {},
   },
   methods: {
 
@@ -66,8 +67,8 @@ LUIComponent('layer-date', {
      * @method created
      * @private
      */
-    created: function() {
-    }
-  }
+    created() {
+    },
+  },
 });
 

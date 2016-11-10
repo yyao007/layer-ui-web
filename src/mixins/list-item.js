@@ -12,24 +12,24 @@ module.exports = {
      *
      * You can set this to a DOM Node or html string
      *
-     * @property {HTMLElement | String}
+     * @property {HTMLElement | String} [customNodeAbove=null]
      */
     customNodeAbove: {
-      set: function(node) {
-        if (this.props._customNodeAbove) this.removeChild(this.props._customNodeAbove);
+      set(node) {
+        if (this.properties._customNodeAbove) this.removeChild(this.properties._customNodeAbove);
         if (node && typeof node === 'string') {
-          var realNode = document.createElement('div');
-          realNode.innerHTML = node;
-          node = realNode;
-          this.props.customNodeAbove = node;
+          const tmp = node;
+          node = document.createElement('div');
+          node.innerHTML = tmp;
+          this.properties.customNodeAbove = node;
         }
         if (node) {
           this.insertBefore(node, this.querySelector('.layer-list-item'));
         } else {
-          this.props.customNodeAbove = null;
+          this.properties.customNodeAbove = null;
         }
-        this.props._customNodeAbove = node;
-      }
+        this.properties._customNodeAbove = node;
+      },
     },
 
     /**
@@ -37,30 +37,30 @@ module.exports = {
      *
      * You can set this to a DOM Node or html string
      *
-     * @property {HTMLElement | String}
+     * @property {HTMLElement | String} [customNodeBelow=null]
      */
     customNodeBelow: {
-      set: function(node) {
-        if (this.props._customNodeBelow) this.removeChild(this.props._customNodeBelow);
+      set(node) {
+        if (this.properties._customNodeBelow) this.removeChild(this.properties._customNodeBelow);
         if (node && typeof node === 'string') {
-          var realNode = document.createElement('div');
-          realNode.innerHTML = node;
-          node = realNode;
-          this.props.customNodeBelow = node;
+          const tmp = node;
+          node = document.createElement('div');
+          node.innerHTML = tmp;
+          this.properties.customNodeBelow = node;
         }
         if (node) {
           this.appendChild(node);
         } else {
-          this.props.customNodeBelow = null;
+          this.properties.customNodeBelow = null;
         }
-        this.props._customNodeBelow = node;
-      }
+        this.properties._customNodeBelow = node;
+      },
     },
 
     /**
      * Shortcut to the `.layer-list-item` node
      *
-     * @property {HTMLElement}
+     * @property {HTMLElement} [innerNode=null]
      * @private
      */
     innerNode: {},
@@ -68,62 +68,84 @@ module.exports = {
     /**
      * Sets whether this widget is the first in a series of layerUI.MessageItem set.
      *
-     * @property {Boolean}
+     * @property {Boolean} [firstInSeries=false]
      */
     firstInSeries: {
       type: Boolean,
       value: false,
-      set: function(value) {
+      set(value) {
         this.toggleClass('layer-list-item-first', value);
-      }
+      },
     },
 
     /**
      * Sets whether this widget is the last in a series of layerUI.MessageItem set.
      *
-     * @property {Boolean}
+     * @property {Boolean} [lastInSeries=false]
      */
     lastInSeries: {
       type: Boolean,
       value: false,
-      set: function(value) {
+      set(value) {
         this.toggleClass('layer-list-item-last', value);
-      }
+      },
     },
 
     /**
      * Height of the list; needed for some of the renderers to determine layout.
      *
-     * @property {Number}
+     * @property {Number} [listHeight=0]
      */
     listHeight: {},
 
     /**
      * Width of the list; needed for some of the renderers to determine layout.
      *
-     * @property {Number}
+     * @property {Number} [listWidth=0]
      */
     listWidth: {},
 
     /**
      * The item of data in a list of data that this List Item will render.
      *
-     * @property {layer.Root}
+     * @property {layer.Root} [item=null]
      */
-    item: {}
+    item: {},
   },
   methods: {
-    created: function() {
+    created() {
       this.innerNode = this.querySelector('.layer-list-item');
     },
-    addClass: function(className) {
+
+    /**
+     * Adds the CSS class to this list item's outer node.
+     *
+     * @method addClass
+     * @param {String} className
+     */
+    addClass(className) {
       this.classList.add(className);
     },
-    removeClass: function(className) {
+
+    /**
+     * Removes the CSS class from this list item's outer node.
+     *
+     * @method removeClass
+     * @param {String} className
+     */
+    removeClass(className) {
       this.classList.remove(className);
     },
-    toggleClass: function(className, arg2) {
-      this.classList[arg2 ? 'add' : 'remove'](className);
-    }
-  }
+
+    /**
+     * Toggles the CSS class of this list item's outer node.
+     *
+     * @method toggleClass
+     * @param {String} className
+     * @param {Boolean} [add=true]
+     */
+    toggleClass(className, add = true) {
+      this.classList[add ? 'add' : 'remove'](className);
+    },
+  },
 };

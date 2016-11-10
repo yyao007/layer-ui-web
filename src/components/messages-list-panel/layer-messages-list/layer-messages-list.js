@@ -16,16 +16,16 @@
  * @class layerUI.components.MessagesListPanel.List
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
-var layerUI = require('../../../base');
-var layer = layerUI.layer;
-var animatedScrollTo = require('animated-scrollto')
+import animatedScrollTo from 'animated-scrollto';
+import LayerUI, { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+import List from '../../../mixins/list';
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
-var PAGING_DELAY = 2000;
+const PAGING_DELAY = 2000;
 
 LUIComponent('layer-messages-list', {
-  mixins: [require('../../../mixins/list')],
+  mixins: [List],
   properties: {
 
     /**
@@ -40,7 +40,7 @@ LUIComponent('layer-messages-list', {
      * };
      * ```
      *
-     * @property {Function}
+     * @property {Function} [dateRenderer=null]
      */
     dateRenderer: {},
 
@@ -55,7 +55,7 @@ LUIComponent('layer-messages-list', {
      * };
      * ```
      *
-     * @property {Function}
+     * @property {Function} [messageStatusRenderer=null]
      */
     messageStatusRenderer: {},
 
@@ -65,11 +65,11 @@ LUIComponent('layer-messages-list', {
      * If value is 0, will page once the user reaches the top.  If the value is 0.5, will page once the user
      * reaches a `scrollTop` of 1/2 `clientHeight`.
      *
-     * @property {Number}
+     * @property {Number} [screenFullsBeforePaging=1.5]
      */
     screenFullsBeforePaging: {
-      value: 1.5
-    }
+      value: 1.5,
+    },
   },
   methods: {
 
@@ -79,15 +79,17 @@ LUIComponent('layer-messages-list', {
      * @method created
      * @private
      */
-    created: function() {
-      if (!this.id) this.id = layer.Util.generateUUID();
-      this.props.lastPagedAt = 0;
-      this.props.isSelfScrolling = false;
-      this.props.stuckToBottom = true;
-      this.props.lastScroll = 0;
-      this.props.checkVisibilityBound = this.checkVisibility.bind(this);
-      window.addEventListener('focus', this.props.checkVisibilityBound);
+    created() {
+      if (!this.id) this.id = LayerAPI.Util.generateUUID();
 
+      // Init some local props
+      this.properties.lastPagedAt = 0;
+      this.properties.isSelfScrolling = false;
+      this.properties.stuckToBottom = true;
+      this.properties.lastScroll = 0;
+      this.properties.checkVisibilityBound = this.checkVisibility.bind(this);
+
+      window.addEventListener('focus', this.properties.checkVisibilityBound);
       this.render();
     },
 
@@ -97,8 +99,8 @@ LUIComponent('layer-messages-list', {
      * @method destroyed
      * @private
      */
-    destroyed: function() {
-      window.removeEventListener('focus', this.props.checkVisibilityBound);
+    destroyed() {
+      window.removeEventListener('focus', this.properties.checkVisibilityBound);
     },
 
     /**
@@ -107,11 +109,11 @@ LUIComponent('layer-messages-list', {
      * 1. Tests scrollTop to see if we are close enough to the top
      * 2. Tests if we are already loading that page of data
      *
-     * @method
+     * @method shouldPage
      * @return {Boolean}
      */
-    shouldPage: function() {
-      var pagingHeight = Math.max(this.clientHeight, 300) * this.screenFullsBeforePaging;
+    shouldPage() {
+      const pagingHeight = Math.max(this.clientHeight, 300) * this.screenFullsBeforePaging;
       return this.scrollTop <= pagingHeight && this.scrollHeight > this.clientHeight + 1 && !this.isDataLoading;
     },
 
@@ -122,37 +124,37 @@ LUIComponent('layer-messages-list', {
      * Typically, we want to stay `stuckToButton` so that any time new Messages arrive,
      * we scroll to the bottom to see them.  Any user scrolling however may disable that behavior.
      *
-     * @method
+     * @method handleScroll
      * @private
      */
-    handleScroll: function() {
+    handleScroll() {
       // We may set a scrollTop higher than the current scrolltop, but the only thing that changes to a lower scrollTop is
       // the user scrolling, which requires us to process it.
-      var userScrolled = !this.props.isSelfScrolling || this.scrollTop < this.props.lastScroll;
-      this.props.lastScroll = this.scrollTop;
+      const userScrolled = !this.properties.isSelfScrolling || this.scrollTop < this.properties.lastScroll;
+      this.properties.lastScroll = this.scrollTop;
 
       // If the user has scrolled within screenFullsBeforePaging of the top of the page... and if the page has enough contents to actually
       // be scrollable, page the Messages.
-      if (this.shouldPage() && userScrolled && !this.props.delayedPagingTimeout) {
-        if (this.props.lastPagedAt + PAGING_DELAY < Date.now()) {
+      if (this.shouldPage() && userScrolled && !this.properties.delayedPagingTimeout) {
+        if (this.properties.lastPagedAt + PAGING_DELAY < Date.now()) {
           if (!this.query.isFiring) {
-            this.query.update({paginationWindow: this.query.paginationWindow + 50});
-            this.isDataLoading = this.props.query.isFiring;
+            this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
+            this.isDataLoading = this.properties.query.isFiring;
           }
-        } else if (!this.props.delayedPagingTimeout) {
+        } else if (!this.properties.delayedPagingTimeout) {
           // User is scrolling kind of fast, lets slow things down a little
-          this.props.delayedPagingTimeout = setTimeout(function() {
-            this.query.update({paginationWindow: this.query.paginationWindow + 50});
-            this.isDataLoading = this.props.query.isFiring;
-            this.props.delayedPagingTimeout = 0;
-          }.bind(this), 500);
+          this.properties.delayedPagingTimeout = setTimeout(() => {
+            this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
+            this.isDataLoading = this.properties.query.isFiring;
+            this.properties.delayedPagingTimeout = 0;
+          }, 500);
         }
       }
 
       // If we have scrolled to the bottom, set stuckToBottom to true, else false.
-      var stuckToBottom = this.scrollHeight - 1 <= this.clientHeight + this.scrollTop;
-      if (stuckToBottom !== this.props.stuckToBottom) {
-        this.props.stuckToBottom = stuckToBottom;
+      const stuckToBottom = this.scrollHeight - 1 <= this.clientHeight + this.scrollTop;
+      if (stuckToBottom !== this.properties.stuckToBottom) {
+        this.properties.stuckToBottom = stuckToBottom;
       }
 
       // Trigger checks on visibility to update read state
@@ -164,17 +166,17 @@ LUIComponent('layer-messages-list', {
      *
      * Will call checkVisibility() when done.
      *
-     * @method
+     * @method scrollTo
      * @param {Number} position
      */
-    scrollTo: function(position) {
+    scrollTo(position) {
       if (position === this.scrollTop) return;
-      this.props.isSelfScrolling = true;
+      this.properties.isSelfScrolling = true;
       this.scrollTop = position;
-      setTimeout(function() {
-        this.props.isSelfScrolling = false;
+      setTimeout(() => {
+        this.properties.isSelfScrolling = false;
         this.checkVisibility();
-      }.bind(this), 200);
+      }, 200);
     },
 
     /**
@@ -182,19 +184,19 @@ LUIComponent('layer-messages-list', {
      *
      * Will call checkVisibility() when done.
      *
-     * @method
+     * @method animateScrollTo
      * @param {Number} position
      */
-    animateScrollTo: function(position) {
+    animateScrollTo(position) {
       if (position === this.scrollTop) return;
-      this.props.isSelfScrolling = true;
-      animatedScrollTo(this, position, 200, function() {
+      this.properties.isSelfScrolling = true;
+      animatedScrollTo(this, position, 200, () => {
         // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
-        setTimeout(function() {
-          this.props.isSelfScrolling = false;
+        setTimeout(() => {
+          this.properties.isSelfScrolling = false;
           this.checkVisibility();
-        }.bind(this), 100);
-      }.bind(this));
+        }, 100);
+      });
     },
 
     /**
@@ -212,24 +214,22 @@ LUIComponent('layer-messages-list', {
      * @method
      * @private
      */
-    checkVisibility: function() {
-      if (layerUI.isInBackground()) return;
+    checkVisibility() {
+      if (LayerUI.isInBackground()) return;
 
       // The top that we can see is marked by how far we have scrolled.
       // However, all offsetTop values of the child nodes will be skewed by the value of this.offsetTop, so add that in.
-      var visibleTop = this.scrollTop + this.offsetTop;
+      const visibleTop = this.scrollTop + this.offsetTop;
 
       // The bottom that we can see is marked by how far we have scrolled plus the height of the panel.
       // However, all offsetTop values of the child nodes will be skewed by the value of this.offsetTop, so add that in.
-      var visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
-      var children = Array.prototype.slice.call(this.childNodes);
-      children.forEach(function(child) {
+      const visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
+      const children = Array.prototype.slice.call(this.childNodes);
+      children.forEach((child) => {
         if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
-          if (child.props && child.props.item && !child.props.item.isRead) {
+          if (child.properties && child.properties.item && !child.properties.item.isRead) {
             // TODO: Use a scheduler rather than many setTimeout calls
-            setTimeout(function() {
-              this.markAsRead(child)
-            }.bind(this), layerUI.settings.markReadDelay);
+            setTimeout(() => this.markAsRead(child), LayerUI.settings.markReadDelay);
           }
         }
       }, this);
@@ -241,33 +241,33 @@ LUIComponent('layer-messages-list', {
      * This method validates that the Message flagged as ready to be read by `checkVisibility()` is
      * in fact still fully visible after the delay.
      *
-     * @method
+     * @method markAsRead
      * @private
      * @param {layerUI.MessageItem} child
      */
-    markAsRead: function(child) {
-      var visibleTop = this.scrollTop + this.offsetTop  ;
-      var visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
+    markAsRead(child) {
+      const visibleTop = this.scrollTop + this.offsetTop  ;
+      const visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
       if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
-        child.props.item.isRead = true;
+        child.properties.item.isRead = true;
       }
     },
 
-    getItemId: function(message) {
-      return 'message-item' + this.id + '-' + message.id.replace(/layer:\/\/\/messages\//, '');
+    getItemId(message) {
+      return `message-item${this.id}-${message.id.replace(/layer:\/\/\/messages\//, '')}`;
     },
 
 
     /**
      * Append a Message to the document fragment, updating the previous messages' lastInSeries property as needed.
      *
-     * @method
+     * @method generateItem
      * @private
      */
-    generateItem: function(message) {
-      var handler = layerUI.getHandler(message, this);
+    generateItem(message) {
+      const handler = LayerUI.getHandler(message, this);
       if (handler) {
-        var messageWidget = document.createElement('layer-message-item');
+        const messageWidget = document.createElement('layer-message-item');
         messageWidget.id = this.getItemId(message);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
@@ -282,30 +282,30 @@ LUIComponent('layer-messages-list', {
     /**
      * Are the two Messages in the same Group?
      *
-     * @method
+     * @method inSameGroup
      * @private
      * @param {layer.Message} m1
      * @param {layer.Message} m2
      */
-    inSameGroup: function(m1, m2) {
+    inSameGroup(m1, m2) {
       if (!m1 || !m2) return false;
-      var diff = Math.abs(m1.sentAt.getTime() - m2.sentAt.getTime());
-      return  (m1.sender === m2.sender && diff <  layerUI.settings.messageGroupTimeSpan);
+      const diff = Math.abs(m1.sentAt.getTime() - m2.sentAt.getTime());
+      return m1.sender === m2.sender && diff < LayerUI.settings.messageGroupTimeSpan;
     },
 
     /**
      * Whenever new message items are added to the list, we need to assign lastInSeries and firstInSeries values to them,
      * as well as update those values in nearby message items.
      *
-     * @method
+     * @method _processAffectedWidgets
      * @private
      * @param {layerUI.Conversation.MessageItem[]} widgets
      */
-    _processAffectedWidgets: function(widgets, isTopItemNew) {
+    _processAffectedWidgets(widgets, isTopItemNew) {
       if (widgets.length === 0) return;
       if (isTopItemNew) widgets[0].firstInSeries = true;
-      for (var i = 1; i < widgets.length; i++) {
-        var sameGroup = this.inSameGroup(widgets[i - 1].item, widgets[i].item);
+      for (let i = 1; i < widgets.length; i++) {
+        const sameGroup = this.inSameGroup(widgets[i - 1].item, widgets[i].item);
         widgets[i].firstInSeries = !sameGroup;
         widgets[i - 1].lastInSeries = !sameGroup;
       }
@@ -315,45 +315,45 @@ LUIComponent('layer-messages-list', {
     /**
      * Call this on any Query change events.
      *
-     * @method
+     * @method rerender
      * @private
      * @param {Event} evt
      */
-    rerender: function(evt) {
+    rerender(evt) {
       this._rerender(evt);
     },
 
-    renderResetData: function() {
-      this.props.listData = [];
+    renderResetData() {
+      this.properties.listData = [];
       this.scrollTo(0);
-      this.props.stuckToBottom = true;
-      this.props.lastPagedAt = 0;
-      this.props.isSelfScrolling = false;
-      this.props.lastScroll = 0;
+      this.properties.stuckToBottom = true;
+      this.properties.lastPagedAt = 0;
+      this.properties.isSelfScrolling = false;
+      this.properties.lastScroll = 0;
       this.render();
     },
 
-    renderWithoutRemovedData: function(evt) {
-      this.props.listData = [].concat(this.props.query.data).reverse();
+    renderWithoutRemovedData(evt) {
+      this.properties.listData = [].concat(this.properties.query.data).reverse();
 
       var messageWidget = this.querySelector('#' + this.getItemId(evt.target));
       if (messageWidget) this.removeChild(messageWidget);
 
-      var removeIndex = this.props.listData.length - evt.index; // Inverted for reverse order
-      var affectedItems = this.props.listData.slice(Math.max(0, removeIndex - 3), removeIndex + 3);
+      var removeIndex = this.properties.listData.length - evt.index; // Inverted for reverse order
+      var affectedItems = this.properties.listData.slice(Math.max(0, removeIndex - 3), removeIndex + 3);
       this._gatherAndProcessAffectedItems(affectedItems, false);
 
     },
 
-    renderInsertedData: function(evt) {
-      var oldListData = this.props.listData;
-      this.props.listData = [].concat(this.props.query.data).reverse();
+    renderInsertedData(evt) {
+      var oldListData = this.properties.listData;
+      this.properties.listData = [].concat(this.properties.query.data).reverse();
 
       var insertIndex = oldListData.length - evt.index; // Inverted for reverse order
       var isTopItemNew = insertIndex === 0;
       var isBottomItemNew = insertIndex === oldListData.length;
 
-      var affectedItems = this.props.listData.slice(Math.max(0, insertIndex - 3), insertIndex + 4);
+      var affectedItems = this.properties.listData.slice(Math.max(0, insertIndex - 3), insertIndex + 4);
       var fragment = this.generateFragment([evt.target]);
       if (insertIndex < oldListData.length) {
         var insertBeforeNode = affectedItems.length > 1 ? this.querySelector('#' + this.getItemId(oldListData[insertIndex])) : null;
@@ -363,7 +363,7 @@ LUIComponent('layer-messages-list', {
       }
       this._gatherAndProcessAffectedItems(affectedItems, isTopItemNew);
       this.updateLastMessageSent();
-      if (this.props.stuckToBottom) {
+      if (this.properties.stuckToBottom) {
         this.animateScrollTo(this.scrollHeight - this.clientHeight);
       } else {
         this.checkVisibility();
@@ -378,15 +378,15 @@ LUIComponent('layer-messages-list', {
      *
      * TODO: Review if a CSS :last-child could isolate last message sent from last message received, and be used for easily styling this.
      *
-     * @method
+     * @method updateLastMessageSent
      * @private
      */
-    updateLastMessageSent: function() {
-      for (var i = this.props.listData.length - 1; i >= 0; i--) {
-        if (this.props.listData[i].sender.sessionOwner) {
-          var item = this.querySelector('#' + this.getItemId(this.props.listData[i]));
+    updateLastMessageSent() {
+      for (let i = this.properties.listData.length - 1; i >= 0; i--) {
+        if (this.properties.listData[i].sender.sessionOwner) {
+          const item = this.querySelector('#' + this.getItemId(this.properties.listData[i]));
           if (item && !item.classList.contains('layer-last-message-sent')) {
-            this.querySelectorAllArray('.layer-last-message-sent').forEach(function(node) {
+            this.querySelectorAllArray('.layer-last-message-sent').forEach((node) => {
               node.classList.remove('layer-last-message-sent');
             });
             item.classList.add('layer-last-message-sent');
@@ -399,17 +399,17 @@ LUIComponent('layer-messages-list', {
     /**
      * Identify the message-item that is fully visible and at the top of the viewport.
      *
-     * @method
+     * @method findFirstVisibleItem
      * @private
      */
-    findFirstVisibleItem: function() {
-      var visibleTop = this.scrollTop + this.offsetTop;
-      var visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
-      var children = Array.prototype.slice.call(this.childNodes);
-      for (var i = 0; i < children.length; i++) {
-        var child = children[i];
+    findFirstVisibleItem() {
+      const visibleTop = this.scrollTop + this.offsetTop;
+      const visibleBottom = this.scrollTop + this.clientHeight + this.offsetTop;
+      const children = Array.prototype.slice.call(this.childNodes);
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
         if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
-          if (child.props && child.props.item) {
+          if (child.properties && child.properties.item) {
             return child;
           }
         }
@@ -420,41 +420,39 @@ LUIComponent('layer-messages-list', {
     /**
      * Render a new page of data received from the Query.
      *
-     * @method
+     * @method renderPagedData
      * @private
      */
-    renderPagedData: function(evt) {
+    renderPagedData(evt) {
       if (evt.data.length === 0) {
-        this.isDataLoading = this.props.query.isFiring;
+        this.isDataLoading = this.properties.query.isFiring;
         return;
       }
 
       // Set this so that if the user is clinging to the scrollbar forcing it to stay at the top,
       // we know we just paged and won't page again.
-      this.props.lastPagedAt = Date.now();
+      this.properties.lastPagedAt = Date.now();
 
       // Get both the query data and the event data
-      var oldListData = this.props.listData;
-      this.props.listData = [].concat(this.props.query.data).reverse();
-      var newData = [].concat(evt.data).reverse();
+      const oldListData = this.properties.listData;
+      this.properties.listData = [].concat(this.properties.query.data).reverse();
+      const newData = [].concat(evt.data).reverse();
 
       // Get the affected items
-      var affectedItems = [].concat(newData);
+      let affectedItems = [].concat(newData);
+      let fragment;
       if (oldListData.length) affectedItems = affectedItems.concat(oldListData.slice(0, 3));
 
-      var fragment;
 
       // Append only a few items at a time, with pauses to keep browser running smoothly.
       // Don't append anything to the document until its all generated
       // TODO: This sucks.  For 100 items, it takes 5 iterates of 20ms each, so it adds 100ms lag to render,
       // and the only good news is that this 100ms lag results in performance of the rest of the browser not degrading.
-      var appendMore = function appendMore() {
-        var processItems = newData.splice(0, 20);
+      const appendMore = function appendMore() {
+        const processItems = newData.splice(0, 20);
         fragment = this.generateFragment(processItems, fragment);
         if (newData.length) {
-          setTimeout(function() {
-            appendMore.call(this);
-          }.bind(this), 20);
+          setTimeout(() => appendMore.call(this), 20);
         } else {
           this.renderPagedDataDone(affectedItems, fragment, evt);
         }
@@ -469,46 +467,47 @@ LUIComponent('layer-messages-list', {
      * 2. Scroll to maintain an appropriate position
      * 3. Insert the document fragment into our widget
      * 4. Check visibility on newly rendered items
+     *
+     * @method renderPagedDataDone
+     * @private
      */
-    renderPagedDataDone: function(affectedItems, fragment, evt) {
+    renderPagedDataDone(affectedItems, fragment, evt) {
       // Find the nodes of all affected items in both the document and the fragment,
       // and call processAffectedWidgets on them
       if (affectedItems.length) {
-        var affectedWidgetsQuery = '#' + affectedItems.map(function(message) {
-          return this.getItemId(message);
-        }, this).join(', #');
-        var affectedWidgets = this.querySelectorAllArray(affectedWidgetsQuery);
+        const affectedWidgetsQuery = '#' + affectedItems.map(message => this.getItemId(message)).join(', #');
+        let affectedWidgets = this.querySelectorAllArray(affectedWidgetsQuery);
         if (fragment) {
-          var fragmentWidgets = Array.prototype.slice.call(fragment.querySelectorAll(affectedWidgetsQuery));
+          const fragmentWidgets = Array.prototype.slice.call(fragment.querySelectorAll(affectedWidgetsQuery));
           affectedWidgets = fragmentWidgets.concat(affectedWidgets);
         }
         try {
           // When paging new data, top item should always be new
           this.processAffectedWidgets(affectedWidgets, true);
-        } catch(e) {
-          console.error(e)
+        } catch (e) {
+          console.error(e);
         }
       }
 
-      var firstVisibleItem = this.findFirstVisibleItem();
-      var initialOffset = firstVisibleItem ? firstVisibleItem.offsetTop - this.offsetTop - this.scrollTop : 0;
+      const firstVisibleItem = this.findFirstVisibleItem();
+      const initialOffset = firstVisibleItem ? firstVisibleItem.offsetTop - this.offsetTop - this.scrollTop : 0;
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
-      var nextItem = this.nodes.loadIndicator.nextSibling;
+      const nextItem = this.nodes.loadIndicator.nextSibling;
       this.insertBefore(fragment, nextItem);
 
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful
       this.updateLastMessageSent();
 
-      if (this.props.stuckToBottom) {
+      if (this.properties.stuckToBottom) {
         this.scrollTo(this.scrollHeight - this.clientHeight);
       } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
         this.scrollTo(firstVisibleItem.offsetTop - this.offsetTop - initialOffset);
       }
 
-      this.isDataLoading = this.props.query.isFiring;
+      this.isDataLoading = this.properties.query.isFiring;
       this.checkVisibility();
-    }
-  }
+    },
+  },
 });

@@ -239,7 +239,7 @@ describe('layer-message-item', function() {
       el.appendChild(el.nodes.content);
       el.listHeight = 200;
       el.listWidth = 500;
-      el.props.item = message;
+      el.properties.item = message;
 
       el.applyContentTag();
       var handler = el.querySelector('layer-message-text-plain');

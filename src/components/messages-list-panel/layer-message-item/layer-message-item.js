@@ -13,29 +13,30 @@
  * @mixins layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
-LUIComponent('layer-message-item', {
-  mixins: [require('../../../mixins/list-item')],
-  properties: {
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+import ListItem from '../../../mixins/list-item';
 
+LUIComponent('layer-message-item', {
+  mixins: [ListItem],
+  properties: {
     /**
      * The layer.Message that this widget is rendering.
      *
      * @property {layer.Message}
      */
     item: {
-      set: function(value){
+      set(value) {
         // Disconnect from any previous Message we were rendering
-        if (this.props.priorMessage) {
-          this.props.priorMessage.off(null, null, this);
-          if (this.props.priorMessage.sender.sessionOwner) {
+        if (this.properties.priorMessage) {
+          this.properties.priorMessage.off(null, null, this);
+          if (this.properties.priorMessage.sender.sessionOwner) {
             this.removeClass('layer-message-item-sent');
           } else {
             this.removeClass('layer-message-item-received');
           }
         }
-        this.props.priorMessage = value;
+        this.properties.priorMessage = value;
 
         if (value) {
           // Any changes to the Message should trigger a rerender
@@ -49,7 +50,7 @@ LUIComponent('layer-message-item', {
           }
           this.render();
         }
-      }
+      },
     },
 
     /**
@@ -58,7 +59,7 @@ LUIComponent('layer-message-item', {
      * @property {Function}
      */
     getDeleteEnabled: {
-      type: Function
+      type: Function,
     },
 
     /**
@@ -68,16 +69,16 @@ LUIComponent('layer-message-item', {
      * @property {String}
      */
     contentTag: {
-      set: function(value) {
-        if (this.props.oldContentTag) {
+      set(value) {
+        if (this.properties.oldContentTag) {
           this.removeClass(this.contentTag);
-          this.props.oldContentTag = '';
+          this.properties.oldContentTag = '';
         }
         if (value) {
           this.addClass(value);
-          this.props.oldContentTag = value;
+          this.properties.oldContentTag = value;
         }
-      }
+      },
     },
 
     /**
@@ -108,7 +109,7 @@ LUIComponent('layer-message-item', {
      *
      * @property {Function}
      */
-    messageStatusRenderer: {}
+    messageStatusRenderer: {},
   },
   methods: {
     /**
@@ -117,7 +118,7 @@ LUIComponent('layer-message-item', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
 
     },
 
@@ -129,17 +130,18 @@ LUIComponent('layer-message-item', {
      * @method
      * @private
      */
-    render: function() {
-      if (!this.props.item) return;
+    render() {
+      if (!this.properties.item) return;
       this.innerHTML = '';
       try {
 
         // Select and apply the correct template
-        var template = this.getTemplate(this.props.item.sender.sessionOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
+        const isOwner = this.properties.item.sender.sessionOwner;
+        let template = this.getTemplate(isOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
         if (!template) {
           template = this.getTemplate();
         }
-        var clone = document.importNode(template.content, true);
+        const clone = document.importNode(template.content, true);
         this.appendChild(clone);
         this.setupDomNodes();
         this.innerNode = this.nodes.innerNode;
@@ -167,8 +169,8 @@ LUIComponent('layer-message-item', {
 
         // Setup the layer-delete
         if (this.nodes.delete) {
-          this.nodes.delete.item = this.props.item;
-          this.nodes.delete.enabled = this.getDeleteEnabled ? this.getDeleteEnabled(this.props.item) : true;
+          this.nodes.delete.item = this.properties.item;
+          this.nodes.delete.enabled = this.getDeleteEnabled ? this.getDeleteEnabled(this.properties.item) : true;
         }
 
         // Generate the renderer for this Message's MessageParts.
@@ -176,7 +178,7 @@ LUIComponent('layer-message-item', {
 
         // Render all mutable data
         this.rerender();
-      } catch(err) {
+      } catch (err) {
         console.error('layer-message-item.render(): ', err);
       }
     },
@@ -187,17 +189,20 @@ LUIComponent('layer-message-item', {
      * @method
      * @private
      */
-    rerender: function() {
-      this.toggleClass('layer-unread-message', !this.props.item.isRead);
-      this.toggleClass('layer-message-status-read-by-all', this.props.item.readStatus === layer.Constants.RECIPIENT_STATE.ALL);
-      this.toggleClass('layer-message-status-read-by-some', this.props.item.readStatus === layer.Constants.RECIPIENT_STATE.SOME);
-      this.toggleClass('layer-message-status-read-by-none', this.props.item.readStatus === layer.Constants.RECIPIENT_STATE.NONE);
+    rerender() {
+      const readStatus = this.properties.item.readStatus;
+      const deliveryStatus = this.properties.item.deliveryStatus;
+      const statusPrefix = 'layer-message-status';
+      this.toggleClass('layer-unread-message', !this.properties.item.isRead);
+      this.toggleClass(`${statusPrefix}-read-by-all`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL);
+      this.toggleClass(`${statusPrefix}-read-by-some`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.SOME);
+      this.toggleClass(`${statusPrefix}-read-by-none`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE);
 
-      this.toggleClass('layer-message-status-delivered-to-all', this.props.item.deliveryStatus === layer.Constants.RECIPIENT_STATE.ALL);
-      this.toggleClass('layer-message-status-delivered-to-some', this.props.item.deliveryStatus === layer.Constants.RECIPIENT_STATE.SOME);
-      this.toggleClass('layer-message-status-delivered-to-none', this.props.item.deliveryStatus === layer.Constants.RECIPIENT_STATE.NONE);
+      this.toggleClass(`${statusPrefix}-delivered-to-all`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL);
+      this.toggleClass(`${statusPrefix}-delivered-to-some`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.SOME);
+      this.toggleClass(`${statusPrefix}-delivered-to-none`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE);
 
-      this.toggleClass('layer-message-status-pending', this.props.item.isSaving());
+      this.toggleClass(`${statusPrefix}-pending`, this.properties.item.isSaving());
     },
 
     /**
@@ -205,8 +210,8 @@ LUIComponent('layer-message-item', {
      *
      * Use that tagName to create a DOM Node to render the MessageParts.
      */
-    applyContentTag: function() {
-      var messageHandler = document.createElement(this.contentTag);
+    applyContentTag() {
+      const messageHandler = document.createElement(this.contentTag);
       messageHandler.listHeight = this.listHeight;
       messageHandler.listWidth = this.listWidth;
       messageHandler.message = this.item;
@@ -215,6 +220,6 @@ LUIComponent('layer-message-item', {
       if (messageHandler.style.height) {
         this.nodes.content.style.height = messageHandler.style.height;
       }
-    }
-  }
-})
+    },
+  },
+});

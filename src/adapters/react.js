@@ -1,5 +1,5 @@
-var layerUI = require('../base');
-var libraryResult;
+import layerUI from '../base';
+
 /**
  * Call this function to initialize all of the react components needed to handle the Layer UI for Web widgets.
  *
@@ -10,7 +10,7 @@ var libraryResult;
  * ```
  * import React from 'react';
  * import ReactDom from 'react-dom';
- * const { Conversation, ConversationList, UserList, Notifier } = layerUI.adapters.react(React, ReactDom);
+ * const { ConversationPanel, ConversationList, UserList, Notifier } = layerUI.adapters.react(React, ReactDom);
  * ```
  *
  * Calling this will expose the following React Components:
@@ -23,7 +23,7 @@ var libraryResult;
  * You can then use:
  *
  * ```
- * render: function() {
+ * render() {
  *    return <ConversationList
  *      on-conversation-selected={this.mySelectHandler}></ConversationList>
  * }
@@ -54,71 +54,72 @@ var libraryResult;
  * @param {Object} React - Pass in the reactJS library
  * @param {Object} ReactDom - Pass in the ReactDom library
  */
+let libraryResult;
 function initReact(React, ReactDom) {
   if (libraryResult) return libraryResult;
   libraryResult = {};
 
   // Gather all UI Components flagged as Main Components; other components don't require special React Components for direct use.
-  Object.keys(layerUI.components).filter(function(componentName) {
-    var component = layerUI.components[componentName];
-    return component.properties.filter(function(prop) {
-      return prop.propertyName === 'isMainComponent';
-    }).length;
-  }).forEach(function(componentName) {
-    var component = layerUI.components[componentName];
+  Object.keys(layerUI.components).filter((componentName) => {
+    const component = layerUI.components[componentName];
+    return component.properties.filter(prop => prop.propertyName === 'isMainComponent').length;
+  })
+  .forEach((componentName) => {
+    const component = layerUI.components[componentName];
 
     // Get the camel case Component name
-    var className = (componentName.substring(0, 1).toUpperCase() + componentName.substring(1).replace(/-(.)/g, function(str, value) {
-      return value.toUpperCase();
-    })).replace(/^Layer/, '');
+    const className = (componentName.substring(0, 1).toUpperCase() +
+      componentName.substring(1)
+      .replace(/-(.)/g, (str, value) => value.toUpperCase()))
+        .replace(/^Layer/, '');
 
     libraryResult[className] = React.createClass({
+
+      /**
+       * On mounting, copy in all properties, and optionally setup a Query.
+       *
+       * Delay added to prevent Webcomponents property setters from being blown away in safari and firefox
+       */
+      componentDidMount() {
+        layerUI.defer(() => {
+          // Get the properties/attributes that match those used in this.props
+          const props = component.properties.filter(property =>
+            this.props[property.propertyName] || this.props[property.attributeName]);
+
+          // Set the webcomponent properties
+          props.forEach((propDef) => {
+            const value = propDef.propertyName in this.props ?
+              this.props[propDef.propertyName] : this.props[propDef.attributeName];
+            this.node[propDef.propertyName] = value;
+          });
+        });
+      },
+
       /**
        * Copy all properties into the dom node, but never let React recreate this widget.
        */
-      shouldComponentUpdate: function(nextProps) {
-        var props = component.properties.filter(function(property) {
-          return this.props[property.propertyName] || this.props[property.attributeName];
-        }, this);
-        props.forEach(function(propDef) {
-          var name = propDef.propertyName in this.props ? propDef.propertyName : propDef.attributeName;
+      shouldComponentUpdate(nextProps) {
+        // Get the properties/attributes that match those used in this.props
+        const props = component.properties.filter(property =>
+          this.props[property.propertyName] || this.props[property.attributeName]);
+
+        // Set the webcomponent properties if they have changed
+        props.forEach((propDef) => {
+          const name = propDef.propertyName in this.props ? propDef.propertyName : propDef.attributeName;
           if (nextProps[name] !== this.props[name]) {
             this.node[propDef.propertyName] = nextProps[name];
           }
         }, this);
-        // Object.keys(nextProps).forEach(function(propName) {
-        //   var camelName = layerUI.camelCase(propName);
-        //   if (nextProps[propName] !== this.props[propName]) {
-        //     this.node[camelName] = nextProps[propName];
-        //   }
-        // }, this);
         return false;
       },
 
-      /**
-       * On mounting, copy in all properties, and optionally setup a Query.
-       */
-      componentDidMount: function() {
-        this.node = ReactDom.findDOMNode(this);
-        // Without this delay, Webcomponents property setters will be blown away in safari and firefox
-        layerUI.defer(function() {
-          var props = component.properties.filter(function(property) {
-            return this.props[property.propertyName] || this.props[property.attributeName];
-          }, this);
-          props.forEach(function(propDef) {
-            var value = propDef.propertyName in this.props ? this.props[propDef.propertyName] : this.props[propDef.attributeName];
-            this.node[propDef.propertyName] = value;
-          }, this);
-        }.bind(this));
+      render() {
+        return React.createElement(componentName, { ref: (node) => { this.node = node; } });
       },
-
-      render: function() {
-        return React.createElement(componentName);
-      }
     });
   });
   return libraryResult;
-};
+}
 
 module.exports = initReact;
 layerUI.addAdapter('react', initReact);

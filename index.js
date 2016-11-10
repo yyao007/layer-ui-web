@@ -57,6 +57,7 @@ layerUI.init = function(settings) {
   require("./lib/mixins/list-item");
   require("./lib/mixins/list");
   require("./lib/mixins/main-component");
+  require("./lib/utils/date-separator");
   require("./lib/utils/files");
   require("./lib/utils/is-url");
   require("./lib/utils/sizing");

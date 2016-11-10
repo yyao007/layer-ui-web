@@ -7,28 +7,12 @@
  * @class layerUI.components.subcomponents.Date
  * @extends layerUI.components.Component
  */
-var layerUI = require('../../../base');
-var layer = layerUI.layer;
-var LUIComponent = require('../../../components/component');
+import layerUI, { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-file-upload-button', {
   properties: {
 
-    /**
-     * Date to be rendered
-     *
-     * @property {Date}
-     */
-    date: {
-      set: function(value){
-        if (value) {
-          var dateStr = value.toLocaleDateString(),
-            timeStr = value.toLocaleTimeString()
-          this.innerHTML = new Date().toLocaleDateString() == dateStr ? timeStr : dateStr + ' ' + timeStr;
-        } else {
-          this.innerHTML = '';
-        }
-      }
-    }
   },
   methods: {
 
@@ -38,26 +22,24 @@ LUIComponent('layer-file-upload-button', {
      * @method created
      * @private
      */
-    created: function() {
-      this.nodes.input.id = layer.Util.generateUUID();
+    created() {
+      this.nodes.input.id = LayerAPI.Util.generateUUID();
       this.nodes.label.setAttribute('for', this.nodes.input.id);
       this.nodes.input.addEventListener('change', this.onChange.bind(this));
-      this.addEventListener('click', function(evt) {this.nodes.input.click();}.bind(this));
+      this.addEventListener('click', evt => this.nodes.input.click());
     },
 
     /**
      * When the file input's value has changed, gather the data and trigger an event
      */
-    onChange: function() {
-      var files = this.nodes.input.files;
-      var parts = Array.prototype.map.call(files, function(file) {
-        return new layer.MessagePart(file);
-      }, this);
-      layerUI.files.processAttachments(parts, {width: 300, height: 300}, function(newParts) {
-        this.trigger('layer-file-selected', {
-          parts: newParts
-        });
-      }.bind(this));
-    }
-  }
+    onChange() {
+      const files = this.nodes.input.files;
+      const inputParts = Array.prototype.map.call(files, file => new LayerAPI.MessagePart(file));
+
+      // TODO: where do these dimensions come from?  How to customize? What are best practices?
+      layerUI.files.processAttachments(inputParts, { width: 300, height: 300 }, (parts) => {
+        this.trigger('layer-file-selected', { parts });
+      });
+    },
+  },
 });

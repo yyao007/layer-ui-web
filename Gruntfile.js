@@ -5,6 +5,7 @@ var path = require('path');
 var version = require('./package.json').version;
 var HTML_HEAD = fs.readFileSync('./jsduck-config/head.html').toString();
 var CSS = fs.readFileSync('./jsduck-config/style.css').toString();
+var babel = require("babel-core");
 
 module.exports = function (grunt) {
 
@@ -112,12 +113,15 @@ module.exports = function (grunt) {
     }
   });
 
-
   grunt.registerMultiTask('webcomponents', 'Building Web Components', function() {
     var options = this.options();
 
     function createCombinedComponentFile(file, outputPath) {
       var output = grunt.file.read(file);
+      var babelResult = babel.transform(output, {
+        presets: ["babel-preset-es2015"]
+      });
+      output = babelResult.code;
 
       var templateCount = 0;
       var outputFolder = path.dirname(outputPath);

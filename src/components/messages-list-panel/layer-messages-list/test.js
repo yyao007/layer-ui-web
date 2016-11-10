@@ -64,19 +64,19 @@ describe('layer-messages-list', function() {
       testRoot.appendChild(el);
     });
     it("Should initialize lastPagedAt", function() {
-      expect(el.props.lastPagedAt).toEqual(0);
+      expect(el.properties.lastPagedAt).toEqual(0);
     });
 
     it("Should initialize isSelfScrolling", function() {
-      expect(el.props.isSelfScrolling).toEqual(false);
+      expect(el.properties.isSelfScrolling).toEqual(false);
     });
 
     it("Should initialize stuckToBottom", function() {
-      expect(el.props.stuckToBottom).toEqual(true);
+      expect(el.properties.stuckToBottom).toEqual(true);
     });
 
     it("Should initialize lastScroll", function() {
-      expect(el.props.lastScroll).toEqual(0);
+      expect(el.properties.lastScroll).toEqual(0);
     });
 
     it("Should call render", function() {
@@ -86,7 +86,7 @@ describe('layer-messages-list', function() {
     it("Should wire up checkVisibility to the focus event", function() {
       query.data[0].isRead = false;
       query.data[query.size - 1].isRead = false;
-      el.props.stuckToBottom = false;
+      el.properties.stuckToBottom = false;
       el.scrollTop = 0;
       spyOn(el, "markAsRead");
       var tmp = window.layerUI.isInBackground;
@@ -163,10 +163,10 @@ describe('layer-messages-list', function() {
     it("Should page the query if shouldPage and if its userScrolled and we arent in the middle of a delayedPagingTimeout and we didn't just fire the query and the query isnt already firing", function() {
       spyOn(query, 'update');
       spyOn(el, 'shouldPage').and.returnValue(true);
-      el.props.isSelfScrolling = false;
-      el.props.lastScroll = 0;
-      el.props.delayedPagingTimeout = 0;
-      el.props.lastPagedAt = 0;
+      el.properties.isSelfScrolling = false;
+      el.properties.lastScroll = 0;
+      el.properties.delayedPagingTimeout = 0;
+      el.properties.lastPagedAt = 0;
       query.isFiring = false;
 
       el.handleScroll();
@@ -179,30 +179,30 @@ describe('layer-messages-list', function() {
       expect(query.update).not.toHaveBeenCalled();
       query.isFiring = false;
 
-      el.props.delayedPagingTimeout = 1;
+      el.properties.delayedPagingTimeout = 1;
       el.handleScroll();
       expect(query.update).not.toHaveBeenCalled();
-      el.props.delayedPagingTimeout = 0;
+      el.properties.delayedPagingTimeout = 0;
 
-      el.props.isSelfScrolling = true;
+      el.properties.isSelfScrolling = true;
       el.handleScroll();
       expect(query.update).not.toHaveBeenCalled();
-      el.props.isSelfScrolling = false;
+      el.properties.isSelfScrolling = false;
 
-      el.props.isSelfScrolling = true;
-      el.props.lastScroll = el.scrollTop + 1;
+      el.properties.isSelfScrolling = true;
+      el.properties.lastScroll = el.scrollTop + 1;
       el.handleScroll();
       expect(query.update).toHaveBeenCalledWith({paginationWindow: jasmine.any(Number)});
-      el.props.lastScroll = 0;
-      el.props.isSelfScrolling = false;
+      el.properties.lastScroll = 0;
+      el.properties.isSelfScrolling = false;
       query.update.calls.reset();
 
-      el.props.lastPagedAt = Date.now();
+      el.properties.lastPagedAt = Date.now();
       el.handleScroll();
       expect(query.update).not.toHaveBeenCalled();
-      el.props.lastPagedAt = 0;
+      el.properties.lastPagedAt = 0;
 
-      el.props.delayedPagingTimeout = 0;
+      el.properties.delayedPagingTimeout = 0;
       el.handleScroll();
       expect(query.update).toHaveBeenCalledWith({paginationWindow: jasmine.any(Number)});
     });
@@ -210,10 +210,10 @@ describe('layer-messages-list', function() {
     it("Should schedule a query update", function() {
       spyOn(query, 'update');
       spyOn(el, 'shouldPage').and.returnValue(true);
-      el.props.isSelfScrolling = false;
-      el.props.lastScroll = 0;
-      el.props.delayedPagingTimeout = 0;
-      el.props.lastPagedAt = Date.now() - 500;
+      el.properties.isSelfScrolling = false;
+      el.properties.lastScroll = 0;
+      el.properties.delayedPagingTimeout = 0;
+      el.properties.lastPagedAt = Date.now() - 500;
       query.isFiring = false;
 
       el.handleScroll();
@@ -226,10 +226,10 @@ describe('layer-messages-list', function() {
     });
 
     it("Should enable stuckToBottom if user scrolls to bottom", function() {
-      el.props.stuckToBottom = false;
+      el.properties.stuckToBottom = false;
       el.scrollTop = 100000;
       el.handleScroll();
-      expect(el.props.stuckToBottom).toBe(true);
+      expect(el.properties.stuckToBottom).toBe(true);
     });
 
     it("Should check visibility after scrolling", function() {
@@ -532,10 +532,10 @@ describe('layer-messages-list', function() {
 
   describe("The renderResetData() method", function() {
     it("Should reset listData", function() {
-      el.props.listData = query.data;
+      el.properties.listData = query.data;
       query.reset();
-      expect(el.props.listData.length).toEqual(0);
-      expect(query.data).not.toBe(el.props.listData);
+      expect(el.properties.listData.length).toEqual(0);
+      expect(query.data).not.toBe(el.properties.listData);
     });
 
     it("Should reset the scroll position", function() {
@@ -555,15 +555,15 @@ describe('layer-messages-list', function() {
     });
 
     it("Should reset assorted state", function() {
-      el.props.stuckToBottom = false;
-      el.props.lastPagedAt = 5;
-      el.props.isSelfScrolling = true;
-      el.props.lastScroll = 5;
+      el.properties.stuckToBottom = false;
+      el.properties.lastPagedAt = 5;
+      el.properties.isSelfScrolling = true;
+      el.properties.lastScroll = 5;
       query.reset();
-      expect(el.props.stuckToBottom).toEqual(true);
-      expect(el.props.lastPagedAt).toEqual(0);
-      expect(el.props.isSelfScrolling).toEqual(false);
-      expect(el.props.lastScroll).toEqual(0);
+      expect(el.properties.stuckToBottom).toEqual(true);
+      expect(el.properties.lastPagedAt).toEqual(0);
+      expect(el.properties.isSelfScrolling).toEqual(false);
+      expect(el.properties.lastScroll).toEqual(0);
     });
   });
 
@@ -572,10 +572,10 @@ describe('layer-messages-list', function() {
     it("Should update listData", function() {
       var queryData = query.data.reverse();
       var initialLength = query.data.length;
-      expect(initialLength).toEqual(el.props.listData.length);
+      expect(initialLength).toEqual(el.properties.listData.length);
 
-      expect(el.props.listData).toEqual(queryData);
-      expect(el.props.listData).not.toBe(queryData);
+      expect(el.properties.listData).toEqual(queryData);
+      expect(el.properties.listData).not.toBe(queryData);
       spyOn(el, 'renderWithoutRemovedData').and.callThrough();
 
       // Run
@@ -585,9 +585,9 @@ describe('layer-messages-list', function() {
 
       // Posttest
       expect(el.renderWithoutRemovedData).toHaveBeenCalled();
-      expect(el.props.listData).toEqual(queryData);
-      expect(el.props.listData).not.toBe(query.data);
-      expect(initialLength).toEqual(el.props.listData.length + 1);
+      expect(el.properties.listData).toEqual(queryData);
+      expect(el.properties.listData).not.toBe(query.data);
+      expect(initialLength).toEqual(el.properties.listData.length + 1);
     });
 
     it("Should call _gatherAndProcessAffectedItems with 3 items before and 3 after the removed item", function() {
@@ -634,7 +634,7 @@ describe('layer-messages-list', function() {
       });
 
       // Posttest
-      expect(el.props.listData[el.props.listData.length - 1]).toBe(message);
+      expect(el.properties.listData[el.properties.listData.length - 1]).toBe(message);
     });
 
     it("Should insert a list item at the proper index", function() {
@@ -750,7 +750,7 @@ describe('layer-messages-list', function() {
 
     it("Should scroll to bottom if stuck to bottom and new item is bottom", function() {
       var message = conversation.createMessage("What the???");
-      el.props.stuckToBottom = true;
+      el.properties.stuckToBottom = true;
       spyOn(el, "animateScrollTo");
       // Run
       query.data.push(message);
@@ -768,7 +768,7 @@ describe('layer-messages-list', function() {
     it("Should checkVisibility rather than scroll if not stuck to bottom", function() {
       var message = conversation.createMessage("What the???");
       spyOn(el, "checkVisibility");
-      el.props.stuckToBottom = false;
+      el.properties.stuckToBottom = false;
       el.scrollTop = 10;
 
       // Run
@@ -825,15 +825,15 @@ describe('layer-messages-list', function() {
 
   describe("The renderPagedData() method", function() {
     it("Should update lastPagedAt and listData", function() {
-      el.props.lastPagedAt = 0;
+      el.properties.lastPagedAt = 0;
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
-      expect(el.props.listData.length).toEqual(100);
+      expect(el.properties.listData.length).toEqual(100);
       query.data.push(messages[1]);
       query.data.push(messages[0]);
       el.renderPagedData({type: 'data', data: messages});
       jasmine.clock().tick(1000);
-      expect(el.props.lastPagedAt > 0).toBe(true);
-      expect(el.props.listData.length).toEqual(102);
+      expect(el.properties.lastPagedAt > 0).toBe(true);
+      expect(el.properties.listData.length).toEqual(102);
     });
 
     it("Should call renderPagedDataDone with top 3 items and two new items", function() {
@@ -846,12 +846,12 @@ describe('layer-messages-list', function() {
     });
 
     it("Should do nothing if no data received", function() {
-      el.props.lastPagedAt = 0;
+      el.properties.lastPagedAt = 0;
       spyOn(el, "renderPagedDataDone");
       el.renderPagedData({type: 'data', data: []});
       jasmine.clock().tick(1000);
       expect(el.renderPagedDataDone).not.toHaveBeenCalled();
-      expect(el.props.lastPagedAt).toBe(0);
+      expect(el.properties.lastPagedAt).toBe(0);
     });
   });
 
@@ -874,7 +874,7 @@ describe('layer-messages-list', function() {
 
     it("Should scroll to bottom if stuck to bottom", function() {
       el.scrollTop = 0;
-      el.props.stuckToBottom = true;
+      el.properties.stuckToBottom = true;
       spyOn(el, "scrollTo");
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el.generateFragment(messages);
@@ -885,7 +885,7 @@ describe('layer-messages-list', function() {
     it("Should scroll to the item that was on top of the visible viewport prior to the insertion", function() {
       el.scrollTop = el.childNodes[10].offsetTop - el.offsetTop;
       expect(el.findFirstVisibleItem()).toBe(el.childNodes[10]);
-      el.props.stuckToBottom = false;
+      el.properties.stuckToBottom = false;
       spyOn(el, "scrollTo");
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el.generateFragment(messages);

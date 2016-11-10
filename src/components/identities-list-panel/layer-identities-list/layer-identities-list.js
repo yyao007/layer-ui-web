@@ -37,93 +37,96 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+import List from '../../../mixins/list';
+import MainComponent from '../../../mixins/main-component';
+
 LUIComponent('layer-identities-list', {
-  mixins: [require('../../../mixins/list'), require('../../../mixins/main-component')],
+  mixins: [List, MainComponent],
 
 
   /**
-     * The user has clicked to select an Identity in the Identities List.
-     *
-     * ```javascript
-     *    identityList.onIdentitySelected = function(evt) {
-     *      var identityAdded = evt.detail.identity;
-     *      var selectedIdentities = evt.target.selectedIdentities;
-     *
-     *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
-     *      // Note that identityAdded is not yet in selectedIdentities so that you may prevent it from being added.
-     *      evt.preventDefault();
-     *    };
-     * ```
-     *
-     *  OR
-     *
-     * ```javascript
-     *    document.body.addEventListener('layer-identity-selected', function(evt) {
-     *      var identityAdded = evt.detail.identity;
-     *      var selectedIdentities = evt.target.selectedIdentities;
-     *
-     *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
-     *      // Note that identityAdded is not yet in selectedIdentities so that you may prevent it from being added.
-     *      evt.preventDefault();
-     *    });
-     * ```
-     *
-     * @event layer-identity-selected
-     * @param {Event} evt
-     * @param {Object} evt.detail
-     * @param {layer.Identity} evt.detail.identity
-     */
-    /**
-     * A identity selection change has occurred
-     *
-     * See the {@link layerUI.components.identityList#layer-identity-selected layer-identity-selected} event for more detail.
-     *
-     * @property {Function} onIdentitySelected
-     * @param {Event} evt
-     * @param {Object} evt.detail
-     * @param {layer.Identity} evt.detail.identity
-     */
+   * The user has clicked to select an Identity in the Identities List.
+   *
+   * ```javascript
+   *    identityList.onIdentitySelected = function(evt) {
+   *      var identityAdded = evt.detail.identity;
+   *      var selectedIdentities = evt.target.selectedIdentities;
+   *
+   *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
+   *      // Note that identityAdded is not yet in selectedIdentities so that you may prevent it from being added.
+   *      evt.preventDefault();
+   *    };
+   * ```
+   *
+   *  OR
+   *
+   * ```javascript
+   *    document.body.addEventListener('layer-identity-selected', function(evt) {
+   *      var identityAdded = evt.detail.identity;
+   *      var selectedIdentities = evt.target.selectedIdentities;
+   *
+   *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
+   *      // Note that identityAdded is not yet in selectedIdentities so that you may prevent it from being added.
+   *      evt.preventDefault();
+   *    });
+   * ```
+   *
+   * @event layer-identity-selected
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.identity
+   */
+  /**
+   * A identity selection change has occurred
+   *
+   * See the {@link layerUI.components.identityList#layer-identity-selected layer-identity-selected} event for more detail.
+   *
+   * @property {Function} onIdentitySelected
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.identity
+   */
 
-    /**
-     * The user has clicked to deselect a identity in the identities list.
-     *
-     *    identityList.onIdentityDeselected = function(evt) {
-     *      var identityRemoved = evt.detail.identity;
-     *      var selectedIdentities = evt.target.selectedIdentities;
-     *
-     *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
-     *      // Note that identityRemoved is still in selectedIdentities so that you may prevent it from being removed.
-     *      evt.preventDefault();
-     *    };
-     *
-     *  OR
-     *
-     *    document.body.addEventListener('layer-identity-deselected', function(evt) {
-     *      var identityRemoved = evt.detail.identity;
-     *      var selectedIdentities = evt.target.selectedIdentities;
-     *
-     *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
-     *      // Note that identityRemoved is still in selectedIdentities so that you may prevent it from being removed.
-     *      evt.preventDefault();
-     *    });
-     *
-     * @event layer-identity-deselected
-     * @param {Event} evt
-     * @param {Object} evt.detail
-     * @param {layer.Identity} evt.detail.identity
-     */
-    /**
-     * A identity selection change has occurred
-     *
-     * See the {@link layerUI.components.identityList#layer-identity-deselected layer-identity-deselected} event for more detail.
-     *
-     * @property {Function} onIdentityDeselected
-     * @param {Event} evt
-     * @param {Object} evt.detail
-     * @param {layer.Identity} evt.detail.identity
-     */
+  /**
+   * The user has clicked to deselect a identity in the identities list.
+   *
+   *    identityList.onIdentityDeselected = function(evt) {
+   *      var identityRemoved = evt.detail.identity;
+   *      var selectedIdentities = evt.target.selectedIdentities;
+   *
+   *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
+   *      // Note that identityRemoved is still in selectedIdentities so that you may prevent it from being removed.
+   *      evt.preventDefault();
+   *    };
+   *
+   *  OR
+   *
+   *    document.body.addEventListener('layer-identity-deselected', function(evt) {
+   *      var identityRemoved = evt.detail.identity;
+   *      var selectedIdentities = evt.target.selectedIdentities;
+   *
+   *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
+   *      // Note that identityRemoved is still in selectedIdentities so that you may prevent it from being removed.
+   *      evt.preventDefault();
+   *    });
+   *
+   * @event layer-identity-deselected
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.identity
+   */
+  /**
+   * A identity selection change has occurred
+   *
+   * See the {@link layerUI.components.identityList#layer-identity-deselected layer-identity-deselected} event for more detail.
+   *
+   * @property {Function} onIdentityDeselected
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.identity
+   */
 
   events: ['layer-identity-selected', 'layer-identity-deselected'],
   properties: {
@@ -148,19 +151,19 @@ LUIComponent('layer-identities-list', {
      * list.selectedIdentities = newList;
      * ```
      *
-     * @property {layer.Identity[]}
+     * @property {layer.Identity[]} [selectedIdentities=[]]
      */
     selectedIdentities: {
-      set: function(value) {
+      set(value) {
         if (!value) value = [];
         if (!Array.isArray(value)) return;
         if (!value) value = [];
-        this.props.selectedIdentities = value.map(function(identity) {
-          if (!(identity instanceof layer.Identity)) return this.props.client.getIdentity(identity.id);
+        this.properties.selectedIdentities = value.map((identity) => {
+          if (!(identity instanceof LayerAPI.Identity)) return this.properties.client.getIdentity(identity.id);
           return identity;
-        }, this);
+        });
         this.renderSelection();
-      }
+      },
     },
 
     /**
@@ -169,12 +172,12 @@ LUIComponent('layer-identities-list', {
      * Defaults to filtering by `conversation.metadata.conversationName`, as well as `displayName`, `firstName`, `lastName` and `emailAddress`
      * of every participant.  Provide your own Function to change this behavior
      *
-     * @property {String|RegEx|Function}
+     * @property {String|RegEx|Function} [filter='']
      */
     filter: {
-      set: function(value) {
+      set(value) {
         this.runFilter();
-      }
+      },
     },
 
     /**
@@ -182,11 +185,11 @@ LUIComponent('layer-identities-list', {
      *
      * @readonly
      * @private
-     * @property {String}
+     * @property {String} [queryModel=layer.Query.Identity]
      */
     queryModel: {
-      value: layer.Query.Identity
-    }
+      value: LayerAPI.Query.Identity,
+    },
   },
   methods: {
 
@@ -197,8 +200,8 @@ LUIComponent('layer-identities-list', {
      * @private
      * @param {String} id
      */
-    getItemId: function(identity) {
-      return 'identities-list-item-' + this.id + '-' + identity.internalId;
+    getItemId(identity) {
+      return `identities-list-item-${this.id}-${identity.internalId}`;
     },
 
     /**
@@ -207,9 +210,9 @@ LUIComponent('layer-identities-list', {
      * @method created
      * @private
      */
-    created: function() {
-      if (!this.id) this.id = layer.Util.generateUUID();
-      this.props.selectedIdentities = [];
+    created() {
+      if (!this.id) this.id = LayerAPI.Util.generateUUID();
+      this.properties.selectedIdentities = [];
 
       this.render();
       this.addEventListener('layer-identity-item-selected', this.handleIdentitySelect.bind(this));
@@ -221,20 +224,19 @@ LUIComponent('layer-identities-list', {
      *
      * Adds the Identity to the selectedIdentities array.
      *
-     * @method
+     * @method handleIdentitySelect
      * @private
      * @param {Event} evt
      */
-    handleIdentitySelect: function(evt) {
+    handleIdentitySelect(evt) {
       evt.stopPropagation();
-      var identity = evt.detail.identity;
-
-      var index = this.selectedIdentities.indexOf(identity)
+      const identity = evt.detail.identity;
+      const index = this.selectedIdentities.indexOf(identity);
 
       // If the item is not in our selectedIdentities array, add it
       if (index === -1) {
         // If app calls prevent default, then don't add the identity to our selectedIdentities list, just call preventDefault on the original event.
-        if (this.trigger('layer-identity-selected', { identity: identity })) {
+        if (this.trigger('layer-identity-selected', { identity })) {
           this.selectedIdentities.push(identity);
         } else {
           evt.preventDefault();
@@ -247,19 +249,19 @@ LUIComponent('layer-identities-list', {
      *
      * Removes the identity from the selectedIdentities array.
      *
-     * @method
+     * @method handleIdentityDeselect
      * @private
      * @param {Event} evt
      */
-    handleIdentityDeselect: function(evt) {
+    handleIdentityDeselect(evt) {
       evt.stopPropagation();
-      var identity = evt.detail.identity;
-      var index = this.selectedIdentities.indexOf(identity)
+      const identity = evt.detail.identity;
+      const index = this.selectedIdentities.indexOf(identity);
 
       // If the item is in our selectedIdentities array, remove it
       if (index !== -1) {
         // If app calls prevent default, then don't remove the identity, just call preventDefault on the original event.
-        if (this.trigger('layer-identity-deselected', { identity: identity })) {
+        if (this.trigger('layer-identity-deselected', { identity })) {
           this.selectedIdentities.splice(index, 1);
         } else {
           evt.preventDefault();
@@ -270,11 +272,12 @@ LUIComponent('layer-identities-list', {
     /**
      * Append a layerUI.components.IdentitiesList.IdentityItem to the Document Fragment
      *
-     * @method
+     * @method generateItem
+     * @param {layer.Identity} identity
      * @private
      */
-    generateItem: function(identity) {
-      var identityWidget = document.createElement('layer-identity-item');
+    generateItem(identity) {
+      const identityWidget = document.createElement('layer-identity-item');
       identityWidget.item = identity;
       identityWidget.id = this.getItemId(identity);
       identityWidget.selected = this.selectedIdentities.indexOf(identity) !== -1;
@@ -285,18 +288,19 @@ LUIComponent('layer-identities-list', {
     /**
      * Call this on any Query change events.
      *
-     * @method
+     * @method rerender
      * @private
      * @param {Event} evt
      */
-    rerender: function(evt) {
+    rerender(evt) {
       this._rerender(evt);
-      switch(evt.type) {
+      switch (evt.type) {
         // If its a remove event, find the user and remove its widget.
-        case 'remove':
-          var removalIndex = this.selectedIdentities.indexOf(evt.target);
+        case 'remove': {
+          const removalIndex = this.selectedIdentities.indexOf(evt.target);
           if (removalIndex !== -1) this.selectedIdentities.splice(removalIndex, 1);
           break;
+        }
 
         // If its a reset event, all data is gone, rerender everything.
         case 'reset':
@@ -308,20 +312,17 @@ LUIComponent('layer-identities-list', {
     /**
      * Update the selected property of all Identity Items based on the selectedIdentities property.
      *
-     * @method
+     * @method renderSelection
      * @private
      */
-    renderSelection: function() {
-      var selectedNodes = this.querySelectorAllArray('.layer-identity-item-selected').map(function(node) {
-        return node.parentNode;
-      });;
-      var nodesToSelect = this.selectedIdentities.length ? this.querySelectorAllArray(this.selectedIdentities.map(function(identity) {
-        return '#' + this.getItemId(identity);
-      }, this).join(', ')) : [];
-      selectedNodes.forEach(function(node) {
+    renderSelection() {
+      const selectedNodes = this.querySelectorAllArray('.layer-identity-item-selected').map(node => node.parentNode);
+      const selectedIds = this.selectedIdentities.map(identity => '#' + this.getItemId(identity));
+      const nodesToSelect = this.selectedIdentities.length ? this.querySelectorAllArray(selectedIds.join(', ')) : [];
+      selectedNodes.forEach((node) => {
         if (nodesToSelect.indexOf(node) === -1) node.selected = false;
       });
-      nodesToSelect.forEach(function(node) {
+      nodesToSelect.forEach((node) => {
         if (selectedNodes.indexOf(node) === -1) node.selected = true;
       });
     },
@@ -329,23 +330,21 @@ LUIComponent('layer-identities-list', {
     /**
      * Run the filter on all Identity Items.
      *
-     * @method
+     * @method runFilter
      * @private
      */
-    runFilter: function() {
+    runFilter() {
       if (!this.filter) {
-        this.querySelectorAllArray('.layer-item-filtered').forEach(function(item) {
-          item.removeClass('layer-item-filtered');
-        }, this);
+        this.querySelectorAllArray('.layer-item-filtered').forEach(item => item.removeClass('layer-item-filtered'));
       } else {
-        for (var i = 0; i < this.childNodes.length; i++) {
-          var listItem = this.childNodes[i];
-          if (listItem.item instanceof layer.Root) {
+        for (let i = 0; i < this.childNodes.length; i++) {
+          const listItem = this.childNodes[i];
+          if (listItem.item instanceof LayerAPI.Root) {
             listItem.runFilter(this.filter);
           }
         }
       }
-    }
-  }
+    },
+  },
 });
 

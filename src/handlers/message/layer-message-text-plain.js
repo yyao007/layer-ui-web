@@ -6,8 +6,9 @@
  * @class layerUI.handlers.message.TextPlain
  * @extends layerUI.components.Component
  */
-var layerUI = require('../../base');
-var LUIComponent = require('../../components/component');
+import layerUI from '../../base';
+import LUIComponent from '../../components/component';
+
 LUIComponent('layer-message-text-plain', {
   properties: {
 
@@ -17,10 +18,10 @@ LUIComponent('layer-message-text-plain', {
      * @property {layer.Message}
      */
     message: {
-      set: function(value){
+      set(value) {
         this.render();
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -30,7 +31,7 @@ LUIComponent('layer-message-text-plain', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
     },
 
     /**
@@ -40,9 +41,9 @@ LUIComponent('layer-message-text-plain', {
      * @method
      * @private
      */
-    fixHtml: function(body) {
-      body = body.replace(/\</g, '&lt;');
-      body = body.replace(/\>/g, '&gt;');
+    fixHtml(body) {
+      body = body.replace(/</g, '&lt;');
+      body = body.replace(/>/g, '&gt;');
       return body;
     },
 
@@ -52,42 +53,41 @@ LUIComponent('layer-message-text-plain', {
      * @method
      * @private
      */
-    render: function() {
+    render() {
       if (!layerUI.textHandlersOrdered) this.setupOrderedHandlers();
 
-      var text = this.message.parts[0].body;
-      var textData = {
+      const text = this.message.parts[0].body;
+      const textData = {
         text: this.fixHtml(text),
-        afterText: []
+        afterText: [],
       };
 
-      layerUI.textHandlersOrdered.forEach(function(handler) {
-        handler(textData);
-      }, this);
-      this.innerHTML = textData.text + (textData.afterText.length ? '<br/><br/>' + textData.afterText.join('<br/>') : '');
+      layerUI.textHandlersOrdered.forEach(handler => handler(textData));
+
+      const startDiv = '<div class="layer-message-text-plain-after-text">';
+      this.innerHTML = textData.text +
+        (textData.afterText.length ? startDiv + textData.afterText.join('</div>' + startDiv) + '</div>' : '');
     },
 
-    setupOrderedHandlers: function() {
-      layerUI.textHandlersOrdered = Object.keys(layerUI.textHandlers).filter(function(handlerName) {
-        return layerUI.textHandlers[handlerName].enabled;
-      }).map(function(handlerName) {
-        return layerUI.textHandlers[handlerName];
-      }).sort(function(a, b) {
+    setupOrderedHandlers() {
+      layerUI.textHandlersOrdered = Object.keys(layerUI.textHandlers).filter(handlerName =>
+        layerUI.textHandlers[handlerName].enabled)
+      .map(handlerName => layerUI.textHandlers[handlerName])
+      .sort((a, b) => {
         if (a.order > b.order) return 1;
         if (b.order > a.order) return -1;
         return 0;
-      }).map(function(handlerObj) {
-        return handlerObj.handler;
-      });
-    }
-  }
+      })
+      .map(handlerObj => handlerObj.handler);
+    },
+  },
 });
 
 // Handle any text/plain Message
 layerUI.registerMessageHandler({
   tagName: 'layer-message-text-plain',
   label: 'Text',
-  handlesMessage: function(message, container) {
+  handlesMessage(message, container) {
     return message.parts.length === 1 && message.parts[0].mimeType === 'text/plain';
   },
 });

@@ -1,4 +1,4 @@
-var layerUI = require('../base');
+import layerUI from '../base';
 
 /**
  * Call this function to initialize all of the angular 1.x directives needed to handle the Layer UI for Web widgets.
@@ -30,7 +30,7 @@ var layerUI = require('../base');
 function initAngular(angular) {
 
   // Define the layerUIController
-  var controllers = angular.module('layerUIControllers', []);
+  const controllers = angular.module('layerUIControllers', []);
 
   // Setup the properties for the given widget that is being generated
   function setupProps(scope, elem, attrs, props) {
@@ -56,12 +56,14 @@ function initAngular(angular) {
      *
      * Best Practice therefore: Use `ng-` prefix on all properties passed via html template files.
      */
-    props.forEach(function(prop) {
-      var ngAttributeName = prop.attributeName.indexOf('on-') === 0 ? 'ng-' + prop.attributeName.substring(3) : 'ng-' + prop.attributeName;
-      var ngPropertyName = prop.propertyName.indexOf('on') === 0 ? 'ng' + prop.propertyName.substring(2) : 'ng' + prop.propertyName.substring(0,1).toUpperCase() + prop.propertyName.substring(1);
+    props.forEach((prop) => {
+      const ngPropertyName = prop.propertyName.indexOf('on') === 0 ?
+        'ng' + prop.propertyName.substring(2) :
+        'ng' + prop.propertyName.substring(0, 1).toUpperCase() + prop.propertyName.substring(1);
 
-      attrs.$observe(prop.propertyName, function(value) {
-        if (elem.props) {
+      // Observe for changes to the attribute value and apply them to the property value
+      attrs.$observe(prop.propertyName, (value) => {
+        if (elem.properties) {
           elem[prop.propertyName] = value;
         } else {
           if (!elem.tmpdata) elem.tmpdata = {};
@@ -69,9 +71,11 @@ function initAngular(angular) {
         }
       });
 
-      attrs.$observe(ngPropertyName, function(value) {
-        scope.$watch(value, function(value) {
-          if (elem.props) {
+      // Observe for changes to the attribute value prefixed with "ng-" and watch the scoped expression for changes
+      // that need to be applied to the property value.
+      attrs.$observe(ngPropertyName, (expression) => {
+        scope.$watch(expression, (value) => {
+          if (elem.properties) {
             elem[prop.propertyName] = value;
           } else {
             if (!elem.tmpdata) elem.tmpdata = {};
@@ -84,30 +88,28 @@ function initAngular(angular) {
 
   // Gather all UI Components flagged as Main Components; other components don't require special wrappers that allow properties
   // embedded in Angular's Templates to correctly handle values.
-  Object.keys(layerUI.components).filter(function(componentName) {
-    var component = layerUI.components[componentName];
-    return component.properties.filter(function(prop) {
-      return prop.propertyName === 'isMainComponent';
-    }).length;
-  }).forEach(function(componentName) {
-    var component = layerUI.components[componentName];
+  Object.keys(layerUI.components).filter((componentName) => {
+    const component = layerUI.components[componentName];
+    return component.properties.filter(prop => prop.propertyName === 'isMainComponent').length;
+  })
+  .forEach((componentName) => {
+    const component = layerUI.components[componentName];
 
     // Get the camel case controller name
-    var controllerName = componentName.replace(/-(.)/g, function(str, value) {
-      return value.toUpperCase();
-    });
+    const controllerName = componentName.replace(/-(.)/g, (str, value) => value.toUpperCase());
 
-    controllers.directive(controllerName, function() {
+
+    controllers.directive(controllerName, () => {
       return {
         retrict: 'E',
-        link: function(scope, elem, attrs) {
-          var functionProps = component.properties;
+        link: (scope, elem, attrs) => {
+          const functionProps = component.properties;
           setupProps(scope, elem[0], attrs, functionProps);
-        }
-      }
+        },
+      };
     });
   });
-};
+}
 
 module.exports = initAngular;
 layerUI.addAdapter('angular', initAngular);

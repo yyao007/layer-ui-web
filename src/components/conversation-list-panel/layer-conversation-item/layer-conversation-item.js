@@ -13,21 +13,23 @@
  * @class layerUI.components.ConversationsListPanel.Item
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+import ListItem from '../../../mixins/list-item';
+
 LUIComponent('layer-conversation-item', {
-  mixins: [require('../../../mixins/list-item')],
+  mixins: [ListItem],
   properties: {
     item: {
-      set: function(value) {
+      set(value) {
         this.render();
         // This component is not currently being used in a way where items change, so this block isn't
         // currently used, but is here as "best practice"
-        if (this.props.oldConversation) {
-          this.props.oldConversation.off(null, null, this);
-          this.props.oldConversation = null;
+        if (this.properties.oldConversation) {
+          this.properties.oldConversation.off(null, null, this);
+          this.properties.oldConversation = null;
         }
         if (value) {
-          this.props.oldConversation = value;
+          this.properties.oldConversation = value;
           value.on('conversations:change', this.rerender, this);
         }
         if (this.nodes.delete) this.nodes.delete.item = value;
@@ -36,7 +38,7 @@ LUIComponent('layer-conversation-item', {
           this.nodes.lastMessage.canRenderLastMessage = this.canRenderLastMessage;
           this.nodes.lastMessage.item = value;
         }
-      }
+      },
     },
 
     /**
@@ -45,13 +47,13 @@ LUIComponent('layer-conversation-item', {
      * This property is currently assumed to be settable at creation time only,
      * and does not rerender if changed.
      *
-     * @property {Boolean}
+     * @property {Boolean} [deleteConversationEnabled=false]
      */
     deleteConversationEnabled: {
       type: Boolean,
-      set: function(value) {
+      set(value) {
         if (this.nodes.delete) this.nodes.delete.enabled = value;
-      }
+      },
     },
 
     /**
@@ -65,9 +67,9 @@ LUIComponent('layer-conversation-item', {
      * }
      * ```
      *
-     * @property {Function}
+     * @property {Function} [canRenderLastMessage=null]
      */
-    canRenderLastMessage: {}
+    canRenderLastMessage: {},
   },
   methods: {
 
@@ -77,81 +79,78 @@ LUIComponent('layer-conversation-item', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
 
     },
 
     /**
      * Generate a DOM ID for each user ID
      *
-     * @method
+     * @method getItemId
      * @private
      * @param {String} id
      */
-    getItemId: function(conversation) {
-      return 'conversation-list-item-' + this.id + '-' + conversation.id.replace(/layer:\/\/\/conversations\//, '');
+    getItemId(conversation) {
+      const uuid = conversation.id.replace(/layer:\/\/\/conversations\//, '');
+      return `conversation-list-item-${this.id}-${uuid}`;
     },
 
     /**
      * Render this Conversation Item.
      *
-     * @method
+     * @method render
      * @private
      */
-    render: function() {
+    render() {
       this.rerender();
     },
 
     /**
      * Update the rendering with new properties.
      *
-     * @method
+     * @method rerender
      * @private
      */
-    rerender: function() {
-      var users = this.item.participants.filter(function(user) {
-        return !user.sessionOwner;
-      });
-
-      var lastMessageWidget = this.nodes.lastMessage;
+    rerender() {
+      const users = this.item.participants.filter(user => !user.sessionOwner);
+      const isRead = !this.item.lastMessage || this.item.lastMessage.isRead;
+      const lastMessageWidget = this.nodes.lastMessage;
       if (lastMessageWidget) {
         lastMessageWidget.listHeight = this.listHeight;
         lastMessageWidget.listWidth = this.listWidth;
       }
 
       this.nodes.avatar.users = users;
-      this.classList[this.item.lastMessage && !this.item.lastMessage.isRead ? 'add' : 'remove']('layer-conversation-unread-messages');
+      this.classList[isRead ? 'remove' : 'add']('layer-conversation-unread-messages');
     },
 
     /**
      * Run a filter on this item, and hide it if it doesn't match the filter.
      *
-     * @method
+     * @method runFilter
      * @param {String|Regex|Function} filter
      */
-    runFilter: function(filter) {
-      var conversation = this.props.item;
-      var match;
+    runFilter(filter) {
+      const conversation = this.properties.item;
+      let match;
       if (!filter) {
         match = true;
       } else if (typeof filter === 'function') {
         match = filter(conversation);
       } else {
-        var values = [];
+        const values = [];
         if (conversation.metadata.conversationName) values.push(conversation.metadata.conversationName);
-        conversation.participants.forEach(function(identity) {
+        conversation.participants.forEach((identity) => {
           values.push(identity.displayName);
           values.push(identity.firstName);
           values.push(identity.lastName);
           values.push(identity.emailAddress);
         });
         if (filter instanceof RegExp) {
-          match = values.filter(function(value) {
-            return filter.test(value);
-          }).length;
+          match = values.filter(value => filter.test(value)).length;
         } else {
           filter = filter.toLowerCase();
-          match = values.filter(function(value) {
+          match = values.filter((value) => {
             if (value) {
               return value.toLowerCase().indexOf(filter) !== -1;
             } else {
@@ -161,6 +160,7 @@ LUIComponent('layer-conversation-item', {
         }
       }
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
-    }
-  }
-})
+    },
+  },
+});
+

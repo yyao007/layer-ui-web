@@ -7,7 +7,9 @@
  * @class layerUI.components.subcomponents.MessageStatus
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-message-status', {
   properties: {
 
@@ -17,17 +19,17 @@ LUIComponent('layer-message-status', {
      * @property {layer.Message}
      */
     message: {
-      set: function(value){
-        if (this.props.oldMessage) {
-          this.props.oldMessage.off(null, null, this);
-          this.props.oldMessage = null;
+      set(value) {
+        if (this.properties.oldMessage) {
+          this.properties.oldMessage.off(null, null, this);
+          this.properties.oldMessage = null;
         }
         if (value) {
-          this.props.oldMessage = value;
+          this.properties.oldMessage = value;
           value.on('messages:change', this.rerender, this);
           this.rerender();
         }
-      }
+      },
     },
 
     /**
@@ -43,7 +45,7 @@ LUIComponent('layer-message-status', {
      *
      * @property {Function}
      */
-    messageStatusRenderer: {}
+    messageStatusRenderer: {},
   },
   methods: {
 
@@ -53,36 +55,35 @@ LUIComponent('layer-message-status', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
     },
 
-    rerender: function(evt) {
+    rerender(evt) {
       if (!evt || evt.hasProperty('recipientStatus')) {
-        var message = this.message,
-          text = '';
+        const message = this.message;
         if (this.messageStatusRenderer) {
           this.innerHTML = this.messageStatusRenderer(message);
         } else {
+          let text = '';
           if (message.isSaving()) {
             text = 'pending';
-          } else if (message.deliveryStatus === layer.Constants.RECIPIENT_STATE.NONE) {
+          } else if (message.deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE) {
             text = 'sent';
-          } else if (message.readStatus === layer.Constants.RECIPIENT_STATE.NONE) {
+          } else if (message.readStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE) {
             text = 'delivered';
-          } else if (message.readStatus === layer.Constants.RECIPIENT_STATE.ALL) {
+          } else if (message.readStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL) {
             text = 'read';
           } else {
-            var sessionOwnerId = message.getClient().user.id;
-            var status = message.recipientStatus;
-            var count = Object.keys(status).filter(function(identityId) {
-              return identityId !== sessionOwnerId && status[identityId] === layer.Constants.RECEIPT_STATE.READ;
-            }).length;
-            text = 'read by ' + count + ' participants';
+            const sessionOwnerId = message.getClient().user.id;
+            const status = message.recipientStatus;
+            const count = Object.keys(status).filter(identityId =>
+              identityId !== sessionOwnerId && status[identityId] === LayerAPI.Constants.RECEIPT_STATE.READ).length;
+            text = `read by ${count} participants`;
           }
           this.innerHTML = text;
         }
       }
-    }
-  }
+    },
+  },
 });
 

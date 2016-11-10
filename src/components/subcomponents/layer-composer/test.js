@@ -55,14 +55,14 @@ describe('layer-composer', function() {
       spyOn(client, "createTypingListener").and.callThrough();
       el.client = client;
       expect(client.createTypingListener).toHaveBeenCalledWith(el.nodes.input);
-      expect(el.props.typingListener.conversation).toBe(null);
+      expect(el.properties.typingListener.conversation).toBe(null);
     });
 
     it("Should setup a typingListener and the Conversation", function() {
       spyOn(client, "createTypingListener").and.callThrough();
       el.conversation = conversation;
       expect(client.createTypingListener).toHaveBeenCalledWith(el.nodes.input);
-      expect(el.props.typingListener.conversation).toBe(conversation);
+      expect(el.properties.typingListener.conversation).toBe(conversation);
     });
   });
 
@@ -113,7 +113,7 @@ describe('layer-composer', function() {
     });
 
     it("Should wire up layer-file-selected to handleAttachments", function() {
-      el.props.conversation = conversation;
+      el.properties.conversation = conversation;
       var parts = [new layer.MessagePart({body: "After death he became Lord Dork Laugh", mimeType: "text/plain"})];
       var evt = new CustomEvent('layer-file-selected', {
         detail: {parts: parts},
@@ -141,10 +141,10 @@ describe('layer-composer', function() {
   describe("The updateTypingIndicator() method", function() {
     it("Should update the conversation being reported upon", function() {
       el.client = client;
-      el.props.conversation = conversation;
-      expect(el.props.typingListener.conversation).toBe(null);
+      el.properties.conversation = conversation;
+      expect(el.properties.typingListener.conversation).toBe(null);
       el.updateTypingIndicator();
-      expect(el.props.typingListener.conversation).toBe(conversation);
+      expect(el.properties.typingListener.conversation).toBe(conversation);
     });
   });
 

@@ -7,8 +7,9 @@
  * @class layerUI.components.subcomponents.Delete
  * @extends layerUI.components.Component
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-delete', {
   properties: {
 
@@ -26,10 +27,10 @@ LUIComponent('layer-delete', {
      */
     enabled: {
       type: Boolean,
-      set: function(value) {
+      set(value) {
         this.classList[value ? 'add' : 'remove']('layer-delete-enabled');
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -39,7 +40,7 @@ LUIComponent('layer-delete', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
       this.addEventListener('click', this.onDeleteClick, this);
     },
 
@@ -52,11 +53,11 @@ LUIComponent('layer-delete', {
      * @private
      * @param {Event} evt
      */
-    onDeleteClick: function(evt) {
+    onDeleteClick(evt) {
       evt.preventDefault();
       evt.stopPropagation();
       if (this.enabled) {
-        if (this.item instanceof layer.Message) {
+        if (this.item instanceof LayerAPI.Message) {
           /**
            * A request has been made through the UI to delete a Message.
            *
@@ -73,34 +74,33 @@ LUIComponent('layer-delete', {
            * @event layer-message-deleted
            */
           if (this.trigger('layer-message-deleted', { message: this.item })) {
-            if (window.confirm("Are you sure you want to delete this message?")) {
-              this.item.delete(layer.Constants.DELETION_MODE.ALL);
+            if (window.confirm('Are you sure you want to delete this message?')) {
+              this.item.delete(LayerAPI.Constants.DELETION_MODE.ALL);
             }
           }
-        } else {
-          /**
-           * A request has been made through the UI to delete a Conversation.
-           *
-           * This event can be canceled to prevent the default deletion behavior:
-           *
-           * ```javascript
-           * document.body.addEventListener('layer-conversation-deleted', function(evt) {
-           *    evt.preventDefault();
-           *    var conversation = evt.conversation;
-           *    conversation.delete(layer.Constants.DELETION_MODE.MY_DEVICES);
-           * });
-           * ```
-           *
-           * @event layer-conversation-deleted
-           */
-          if (this.trigger('layer-conversation-deleted', { conversation: this.item })) {
-            if (window.confirm("Are you sure you want to delete this conversation?")) {
-              this.item.delete(layer.Constants.DELETION_MODE.ALL);
-            }
+        }
+
+        /**
+         * A request has been made through the UI to delete a Conversation.
+         *
+         * This event can be canceled to prevent the default deletion behavior:
+         *
+         * ```javascript
+         * document.body.addEventListener('layer-conversation-deleted', function(evt) {
+         *    evt.preventDefault();
+         *    var conversation = evt.conversation;
+         *    conversation.delete(layer.Constants.DELETION_MODE.MY_DEVICES);
+         * });
+         * ```
+         *
+         * @event layer-conversation-deleted
+         */
+        else if (this.trigger('layer-conversation-deleted', { conversation: this.item })) {
+          if (window.confirm('Are you sure you want to delete this conversation?')) {
+            this.item.delete(LayerAPI.Constants.DELETION_MODE.ALL);
           }
         }
       }
     },
-  }
+  },
 });
-

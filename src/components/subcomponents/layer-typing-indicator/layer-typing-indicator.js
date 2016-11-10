@@ -36,53 +36,55 @@
  * @param {layer.Identity[]] evt.detail.typing
  * @param {layer.Identity[]] evt.detail.paused
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-typing-indicator', {
   properties: {
     /**
      * The Conversation whose typing indicator activity we are reporting on.
      *
-     * @property {layer.Conversation}
+     * @property {layer.Conversation} [conversation=null]
      */
     conversation: {
-      set: function(value){
+      set(value) {
         this.client = value.getClient();
         if (value) {
-          var state = this.client.getTypingState(value);
+          const state = this.client.getTypingState(value);
           this.rerender({
             conversationId: value.id,
             typing: state.typing,
-            paused: state.paused
+            paused: state.paused,
           });
         } else {
           this.value = '';
         }
-      }
+      },
     },
 
     /**
      * The Client we are connected with; we need it to receive typing indicator events from the WebSDK.
      *
      * This property is typically set indirectly by setting the layerUI.TypingIndicator.conversation.
-     * @property {layer.Client}
+     *
+     * @property {layer.Client} [client=null]
      */
     client: {
-      set: function(client) {
+      set(client) {
         client.on('typing-indicator-change', this.rerender.bind(this));
-      }
+      },
     },
 
     /**
      * The value property is the text/html being rendered.
      *
-     * @property {String}
+     * @property {String} [value=""]
      */
     value: {
-      set: function(text) {
+      set(text) {
         this.nodes.panel.innerHTML = text || '';
         this.classList[text ? 'add' : 'remove']('layer-typing-occuring');
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -92,32 +94,31 @@ LUIComponent('layer-typing-indicator', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
 
     },
 
     /**
      * Whenever there is a typing indicator event, rerender our UI
      *
-     * @method
+     * @method rerender
      * @param {layer.LayerEvent} evt
      */
-    rerender: function(evt) {
-
+    rerender(evt) {
       // We receive typing indicator events for ALL Conversations; ignore them if they don't apply to the current Conversation
       if (evt.conversationId === this.conversation.id) {
 
         // Trigger an event so that the application can decide if it wants to handle the event itself.
-        var customEvtResult = this.trigger('layer-typing-indicator-change', {
+        const customEvtResult = this.trigger('layer-typing-indicator-change', {
           typing: evt.typing,
           paused: evt.paused,
-          widget: this
+          widget: this,
         });
 
         // If the app lets us handle the event, set the value of this widget to something appropriate
         if (customEvtResult) {
-          var names = evt.typing.map(function(user) {return user.displayName});
-          switch(names.length) {
+          const names = evt.typing.map(user => user.displayName);
+          switch (names.length) {
             case 0:
               this.value = '';
               break;
@@ -125,11 +126,11 @@ LUIComponent('layer-typing-indicator', {
               this.value = names.join(', ') + ' is typing';
               break;
             default:
-              this.value = names.join(', ').replace(/, ([^,]*)$/, " and $1") + ' are typing';
+              this.value = names.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' are typing';
           }
         }
       }
-    }
-  }
+    },
+  },
 });
 

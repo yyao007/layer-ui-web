@@ -3,8 +3,8 @@
  *
  * @class layerUI.mixins.MainComponent
  */
-var layerUI = require('../base');
-var layer = layerUI.layer;
+import { layer as LayerAPI, settings } from '../base';
+
 module.exports = {
   properties: {
     /**
@@ -12,23 +12,24 @@ module.exports = {
      *
      * Used by adapters to find components to adapte.
      * @private
-     * @property {Boolean}
+     * @readonly
+     * @property {Boolean} [isMainComponent=true]
      */
     isMainComponent: {
       value: true,
-      order: 1
+      order: 1,
     },
 
     // TODO: Some MainComponents don't have Queries; this should be moved into a has-query mixin
     /**
      * The Query was generated internally, not passed in as an attribute or property.
      *
-     * @property {Boolean}
+     * @property {Boolean} [hasGeneratedQuery=false]
      * @readonly
      */
     hasGeneratedQuery: {
       value: false,
-      type: Boolean
+      type: Boolean,
     },
 
     /**
@@ -43,15 +44,17 @@ module.exports = {
      * The only time one would use this property
      * is if building an app that used multiple App IDs.
      *
-     * @property {String}
+     * @property {String} [appId=""]
      */
     appId: {
       order: 2,
-      set: function(value) {
+      set(value) {
         if (value && value.indexOf('layer:///') === 0) {
-          this.client = layer.Client.getClient(value);
+          const client = LayerAPI.Client.getClient(value);
+          if (!client) throw new Error('You must create a layer.Client with your appId before creating this component');
+          this.client = client;
         }
-      }
+      },
     },
 
     /**
@@ -66,29 +69,29 @@ module.exports = {
      * The only time one would use this property
      * is if building an app that used multiple Clients.
      *
-     * @property {layer.Client}
+     * @property {layer.Client} [client=null]
      */
-    client: {}
+    client: {},
   },
   methods: {
-    created: function() {
-      if (layerUI.appId) this.appId = layerUI.appId;
+    created() {
+      if (settings.appId) this.appId = settings.appId;
     },
 
     // Wait to give the app a chance to setup a query before we generate and fire one
-    scheduleGeneratedQuery: function() {
+    scheduleGeneratedQuery() {
       setTimeout(this.setupGeneratedQuery.bind(this), 50);
     },
 
-    setupGeneratedQuery: function() {
+    setupGeneratedQuery() {
       if (this.queryModel && !this.query && this.client && !this.client.isDestroyed) {
         this.query = this.client.createQuery({
           model: this.queryModel,
-          dataType: layer.Query.InstanceDataType,
-          paginationWindow: this.pageSize || 50
+          dataType: LayerAPI.Query.InstanceDataType,
+          paginationWindow: this.pageSize || 50,
         });
         this.hasGeneratedQuery = true;
       }
-    }
-  }
+    },
+  },
 };

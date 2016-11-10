@@ -107,13 +107,15 @@ describe('layer-conversation-item', function() {
 
     it("Should update layer-conversation-unread-messages class", function() {
       el.item = conversation;
-      conversation.unreadCount = 0;
-      el.rerender();
-      expect(el.classList.contains('layer-conversation-unread-messages')).toBe(false);
-
-      conversation.unreadCount = 1;
+      var message = new layer.Message({client: client});
+      message.isRead = false;
+      conversation.lastMessage = message;
       el.rerender();
       expect(el.classList.contains('layer-conversation-unread-messages')).toBe(true);
+
+      conversation.lastMessage.isRead = true;
+      el.rerender();
+      expect(el.classList.contains('layer-conversation-unread-messages')).toBe(false);
     });
   });
 

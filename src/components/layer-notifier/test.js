@@ -61,7 +61,7 @@ if (window.Notification) {
 
       it("Should wire up the click handler to clickToast", function() {
         spyOn(el, 'onNotificationClick');
-        el.props.toastMessage = message;
+        el.properties.toastMessage = message;
         el.click();
         expect(el.onNotificationClick).toHaveBeenCalled();
       });
@@ -69,15 +69,15 @@ if (window.Notification) {
 
     describe("The onPermissionGranted() method", function() {
       it("Should flag desktop notifications are enabled", function() {
-        expect(el.props.userEnabledDesktopNotifications).toBe(false);
+        expect(el.properties.userEnabledDesktopNotifications).toBe(false);
         el.onPermissionGranted();
-        expect(el.props.userEnabledDesktopNotifications).toBe(true);
+        expect(el.properties.userEnabledDesktopNotifications).toBe(true);
       });
     });
 
     describe("Run with permissions granted", function() {
       beforeEach(function() {
-        el.props.userEnabledDesktopNotifications = true;
+        el.properties.userEnabledDesktopNotifications = true;
       });
       describe("The notify() method", function() {
         it("Should use background notification setting if isInBackground returns true", function() {
@@ -184,7 +184,7 @@ if (window.Notification) {
           spyOn(window.layerUI, 'isInBackground').and.returnValue(true);
           el.notifyInBackground = 'desktop';
           el.notifyInForeground = 'desktop';
-          el.props.userEnabledDesktopNotifications = false;
+          el.properties.userEnabledDesktopNotifications = false;
 
           // Run
           el.notify({message: message});
@@ -201,12 +201,12 @@ if (window.Notification) {
       describe("The desktopNotify() method", function() {
         it("Should calls closeDesktopNotify if needed", function() {
           spyOn(el, "closeDesktopNotify");
-          expect(Boolean(el.props.desktopNotify)).toBe(false);
+          expect(Boolean(el.properties.desktopNotify)).toBe(false);
 
           // Run 1
           el.desktopNotify(message);
           expect(el.closeDesktopNotify).not.toHaveBeenCalled();
-          expect(Boolean(el.props.desktopNotify)).toBe(true);
+          expect(Boolean(el.properties.desktopNotify)).toBe(true);
 
           // Run 2
           el.desktopNotify(message);
@@ -214,15 +214,15 @@ if (window.Notification) {
         });
 
         it("Should set desktopMessage and desktopNotify", function() {
-          expect(Boolean(el.props.desktopNotify)).toBe(false);
-          expect(Boolean(el.props.desktopMessage)).toBe(false);
+          expect(Boolean(el.properties.desktopNotify)).toBe(false);
+          expect(Boolean(el.properties.desktopMessage)).toBe(false);
 
           // Run
           el.desktopNotify(message);
 
           // Posttest
-          expect(Boolean(el.props.desktopNotify)).toBe(true);
-          expect(el.props.desktopMessage).toBe(message);
+          expect(Boolean(el.properties.desktopNotify)).toBe(true);
+          expect(el.properties.desktopMessage).toBe(message);
         });
 
         it("Should listen for the message to be read and call closeDesktopNotify", function() {
@@ -242,9 +242,9 @@ if (window.Notification) {
 
       describe("The closeDesktopNotify() method", function() {
         it("Should set desktopMessage and desktopNotify to null", function() {
-          el.props.desktopMessage = message;
+          el.properties.desktopMessage = message;
           var spy = jasmine.createSpy('close');
-          el.props.desktopNotify = {
+          el.properties.desktopNotify = {
             close: spy
           };
 
@@ -252,8 +252,8 @@ if (window.Notification) {
           el.closeDesktopNotify();
 
           // Posttest
-          expect(el.props.desktopMessage).toBe(null);
-          expect(el.props.desktopNotify).toBe(null);
+          expect(el.properties.desktopMessage).toBe(null);
+          expect(el.properties.desktopNotify).toBe(null);
           expect(spy).toHaveBeenCalled();
         });
       });
@@ -287,18 +287,18 @@ if (window.Notification) {
 
         });
 
-        it("Should listen for the message to be read and call clearToast", function() {
-          spyOn(el, "clearToast");
+        it("Should listen for the message to be read and call closeToast", function() {
+          spyOn(el, "closeToast");
           message.isRead = false;
 
           // Run
           el.toastNotify(message);
-          expect(el.clearToast).not.toHaveBeenCalled();
+          expect(el.closeToast).not.toHaveBeenCalled();
           message.trigger('messages:change', {});
-          expect(el.clearToast).not.toHaveBeenCalled();
+          expect(el.closeToast).not.toHaveBeenCalled();
           message.isRead = true;
           message.trigger('messages:change', {});
-          expect(el.clearToast).toHaveBeenCalled();
+          expect(el.closeToast).toHaveBeenCalled();
         });
 
         it("Should add the layer-notifier-toast css class", function() {
@@ -308,40 +308,40 @@ if (window.Notification) {
         });
       });
 
-      describe("The clearToast() method", function() {
+      describe("The closeToast() method", function() {
         it("Should clear the layer-notifier-toast css class", function() {
           el.classList.add('layer-notifier-toast');
-          el.clearToast();
+          el.closeToast();
           expect(el.classList.contains('layer-notifier-toast')).toBe(false);
         });
 
-        it("Should no longer listen for the message to be read and call clearToast", function() {
+        it("Should no longer listen for the message to be read and call closeToast", function() {
           message.isRead = false;
 
           // Run
-          el.clearToast();
+          el.closeToast();
 
           // Posttest
-          spyOn(el, "clearToast");
+          spyOn(el, "closeToast");
           el.toastNotify(message);
-          expect(el.clearToast).not.toHaveBeenCalled();
+          expect(el.closeToast).not.toHaveBeenCalled();
           message.trigger('messages:change', {});
-          expect(el.clearToast).not.toHaveBeenCalled();
+          expect(el.closeToast).not.toHaveBeenCalled();
           message.isRead = true;
           message.trigger('messages:change', {});
-          expect(el.clearToast).toHaveBeenCalled();
+          expect(el.closeToast).toHaveBeenCalled();
         });
 
         it("Should clear timeouts", function() {
-          el.props.toastTimeout = 5;
-          el.clearToast();
-          expect(el.props.toastTimeout).toEqual(0);
+          el.properties.toastTimeout = 5;
+          el.closeToast();
+          expect(el.properties.toastTimeout).toEqual(0);
         });
       });
 
       describe("The clickToast() method", function() {
         beforeEach(function() {
-          el.props.toastMessage = message;
+          el.properties.toastMessage = message;
         });
         it("Should prevent bubbling", function() {
           var preventDefaultSpy = jasmine.createSpy('preventDefault');

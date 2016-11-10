@@ -21,7 +21,8 @@
  * @class layerUI.components.subcomponents.ConversationTitle
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-conversation-title', {
   properties: {
 
@@ -31,20 +32,20 @@ LUIComponent('layer-conversation-title', {
      * @property {layer.Conversation}
      */
     item: {
-      set: function(value){
+      set(value) {
         // This component is not currently being used in a way where items change, so this block isn't
         // currently used, but is here as "best practice"
-        if (this.props.oldConversation) {
-          this.props.oldConversation.off(null, null, this);
-          this.props.oldConversation = null;
+        if (this.properties.oldConversation) {
+          this.properties.oldConversation.off(null, null, this);
+          this.properties.oldConversation = null;
         }
         if (value) {
-          this.props.oldConversation = value;
+          this.properties.oldConversation = value;
           value.on('conversations:change', this.rerender, this);
         }
         this.rerender();
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -54,29 +55,25 @@ LUIComponent('layer-conversation-title', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
     },
 
-    rerender: function(evt) {
+    rerender(evt) {
       if (!evt || evt.hasProperty('metadata') || evt.hasProperty('participants')) {
-        var conversation = this.item;
+        const conversation = this.item;
         if (!conversation) {
           this.innerHTML = '';
         } else {
-          var title =  conversation.metadata.conversationName ||
+          let title = conversation.metadata.conversationName ||
             conversation.metadata.title;
           if (!title) {
-            var userNames = conversation.participants
-              .filter(function(user) {
-                return !user.sessionOwner;
-              })
-              .filter(function(user) {
-                return user.displayName;
-              }).map(function(user) {
-                return user.displayName
-              });
+            const userNames = conversation.participants
+              .filter(user => !user.sessionOwner) // don't show the user their own name
+              .filter(user => user.displayName)   // don't show users who lack a name
+              .map(user => user.displayName);     // replace identity object with the name
+
             if (userNames.length) {
-              title = userNames.join(', ').replace(/, ([^,]*)$/, " and $1")
+              title = userNames.join(', ').replace(/, ([^,]*)$/, ' and $1');
             } else {
               title = 'No Title';
             }
@@ -84,6 +81,6 @@ LUIComponent('layer-conversation-title', {
           if (title !== this.innerHTML) this.innerHTML = title;
         }
       }
-    }
-  }
+    },
+  },
 });

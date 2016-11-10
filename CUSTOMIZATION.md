@@ -263,7 +263,7 @@ layerUI.registerComponent('layer-avatar', {
 
     // Called any time the `users` is set (should only happen once in a Message Item, but many times for a Conversation Item
     renderUsers: function() {
-      var user = this.props.users[0];
+      var user = this.properties.users[0];
       if (user) {
         this.nodes.myname.innerHTML = user.firstName || user.displayName.replace(/\S.*$/, '');
       }
@@ -311,7 +311,7 @@ layerUI.registerComponent('text-mountain-part', {
   properties: {
     message: {
       set: function(value){
-        this.props.mountain = value.parts[0].body;
+        this.properties.mountain = value.parts[0].body;
         this.render();
       }
     }
@@ -320,7 +320,7 @@ layerUI.registerComponent('text-mountain-part', {
     created: function() {
     },
     render: function() {
-      this.innerHTML = 'Mountains ' + this.props.mountain + ' are taller than Plains';
+      this.innerHTML = 'Mountains ' + this.properties.mountain + ' are taller than Plains';
     }
   }
 });

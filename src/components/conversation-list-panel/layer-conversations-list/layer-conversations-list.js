@@ -46,11 +46,13 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-var layer = require('../../../base').layer;
-var LUIComponent = require('../../../components/component');
-LUIComponent('layer-conversations-list', {
-  mixins: [require('../../../mixins/list'), require('../../../mixins/main-component')],
+import { layer as LayerAPI } from '../../../base';
+import LUIComponent from '../../../components/component';
+import List from '../../../mixins/list';
+import MainComponent from '../../../mixins/main-component';
 
+LUIComponent('layer-conversations-list', {
+  mixins: [List, MainComponent],
 
   /**
    * Configure a custom action when a Conversation is selected;
@@ -154,12 +156,12 @@ LUIComponent('layer-conversations-list', {
      *
      * The above code will set the selected Conversation and render the conversation as selected.
      *
-     * @property {String}
+     * @property {String} [selectedConversationId='']
      */
     selectedConversationId: {
-      set: function(value) {
+      set(value) {
         this.renderSelection();
-      }
+      },
     },
 
     /**
@@ -176,12 +178,12 @@ LUIComponent('layer-conversations-list', {
      * If delete is enabled, the layerUI.components.misc.Delete.enabled property is changed, causing
      * the `layer-delete-enabled` css class to be added/removed on that widget.
      *
-     * @property {Function} deleteConversationEnabled
+     * @property {Function} [deleteConversationEnabled=null]
      * @property {layer.Conversation} deleteConversationEnabled.conversation
      * @property {Boolean} deleteConversationEnabled.return
      */
     deleteConversationEnabled: {
-      type: Function
+      type: Function,
     },
 
     /**
@@ -199,12 +201,12 @@ LUIComponent('layer-conversations-list', {
      * `displayName`, `firstName`, `lastName` and `emailAddress` properties.
      * * A string to compare against the same list of properties as the RegEx.
      *
-     * @property {String|RegEx|Function}
+     * @property {String|RegEx|Function} [filter='']
      */
     filter: {
-      set: function(value) {
+      set(value) {
         this.runFilter();
-      }
+      },
     },
 
     /**
@@ -212,10 +214,10 @@ LUIComponent('layer-conversations-list', {
      *
      * @readonly
      * @private
-     * @property {String}
+     * @property {String} [queryModel=layer.Query.Conversation]
      */
     queryModel: {
-      value: layer.Query.Conversation
+      value: LayerAPI.Query.Conversation,
     },
 
     /**
@@ -236,24 +238,26 @@ LUIComponent('layer-conversations-list', {
      * If you prevent rendering of a Message, it will instead render the `label` attribute for that message handler;
      * see layerUI.registerMessageHandler for more info on the `label`.
      *
-     * @property {Function}
+     * @property {Function} canRenderLastMessage
      */
     canRenderLastMessage: {
       type: Function,
-      value: function(message) {
+      value(message) {
         return (message.parts.length === 1 && message.parts[0].mimeType === 'text/plain');
-      }
-    }
+      },
+    },
   },
   methods: {
     /**
      * Generate a unique but consistent DOM ID for each layerUI.ConversationItem.
      *
-     * @method
+     * @method getItemId
+     * @param {layer.Conversation} conversation
      * @private
      */
-    getItemId: function(conversation) {
-      return 'conversation-list-item-' + this.id + '-' + conversation.id.replace(/layer:\/\/\/conversations\//, '');
+    getItemId(conversation) {
+      const uuid = conversation.id.replace(/layer:\/\/\/conversations\//, '');
+      return `conversation-list-item-${this.id}-${uuid}`;
     },
 
     /**
@@ -262,8 +266,8 @@ LUIComponent('layer-conversations-list', {
      * @method created
      * @private
      */
-    created: function() {
-      if (!this.id) this.id = layer.Util.generateUUID();
+    created() {
+      if (!this.id) this.id = LayerAPI.Util.generateUUID();
       this.render();
       this.addEventListener('click', this.onClick.bind(this));
     },
@@ -284,16 +288,16 @@ LUIComponent('layer-conversations-list', {
      * @private
      * @param {Event} evt
      */
-    onClick: function(evt) {
-      var target = evt.target;
-      while(target && target !== this && !target.item) {
+    onClick(evt) {
+      let target = evt.target;
+      while (target && target !== this && !target.item) {
         target = target.parentNode;
       }
 
       if (target.item) {
         evt.preventDefault();
         evt.stopPropagation();
-        if (this.trigger('layer-conversation-selected', {conversation: target.item, originalEvent: evt} )) {
+        if (this.trigger('layer-conversation-selected', { conversation: target.item, originalEvent: evt })) {
           this.selectedConversationId = target.item.id;
         }
       }
@@ -302,12 +306,12 @@ LUIComponent('layer-conversations-list', {
     /**
      * Generate a `layer-conversation-item` widget.
      *
-     * @method
+     * @method generateItem
      * @private
      * @param {layer.Conversation} conversation
      */
-    generateItem: function(conversation) {
-      var conversationWidget = document.createElement('layer-conversation-item');
+    generateItem(conversation) {
+      const conversationWidget = document.createElement('layer-conversation-item');
       conversationWidget.id = this.getItemId(conversation);
       conversationWidget.deleteConversationEnabled = typeof this.deleteConversationEnabled === 'function' ?
         this.deleteConversationEnabled(conversation) : true;
@@ -322,10 +326,10 @@ LUIComponent('layer-conversations-list', {
      *
      * Updates rendering of the list, and then updates rendering of the list selection.
      *
-     * @method
+     * @method rerender
      * @private
      */
-    rerender: function(evt) {
+    rerender(evt) {
       this._rerender(evt);
       this.renderSelection();
     },
@@ -333,19 +337,20 @@ LUIComponent('layer-conversations-list', {
     /**
      * Render the currently selected Conversation; remove any selection rendering from formerly selected Conversations.
      *
-     * @method
+     * @method renderSelection
      * @private
      */
-    renderSelection: function() {
-      var selectedNodes = this.querySelectorAllArray('.layer-conversation-item-selected');
-      var nodeToSelect = this.selectedConversationId ? this.querySelector('#' + this.getItemId({id: this.selectedConversationId})) : null;
+    renderSelection() {
+      const selectedNodes = this.querySelectorAllArray('.layer-conversation-item-selected');
+      const itemId = this.selectedConversationId ? this.getItemId({ id: this.selectedConversationId }) : null;
+      const nodeToSelect = this.selectedConversationId ? this.querySelector('#' + itemId) : null;
 
       // Deselect everything if the selected nodes are not the node to select...
       // assumes only one item would ever be selected at a time.
       if (selectedNodes.length !== 1 || selectedNodes[0] !== nodeToSelect) {
-        if (selectedNodes) selectedNodes.forEach(function(node) {
-          node.removeClass('layer-conversation-item-selected');
-        });
+        if (selectedNodes) {
+          selectedNodes.forEach(node => node.removeClass('layer-conversation-item-selected'));
+        }
 
         // Select the new item
         if (nodeToSelect) nodeToSelect.addClass('layer-conversation-item-selected');
@@ -355,26 +360,24 @@ LUIComponent('layer-conversations-list', {
     /**
      * Run the filter on all Conversation Items.
      *
-     * @method
+     * @method runFilter
      * @private
      */
-    runFilter: function() {
+    runFilter() {
       // If the filter has been reset, remove all filtering
       if (!this.filter) {
-        this.querySelectorAllArray('.layer-item-filtered').forEach(function(item) {
-          item.removeClass('layer-item-filtered');
-        }, this);
+        this.querySelectorAllArray('.layer-item-filtered').forEach(item => item.removeClass('layer-item-filtered'));
       }
 
       // Run all filtering
       else {
-        for (var i = 0; i < this.childNodes.length; i++) {
-          var listItem = this.childNodes[i];
-          if (listItem.item instanceof layer.Root) {
+        for (let i = 0; i < this.childNodes.length; i++) {
+          const listItem = this.childNodes[i];
+          if (listItem.item instanceof LayerAPI.Root) {
             listItem.runFilter(this.filter);
           }
         }
       }
-    }
-  }
+    },
+  },
 });

@@ -50,9 +50,9 @@ describe('layer-identity-item', function() {
 
     it("Should get the selected state if no checkbox", function() {
       el.nodes.checkbox = null;
-      el.props.selected = false;
+      el.properties.selected = false;
       expect(el.selected).toBe(false);
-      el.props.selected = true;
+      el.properties.selected = true;
       expect(el.selected).toBe(true);
     });
   });

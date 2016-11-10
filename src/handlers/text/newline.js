@@ -7,16 +7,17 @@
  *
  * @class layerUI.handlers.text.NewLine
  */
-var layerUI = require('../../base');
+import layerUI from '../../base';
+
 layerUI.registerTextHandler({
   name: 'newline',
   order: 600,
   requiresEnable: true,
-  handler: function(textData) {
-    var body = textData.text;
-    var codeBlockIndices = [];
-    var codeBlocks = [];
-    var lastIndex = 0;
+  handler(textData) {
+    let body = textData.text;
+    const codeBlockIndices = [];
+    const codeBlocks = [];
+    let lastIndex = 0;
     while (lastIndex !== -1) {
       lastIndex = body.indexOf('```', lastIndex);
       if (lastIndex !== -1) {
@@ -25,15 +26,15 @@ layerUI.registerTextHandler({
       }
     }
 
-    for (var i = 1; i < codeBlockIndices.length; i++) {
+    for (let i = 1; i < codeBlockIndices.length; i++) {
       codeBlocks.push([codeBlockIndices[i - 1], codeBlockIndices[i]]);
     }
 
     function isInCodeBlock(index) {
-      return Boolean(codeBlocks.filter(function(block) {return index > block[0] && index < block[1]}).length);
+      return Boolean(codeBlocks.filter(block => index > block[0] && index < block[1]).length);
     }
 
-    body = body.replace(/\n/g, function(text, index) {
+    body = body.replace(/\n/g, (text, index) => {
       if (isInCodeBlock(index)) {
         return text;
       } else {
@@ -41,5 +42,5 @@ layerUI.registerTextHandler({
       }
     });
     textData.text = body;
-  }
+  },
 });

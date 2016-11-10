@@ -50,11 +50,12 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
  */
-var layer = require('../../base').layer;
-var LUIComponent = require('../../components/component');
+import { layer as LayerAPI } from '../../base';
+import LUIComponent from '../../components/component';
+import MainComponent from '../../mixins/main-component';
 
 LUIComponent('layer-conversation-panel', {
-  mixins: [require('../../mixins/main-component')],
+  mixins: [MainComponent],
 
   /**
    * This event is triggered before any Message is sent.
@@ -216,30 +217,40 @@ LUIComponent('layer-conversation-panel', {
      *
      * Leaving this and the query properties empty will cause a Query to be generated for you.
      *
-     * @property {String}
+     * @property {String} [queryId='']
      */
     queryId: {
-      set: function(value) {
-        if (value && value.indexOf('layer:///queries') !== 0) this.props.queryId = '';
-        if (this.props.client && this.queryId) {
-          this.query = this.props.client.getQuery(this.queryId);
+      set(value) {
+        if (value && value.indexOf('layer:///queries') !== 0) this.properties.queryId = '';
+        if (this.properties.client && this.queryId) {
+          this.query = this.properties.client.getQuery(this.queryId);
         }
-      }
+      },
     },
 
-
+    /**
+     * A Query identifies the layer.Query that provides the Messages we are to render and page through.
+     *
+     * You may use the layerUI.components.ConversationPanel.queryId property instead of layerUI.components.ConversationPanel.query,
+     * however, if putting the value within an HTML attribute
+     * rather than doing DOM manipulation, only string values work.
+     *
+     * Leaving this and the queryId properties empty will cause a Query to be generated for you.
+     *
+     * @property {layer.Query} [query=null]
+     */
     query: {
-      set: function(value, oldValue) {
-        if (value instanceof layer.Query) {
+      set(value, oldValue) {
+        if (value instanceof LayerAPI.Query) {
           if (this.hasGeneratedQuery) {
             this.hasGeneratedQuery = false;
             oldValue.destroy();
           }
           this.nodes.list.query = value;
-        }  else {
-          this.props.query = null;
+        } else {
+          this.properties.query = null;
         }
-      }
+      },
     },
 
     /**
@@ -259,13 +270,13 @@ LUIComponent('layer-conversation-panel', {
      * }
      * ```
      *
-     * @property {String}
+     * @property {String} [conversationId='']
      */
     conversationId: {
-      set: function(value) {
-        if (value && value.indexOf('layer:///conversations') !== 0) this.props.conversationId = '';
+      set(value) {
+        if (value && value.indexOf('layer:///conversations') !== 0) this.properties.conversationId = '';
         if (this.client && this.conversationId) this.conversation = this.client.getConversation(this.conversationId, true);
-      }
+      },
     },
 
     /**
@@ -288,18 +299,18 @@ LUIComponent('layer-conversation-panel', {
      * @property {String}
      */
     conversation: {
-      set: function(value) {
-        if (value && !(value instanceof layer.Conversation)) this.props.conversation = '';
+      set(value) {
+        if (value && !(value instanceof LayerAPI.Conversation)) this.properties.conversation = '';
         if (this.client && this.conversation) this.setupConversation();
-      }
+      },
     },
 
     // Docs in mixins/main-component
     hasGeneratedQuery: {
-      set: function(value) {
+      set(value) {
         if (value && this.conversationId && this.client) this.setupConversation();
       },
-      type: Boolean
+      type: Boolean,
     },
 
     /**
@@ -308,18 +319,16 @@ LUIComponent('layer-conversation-panel', {
      * So, the user clicked on a Conversation in a Conversation List, and focus is no longer on this widget?
      * Automatically refocus on it.
      *
-     * Default: `true`
-     *
-     * @property {Boolean}
+     * @property {Boolean} [autoFocusConversation=true]
      */
     autoFocusConversation: {
       value: true,
-      type: Boolean
+      type: Boolean,
     },
 
     // Docs in mixins/main-component
     client: {
-      set: function(value) {
+      set(value) {
         if (value) {
           if (!this.conversation && this.conversationId) this.conversation = value.getConversation(this.conversationId, true);
           if (this.conversation) this.setupConversation();
@@ -329,7 +338,7 @@ LUIComponent('layer-conversation-panel', {
             this.scheduleGeneratedQuery();
           }
         }
-      }
+      },
     },
 
     /**
@@ -358,12 +367,12 @@ LUIComponent('layer-conversation-panel', {
      */
     onRenderListItem: {
       type: Function,
-      set: function(value) {
+      set(value) {
         this.nodes.list.onRenderListItem = value;
       },
-      get: function() {
+      get() {
         return this.nodes.list.onRenderListItem;
-      }
+      },
     },
 
     /**
@@ -377,13 +386,13 @@ LUIComponent('layer-conversation-panel', {
      * };
      * ```
      *
-     * @property {Function}
+     * @property {Function} [dateRenderer=null]
      */
     dateRenderer: {
       type: Function,
-      set: function(value) {
+      set(value) {
         this.nodes.list.dateRenderer = value;
-      }
+      },
     },
 
     /**
@@ -399,13 +408,13 @@ LUIComponent('layer-conversation-panel', {
      *
      * See layer.Message for more information on the properties available to determine a message's status.
      *
-     * @property {Function}
+     * @property {Function} [messageStatusRenderer=null]
      */
     messageStatusRenderer: {
       type: Function,
-      set: function(value) {
+      set(value) {
         this.nodes.list.messageStatusRenderer = value;
-      }
+      },
     },
 
     /**
@@ -418,12 +427,12 @@ LUIComponent('layer-conversation-panel', {
      * ];
      * ```
      *
-     * @property {HTMLElement[]}
+     * @property {HTMLElement[]} [composeButtons=[]]
      */
     composeButtons: {
-      set: function(value) {
+      set(value) {
         this.nodes.composer.buttons = value;
-      }
+      },
     },
 
     /**
@@ -434,15 +443,15 @@ LUIComponent('layer-conversation-panel', {
      * var message = conversation.createMessage(widget.composeText);
      * ```
      *
-     * @property {String}
+     * @property {String} [composeText='']
      */
     composeText: {
-      get: function() {
+      get() {
         return this.nodes.composer.value;
       },
-      set: function(value) {
+      set(value) {
         this.nodes.composer.value = value;
-      }
+      },
     },
 
     /**
@@ -450,11 +459,11 @@ LUIComponent('layer-conversation-panel', {
      *
      * @readonly
      * @private
-     * @property {String}
+     * @property {String} [queryModel=layer.Query.Message]
      */
     queryModel: {
-      value: layer.Query.Message
-    }
+      value: LayerAPI.Query.Message,
+    },
   },
   methods: {
     /**
@@ -463,11 +472,11 @@ LUIComponent('layer-conversation-panel', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
       this.addEventListener('keydown', this.onKeyDown.bind(this));
 
       // Typically the defaultIndex is -1, but IE11 uses 0.
-      var defaultIndex = document.head ? document.head.tabIndex : null;
+      const defaultIndex = document.head ? document.head.tabIndex : null;
       if (this.tabIndex === '' || this.tabIndex === -1 || this.tabIndex === defaultIndex) this.tabIndex = -1;
     },
 
@@ -477,10 +486,13 @@ LUIComponent('layer-conversation-panel', {
      * Unless the focus is on an input or textarea, in which case, let the user type.
      *
      * @method onKeyDown
+     * @param {Event} evt
      * @private
      */
-    onKeyDown: function(evt) {
-      var keyCode = evt.keyCode, metaKey = evt.metaKey, ctrlKey = evt.ctrlKey;
+    onKeyDown(evt) {
+      const keyCode = evt.keyCode;
+      const metaKey = evt.metaKey;
+      const ctrlKey = evt.ctrlKey;
       if (metaKey || ctrlKey) return;
 
       if (keyCode >= 65 && keyCode <= 90 || // a-z
@@ -497,24 +509,29 @@ LUIComponent('layer-conversation-panel', {
     /**
      * Place focus on the text editor in the Compose bar.
      *
-     * @method
+     * @method focusText
      */
-    focusText: function() {
+    focusText() {
       this.nodes.composer.focus();
     },
 
     /**
      * Given a Conversation ID and a Client, setup the Composer and Typing Indicator
      *
-     * @method
+     * @method setupConversation
      * @private
      */
-    setupConversation: function() {
-      var conversation = this.props.conversation;
+    setupConversation() {
+      const conversation = this.properties.conversation;
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
-      if (this.hasGeneratedQuery) this.query.update({predicate: 'conversation.id = "' + conversation.id + '"'});
+      if (this.hasGeneratedQuery) {
+        this.query.update({
+          predicate: `conversation.id = "${conversation.id}"`,
+        });
+      }
       if (this.autoFocusConversation) this.focusText();
-    }
-  }
-})
+    },
+  },
+});
+

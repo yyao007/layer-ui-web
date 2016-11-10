@@ -21,7 +21,9 @@
  * @class layerUI.components.subcomponents.ConversationLastMessage
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import layerUI from '../../../base';
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-conversation-last-message', {
   properties: {
 
@@ -31,20 +33,21 @@ LUIComponent('layer-conversation-last-message', {
      * @property {layer.Message}
      */
     item: {
-      set: function(value){
+      set(value) {
         // This component is not currently being used in a way where items change, so this block isn't
         // currently used, but is here as "best practice"
-        if (this.props.oldConversation) {
-          this.props.oldConversation.off(null, null, this);
-          this.props.oldConversation = null;
+        if (this.properties.oldConversation) {
+          this.properties.oldConversation.off(null, null, this);
+          this.properties.oldConversation = null;
         }
         if (value) {
-          this.props.oldConversation = value;
+          this.properties.oldConversation = value;
           value.on('conversations:change', this.rerender, this);
         }
         this.rerender();
-      }
+      },
     },
+
     listHeight: {},
     listWidth: {},
 
@@ -61,7 +64,7 @@ LUIComponent('layer-conversation-last-message', {
      *
      * @property {Function}
      */
-    canRenderLastMessage: {}
+    canRenderLastMessage: {},
   },
   methods: {
 
@@ -71,19 +74,19 @@ LUIComponent('layer-conversation-last-message', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
     },
 
-    rerender: function(evt) {
+    rerender(evt) {
       if (!evt || evt.hasProperty('lastMessage')) {
-        var conversation = this.item;
-        var message = conversation ? conversation.lastMessage : null;
+        const conversation = this.item;
+        const message = conversation ? conversation.lastMessage : null;
         if (!message) {
           this.innerHTML = '';
         } else {
           if (this.firstChild) this.removeChild(this.firstChild);
 
-          var handler;
+          let handler;
           if (message) {
             handler = layerUI.getHandler(message, this);
           }
@@ -91,7 +94,7 @@ LUIComponent('layer-conversation-last-message', {
           if (handler) {
             this.classList.add(handler.tagName);
             if (!this.canRenderLastMessage || this.canRenderLastMessage(message)) {
-              var messageHandler = document.createElement(handler.tagName);
+              const messageHandler = document.createElement(handler.tagName);
 
               // TODO: Need better calculations for height to allocate for rendering images
               messageHandler.listHeight = this.listHeight;
@@ -100,11 +103,11 @@ LUIComponent('layer-conversation-last-message', {
               messageHandler.message = message;
               this.appendChild(messageHandler);
             } else if (handler.label) {
-              this.innerHTML = '<div class="layer-custom-mime-type">' + handler.label + '</div>';
+              this.innerHTML = `<div class="layer-custom-mime-type">${handler.label}</div>`;
             }
           }
         }
       }
-    }
-  }
+    },
+  },
 });

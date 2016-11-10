@@ -22,7 +22,8 @@
  * @class layerUI.components.subcomponents.ComposeButtonPanel
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../../components/component');
+import LUIComponent from '../../../components/component';
+
 LUIComponent('layer-compose-button-panel', {
   properties: {
     /**
@@ -31,9 +32,9 @@ LUIComponent('layer-compose-button-panel', {
      * @property {HTMLElement[]}
      */
     buttons: {
-      set: function(value) {
+      set(value) {
         this.rerender();
-      }
+      },
     },
   },
   methods: {
@@ -44,8 +45,8 @@ LUIComponent('layer-compose-button-panel', {
      * @method created
      * @private
      */
-    created: function() {
-      this.props.buttons = [];
+    created() {
+      this.properties.buttons = [];
     },
 
     /**
@@ -54,15 +55,12 @@ LUIComponent('layer-compose-button-panel', {
      * @method
      * @private
      */
-    rerender: function() {
+    rerender() {
       this.innerHTML = '';
-      var fragment = document.createDocumentFragment();
-      this.buttons.forEach(function(button) {
-        fragment.appendChild(button);
-      });
-
+      const fragment = document.createDocumentFragment();
+      this.buttons.forEach(button => fragment.appendChild(button));
       this.appendChild(fragment);
-    }
-  }
+    },
+  },
 });
 

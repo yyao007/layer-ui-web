@@ -1,5 +1,4 @@
-var layerUI = require('../base');
-var libraryResult;
+import layerUI from '../base';
 
 /**
  * Call this function to initialize all of the Backbone Views needed to handle the Layer UI for Web widgets.
@@ -37,49 +36,49 @@ var libraryResult;
  * @singleton
  * @param {Object} backbone     Pass in the backbone library
  */
+let libraryResult;
 function initBackbone(backbone) {
   if (libraryResult) return libraryResult;
   libraryResult = {};
 
   // Gather all UI Components flagged as Main Components; other components don't require special wrappers for direct use by Apps.
-  Object.keys(layerUI.components).filter(function(componentName) {
-    var component = layerUI.components[componentName];
-    return component.properties.filter(function(prop) {
-      return prop.propertyName === 'isMainComponent';
-    }).length;
-  }).forEach(function(componentName) {
-    var component = layerUI.components[componentName];
+  Object.keys(layerUI.components).filter((componentName) => {
+    const component = layerUI.components[componentName];
+    return component.properties.filter(prop => prop.propertyName === 'isMainComponent').length;
+  })
+  .forEach((componentName) => {
+    const component = layerUI.components[componentName];
 
     // Get the camel case Component name
-    var className = (componentName.substring(0, 1).toUpperCase() + componentName.substring(1).replace(/-(.)/g, function(str, value) {
-      return value.toUpperCase();
-    })).replace(/^Layer/, '');
+    const className = (componentName.substring(0, 1).toUpperCase() +
+      componentName.substring(1).replace(/-(.)/g, (str, value) => value.toUpperCase())
+    ).replace(/^Layer/, '');
 
     // Define the Backbone View
-    var view = libraryResult[className] = backbone.View.extend({
+    const view = libraryResult[className] = backbone.View.extend({
       el: componentName,
-      initialize: function(client, options) {
+      initialize: (client, options) => {
         this.client = client;
-        Object.keys(options || {}).forEach(function(propertyName) {
+        Object.keys(options || {}).forEach((propertyName) => {
           this[propertyName] = options[propertyName];
-        }, this);
-      }
+        });
+      },
     });
 
     // Define getters/setters so that the View acts as though it were the WebComponent it wraps
-    component.properties.forEach(function(propertyDef) {
+    component.properties.forEach((propertyDef) => {
       Object.defineProperty(view.prototype, propertyDef.propertyName, {
-        set: function(value) {
+        set(value) {
           this.$el[0][propertyDef.propertyName] = value;
         },
-        get: function() {
+        get() {
           return this.$el[0][propertyDef.propertyName];
-        }
+        },
       });
     });
   });
   return libraryResult;
-};
+}
 
 module.exports = initBackbone;
 layerUI.addAdapter('backbone', initBackbone);

@@ -114,20 +114,20 @@ describe('layer-conversation-panel', function() {
       el.client = client;
       var query2 = client.createQuery({model: layer.Conversation});
       el.query = query2;
-      el.props.hasGeneratedQuery = true;
+      el.properties.hasGeneratedQuery = true;
       el.query = query;
       expect(query2.isDestroyed).toBe(true);
-      expect(el.props.hasGeneratedQuery).toBe(false);
+      expect(el.properties.hasGeneratedQuery).toBe(false);
     });
 
     it("Should not destroy the existing query if hasGeneratedQuery is false", function() {
       el.client = client;
       var query2 = client.createQuery({model: layer.Conversation});
       el.query = query2;
-      el.props.hasGeneratedQuery = false;
+      el.properties.hasGeneratedQuery = false;
       el.query = query;
       expect(query2.isDestroyed).toBe(false);
-      expect(el.props.hasGeneratedQuery).toBe(false);
+      expect(el.properties.hasGeneratedQuery).toBe(false);
     });
 
     it("Should call scheduleGeneratedQuery once the client is set", function() {

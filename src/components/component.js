@@ -39,7 +39,7 @@
  *        alert("The widget has been created");
  *     },
  *     myRenderer: function() {
- *        this.innerHTML = this.props.prop1;
+ *        this.innerHTML = this.properties.prop1;
  *     }
  *   }
  * };
@@ -64,16 +64,16 @@
  * });
  * ```
  *
- * The above code declares `prop1` to be a property, sets up a setter that writes `widget.props.prop1` any time `widget.prop1` is set,
- * and sets up a getter to read the value from `widget.props.prop1`.  It also insures that at initialization time, if a `prop1` attribute
+ * The above code declares `prop1` to be a property, sets up a setter that writes `widget.properties.prop1` any time `widget.prop1` is set,
+ * and sets up a getter to read the value from `widget.properties.prop1`.  It also insures that at initialization time, if a `prop1` attribute
  * is found, it will be used as the `prop1` property.
  *
  * Property Definitions support the following keys:
  *
- * *  set: A setter function whose input is the new value.  Note that your setter function is called AFTER this.props.propName
+ * *  set: A setter function whose input is the new value.  Note that your setter function is called AFTER this.properties.propName
  *    has been set with the new value; your setter is for any side effects, rendering updates, or additional processing and NOT
  *    for writing the value itself.
- * *  get: A getter is needed if getting the property value from `this.props.propName` is not getting the latest value.
+ * *  get: A getter is needed if getting the property value from `this.properties.propName` is not getting the latest value.
  *    Perhaps you want to return `this.nodes.input.value` to get text typed in by a user.
  * *  value: If a `value` key is provided, then this will be the default value of your property, to be used if a value is
  *    not provided by the component creator.
@@ -157,139 +157,206 @@
  * @param {String[]} classDef.events - Array of events to listen for and repackage as event handler properties
  * @param {Boolean} force - If set to true, layerUI.settings.customComponents will not skip this class definition.
  */
-var layerUI = require('../base');
-module.exports = layerUI.registerComponent = function(tagName, classDef, force) {
-  if (layerUI.settings.customComponents.indexOf(tagName) !== -1 && !force) return;
+import layerUI from '../base';
 
-  // Provides a basic mixin mechanism; Provide an array of objects with a `properties` key and a `methods` key,
-  // and all property defintions and method defintions will be copied into your classDef UNLESS your classDef
-  // has provided its own definition.
-  // If your mixin provides a created() method, it will be called after the classDef created() method is called;
-  // this will be called for any number of mixins.
-  if (classDef.mixins) {
-    classDef.mixins.forEach(function(mixin) {
-      Object.keys(mixin.properties || []).forEach(function(propertyName) {
-        if (!classDef.properties[propertyName]) classDef.properties[propertyName] = mixin.properties[propertyName];
-      });
+/**
+ * Provides a basic mixin mechanism.
+ *
+ * Provide an array of objects with a `properties` key and a `methods` key,
+ * and all property defintions and method defintions will be copied into your classDef UNLESS your classDef
+ * has provided its own definition.
+ * If your mixin provides a created() method, it will be called after the classDef created() method is called;
+ * this will be called for any number of mixins.
+ *
+ * @method setupMixin
+ * @param {Object} classDef
+ * @private
+ */
+function setupMixin(classDef, mixin) {
+  const propNames = Object.keys(mixin.properties || {});
+  const methodNames = Object.keys(mixin.methods || {});
 
-      Object.keys(mixin.methods || []).forEach(function(propertyName) {
-        if (propertyName === 'created') {
-          if (!classDef.__created) classDef.__created = [];
-          classDef.__created.push(mixin.methods.created);
-        } else {
-          if (!classDef.methods[propertyName]) classDef.methods[propertyName] = mixin.methods[propertyName];
-        }
-      });
-    });
-  }
-
-  classDef.properties._layerEventSubscriptions = {};
-
-  // Any event specified in the events array we are going to listen for, and make available to the user of this Component
-  // as a `widget.onEventName = myfunc(evt){...}` event handler assignment, allowing them to use this or
-  // `addEventListener`.  The events array may contain events from child components or events triggered by this component.
-  (classDef.events || []).forEach(function(eventName) {
-    var camelEventName = layerUI.camelCase(eventName.replace(/^layer-/, ''));
-    var callbackName = 'on' + camelEventName.charAt(0).toUpperCase() + camelEventName.substring(1);
-    if (!classDef.properties[callbackName]) {
-      classDef.properties[callbackName] = {
-        type: Function,
-        set: function(value) {
-          if (this.props['old-' + eventName]) {
-            this.removeEventListener(eventName, this.props['old-' + eventName]);
-            this.props['old-' + eventName] = null;
-          }
-          if (value) {
-            this.addEventListener(eventName, value);
-            this.props['old-' + eventName] = value;
-          }
-        }
-      }
+  // Copy all properties from the mixin into the class definition,
+  // unless they are already defined.
+  propNames.forEach((name) => {
+    if (!classDef.properties[name]) {
+      classDef.properties[name] = mixin.properties[name];
     }
-  }, this);
+  });
 
-  // For each property in the methods hash, setup the setter/getter
-  var propertyDefHash = {};
-  var props = Object.keys(classDef.properties).map(function(propName) {
-    return {
-      propertyName: propName,
-      attributeName: layerUI.hyphenate(propName),
-      order: classDef.properties[propName].order
+  // Copy all methods from the mixin into the class definition,
+  // unless they are already defined.
+  // Created method is always copied, but in a manner such
+  // that it does not overwrite other created methods on the classDef.
+  methodNames.forEach((name) => {
+    if (name === 'created') {
+      if (!classDef.__created) classDef.__created = [];
+      classDef.__created.push(mixin.methods.created);
+    } else if (!classDef.methods[name]) {
+      classDef.methods[name] = mixin.methods[name];
+    }
+  });
+}
+
+/**
+ * For each event defined in the `events` property, setup an `onXXX` property.
+ *
+ * The `onXXX` property works by:
+ *
+ * 1. Doing nothing unless the app sets this event property to a Function
+ * 2. Listening for the specified event via addEventListener
+ * 3. Calling any provided function with the event provided by addEventListener
+ * 4. Call removeEventListener should this property ever change
+ *
+ * @method setupEvent
+ * @private
+ * @param {Object} classDef
+ * @param {String} eventName
+ */
+function setupEvent(classDef, eventName) {
+  const camelEventName = layerUI.camelCase(eventName.replace(/^layer-/, ''));
+  const callbackName = 'on' + camelEventName.charAt(0).toUpperCase() + camelEventName.substring(1);
+  if (!classDef.properties[callbackName]) {
+    classDef.properties[callbackName] = {
+      type: Function,
+      set(value) {
+        if (this.properties['old-' + eventName]) {
+          this.removeEventListener(eventName, this.properties['old-' + eventName]);
+          this.properties['old-' + eventName] = null;
+        }
+        if (value) {
+          this.addEventListener(eventName, value);
+          this.properties['old-' + eventName] = value;
+        }
+      },
     };
-  }).sort(function(a, b) {
+  }
+}
+
+/**
+ * Get an ordered array of property descriptions.
+ *
+ * @method
+ * @private
+ * @param {Object} classDef
+ */
+function getOrderedProps(classDef) {
+  // Translate the property names into definitions with property/attribute names and orders
+  const propertyAndOrderObjects = Object.keys(classDef.properties).map((propertyName) => {
+    return {
+      propertyName,
+      attributeName: layerUI.hyphenate(propertyName),
+      order: classDef.properties[propertyName].order,
+    };
+  });
+
+  // Use the order to return an ordered list.
+  return propertyAndOrderObjects.sort((a, b) => {
     if (a.order !== undefined && b.order === undefined) return -1;
     if (b.order !== undefined && a.order === undefined) return 1;
     if (a.order < b.order) return -1;
     if (a.order > b.order) return 1;
     return 0;
   });
+}
 
-  props.forEach(function(prop) {
-    var name = prop.propertyName;
-    var attributeName = prop.attributeName;
-    var propDef = classDef.properties[name];
-    propertyDefHash[name] = propDef;
+/**
+ * Define a single property based on a single property from the Component's `properties` definition.
+ *
+ * Will setup the properties getter, setter, default value, and type.
+ *
+ * @method setupProperty
+ * @private
+ * @param {Object} classDef   The class definition object
+ * @param {Object} prop       A property definition as generated by getOrderedProps
+ * @param {Object} propertyDefHash  A hash of all property definitions for use in reflection
+ */
+function setupProperty(classDef, prop, propertyDefHash) {
+  const newDef = {};
+  const name = prop.propertyName;
+  const propDef = classDef.properties[name];
 
-    // The new definition which will be derived from the provided definition.
-    var newDef = {};
+  // Copy our property definition into our hash of definitions
+  // which will be associated with this class for reflection purposes
+  propertyDefHash[name] = propDef;
 
-    // If a getter is provided, use it. else provide a getter that returns this.props[name]
-    // so that developers don't have to provide a getter for every property.
-    if (propDef.get) {
-      newDef.get = propDef.get;
-    } else {
-      newDef.get = function() {
-        return this.props[name];
-      };
-    }
-
-    // The property setter will set this.props[name] and then if there is a custom setter, it will be invoked.
-    // This means that the setter does NOT need to write to this.props, but can handle side effects, transformations, etc...
-    newDef.set = function(value) {
-      if (layerUI.debug) console.log("Set property " + this.tagName + '.' + name + " to ", value);
-      // Currently Boolean is the only supported type, and is used so that anyone passing a value via innerHTML which is always a string will
-      // have some chance of it not being treated as always true.
-      switch(propDef.type) {
-        // Flag the input string as a Boolean value so that when we get the value as a string, we can make sure a string of "false" or "0" is not treated as true
-        case Boolean:
-          if (['false', '0', 'null', 'undefined'].indexOf(value) !== -1) {
-            value = false;
-          } else {
-            value = Boolean(value);
-          }
-          break;
-
-        // Flag onRenderListItem as a Function to make sure it gets evaled and is executable
-        case Function:
-          value = typeof value === 'string' ? eval('(' + value + ')') : value;
-          break;
-      }
-      var oldValue = (classDef[name].get) ? classDef[name].get.call(this) : this.props[name];
-      if (oldValue !== value) {
-        this.props[name] = value;
-        if (propDef.set) propDef.set.call(this, value, oldValue);
-      }
+  // If a getter is provided, use it. else provide a getter that returns this.properties[name]
+  // so that developers don't have to provide a getter for every property.
+  if (propDef.get) {
+    newDef.get = propDef.get;
+  } else {
+    // Do not use arrow functions; that will change the "this" pointer.
+    newDef.get = function getter() {
+      return this.properties[name];
     };
-
-    // Write the property def to our class
-    classDef[name] = newDef;
-  });
-
-  // Safari gets back something other than the constructor with `this.constructor`;
-  // this property is the new way to access the constructor.
-  classDef._constructor = {
-    get: function() {return layerUI.components[tagName];}
   }
 
-  // Cleanup; we no longer need this properties object.
+
+  // The property setter will set this.properties[name] and then if there is a custom setter, it will be invoked.
+  // This means that the setter does NOT need to write to this.properties, but can handle side effects, transformations, etc...
+  newDef.set = function propertySetter(value) {
+    if (layerUI.debug) console.log(`Set property ${this.tagName}.${name} to `, value);
+
+    // Some special handling is needed for some properties as they may be delivered
+    // as strings HTML delivers attributes as strings.
+    switch (propDef.type) {
+      // Translate strings into booleans
+      case Boolean:
+        if (['false', '0', 'null', 'undefined'].indexOf(value) !== -1) {
+          value = false;
+        } else {
+          value = Boolean(value);
+        }
+        break;
+
+      // Translate strings into functions
+      case Function:
+        value = typeof value === 'string' ? eval('(' + value + ')') : value;
+        break;
+    }
+
+    const oldValue = this[name];
+    if (oldValue !== value) {
+      this.properties[name] = value;
+      if (propDef.set) propDef.set.call(this, value, oldValue);
+    }
+  };
+
+  // Write the property def to our class that will be passed into document.registerElement(tagName, classDef)
+  classDef[name] = newDef;
+}
+
+layerUI.registerComponent = function registerComponent(tagName, classDef, force) {
+  if (layerUI.settings.customComponents.indexOf(tagName) !== -1 && !force) return;
+
+  // Add in mixins
+  if (classDef.mixins) {
+    classDef.mixins.forEach(mixin => setupMixin(classDef, mixin));
+  }
+
+  // Add an object for tracking event subscriptions that we need to unsubscribe from.
+  classDef.properties._layerEventSubscriptions = {};
+
+  // Setup all events specified in the `events` property.
+  if (classDef.events) {
+    classDef.events.forEach(eventName => setupEvent(classDef, eventName));
+  }
+
+  // For each property in the methods hash, setup the setter/getter
+  const propertyDefHash = {};
+  const props = getOrderedProps(classDef);
+
+  // Add the property to our object, with suitable getters and setters
+  props.forEach(prop => setupProperty(classDef, prop, propertyDefHash));
+
+  // Cleanup; we no longer need this properties object; it can be accessed via propertyDefHash
   delete classDef.properties;
 
   // For every method, add the expected structure to the function
-  var methods = Object.keys(classDef.methods);
-  methods.forEach(function(name) {
+  Object.keys(classDef.methods).forEach((name) => {
     classDef[name] = {
       value: classDef.methods[name],
-      writable: true
+      writable: true,
     };
   });
   delete classDef.methods;
@@ -314,18 +381,18 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @method created
    */
   classDef.createdCallback = {
-    value: function() {
+    value: function createdCallback() {
       if (!layerUI.components[tagName]) return;
       /**
        * Hash of all property names/values for this widget.
        *
-       * All properties are stored in `this.props`; any property defined in the class definition's properties hash
+       * All properties are stored in `this.properties`; any property defined in the class definition's properties hash
        * are read and written here.
        *
        * @property {Object} props
        */
-      this.props = {
-        _layerEventSubscriptions: []
+      this.properties = {
+        _layerEventSubscriptions: [],
       };
 
       /**
@@ -352,7 +419,7 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
        *
        * ```
        * render: function() {
-       *    this.nodes.image.src = this.props.url;
+       *    this.nodes.image.src = this.properties.url;
        * }
        * ```
        *
@@ -361,9 +428,9 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
       this.nodes = {};
 
       // If a template has been assigned for this class, append it to this node, and parse for layer-ids
-      var template = this.getTemplate();
+      const template = this.getTemplate();
       if (template) {
-        var clone = document.importNode(template.content, true);
+        const clone = document.importNode(template.content, true);
         this.appendChild(clone);
         this.setupDomNodes();
       }
@@ -372,41 +439,54 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
       if (this.created) this.created();
 
       // Call any Mixin created methods
-      if (classDef.__created) classDef.__created.forEach(function(mixinCreated) {
-        mixinCreated.apply(this);
-      }, this);
+      if (classDef.__created) {
+        classDef.__created.forEach(mixinCreated => mixinCreated.apply(this));
+      }
 
       // Copy all DOM attributes into class properties, triggering property setters
-      props.forEach(function(prop) {
-        var value = this.getAttribute(prop.attributeName);
-        // Firefox seems to need this alternative to getAttribute().
-        // TODO: Verify this and determine if it uses the getter here.
-        if (value === null && this[prop.attributeName] !== undefined) {
-          value = this[prop.attributeName];
-        }
-
-        if (value === null && this.tmpdata && this.tmpdata[prop.propertyName] !== undefined) {
-          value = this.tmpdata[prop.propertyName];
-        }
-
-        if (value !== null) {
-          this[prop.propertyName] = value;
-        } else if (this[prop.propertyName] !== undefined) {
-          value = this[prop.propertyName];
-          // this only happens in firefox; somehow the property rather than the attribute is set, but
-          // the setter is never called; call it now.
-          // TODO: Verify this
-          if (classDef[prop.propertyName].set) {
-            classDef[prop.propertyName].set.call(this, value);
-          }
-        } else if ('value' in propertyDefHash[prop.propertyName]) {
-          this[prop.propertyName] = propertyDefHash[prop.propertyName].value;
-        } else {
-          this.props[prop.propertyName] = null;
-        }
-      }, this);
+      props.forEach(prop => this._copyInAttribute(prop));
       if (this.tmpdata) this.tmpdata = null;
-    }
+    },
+  };
+
+  /**
+   * Handle some messy post-create copying of attribute values over to property
+   * values where property setters can fire.
+   *
+   * @method _copyInAttribute
+   * @private
+   * @param {Object} prop   A property def object as defined by getOrderedProperties
+   */
+  classDef._copyInAttribute = {
+    value: function _copyInAttribute(prop) {
+
+      let value = this.getAttribute(prop.attributeName);
+      // Firefox seems to need this alternative to getAttribute().
+      // TODO: Verify this and determine if it uses the getter here.
+      if (value === null && this[prop.attributeName] !== undefined) {
+        value = this[prop.attributeName];
+      }
+
+      if (value === null && this.tmpdata && this.tmpdata[prop.propertyName] !== undefined) {
+        value = this.tmpdata[prop.propertyName];
+      }
+
+      if (value !== null) {
+        this[prop.propertyName] = value;
+      } else if (this[prop.propertyName] !== undefined) {
+        value = this[prop.propertyName];
+        // this only happens in firefox; somehow the property rather than the attribute is set, but
+        // the setter is never called; call it now.
+        // TODO: Verify this
+        if (classDef[prop.propertyName].set) {
+          classDef[prop.propertyName].set.call(this, value);
+        }
+      } else if ('value' in propertyDefHash[prop.propertyName]) {
+        this[prop.propertyName] = propertyDefHash[prop.propertyName].value;
+      } else {
+        this.properties[prop.propertyName] = null;
+      }
+    },
   };
 
   /**
@@ -420,13 +500,13 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @method setupDomNodes
    */
   classDef.setupDomNodes = {
-    value: function() {
+    value: function setupDomNodes() {
       this.nodes = {};
-      this.querySelectorAllArray('*').forEach(function(node) {
-        var id = node.getAttribute('layer-id');
+      this.querySelectorAllArray('*').forEach((node) => {
+        const id = node.getAttribute('layer-id');
         if (id) this.nodes[id] = node;
-      }, this);
-    }
+      });
+    },
   };
 
   /**
@@ -457,22 +537,20 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @event layer-widget-destroyed
    */
   classDef.detachedCallback = {
-    value: function() {
+    value: function detachedCallback() {
 
       // Wait 10 seconds after its been removed, then check to see if its still removed from the dom before doing cleanup and destroy.
-      setTimeout(function() {
+      setTimeout(() => {
         if (!document.body.contains(this) && !document.head.contains(this) && this.trigger('layer-widget-destroyed')) {
-          this._layerEventSubscriptions.forEach(function(subscribedObject) {
-            subscribedObject.off(null, null, this);
-          }, this);
+          this._layerEventSubscriptions.forEach(subscribedObject => subscribedObject.off(null, null, this));
           this._layerEventSubscriptions = [];
           this.classList.add('layer-node-destroyed');
 
           // Call the provided constructor
           if (this.destroyed) this.destroyed();
         }
-      }.bind(this), 10000);
-    }
+      }, 10000);
+    },
   };
 
   /**
@@ -484,11 +562,11 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @param {Mixed} newValue   Newly assigned value of the attribute
    */
   classDef.attributeChangedCallback = {
-    value: function(name, oldValue, newValue) {
-      if (layerUI.debug) console.log("Attribute Change on " + this.tagName + '.' + name + " from " + oldValue + " to ", newValue);
+    value: function attributeChangedCallback(name, oldValue, newValue) {
+      if (layerUI.debug) console.log(`Attribute Change on ${this.tagName}.${name} from ${oldValue} to `, newValue);
       this[layerUI.camelCase(name)] = newValue;
-    }
-  }
+    },
+  };
 
   /**
    * Return the default template or the named template for this Component.
@@ -520,18 +598,22 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @returns {HTMLTemplateElement}
    */
   classDef.getTemplate = {
-    value: function(templateName) {
+    value: function getTemplate(templateName) {
       templateName = templateName || 'default';
 
-      if (layerUI.components[tagName].styles && layerUI.components[tagName].styles[templateName] && layerUI.components[tagName].renderedStyles[templateName] === false) {
-        var styleNode = document.createElement('style');
-        styleNode.id='style-' + this.tagName.toLowerCase() + '-' + templateName;
+      const needsStyleNode = layerUI.components[tagName].styles &&
+        layerUI.components[tagName].styles[templateName] &&
+        layerUI.components[tagName].renderedStyles[templateName] === false;
+
+      if (needsStyleNode) {
+        const styleNode = document.createElement('style');
+        styleNode.id = 'style-' + this.tagName.toLowerCase() + '-' + templateName;
         styleNode.innerHTML = layerUI.components[tagName].styles[templateName];
         document.getElementsByTagName('head')[0].appendChild(styleNode);
         layerUI.components[tagName].renderedStyles[templateName] = true;
       }
       return layerUI.components[tagName].templates ? layerUI.components[tagName].templates[templateName] : null;
-    }
+    },
   };
 
   /**
@@ -571,15 +653,15 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    *                    the default action using `evt.preventDefault()` (perhaps an event listener wanted to handle the action itself)
    */
   classDef.trigger = {
-    value: function(eventName, details) {
-      var evt = new CustomEvent(eventName, {
+    value: function trigger(eventName, details) {
+      const evt = new CustomEvent(eventName, {
         detail: details,
         bubbles: true,
-        cancelable: true
+        cancelable: true,
       });
       this.dispatchEvent(evt);
       return !evt.defaultPrevented;
-    }
+    },
   };
 
   /**
@@ -592,14 +674,14 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    * @returns {HTMLElement[]}
    */
   classDef.querySelectorAllArray = {
-    value: function(selector) {
+    value: function querySelectorAllArray(selector) {
       return Array.prototype.slice.call(this.querySelectorAll(selector));
-    }
+    },
   };
 
   // Register the component with our components hash as well as with the document.
   layerUI.components[tagName] = document.registerElement(tagName, {
-    prototype: Object.create(HTMLElement.prototype, classDef)
+    prototype: Object.create(HTMLElement.prototype, classDef),
   });
 
   /**
@@ -653,3 +735,5 @@ module.exports = layerUI.registerComponent = function(tagName, classDef, force) 
    */
   layerUI.components[tagName].properties = props;
 };
+
+module.exports = layerUI.registerComponent;

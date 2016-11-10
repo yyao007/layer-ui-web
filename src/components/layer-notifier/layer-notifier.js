@@ -28,11 +28,15 @@
  * @class layerUI.components.Notifier
  * @extends layerUI.components.Component
  */
-var layerUI = require('../../base');
-var Notify = require('notifyjs').default;
-var LUIComponent = require('../../components/component');
+import * as NotifyLib from 'notifyjs';
+import { isInBackground as IsInBackground, getHandler as GetHandler } from '../../base';
+import LUIComponent from '../../components/component';
+import MainComponent from '../../mixins/main-component';
+
+const Notify = NotifyLib.default.default;
+
 LUIComponent('layer-notifier', {
-  mixins: [require('../../mixins/main-component')],
+  mixins: [MainComponent],
 
   /**
    * Before showing any notification, this event will be triggered.
@@ -118,9 +122,9 @@ LUIComponent('layer-notifier', {
   events: ['layer-message-notification', 'layer-notification-click'],
   properties: {
     client: {
-      set: function(value) {
+      set(value) {
         value.on('messages:notify', this.notify.bind(this));
-      }
+      },
     },
 
     /**
@@ -136,11 +140,11 @@ LUIComponent('layer-notifier', {
      */
     notifyInBackground: {
       value: 'desktop',
-      set: function(value) {
+      set(value) {
         if (value === 'desktop' && window.Notification) {
           Notify.requestPermission(this.onPermissionGranted.bind(this));
         }
-      }
+      },
     },
 
     /**
@@ -156,11 +160,11 @@ LUIComponent('layer-notifier', {
      */
     notifyInForeground: {
       value: 'none',
-      set: function(value) {
+      set(value) {
         if (value === 'desktop' && window.Notification) {
           Notify.requestPermission(this.onPermissionGranted.bind(this));
         }
-      }
+      },
     },
 
     /**
@@ -170,7 +174,7 @@ LUIComponent('layer-notifier', {
      * @readonly
      */
     userEnabledDesktopNotifications: {
-      value: false
+      value: false,
     },
 
     /**
@@ -181,7 +185,7 @@ LUIComponent('layer-notifier', {
      * @property {String} [iconUrl=]
      */
     iconUrl: {
-      value: ''
+      value: '',
     },
 
     /**
@@ -190,18 +194,18 @@ LUIComponent('layer-notifier', {
      * @property {Number} [timeoutSeconds=30]
      */
     timeoutSeconds: {
-      value: 30
+      value: 30,
     },
 
     /**
      * Timeout ID for clearing the toast notification
      *
      * @private
-     * @property {Number}
+     * @property {Number} [toastTimeout=0]
      */
     toastTimeout: {
-      value: 0
-    }
+      value: 0,
+    },
   },
   methods: {
 
@@ -211,12 +215,18 @@ LUIComponent('layer-notifier', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
       this.addEventListener('click', this.clickToast.bind(this));
-      this.addEventListener("transitionend", this.afterTransition.bind(this), true);
+      this.addEventListener('transitionend', this.afterTransition.bind(this), true);
     },
 
-    afterTransition: function() {
+    /**
+     * After finishing an animation, trigger this callback which removes the animation classes.
+     *
+     * @method afterTransition
+     * @private
+     */
+    afterTransition() {
       this.classList.remove('layer-notifier-toast-fade');
     },
 
@@ -226,8 +236,8 @@ LUIComponent('layer-notifier', {
      * @method onPermissionGranted
      * @private
      */
-    onPermissionGranted: function() {
-      this.props.userEnabledDesktopNotifications = true;
+    onPermissionGranted() {
+      this.properties.userEnabledDesktopNotifications = true;
     },
 
     /**
@@ -242,18 +252,15 @@ LUIComponent('layer-notifier', {
      * @param {layer.LayerEvent} evt
      * @private
      */
-    notify: function(evt) {
-      var isBackground = layerUI.isInBackground();
-      var notificationType = isBackground ? this.notifyInBackground : this.notifyInForeground;
-      if (notificationType && notificationType !== 'none') {
-        if (this.trigger('layer-message-notification', {
-          message: evt.message,
-          isBackground: isBackground,
-          type: notificationType
-        })) {
-          if (notificationType === 'desktop' && this.props.userEnabledDesktopNotifications) {
+    notify(evt) {
+      const isBackground = IsInBackground();
+      const type = isBackground ? this.notifyInBackground : this.notifyInForeground;
+      const message = evt.message;
+      if (type && type !== 'none') {
+        if (this.trigger('layer-message-notification', { message, type, isBackground })) {
+          if (type === 'desktop' && this.properties.userEnabledDesktopNotifications) {
             this.desktopNotify(evt.message);
-          } else if (notificationType === 'toast') {
+          } else if (type === 'toast') {
             this.toastNotify(evt.message);
           }
         }
@@ -263,56 +270,70 @@ LUIComponent('layer-notifier', {
     /**
      * Show a desktop notification.
      *
-     * @method
-     * @private
+     * @method desktopNotify
+     * @param {layer.Message} message
      */
-    desktopNotify: function(message) {
+    desktopNotify(message) {
       try {
-        var text = message.getText();
-        if (this.props.desktopNotify) this.closeDesktopNotify();
+        const text = message.getText();
+        if (this.properties.desktopNotify) this.closeDesktopNotify();
 
-        this.props.desktopMessage = message;
-        this.props.desktopNotify = new Notify('Message from ' + message.sender.displayName, {
+        this.properties.desktopMessage = message;
+        this.properties.desktopNotify = new Notify(`Message from ${message.sender.displayName}`, {
           icon: this.iconUrl || message.sender.avatarUrl,
           timeout: this.timeoutSeconds,
           body: text || 'New file received',
           tag: message.conversationId || 'announcement',
           closeOnClick: true,
-          notifyClick: function() {
+          notifyClick: () => {
             window.focus();
-            this.trigger('layer-notification-click', {message: message});
-          }.bind(this)
+            this.trigger('layer-notification-click', { message });
+          },
         });
-        this.props.desktopNotify.show();
+        this.properties.desktopNotify.show();
 
-        message.on('messages:change', function(evt) {
+        message.on('messages:change', (evt) => {
           if (message.isRead) {
             this.closeDesktopNotify();
           }
         }, this);
-      } catch(e) {
+      } catch (e) {
         // do nothing
       }
     },
 
-    closeDesktopNotify: function() {
-      if (this.props.desktopNotify) {
-        this.props.desktopNotify.close();
-        this.props.desktopMessage.off(null, null, this);
-        this.props.desktopMessage = this.props.desktopNotify = null;
+    /**
+     * Close the desktop notification.
+     *
+     * @method closeDesktopNotify
+     * @private
+     */
+    closeDesktopNotify() {
+      if (this.properties.desktopNotify) {
+        this.properties.desktopNotify.close();
+        this.properties.desktopMessage.off(null, null, this);
+        this.properties.desktopMessage = this.properties.desktopNotify = null;
       }
     },
 
-    toastNotify: function(message) {
-      var placeholder = this.querySelector('.layer-message-item-placeholder');
-      if (placeholder) this.nodes.container.removeChild(placeholder);
-      this.nodes.avatar.users = [message.sender];
-      this.nodes.title.innerHTML = message.sender.displayName;
-      var handler = layerUI.getHandler(message, this);
+    /**
+     * Show a toast notification.
+     *
+     * @method toastNotify
+     * @param {layer.Message} message
+     */
+    toastNotify(message) {
+      const placeholder = this.querySelector('.layer-message-item-placeholder');
+      const handler = GetHandler(message, this);
+
       if (handler) {
-        if (this.props.toastTimeout) clearTimeout(this.props.toastTimeout);
+        if (placeholder) this.nodes.container.removeChild(placeholder);
+        this.nodes.avatar.users = [message.sender];
+        this.nodes.title.innerHTML = message.sender.displayName;
+
+        if (this.properties.toastTimeout) clearTimeout(this.properties.toastTimeout);
         this.classList.add(handler.tagName);
-        var messageHandler = document.createElement(handler.tagName);
+        const messageHandler = document.createElement(handler.tagName);
         messageHandler.listHeight = 200;
         messageHandler.listWidth = 400;
         messageHandler.noPadding = true;
@@ -321,35 +342,47 @@ LUIComponent('layer-notifier', {
         this.nodes.container.appendChild(messageHandler);
         this.classList.add('layer-notifier-toast-fade');
         this.classList.add('layer-notifier-toast');
-        this.props.toastTimeout = setTimeout(this.clearToast.bind(this), this.timeoutSeconds * 1000);
+        this.properties.toastTimeout = setTimeout(this.closeToast.bind(this), this.timeoutSeconds * 1000);
 
-        this.props.toastMessage = message;
-        message.on('messages:change', function(evt) {
+        this.properties.toastMessage = message;
+        message.on('messages:change', (evt) => {
           if (message.isRead) {
-            this.clearToast();
+            this.closeToast();
           }
         }, this);
       }
     },
 
-    clearToast: function() {
+    /**
+     * Close the toast notification.
+     *
+     * @method closeToast
+     */
+    closeToast() {
       this.classList.add('layer-notifier-toast-fade');
       this.classList.remove('layer-notifier-toast');
 
-      clearTimeout(this.props.toastTimeout);
-      this.props.toastTimeout = 0;
-      if (this.props.toastMessage) this.props.toastMessage.off(null, null, this);
-      this.props.toastMessage = null;
+      clearTimeout(this.properties.toastTimeout);
+      this.properties.toastTimeout = 0;
+      if (this.properties.toastMessage) this.properties.toastMessage.off(null, null, this);
+      this.properties.toastMessage = null;
     },
 
-    clickToast: function(evt) {
-      if (this.props.toastMessage) {
+    /**
+     * The user has clicked on the toast dialog
+     *
+     * @method clickToast
+     * @private
+     * @param {Event} evt
+     */
+    clickToast(evt) {
+      if (this.properties.toastMessage) {
         evt.preventDefault();
         evt.stopPropagation();
-        this.trigger('layer-notification-click', {message: this.props.toastMessage});
-        this.clearToast();
+        this.trigger('layer-notification-click', { message: this.properties.toastMessage });
+        this.closeToast();
       }
-    }
-  }
+    },
+  },
 });
 

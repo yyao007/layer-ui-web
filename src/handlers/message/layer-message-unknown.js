@@ -4,7 +4,8 @@
  * @class layerUI.handlers.message.Unknown
  * @extends layerUI.components.Component
  */
-var LUIComponent = require('../../components/component');
+import LUIComponent from '../../components/component';
+
 LUIComponent('layer-message-unknown', {
   properties: {
 
@@ -14,10 +15,10 @@ LUIComponent('layer-message-unknown', {
      * @property {layer.Message}
      */
     message: {
-      set: function(value){
+      set(value) {
         this.render();
-      }
-    }
+      },
+    },
   },
   methods: {
 
@@ -27,7 +28,7 @@ LUIComponent('layer-message-unknown', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
     },
 
     /**
@@ -36,13 +37,12 @@ LUIComponent('layer-message-unknown', {
      * @method
      * @private
      */
-    render: function() {
-      var mimeTypes = this.message.parts.map(function(part) {
-        return part.mimeType;
-      }).join(', ');
-      this.innerHTML = 'Message with mimeTypes ' + mimeTypes + ' has been received but has no renderer';
-    }
-  }
+    render() {
+      const mimeTypes = this.message.parts.map(part => part.mimeType)
+      .join(', ');
+      this.innerHTML = `Message with mimeTypes ${mimeTypes} has been received but has no renderer`;
+    },
+  },
 });
 
 // Do not register this handler

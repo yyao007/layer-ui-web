@@ -11,14 +11,17 @@
  * @class layerUI.handlers.message.Image
  * @extends layerUI.components.Component
  */
-var layerUI = require('../../base');
-var LUIComponent = require('../../components/component');
-var ImageManager = window.loadImage = require("blueimp-load-image/js/load-image");
-require("blueimp-load-image/js/load-image-orientation.js");
-require("blueimp-load-image/js/load-image-meta.js");
-require("blueimp-load-image/js/load-image-exif.js");
-var normalizeSize = require('../../utils/sizing');
+import ImageManager from 'blueimp-load-image/js/load-image';
+import 'blueimp-load-image/js/load-image-orientation';
+import 'blueimp-load-image/js/load-image-meta';
+import 'blueimp-load-image/js/load-image-exif';
 
+import layerUI from '../../base';
+import LUIComponent from '../../components/component';
+import normalizeSize from '../../utils/sizing';
+
+// TODO: Investigate if this is still needed, but I think the dependency on this is baked into the ImageManager.
+window.loadImage = ImageManager;
 
 LUIComponent('layer-message-image', {
   properties: {
@@ -29,37 +32,36 @@ LUIComponent('layer-message-image', {
      * @property {layer.Message}
      */
     message: {
-      set: function(value){
+      set(value) {
 
         // Extract our image, preview and metadata message parts
-        this.props.image = value.parts.filter(function(part) {return ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1;})[0];
-        this.props.preview = value.parts.filter(function(part) {return part.mimeType === 'image/jpeg+preview';})[0];
-        var meta = value.parts.filter(function(part) {return part.mimeType === 'application/json+imageSize';})[0];
-        if (meta) this.props.meta = JSON.parse(meta.body);
+        this.properties.image = value.parts.filter(part => ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1)[0];
+        this.properties.preview = value.parts.filter(part => part.mimeType === 'image/jpeg+preview')[0];
+        const meta = value.parts.filter(part => part.mimeType === 'application/json+imageSize')[0];
+        if (meta) this.properties.meta = JSON.parse(meta.body);
 
         // If there is a preview and it doesn't have a body, fetch the preview body so we can pass it into the ImageManager.
-        if (this.props.preview && this.props.image) {
-          if (!this.props.preview.body) {
-            this.props.preview.fetchContent();
-            this.props.preview.on('content-loaded', this.render, this);
+        if (this.properties.preview && this.properties.image) {
+          if (!this.properties.preview.body) {
+            this.properties.preview.fetchContent();
+            this.properties.preview.on('content-loaded', this.render, this);
           }
           // TODO: remove body test once all websdk changes are merged and url is gaurenteed to have a value if body has a value
           // If image does not have a url, call fetchStream to get an updated url
-          if (!this.props.image.url && !this.props.image.body) this.props.image.fetchStream();
-        } else {
-          // If there is no preview, only an image, we're going to pass it into the ImageManager so fetch its body
-          if (!this.props.image.body) {
-            this.props.image.fetchContent();
-            this.props.image.on('content-loaded', this.render, this);
-          }
+          if (!this.properties.image.url && !this.properties.image.body) this.properties.image.fetchStream();
         }
 
+        // If there is no preview, only an image, we're going to pass it into the ImageManager so fetch its body
+        else if (!this.properties.image.body) {
+          this.properties.image.fetchContent();
+          this.properties.image.on('content-loaded', this.render, this);
+        }
 
         // Render the Message
         this.render();
-      }
+      },
     },
-    // TODO: Add a simple wrapper to declare components and define these properties
+
     /**
      * Knowing the height of the list will help us determine a suitable size for the Image.
      *
@@ -79,7 +81,7 @@ LUIComponent('layer-message-image', {
      *
      * @property {Boolean}
      */
-    noPadding: {}
+    noPadding: {},
   },
   methods: {
 
@@ -89,7 +91,7 @@ LUIComponent('layer-message-image', {
      * @method created
      * @private
      */
-    created: function() {
+    created() {
       this.addEventListener('click', this.handleClick.bind(this));
     },
 
@@ -100,10 +102,10 @@ LUIComponent('layer-message-image', {
      * @private
      * @param {Event} evt
      */
-    handleClick: function(evt) {
+    handleClick(evt) {
       if (this.parentNode.tagName !== 'LAYER-CONVERSATION-LAST-MESSAGE') {
         evt.preventDefault();
-        if (this.props.image && this.props.image.url) window.open(this.props.image.url);
+        if (this.properties.image && this.properties.image.url) window.open(this.properties.image.url);
       }
     },
 
@@ -115,14 +117,15 @@ LUIComponent('layer-message-image', {
      * @method
      * @private
      */
-    render: function() {
-      this.props.sizes = normalizeSize(this.props.meta, {width: 256, height: 256, noPadding: this.noPadding});
-      this.style.width = this.props.sizes.width + 'px';
-      this.style.height = this.props.sizes.height + 'px';
-      if (this.props.preview && this.props.preview.body) {
-        this.renderCanvas(this.props.preview.body);
-      } else if (this.props.image && this.props.image.body) {
-        this.renderCanvas(this.props.image.body);
+    render() {
+      // TODO: Need something better than hardcoded in sizes.
+      this.properties.sizes = normalizeSize(this.properties.meta, { width: 256, height: 256, noPadding: this.noPadding });
+      this.style.width = this.properties.sizes.width + 'px';
+      this.style.height = this.properties.sizes.height + 'px';
+      if (this.properties.preview && this.properties.preview.body) {
+        this.renderCanvas(this.properties.preview.body);
+      } else if (this.properties.image && this.properties.image.body) {
+        this.renderCanvas(this.properties.image.body);
       }
     },
 
@@ -135,35 +138,33 @@ LUIComponent('layer-message-image', {
      * @private
      * @param {Blob} blob
      */
-    renderCanvas: function(blob) {
+    renderCanvas(blob) {
       // Read the EXIF data
       ImageManager.parseMetaData(
-          blob,
-          function (data) {
-            var orientation = 1;
-            var options = {
-                canvas: true
-            };
+        blob, (data) => {
+          const options = {
+            canvas: true,
+          };
 
-            if (data.imageHead && data.exif) {
-                options.orientation = data.exif[0x0112] || 0;
+          if (data.imageHead && data.exif) {
+            options.orientation = data.exif[0x0112] || 1;
+          }
+          options.maxWidth = options.minWidth = this.properties.sizes.width;
+          options.maxHeight = options.minHeight = this.properties.sizes.height;
+
+          // Write the image to a canvas with the specified orientation
+          ImageManager(blob, (canvas) => {
+            while (this.firstChild) this.removeChild(this.firstChild);
+            if (canvas instanceof HTMLElement) {
+              this.appendChild(canvas);
+            } else {
+              console.error(canvas);
             }
-            options.maxWidth = options.minWidth = this.props.sizes.width;
-            options.maxHeight = options.minHeight = this.props.sizes.height;
-
-            // Write the image to a canvas with the specified orientation
-            ImageManager(blob, function(canvas) {
-                while(this.firstChild) this.removeChild(this.firstChild);
-                if (canvas instanceof HTMLElement) {
-                  this.appendChild(canvas);
-                } else {
-                  console.error(canvas);
-                }
-            }.bind(this), options);
-          }.bind(this)
-        );
-      }
-  }
+          }, options);
+        },
+      );
+    },
+  },
 });
 
 /*
@@ -172,19 +173,16 @@ LUIComponent('layer-message-image', {
 layerUI.registerMessageHandler({
   tagName: 'layer-message-image',
   label: '<i class="fa fa-file-image-o" aria-hidden="true"></i> Image message',
-  handlesMessage: function(message, container) {
-    var imageParts = message.parts.filter(function(part) {
-      return ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1;
-    }).length;
-    var previewParts = message.parts.filter(function(part) {
-      return part.mimeType === 'image/jpeg+preview';
-    }).length;
-    var metaParts = message.parts.filter(function(part) {
-      return part.mimeType === 'application/json+imageSize';
-    }).length;
+  handlesMessage(message, container) {
+    const imageParts = message.parts.filter(part =>
+      ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1).length;
+    const previewParts = message.parts.filter(part =>
+      part.mimeType === 'image/jpeg+preview').length;
+    const metaParts = message.parts.filter(part =>
+      part.mimeType === 'application/json+imageSize').length;
     return (message.parts.length === 1 && imageParts ||
       message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1);
-  }
+  },
 });
 
 
