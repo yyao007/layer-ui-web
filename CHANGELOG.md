@@ -1,6 +1,6 @@
 # Layer UI for Web Change Log
 
-## 0.9.3
+## 0.9.4
 
 * Fixes bug using the appId passed into `layerUI.init()`
 * Full es6 conversation, babel compile, and eslintification of code base
@@ -8,7 +8,7 @@
 * Adds a Date Separator component
 * Now uses `!conversation.lastMessage.isRead` instead of `conversation.unreadCount` for flagging a conversation as unread
 
-## 0.9.1, 0.9.2
+## 0.9.1, 0.9.2, 0.9.3
 
 * npm unpublish is a problem
 
