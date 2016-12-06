@@ -57,7 +57,7 @@ Each theme folder in `src` consists of:
 
 To learn how to theme a component, such as `<layer-avatar />`:
 
-* Open up the theme file for it: `themes/src/basic-bubbles/layer-conversation-item.less` for examples
+* Open up the theme file for it: `themes/src/bubbles-basic/layer-conversation-item.less` for examples
 * Open up the Component Template for it: `src/conversations-list-panel/layer-conversation-item/layer-conversation-item.html` to see the HTML and CSS Classes available for styling
 
 It is not required that each Component have its own CSS or LESS file, but simply an approach we have taken to help developers understand the theme and build their own.
@@ -246,7 +246,7 @@ layerUI.registerComponent('layer-avatar', {
     // This method is called by the constructor
     created: function() {
       // the nodes object is setup using the layer-id attribute
-      this.nodes.mybutton.addEventListener('click', this.onClick.bind(this));
+      this.nodes.mybutton.addEventListener('click', this._onClick.bind(this));
     },
 
     // Called when the user clicks the button

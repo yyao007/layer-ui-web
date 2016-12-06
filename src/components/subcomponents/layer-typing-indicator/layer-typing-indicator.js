@@ -5,6 +5,8 @@
  *
  * The simplest way to customize the behavior of this widget is using the `layer-typing-indicator-change` event.
  *
+ * TODO: Provide a layerUI.components.ConversationPanel.typingIndicatorRenderer property
+ *
  * @class layerUI.components.subcomponents.TypingIndicator
  * @extends layerUI.components.Component
  */
@@ -33,8 +35,9 @@
  *
  * @event layer-typing-indicator-change
  * @param {Event} evt
- * @param {layer.Identity[]] evt.detail.typing
- * @param {layer.Identity[]] evt.detail.paused
+ * @param {Object} evt.detail
+ * @param {layer.Identity[]} evt.detail.typing
+ * @param {layer.Identity[]} evt.detail.paused
  */
 import LUIComponent from '../../../components/component';
 
@@ -50,7 +53,7 @@ LUIComponent('layer-typing-indicator', {
         this.client = value.getClient();
         if (value) {
           const state = this.client.getTypingState(value);
-          this.rerender({
+          this._rerender({
             conversationId: value.id,
             typing: state.typing,
             paused: state.paused,
@@ -70,7 +73,7 @@ LUIComponent('layer-typing-indicator', {
      */
     client: {
       set(client) {
-        client.on('typing-indicator-change', this.rerender.bind(this));
+        client.on('typing-indicator-change', this._rerender.bind(this));
       },
     },
 
@@ -82,6 +85,7 @@ LUIComponent('layer-typing-indicator', {
     value: {
       set(text) {
         this.nodes.panel.innerHTML = text || '';
+        // classList.toggle doesn't work right in IE11
         this.classList[text ? 'add' : 'remove']('layer-typing-occuring');
       },
     },
@@ -91,20 +95,20 @@ LUIComponent('layer-typing-indicator', {
     /**
      * Constructor.
      *
-     * @method created
+     * @method _created
      * @private
      */
-    created() {
+    _created() {
 
     },
 
     /**
      * Whenever there is a typing indicator event, rerender our UI
      *
-     * @method rerender
+     * @method _rerender
      * @param {layer.LayerEvent} evt
      */
-    rerender(evt) {
+    _rerender(evt) {
       // We receive typing indicator events for ALL Conversations; ignore them if they don't apply to the current Conversation
       if (evt.conversationId === this.conversation.id) {
 

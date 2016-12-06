@@ -1,12 +1,15 @@
 /**
- * The Layer Image MessageHandler renders a single image, or an Atlas 3-message-part Image.
+ * The Layer Image MessageHandler renders a single MessagePart image, or an Atlas 3-message-part Image.
  *
  * One of the challenges in rendering images is that browser `<img />` tags do not follow EXIF data
- * for orientation, which results in sideways and upside down photos.  This Component uses `blueimp-load-image`
+ * for orientation, which results in sideways and upside down photos.  Furthermore, CSS rotation of the dom,
+ * results in offsets and margins that vary based on the exact dimensions of the image, resulting
+ * in some very ugly code to get anything remotely consistent.  This Component uses `blueimp-load-image`
  * to write the image to a Canvas, parse its EXIF data and orient it appropriately.
  *
- * Image heights should be fixed; any change in height of the image will cause our scroll position to be shifted
- * (i.e. the numeric value of `scrollTop` will remain unchanged, but what is visible to the user at that position may change)
+ * As with all Message Handling, Message Height should be fixed at rendering time, and should not change asynchrnously
+ * except in response to a user action.  Otherwise scroll positions get mucked and users get lost.
+ * As a result, image heights should be fixed before any asynchronously loaded image has loaded.
  *
  * @class layerUI.handlers.message.Image
  * @extends layerUI.components.Component
@@ -16,12 +19,9 @@ import 'blueimp-load-image/js/load-image-orientation';
 import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
 
-import layerUI from '../../base';
-import LUIComponent from '../../components/component';
-import normalizeSize from '../../utils/sizing';
-
-// TODO: Investigate if this is still needed, but I think the dependency on this is baked into the ImageManager.
-window.loadImage = ImageManager;
+import layerUI, { settings as UISettings } from '../../../base';
+import LUIComponent from '../../../components/component';
+import normalizeSize from '../../../utils/sizing';
 
 LUIComponent('layer-message-image', {
   properties: {
@@ -29,7 +29,7 @@ LUIComponent('layer-message-image', {
     /**
      * The Message property provides the MessageParts we are going to render.
      *
-     * @property {layer.Message}
+     * @property {layer.Message} [message=null]
      */
     message: {
       set(value) {
@@ -44,7 +44,7 @@ LUIComponent('layer-message-image', {
         if (this.properties.preview && this.properties.image) {
           if (!this.properties.preview.body) {
             this.properties.preview.fetchContent();
-            this.properties.preview.on('content-loaded', this.render, this);
+            this.properties.preview.on('content-loaded', this._render, this);
           }
           // TODO: remove body test once all websdk changes are merged and url is gaurenteed to have a value if body has a value
           // If image does not have a url, call fetchStream to get an updated url
@@ -54,45 +54,27 @@ LUIComponent('layer-message-image', {
         // If there is no preview, only an image, we're going to pass it into the ImageManager so fetch its body
         else if (!this.properties.image.body) {
           this.properties.image.fetchContent();
-          this.properties.image.on('content-loaded', this.render, this);
+          this.properties.image.on('content-loaded', this._render, this);
         }
 
         // Render the Message
-        this.render();
+        this._render();
       },
     },
 
-    /**
-     * Knowing the height of the list will help us determine a suitable size for the Image.
-     *
-     * @property {Number}
-     */
-    listHeight: {},
+    parentContainer: {},
 
-    /**
-     * Knowing the width of the list will help us determine a suitable size for the Image.
-     *
-     * @property {Number}
-     */
-    listWidth: {},
-
-    /**
-     * Optional parameter to use for rendering images.
-     *
-     * @property {Boolean}
-     */
-    noPadding: {},
   },
   methods: {
 
     /**
      * Constructor.
      *
-     * @method created
+     * @method _created
      * @private
      */
-    created() {
-      this.addEventListener('click', this.handleClick.bind(this));
+    _created() {
+      this.addEventListener('click', this._handleClick.bind(this));
     },
 
     /**
@@ -102,7 +84,8 @@ LUIComponent('layer-message-image', {
      * @private
      * @param {Event} evt
      */
-    handleClick(evt) {
+    _handleClick(evt) {
+      // Don't open images clicked within the Conversations List
       if (this.parentNode.tagName !== 'LAYER-CONVERSATION-LAST-MESSAGE') {
         evt.preventDefault();
         if (this.properties.image && this.properties.image.url) window.open(this.properties.image.url);
@@ -112,22 +95,24 @@ LUIComponent('layer-message-image', {
     /**
      * Render the Message.
      *
-     * Primarily, this method determines whether to call renderCanvas on the preview or the image.
+     * Primarily, this method determines whether to call _renderCanvas on the preview or the image.
      *
      * @method
      * @private
      */
-    render() {
-      // TODO: Need something better than hardcoded in sizes.
-      this.properties.sizes = normalizeSize(this.properties.meta, { width: 256, height: 256, noPadding: this.noPadding });
-      this.style.width = this.properties.sizes.width + 'px';
-      this.style.height = this.properties.sizes.height + 'px';
+    _render() {
+      let maxSizes = UISettings.maxSizes;
+      // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
+      if (this.parentContainer.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };
+      this.properties.sizes = normalizeSize(this.properties.meta, { width: maxSizes.width, height: maxSizes.height });
+      this.style.height = (UISettings.verticalMessagePadding + this.properties.sizes.height) + 'px';
       if (this.properties.preview && this.properties.preview.body) {
-        this.renderCanvas(this.properties.preview.body);
+        this._renderCanvas(this.properties.preview.body);
       } else if (this.properties.image && this.properties.image.body) {
-        this.renderCanvas(this.properties.image.body);
+        this._renderCanvas(this.properties.image.body);
       }
     },
+
 
     /**
      * Parse the EXIF data, determine the orientation and then generate a Canvas with a correctly oriented Image.
@@ -138,7 +123,7 @@ LUIComponent('layer-message-image', {
      * @private
      * @param {Blob} blob
      */
-    renderCanvas(blob) {
+    _renderCanvas(blob) {
       // Read the EXIF data
       ImageManager.parseMetaData(
         blob, (data) => {
@@ -168,18 +153,25 @@ LUIComponent('layer-message-image', {
 });
 
 /*
-  * Handle any Message that contains an IMage + Preview + Metadata or is just an Image
-  */
+ * Handle any Message that contains an IMage + Preview + Metadata or is just an Image
+ */
 layerUI.registerMessageHandler({
   tagName: 'layer-message-image',
   label: '<i class="fa fa-file-image-o" aria-hidden="true"></i> Image message',
   handlesMessage(message, container) {
+    // Get the Image Parts
     const imageParts = message.parts.filter(part =>
       ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1).length;
+
+    // Get the Preview Parts
     const previewParts = message.parts.filter(part =>
       part.mimeType === 'image/jpeg+preview').length;
+
+    // Get the Metadata Parts
     const metaParts = message.parts.filter(part =>
       part.mimeType === 'application/json+imageSize').length;
+
+    // We handle 1 part images or 3 part images.
     return (message.parts.length === 1 && imageParts ||
       message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1);
   },

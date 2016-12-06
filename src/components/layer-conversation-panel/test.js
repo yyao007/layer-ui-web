@@ -130,46 +130,46 @@ describe('layer-conversation-panel', function() {
       expect(el.properties.hasGeneratedQuery).toBe(false);
     });
 
-    it("Should call scheduleGeneratedQuery once the client is set", function() {
+    it("Should call _scheduleGeneratedQuery once the client is set", function() {
         testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
         CustomElements.takeRecords();
         var el = testRoot.firstChild;
-        spyOn(el, "scheduleGeneratedQuery");
+        spyOn(el, "_scheduleGeneratedQuery");
         el.client = client;
-        expect(el.scheduleGeneratedQuery).toHaveBeenCalledWith();
+        expect(el._scheduleGeneratedQuery).toHaveBeenCalledWith();
       });
   });
 
   describe("The hasGeneratedQuery property", function() {
-    it("Should call setupConversation if set to true", function() {
+    it("Should call _setupConversation if set to true", function() {
       el.conversationId = conversation.id;
       el.client = client;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.hasGeneratedQuery = true;
-      expect(el.setupConversation).toHaveBeenCalled();
+      expect(el._setupConversation).toHaveBeenCalled();
     });
 
-    it("Should not call setupConversation if set to false", function() {
+    it("Should not call _setupConversation if set to false", function() {
       el.conversationId = conversation.id;
       el.client = client;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.hasGeneratedQuery = false;
-      expect(el.setupConversation).not.toHaveBeenCalled();
+      expect(el._setupConversation).not.toHaveBeenCalled();
     });
 
-    it("Should not call setupConversation if set to true but no conversationId", function() {
+    it("Should not call _setupConversation if set to true but no conversationId", function() {
       el.conversationId = '';
       el.client = client;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.hasGeneratedQuery = true;
-      expect(el.setupConversation).not.toHaveBeenCalled();
+      expect(el._setupConversation).not.toHaveBeenCalled();
     });
 
-    it("Should not call setupConversation if no client", function() {
+    it("Should not call _setupConversation if no client", function() {
       el.conversationId = conversation.id;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.hasGeneratedQuery = true;
-      expect(el.setupConversation).not.toHaveBeenCalled();
+      expect(el._setupConversation).not.toHaveBeenCalled();
     });
   });
 
@@ -185,17 +185,17 @@ describe('layer-conversation-panel', function() {
       expect(el.conversationId).toEqual('');
     });
 
-    it("Should call setupConversation if there is a client", function() {
-      spyOn(el, "setupConversation");
+    it("Should call _setupConversation if there is a client", function() {
+      spyOn(el, "_setupConversation");
       el.client = client;
       el.conversationId = conversation.id;
-      expect(el.setupConversation).toHaveBeenCalledWith();
+      expect(el._setupConversation).toHaveBeenCalledWith();
     });
 
-    it("Should call not call setupConversation if there is not a client", function() {
-      spyOn(el, "setupConversation");
+    it("Should call not call _setupConversation if there is not a client", function() {
+      spyOn(el, "_setupConversation");
       el.conversationId = conversation.id;
-      expect(el.setupConversation).not.toHaveBeenCalled();
+      expect(el._setupConversation).not.toHaveBeenCalled();
     });
   });
 
@@ -227,17 +227,17 @@ describe('layer-conversation-panel', function() {
       testRoot.innerHTML = '<layer-conversation-panel conversation-id="' + conversation.id + '"></layer-conversation-panel>';
       CustomElements.takeRecords();
       el = testRoot.firstChild;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.client = client;
-      expect(el.setupConversation).toHaveBeenCalledWith();
+      expect(el._setupConversation).toHaveBeenCalledWith();
 
       // Inverse Test
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
       el = testRoot.firstChild;
-      spyOn(el, "setupConversation");
+      spyOn(el, "_setupConversation");
       el.client = client;
-      expect(el.setupConversation).not.toHaveBeenCalled();
+      expect(el._setupConversation).not.toHaveBeenCalled();
     });
 
     it("Should setup the query if there is a queryId", function() {
@@ -266,6 +266,14 @@ describe('layer-conversation-panel', function() {
     });
   });
 
+  describe("The emptyMessageListNode property", function() {
+    it("Should set the list emptyNode property", function() {
+      var div = document.createElement('div');
+      el.emptyMessageListNode = div;
+      expect(el.nodes.list.emptyNode).toBe(div);
+    });
+  });
+
   describe("The composeButtons property", function() {
     it("Should set the list composeButtons property", function() {
       var buttons = [document.createElement("button"), document.createElement("button")];
@@ -279,6 +287,13 @@ describe('layer-conversation-panel', function() {
     it("Should set the list composeText property", function() {
       el.composeText = "Frodo Must Cry";
       expect(el.nodes.composer.value).toEqual("Frodo Must Cry");
+    });
+  });
+
+  describe("The composePlaceholder property", function() {
+    it("Should set the list composePlaceholder property", function() {
+      el.composePlaceholder = "Frodo Must Cry";
+      expect(el.nodes.composer.placeholder).toEqual("Frodo Must Cry");
     });
   });
 
@@ -316,7 +331,7 @@ describe('layer-conversation-panel', function() {
     });
   });
 
-  describe("The onKeyDown() method", function() {
+  describe("The _onKeyDown() method", function() {
     beforeEach(function() {
       spyOn(el, "focusText");
     });
@@ -325,7 +340,7 @@ describe('layer-conversation-panel', function() {
       el.focus();
       jasmine.clock().uninstall();
       setTimeout(function() {
-        el.onKeyDown({
+        el._onKeyDown({
           keyCode: 70,
           metaKey: false,
           ctrlKey: false
@@ -339,7 +354,7 @@ describe('layer-conversation-panel', function() {
       var input = document.createElement("input");
       testRoot.appendChild(input);
       input.focus();
-      el.onKeyDown({
+      el._onKeyDown({
         keyCode: 70,
         metaKey: false,
         ctrlKey: false
@@ -348,7 +363,7 @@ describe('layer-conversation-panel', function() {
     });
 
     it("Should not call focusText if a charater is hit while holding a metaKey or ctrlKey", function() {
-      el.onKeyDown({
+      el._onKeyDown({
         keyCode: 70,
         metaKey: false,
         ctrlKey: true
@@ -357,7 +372,7 @@ describe('layer-conversation-panel', function() {
     });
 
     it("Should not call focusText if a non-character key is hit", function() {
-      el.onKeyDown({
+      el._onKeyDown({
         keyCode: 4,
         metaKey: false,
         ctrlKey: false
@@ -374,7 +389,7 @@ describe('layer-conversation-panel', function() {
     });
   });
 
-  describe("The setupConversation() method", function() {
+  describe("The _setupConversation() method", function() {
     beforeEach(function() {
       el.client = client;
     });

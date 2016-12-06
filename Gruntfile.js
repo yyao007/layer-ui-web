@@ -52,6 +52,14 @@ module.exports = function (grunt) {
         ]
       }
     },
+    cssmin: {
+      build: {
+        files: [
+          {src: ['themes/build/bubbles-basic.css'], dest: 'themes/build/bubbles-basic.min.css'},
+          {src: ['themes/build/groups-basic.css'], dest: 'themes/build/groups-basic.min.css'}
+        ]
+      }
+    },
     /* TODO: This is a crap copy routine as multiple themes using the same template name will overwrite eachother. */
     copy: {
       themes: {
@@ -78,7 +86,7 @@ module.exports = function (grunt) {
     // Documentation
     jsduck: {
       build: {
-        src: ["src/**/*.js", "node_modules/layer-websdk/lib/**/*.js"],
+        src: ["lib/**/*.js", "node_modules/layer-websdk/lib/**/*.js"],
         dest: 'docs',
         options: {
           'builtin-classes': false,
@@ -95,12 +103,18 @@ module.exports = function (grunt) {
 
     watch: {
       debug: {
-        files: ['src/**', "Gruntfile.js", '!**/test.js', 'index.js'],
-        tasks: ['debug', 'notify:watch']
+        files: ['src/**', "Gruntfile.js", '!**/test.js'],
+        tasks: ['debug', 'notify:watch'],
+        options: {
+          interrupt: true
+        }
       },
       themes: {
         files: ['themes/src/**'],
-        tasks: ['theme']
+        tasks: ['theme'],
+        options: {
+          interrupt: true
+        }
       }
     },
     notify: {
@@ -113,24 +127,57 @@ module.exports = function (grunt) {
     }
   });
 
+  grunt.registerTask('wait', 'Waiting for files to appear', function() {
+    console.log('Waiting...');
+    var done = this.async();
+
+    // There is an inexplicable delay between when grunt writes a file (and confirms it as written) and when it shows up in the file system.
+    // This has no affect on subsequent grunt tasks but can severely impact npm publish
+    // Note that we can't test if a file exists because grunt reports that it exists even if it hasn't yet been flushed to the file system.
+    setTimeout(function() {
+      console.log("Waiting...");
+      setTimeout(function() {
+        console.log("Waiting...");
+        setTimeout(function() {
+          done();
+        }, 1500);
+      }, 1500);
+    }, 1500);
+  });
+
   grunt.registerMultiTask('webcomponents', 'Building Web Components', function() {
     var options = this.options();
 
     function createCombinedComponentFile(file, outputPath) {
+      // Extract the class name; TODO: class name should be same as file name.
+      var jsFileName = file.replace(/^.*\//, '');
+      var className = jsFileName.replace(/\.js$/, '');
+
+      if (jsFileName === 'test.js') return;
+
       var output = grunt.file.read(file);
       var babelResult = babel.transform(output, {
         presets: ["babel-preset-es2015"]
       });
       output = babelResult.code;
 
+      // Babel sometimes moves our jsduck comments defining the class to the end of the file, causing JSDuck to quack.
+      // Move it back to the top so that JSDuck knows what class all the properties and methods belong to
+      var indexOfClass = output.indexOf('@class');
+      if (indexOfClass !== -1) var indexOfClassCodeBlock = output.lastIndexOf('/**', indexOfClass);
+      if (indexOfClassCodeBlock !== -1) {
+        var endOfClassCodeBlock = output.indexOf('*/', indexOfClass);
+        if (endOfClassCodeBlock !== -1) {
+          endOfClassCodeBlock += 2;
+          var prefix = output.substring(0, indexOfClassCodeBlock);
+          var classComment = output.substring(indexOfClassCodeBlock, endOfClassCodeBlock);
+          var postfix =  output.substring(endOfClassCodeBlock);
+          output = classComment + prefix + postfix;
+        }
+      }
+
       var templateCount = 0;
       var outputFolder = path.dirname(outputPath);
-
-      // Extract the class name; TODO: class name should be same as file name.
-      var jsFileName = file.replace(/^.*\//, '');
-      var className = jsFileName.replace(/\.js$/, '');
-
-      if (jsFileName === 'test.js') return;
 
       // Find the template file by checking for an html file of the same name as the js file in the same folder.
       var parentFolder = path.dirname(file);
@@ -171,7 +218,7 @@ module.exports = function (grunt) {
           templateContents = templateContents.replace(/>\s+</g, '><');
 
           // Generate the <template /> and <style> objects
-          output += 'var layerUI = require("' + pathToBase + '");\n';
+          output += '\nvar layerUI = require("' + pathToBase + '");\n';
           output += 'layerUI.buildAndRegisterTemplate("' + className + '", ' + JSON.stringify(templateContents.replace(/\n/g,'').trim()) + ', "' + templateId + '");\n';
           output += 'layerUI.buildStyle("' + className + '", ' + JSON.stringify(style.trim()) + ', "' + templateId + '");\n';
         });
@@ -181,6 +228,7 @@ module.exports = function (grunt) {
         grunt.file.mkdir(outputFolder);
       }
       grunt.file.write(outputPath, output);
+      // console.log("Wrote " + outputPath + "; success: " + grunt.file.exists(outputPath));
     }
 
     this.files.forEach(function(fileGroup) {
@@ -226,11 +274,12 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-jsduck');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-notify');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   grunt.registerTask('theme', ['less', 'copy']),
   grunt.registerTask('docs', ['jsduck']);
   grunt.registerTask('debug', ['webcomponents', 'browserify']);
-  grunt.registerTask('build', ['debug', 'uglify', 'theme']);
+  grunt.registerTask('build', ['debug', 'uglify', 'theme', 'cssmin']);
   grunt.registerTask('default', ['build', 'docs']);
-  grunt.registerTask('prepublish', ['build']);
+  grunt.registerTask('prepublish', ['build', 'wait']);
 };

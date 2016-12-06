@@ -42,9 +42,9 @@
  *
  * Events listed here come from either this component, or its subcomponents.
  *
- * * {@link layerUI.components.ConversationPanel.Composer#layer-send-message layer-send-message}: User has requested their Message be sent
- * * {@link layerUI.components.misc.Delete#layer-message-deleted layer-message-deleted}: User has requested a Message be deleted
- * * {@link layerUI.components.ConversationPanel.TypingIndicator#layer-typing-indicator-change layer-typing-indicator-change}: Someone in the Conversation has started/stopped typing
+ * * {@link layerUI.components.subcomponents.Composer#layer-send-message layer-send-message}: User has requested their Message be sent
+ * * {@link layerUI.components.subcomponents.Delete#layer-message-deleted layer-message-deleted}: User has requested a Message be deleted
+ * * {@link layerUI.components.subcomponents.TypingIndicator#layer-typing-indicator-change layer-typing-indicator-change}: Someone in the Conversation has started/stopped typing
  *
  * @class layerUI.components.ConversationPanel
  * @extends layerUI.components.Component
@@ -89,7 +89,7 @@ LUIComponent('layer-conversation-panel', {
    * You can use this event to provide your own logic for sending the Message.
    *
    * ```javascript
-   * document.body.addEventListener('on-send-message', function(evt) {
+   * document.body.addEventListener('layer-send-message', function(evt) {
    *   evt.preventDefault();
    *   var message = evt.detail.message;
    *   myAsyncLookup(function(result) {
@@ -103,10 +103,11 @@ LUIComponent('layer-conversation-panel', {
    * });
    * ```
    *
-   * @event on-send-message
+   * @event layer-send-message
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.message
+   * @param {Object} evt.detail.notification
    */
 
   /**
@@ -134,14 +135,14 @@ LUIComponent('layer-conversation-panel', {
    * You can use this event to provide your own logic for deleting the Message, or preventing it from being deleted.
    *
    * ```javascript
-   * document.body.addEventListener('on-message-deleted', function(evt) {
+   * document.body.addEventListener('layer-message-deleted', function(evt) {
    *   evt.preventDefault();
    *   var message = evt.detail.message;
    *   message.delete(layer.Constants.DELETION_MODES.MY_DEVICES);
    * });
    * ```
    *
-   * @event on-message-deleted
+   * @event layer-message-deleted
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.message
@@ -182,7 +183,7 @@ LUIComponent('layer-conversation-panel', {
    * By calling `evt.preventDefault()` on the event you can provide your own custom typing indicator text to this widget:
    *
    * ```javascript
-   * document.body.addEventListener('on-typing-indicator-change', function(evt) {
+   * document.body.addEventListener('layer-typing-indicator-change', function(evt) {
    *    evt.preventDefault();
    *    var widget = evt.target;
    *    var typingUsers = evt.detail.typing;
@@ -198,7 +199,7 @@ LUIComponent('layer-conversation-panel', {
    * Note that as long as you have called `evt.preventDefault()` you can also just directly manipulate child domNodes of `evt.detail.widget`
    * if a plain textual message doesn't suffice.
    *
-   * @event on-typing-indicator-change
+   * @event layer-typing-indicator-change
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Identity[]} evt.detail.typing
@@ -275,7 +276,15 @@ LUIComponent('layer-conversation-panel', {
     conversationId: {
       set(value) {
         if (value && value.indexOf('layer:///conversations') !== 0) this.properties.conversationId = '';
-        if (this.client && this.conversationId) this.conversation = this.client.getConversation(this.conversationId, true);
+        if (this.client && this.conversationId) {
+          if (this.client.isReady) {
+            this.conversation = this.client.getConversation(this.conversationId, true);
+          } else {
+            this.client.once('ready', () => {
+              if (this.conversationId) this.conversation = this.client.getConversation(this.conversationId, true);
+            });
+          }
+        }
       },
     },
 
@@ -301,14 +310,14 @@ LUIComponent('layer-conversation-panel', {
     conversation: {
       set(value) {
         if (value && !(value instanceof LayerAPI.Conversation)) this.properties.conversation = '';
-        if (this.client && this.conversation) this.setupConversation();
+        if (this.client && this.conversation) this._setupConversation();
       },
     },
 
-    // Docs in mixins/main-component
+    // Docs in mixins/main-component.js
     hasGeneratedQuery: {
       set(value) {
-        if (value && this.conversationId && this.client) this.setupConversation();
+        if (value && this.conversationId && this.client) this._setupConversation();
       },
       type: Boolean,
     },
@@ -326,16 +335,16 @@ LUIComponent('layer-conversation-panel', {
       type: Boolean,
     },
 
-    // Docs in mixins/main-component
+    // Docs in mixins/main-component.js
     client: {
       set(value) {
         if (value) {
           if (!this.conversation && this.conversationId) this.conversation = value.getConversation(this.conversationId, true);
-          if (this.conversation) this.setupConversation();
+          if (this.conversation) this._setupConversation();
           if (this.queryId) {
             this.query = value.getQuery(this.queryId);
           } else {
-            this.scheduleGeneratedQuery();
+            this._scheduleGeneratedQuery();
           }
         }
       },
@@ -355,7 +364,7 @@ LUIComponent('layer-conversation-panel', {
      * ```
      *
      * @property {Function} onRenderListItem
-     * @property {layerUI.components.ConversationPanel.MessageItem} onRenderListItem.widget
+     * @property {layerUI.components.MessagesListPanel.Item} onRenderListItem.widget
      *    One row of the list
      * @property {layer.Message[]} onRenderListItem.items
      *    full set of messages in the list
@@ -417,6 +426,15 @@ LUIComponent('layer-conversation-panel', {
       },
     },
 
+    emptyMessageListNode: {
+      set(value) {
+        this.nodes.list.emptyNode = value;
+      },
+      get(value) {
+        return this.nodes.list.emptyNode;
+      },
+    },
+
     /**
      * An array of buttons (dom nodes) to be added to the Compose bar.
      *
@@ -455,13 +473,31 @@ LUIComponent('layer-conversation-panel', {
     },
 
     /**
+     * Use this to get/set the text in the Compose bar.
+     *
+     * ```
+     * widget.composePlaceholder = 'Enter a message. Or dont. It really doesnt matter.';
+     * ```
+     *
+     * @property {String} [composePlaceholder='']
+     */
+    composePlaceholder: {
+      get() {
+        return this.nodes.composer.placeholder;
+      },
+      set(value) {
+        this.nodes.composer.placeholder = value;
+      },
+    },
+
+    /**
      * The model to generate a Query for if a Query is not provided.
      *
      * @readonly
      * @private
-     * @property {String} [queryModel=layer.Query.Message]
+     * @property {String} [_queryModel=layer.Query.Message]
      */
-    queryModel: {
+    _queryModel: {
       value: LayerAPI.Query.Message,
     },
   },
@@ -469,11 +505,11 @@ LUIComponent('layer-conversation-panel', {
     /**
      * Constructor.
      *
-     * @method created
+     * @method _created
      * @private
      */
-    created() {
-      this.addEventListener('keydown', this.onKeyDown.bind(this));
+    _created() {
+      this.addEventListener('keydown', this._onKeyDown.bind(this));
 
       // Typically the defaultIndex is -1, but IE11 uses 0.
       const defaultIndex = document.head ? document.head.tabIndex : null;
@@ -485,11 +521,11 @@ LUIComponent('layer-conversation-panel', {
      *
      * Unless the focus is on an input or textarea, in which case, let the user type.
      *
-     * @method onKeyDown
+     * @method _onKeyDown
      * @param {Event} evt
      * @private
      */
-    onKeyDown(evt) {
+    _onKeyDown(evt) {
       const keyCode = evt.keyCode;
       const metaKey = evt.metaKey;
       const ctrlKey = evt.ctrlKey;
@@ -509,7 +545,11 @@ LUIComponent('layer-conversation-panel', {
     /**
      * Place focus on the text editor in the Compose bar.
      *
-     * @method focusText
+     * ```
+     * widget.focusText();
+     * ```
+     *
+     * @method
      */
     focusText() {
       this.nodes.composer.focus();
@@ -518,11 +558,20 @@ LUIComponent('layer-conversation-panel', {
     /**
      * Given a Conversation ID and a Client, setup the Composer and Typing Indicator
      *
-     * @method setupConversation
+     * @method _setupConversation
      * @private
      */
-    setupConversation() {
+    _setupConversation() {
       const conversation = this.properties.conversation;
+
+      // No Conversation? Not much to do... except if not yet authenticated,
+      // in which case retry once authenticated.
+      if (!conversation) {
+        if (this.client && !this.client.isReady) {
+          this.client.once('ready', this._setupConversation.bind(this));
+        }
+        return;
+      }
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {

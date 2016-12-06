@@ -39,7 +39,7 @@ const layerUI = {};
  *
  * @property {Object} settings
  *
- * @property {layer} settings.layer    The Layer WebSDK
+ * @property {Object} settings.layer    The Layer WebSDK
  *
  * @property {String} [settings.appId]      The app ID to use for all webcomponents.
  *    Setting this is a short-hand for using the `app-id` property on each widget;
@@ -80,7 +80,9 @@ const layerUI = {};
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
  * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'images', 'newline', 'youtube']] Specify which text handlers you want
  *    Note that any custom handlers you add do not need to be in the settings, they can be called after calling `init()` using layerUI.registerTextHandler.
- * @property {Object} [settings.listNodeDimensions]  The list width/height to use for calculating optimal images/message-part sizes
+ * @property {Object} [settings.maxSizes]  The maximum width/height for image and video previews
+ * @property {Object} [settings.verticalMessagePadding=0]  Message handlers that must hard code a height into their dom nodes can be
+ *     hard to add borders and padding around.  Use this property to offset any hardcoded height by this number of pixels
  */
 layerUI.settings = {
   appId: '',
@@ -92,6 +94,8 @@ layerUI.settings = {
     tagName: 'layer-message-unknown',
   },
   textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
+  maxSizes: { width: 512, height: 512 },
+  verticalMessagePadding: 0,
 };
 
 /**
@@ -201,10 +205,12 @@ layerUI.addListItemSeparator = function addListItemSeparator(listItemNode, conte
     node.classList.add(contentClass);
   }
 
-  if (content && typeof content === 'string') {
-    node.innerHTML = content;
-  } else {
-    node.appendChild(content);
+  if (content) {
+    if (typeof content === 'string') {
+      node.innerHTML = content;
+    } else {
+      node.appendChild(content);
+    }
   }
 
   // If there is already a layer-list-item-separator-parent, then we just need to make sure it has this content
@@ -283,7 +289,7 @@ layerUI.adapters = {
  * @param {Object} options
  * @param {Function} options.handlesMessage
  * @param {layer.Message} options.handlesMessage.message    Message to test and handle with our handler if it matches
- * @param {DOMElement} options.handlesMessage.container     The container that this will be rendered within; typically identifies a specific
+ * @param {HTMLElement} options.handlesMessage.container     The container that this will be rendered within; typically identifies a specific
  *                                                          layerUI.MessageList or layerUI.ConversationItem.
  * @param {Boolean} options.handlesMessage.returns          Return true to signal that this handler accepts this Message.
  * @param {String} tagName                                  Dom node to create if this handler accepts the Message.
@@ -303,7 +309,7 @@ layerUI.registerMessageHandler = function registerMessageHandler(options) {
  * @method getHandler
  * @static
  * @param {layer.Message} message
- * @param {DOMElement} options.handlesMessage.container     The container that this will be rendered within
+ * @param {HTMLElement} container     The container that this will be rendered within
  * @return {Object} handler     See layerUI.registerMessageHandler for the structure of a handler.
  */
 layerUI.getHandler = (message, container) => {
@@ -352,7 +358,7 @@ layerUI.getHandler = (message, container) => {
  * @param {Number} options.order     A number used to sort your handler amongst other handlers as order
  *      of execution can matter for any text handler that modifies the text parsed by subsequent parsers.
  * @param {Function} options.handler
- * @param {object} options.handler.textData
+ * @param {Object} options.handler.textData
  * @param {String} options.handler.textData.text          Use this to read the current text value and write an update to it
  * @param {String[]} options.handler.textData.afterText   Append elements to this array to add stuff to be rendered below the text.
  *      Anything that goes into `afterText` should NOT be parsed by any text handler.
