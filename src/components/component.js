@@ -334,7 +334,7 @@ function setupProperty(classDef, prop, propertyDefHash) {
   classDef[name] = newDef;
 }
 
-layerUI.registerComponent = function registerComponent(tagName, classDef, force) {
+module.exports =  function registerComponent(tagName, classDef, force) {
   if (layerUI.settings.customComponents.indexOf(tagName) !== -1 && !force) return;
 
   // Insure property exists
@@ -782,5 +782,3 @@ layerUI.registerComponent = function registerComponent(tagName, classDef, force)
    */
   layerUI.components[tagName].properties = props;
 };
-
-module.exports = layerUI.registerComponent;

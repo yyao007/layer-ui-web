@@ -281,5 +281,5 @@ module.exports = function (grunt) {
   grunt.registerTask('debug', ['webcomponents', 'browserify']);
   grunt.registerTask('build', ['debug', 'uglify', 'theme', 'cssmin']);
   grunt.registerTask('default', ['build', 'docs']);
-  grunt.registerTask('prepublish', ['build', 'wait']);
+  grunt.registerTask('prepublish', ['build', 'theme', 'wait']);
 };

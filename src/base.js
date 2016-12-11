@@ -28,6 +28,8 @@
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
  */
+import RegisterComponent from './components/component';
+
 const layerUI = {};
 
 /**
@@ -631,5 +633,6 @@ layerUI.init = function init(settings) {
  *
  * @method registerComponent
  */
+layerUI.registerComponent = RegisterComponent;
 
 module.exports = layerUI;
