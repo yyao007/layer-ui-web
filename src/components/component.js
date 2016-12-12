@@ -328,6 +328,13 @@ function setupProperty(classDef, prop, propertyDefHash) {
       this.properties[name] = value;
       if (propDef.set) propDef.set.call(this, value, oldValue);
     }
+    if (layerUI.settings.enableTemplating && this.templateData && this.templateData[name]) {
+      this.templateData[name].forEach((config) => {
+        const value = this.evaluateExpression(config.expression);
+        const oldValue = this[config.attribute];
+        if (value !== oldValue) config.node[config.attribute] = value;
+      });
+    }
   };
 
   // Write the property def to our class that will be passed into document.registerElement(tagName, classDef)
@@ -547,12 +554,43 @@ module.exports =  function registerComponent(tagName, classDef, force) {
   classDef.setupDomNodes = {
     value: function setupDomNodes() {
       this.nodes = {};
+      this.templateData = {};
       this.querySelectorAllArray('*').forEach((node) => {
         const id = node.getAttribute('layer-id');
         if (id) this.nodes[id] = node;
+
+        if (layerUI.settings.enableTemplating) {
+          if (node.firstChild && node.firstChild.nodeName === '#text' && node.firstChild.data.match(/\{\{.*?\}\}/)) {
+              parseExpression(node.firstChild.data, 'innerHTML', node, this.templateData);
+          }
+          const attrs = node.attributes;
+          for (let i = 0; i < attrs.length; i++) {
+            const attr = attrs.item(i);
+            parseExpression(attr.value, attr.name, node, this.templateData);
+          }
+        }
       });
     },
   };
+
+
+  function parseExpression(expr, attributeName, node, templateData) {
+    const matches = expr.match(/^\{\{.*\}\}$/);
+    if (matches) {
+      const props = matches[0].match(/properties\.[a-zA-Z0-9-_]+/g);
+      if (props) {
+        props.forEach(propPath => {
+          const propName = propPath.replace(/^properties\./, '');
+          if (!templateData[propName]) templateData[propName] = [];
+          templateData[propName].push({
+            attribute: attributeName,
+            expression: matches[0],
+            node
+          });
+        });
+      }
+    }
+  }
 
   /**
    * Add a `_destroyed` method to your component which will be called when your component has been removed fromt the DOM.
@@ -661,6 +699,22 @@ module.exports =  function registerComponent(tagName, classDef, force) {
       }
       return layerUI.components[tagName].templates ? layerUI.components[tagName].templates[templateName] : null;
     },
+  };
+
+  classDef.evaluateExpression = {
+    value: function evaluateExpression(expr) {
+      const parts = expr.substring(2,expr.length-2).split(/\./);
+      let value = this;
+      let abort = false;
+      parts.forEach((part) => {
+        if (!abort && part in value) {
+          value = value[part];
+        } else {
+          abort = true;
+        }
+      });
+      return abort ? '' : value;
+    }
   };
 
   /**
