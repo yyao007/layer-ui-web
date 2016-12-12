@@ -28,8 +28,6 @@
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
  */
-import RegisterComponent from './components/component';
-
 const layerUI = {};
 
 /**
@@ -629,10 +627,11 @@ layerUI.init = function init(settings) {
 /**
  * This method is shorthand for accessing layerUI.components.Component.registerComponent
  *
- * Note: This code is actually in component.js
+ * Note: This code is actually in components/component.js and is only attached to layerUI
+ * if you require `layer-ui-web/index.js` or just `layer-ui-web`, else you have to directly
+ * access it.
  *
  * @method registerComponent
  */
-layerUI.registerComponent = RegisterComponent;
 
 module.exports = layerUI;

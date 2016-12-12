@@ -16,7 +16,11 @@
 require('webcomponents.js/webcomponents-lite.js');
 
 // Load layerUI namespace methods/properties
-var layerUI = require("./lib/base");
+var layerUI = require('./lib/base');
+var registerComponent = require('./lib/components/component');
+
+layerUI.registerComponent = registerComponent;
+
 var initSettings = layerUI.init;
 layerUI.init = function(settings) {
   initSettings(settings);
