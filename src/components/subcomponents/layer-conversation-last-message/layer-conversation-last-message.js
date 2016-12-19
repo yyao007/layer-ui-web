@@ -11,14 +11,15 @@
  *   customComponents: ['layer-conversation-last-message']
  * });
  *
- * document.registerElement('layer-conversation-last-message', {
- *   prototype: Object.create(HTMLElement.prototype, {
- *     createdCallback: {
- *       value: function() {
- *         this.innerHTML = this.item.lastMessage.parts[0].body;
- *       }
+ * layerUI.registerComponent('layer-conversation-last-message', {
+ *   properties: {
+ *      item: {}
+ *   },
+ *   methods: {
+ *     created: function() {
+ *       this.innerHTML = this.item.lastMessage.parts[0].body;
  *     }
- *   })
+ *   }
  * });
  * ```
  *

@@ -76,6 +76,13 @@ describe('layer-conversation-panel', function() {
       el.firstChild.trigger('layer-typing-indicator-change', {});
       expect(spy).toHaveBeenCalledWith(jasmine.any(CustomEvent));
     });
+
+    it("Should call onComposerChangeValue when child triggers layer-composer-change-value", function() {
+      var spy = jasmine.createSpy('callback');
+      el.onComposerChangeValue = spy;
+      el.firstChild.trigger('layer-composer-change-value', {});
+      expect(spy).toHaveBeenCalledWith(jasmine.any(CustomEvent));
+    });
   });
 
   describe("The query properties", function() {
@@ -386,6 +393,14 @@ describe('layer-conversation-panel', function() {
       spyOn(el.nodes.composer, "focus");
       el.focusText();
       expect(el.nodes.composer.focus).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("The send() method", function() {
+    it("Should call the composers focus method", function() {
+      spyOn(el.nodes.composer, "send");
+      el.send();
+      expect(el.nodes.composer.send).toHaveBeenCalledWith();
     });
   });
 

@@ -1,4 +1,66 @@
-layer-avatar * {
-  background-color: white;
-  border: solid 1px rgba(0, 0, 0, 0.1);
+layer-avatar {
+  * {
+    background-color: white;
+    border: solid 1px rgba(0, 0, 0, 0.1);
+  }
+  &.layer-has-user {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  span, img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border-width: 1px;
+  }
+
+  &.layer-avatar-cluster > * {
+      position: absolute;
+  }
+
+  &.layer-avatar-cluster > *:after {
+    content: '';
+    position: absolute;
+  }
+
+  &.layer-avatar-cluster > *:after {
+    top: -3px;
+    left: -3px;
+    bottom: -3px;
+    right: -3px;
+    border: 2px white solid;
+    border-radius: 50%;
+  }
+}
+
+/* Larger Avatar */
+layer-identities-list {
+  layer-avatar {
+    height: 50px;
+    width: 50px;
+    min-width: 50px;
+    line-height: 50px;
+    font-size: 16px;
+
+    span, img {
+      height: 48px;
+      width: 48px;
+    }
+
+  /* Clustered Avatars for Group Chats */
+    &.layer-avatar-cluster > * {
+      height: 70%;
+      width: 70%;
+      font-size: 0.7em;
+    }
+
+    &.layer-avatar-cluster > *:nth-child(2) {
+      margin-left: 25%;
+      margin-top: 25%;
+      z-index: 2;
+    }
+  }
 }

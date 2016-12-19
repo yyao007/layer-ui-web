@@ -1,5 +1,24 @@
 # Layer UI for Web Change Log
 
+## 0.9.6
+
+* Build Fixes
+  * Fixes the missing `layerUI.registerComponent` method
+  * Fixes missing `themes/build` folder in `npm` distribution
+  * Fixes missing `build/*.js` folder in `npm` distribution
+* Composer Enhancements
+  * Adds a Send button
+  * Adds a `ConversationPanel.send()` method to let apps send the contents of the Composer.
+  * Updates design of the File Upload button
+  * Adds `onComposerChangeValue` property / `layer-composer-change-value` event to the `ConversationPanel` widget.
+  * Triggers a `layer-composer-change-value` event when the input changes; this helps Flux architectures to put the current value into their state.
+* Adds Message parameter to the registerTextHandler callback arguments
+* Fixes backbone adapter; which had errors from the introduction of ES6 syntax
+* Fixes to `emptyMessageListNode` to handle rerendering better
+* Theming
+  * Moves most of the CSS for Layer Avatars from the template to the theme
+  * Some cleanup and reworking of themes and theme variables
+
 ## 0.9.5
 
 * Adds `composePlaceholder` property to `<layer-conversation-panel>` to control the composer's placeholder property

@@ -1,6 +1,6 @@
 {
   "name": "layer-ui-web",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-preset-latest": "^6.16.0",
+    "eslint-config-airbnb": "^13.0.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
     "grunt-cli": "^1.2.0",

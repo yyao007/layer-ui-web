@@ -359,6 +359,7 @@ LUIComponent('layer-messages-list', {
 
     _postRender() {
       this.nodes.emptyNode.style.display = this.isEmptyList ? '' : 'none';
+      if (this.emptyNode) this.nodes.emptyNode.appendChild(this.emptyNode);
     },
 
     /**

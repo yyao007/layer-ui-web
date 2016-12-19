@@ -67,8 +67,10 @@ LUIComponent('layer-composer', {
      */
     value: {
       set(value) {
+        const oldValue = this.nodes.input.value;
         this.nodes.input.value = value;
         this._resizeNode();
+        this._triggerChange(value, oldValue);
       },
       get() {
         return this.nodes.input.value;
@@ -103,9 +105,43 @@ LUIComponent('layer-composer', {
       // Setting this in the template causes errors in IE 11.
       this.nodes.input.placeholder = 'Enter a message';
       this.nodes.input.addEventListener('keydown', this._onKeyDown.bind(this));
+      this.nodes.input.addEventListener('input', this._onInput.bind(this));
 
       // Event handlers
       this.addEventListener('layer-file-selected', this._handleAttachments.bind(this));
+      this.addEventListener('layer-send-click', this.send.bind(this, null));
+    },
+
+    /**
+     * Whenever the value changes, trigger a `layer-composer-change-value` event.
+     *
+     * @method
+     * @private
+     * @param {String} value      The current value
+     * @param {String} oldValue   The prior value
+     */
+    _triggerChange(value, oldValue) {
+      if (value === oldValue) return;
+      this.properties.value = value;
+
+      /**
+       * This event is triggered whenever the composer value changes.
+       *
+       * This is not a cancelable event.
+       *
+       * ```javascript
+       * document.body.addEventListener('layer-composer-change-value', function(evt) {
+       *   this.setState({composerValue: evt.detail.value});
+       * }
+       * ```
+       *
+       * @event layer-composer-change-value
+       * @param {Event} evt
+       * @param {Object} evt.detail
+       * @param {String} evt.detail.value
+       * @param {String} evt.detail.oldValue
+       */
+      this.trigger('layer-composer-change-value', { value, oldValue });
     },
 
     /**
@@ -147,6 +183,10 @@ LUIComponent('layer-composer', {
      * @param {layer.MessagePart[]} optionalParts
      */
     send(optionalParts) {
+      if (!this.conversation) {
+        console.error("Unable to send message without a conversationId");
+        return;
+      }
       let parts = [];
       if (optionalParts) {
         parts = optionalParts;
@@ -231,11 +271,17 @@ LUIComponent('layer-composer', {
         } else {
           event.target.value += '\n';
         }
+        this._onInput(event);
       } else if (!layerUI.settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
         event.preventDefault();
         event.target.value += '\t  ';
+        this._onInput(event);
       }
+    },
+
+    _onInput(event) {
       this._resizeNode();
+      this._triggerChange(this.nodes.input.value, this.properties.value);
     },
 
     /**

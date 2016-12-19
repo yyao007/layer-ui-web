@@ -344,7 +344,7 @@ layerUI.getHandler = (message, container) => {
  * layerUI.registerTextHandler({
  *    name: 'youtube',
  *    order: 200,
- *    handler: function(textData) {
+ *    handler: function(textData, message) {
  *    textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
  *   });
@@ -362,6 +362,7 @@ layerUI.getHandler = (message, container) => {
  * @param {String} options.handler.textData.text          Use this to read the current text value and write an update to it
  * @param {String[]} options.handler.textData.afterText   Append elements to this array to add stuff to be rendered below the text.
  *      Anything that goes into `afterText` should NOT be parsed by any text handler.
+ * @param {layer.Message} options.handler.message         If your text processor needs access to the original message, this is it, but should be treated as a read-only object in this context.
  * @param {Boolean} [requiresEnable=false]                If provided, this registers the handler but won't use the handler
  *       without a separate call to opt in.  Opt in later using with `layerUI.registerTextHandler({name: handlerName})`
  *       and no handler function.  (For Internal use only)
@@ -627,7 +628,9 @@ layerUI.init = function init(settings) {
 /**
  * This method is shorthand for accessing layerUI.components.Component.registerComponent
  *
- * Note: This code is actually in component.js
+ * Note: This code is actually in components/component.js and is only attached to layerUI
+ * if you require `layer-ui-web/index.js` or just `layer-ui-web`, else you have to directly
+ * access it.
  *
  * @method registerComponent
  */

@@ -6,7 +6,7 @@ layer-conversation-item {
    */
   .layer-list-item {
     cursor: pointer;
-    padding: 12px 5px;
+    padding: 20px 5px;
     border-left: 3px solid transparent;
     border-bottom: @border-list-item;
     &:not(:first-child) {
@@ -50,24 +50,21 @@ layer-conversation-item {
    layer-avatar * {
       color: @fontcolor-lightest;
       border: @border-lightest;
+      border: 1px solid rgba(0,0,0,0.1);
    }
 
-   &.layer-conversation-unread-messages layer-avatar {
-      &:not(.layer-avatar-cluster) {
-        width: 44px;
-        height: 44px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-right: 11px;
-        * {
-          border: @border-highlight;
-        }
-      }
-      * {
-        color: @fontcolor-normal;
-      }
+   &.layer-conversation-unread-messages layer-avatar::after {
+      width: 19px;
+      height: 19px;
+      display: inline-block;
+      background-color: #19A5E4;
+      content: "•";
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      border-radius: 20px;
+      border: solid 3px white;
+      z-index: 8;
    }
 
    &.layer-conversation-item-selected layer-avatar {

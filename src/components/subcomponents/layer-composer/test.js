@@ -94,6 +94,13 @@ describe('layer-composer', function() {
       el.nodes.input.value = "Please Gollum, just eat him";
       expect(el.value).toEqual("Please Gollum, just eat him");
     });
+
+    it("Should call _triggerChange", function() {
+      el.value = "hi";
+      spyOn(el, "_triggerChange");
+      el.value = "hi ho";
+      expect(el._triggerChange).toHaveBeenCalledWith("hi ho", "hi");
+    });
   });
 
   describe("The placeholder property", function() {
@@ -269,6 +276,7 @@ describe('layer-composer', function() {
       });
       expect(preventSpy).not.toHaveBeenCalledWith();
       expect(el.nodes.input.value).toEqual("");
+      layerUI.settings.disableTabAsWhiteSpace = false;
     });
 
     it("Should call _resizeNode() whether its an ENTER or a letter", function() {
@@ -276,12 +284,71 @@ describe('layer-composer', function() {
       var preventSpy = jasmine.createSpy('preventDefault');
       el._onKeyDown({
         preventDefault: preventSpy,
-        keyCode: 9,
+        keyCode: 13,
         shiftKey: false,
         ctrlKey: false,
         target: el.nodes.input
       });
       expect(el._resizeNode).toHaveBeenCalledWith();
+    });
+
+    it("Should call _triggerChange", function() {
+      el.nodes.input.value = "hi ho";
+      el.properties.value = "hi";
+
+      spyOn(el, "_triggerChange");
+      el._onKeyDown({
+        preventDefault: function() {},
+        keyCode: 13,
+        shiftKey: false,
+        ctrlKey: false,
+        target: el.nodes.input
+      });
+      expect(el._triggerChange).toHaveBeenCalledWith("hi ho", "hi");
+    });
+  });
+
+  describe("The _onInput() method", function() {
+    it("Should call _resizeNode() ", function() {
+      spyOn(el, "_resizeNode");
+      var preventSpy = jasmine.createSpy('preventDefault');
+      el._onInput({});
+      expect(el._resizeNode).toHaveBeenCalledWith();
+    });
+
+    it("Should call _triggerChange", function() {
+      el.nodes.input.value = "hi ho";
+      el.properties.value = "hi";
+
+      spyOn(el, "_triggerChange");
+      el._onInput({});
+      expect(el._triggerChange).toHaveBeenCalledWith("hi ho", "hi");
+    });
+  });
+
+  describe("The _triggerChange() method", function() {
+    it("Should trigger a change event", function() {
+      el.properties.value = "hi";
+      spyOn(el, "trigger");
+      el._triggerChange("hi ho", "hi");
+      expect(el.trigger).toHaveBeenCalledWith("layer-composer-change-value", {
+        value: "hi ho",
+        oldValue: "hi"
+      });
+    });
+
+    it("Should update this.data.value", function() {
+      el.properties.value = "hi";
+      el._triggerChange("hi ho", "hi");
+      expect(el.properties.value).toEqual("hi ho");
+    });
+
+    it("Should abort if no change", function() {
+      el.properties.value = "hi";
+      spyOn(el, "trigger");
+      el._triggerChange("hi ho", "hi ho");
+      expect(el.properties.value).toEqual("hi");
+      expect(el.trigger).not.toHaveBeenCalled();
     });
   });
 

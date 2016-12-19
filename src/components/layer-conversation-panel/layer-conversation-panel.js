@@ -77,7 +77,7 @@ LUIComponent('layer-conversation-panel', {
    * };
    * ```
    *
-   * @method onSendMessage
+   * @property {Function} onSendMessage
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.message
@@ -123,7 +123,7 @@ LUIComponent('layer-conversation-panel', {
    * };
    * ```
    *
-   * @method onMessageDeleted
+   * @property {Function} onMessageDeleted
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.message
@@ -170,7 +170,7 @@ LUIComponent('layer-conversation-panel', {
    * Note that as long as you have called `evt.preventDefault()` you can also just directly manipulate child domNodes of `evt.detail.widget`
    * if a plain textual message doesn't suffice.
    *
-   * @method onTypingIndicatorChange
+   * @property {Function} onTypingIndicatorChange
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Identity[]} evt.detail.typing
@@ -205,7 +205,26 @@ LUIComponent('layer-conversation-panel', {
    * @param {layer.Identity[]} evt.detail.typing
    * @param {layer.Identity[]} evt.detail.paused
    */
-  events: ['layer-message-deleted', 'layer-send-message', 'layer-typing-indicator-change'],
+
+  /**
+   * This event is triggered whenever the composer value changes.
+   *
+   * This is not a cancelable event.
+   *
+   * ```javascript
+   * conversationPanel.onComposerChangeValue = function(evt) {
+   *   this.setState({composerValue: evt.detail.value});
+   * }
+   * ```
+   *
+   * @property {Function} onComposerChangeValue
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {String} evt.detail.value
+   * @param {String} evt.detail.oldValue
+   */
+  events: ['layer-message-deleted', 'layer-send-message', 'layer-typing-indicator-change',
+    'layer-composer-change-value'],
 
   properties: {
 
@@ -553,6 +572,26 @@ LUIComponent('layer-conversation-panel', {
      */
     focusText() {
       this.nodes.composer.focus();
+    },
+
+    /**
+     * Send the Message that the user has typed in... or that you have specified.
+     *
+     * ```
+     * widget.composeText = "Hello world";
+     * widget.send(); // send the current text in the textarea
+     * ```
+     *
+     * ```
+     * widget.send(parts); // send custom message parts but NOT the text in the textarea
+     * ```
+     *
+     * @method
+     * @param {layer.MessagePart[]} optionalParts
+     */
+    send(optionalParts) {
+      const args = optionalParts ? [optionalParts] : [];
+      this.nodes.composer.send(...args);
     },
 
     /**

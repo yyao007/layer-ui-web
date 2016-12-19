@@ -149,6 +149,7 @@ module.exports = function (grunt) {
     var options = this.options();
 
     function createCombinedComponentFile(file, outputPath) {
+      try {
       // Extract the class name; TODO: class name should be same as file name.
       var jsFileName = file.replace(/^.*\//, '');
       var className = jsFileName.replace(/\.js$/, '');
@@ -228,7 +229,10 @@ module.exports = function (grunt) {
         grunt.file.mkdir(outputFolder);
       }
       grunt.file.write(outputPath, output);
-      // console.log("Wrote " + outputPath + "; success: " + grunt.file.exists(outputPath));
+      //grunt.log.writeln("Wrote " + outputPath + "; success: " + grunt.file.exists(outputPath));
+      } catch(e) {
+        grunt.log.writeln('Failed to process ' + file);
+      }
     }
 
     this.files.forEach(function(fileGroup) {
@@ -281,5 +285,5 @@ module.exports = function (grunt) {
   grunt.registerTask('debug', ['webcomponents', 'browserify']);
   grunt.registerTask('build', ['debug', 'uglify', 'theme', 'cssmin']);
   grunt.registerTask('default', ['build', 'docs']);
-  grunt.registerTask('prepublish', ['build', 'wait']);
+  grunt.registerTask('prepublish', ['build', 'theme', 'wait']);
 };

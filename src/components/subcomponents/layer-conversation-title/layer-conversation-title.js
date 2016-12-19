@@ -11,14 +11,14 @@
  *   customComponents: ['layer-conversation-title']
  * });
  *
- * document.registerElement('layer-conversation-title', {
- *   prototype: Object.create(HTMLElement.prototype, {
- *     createdCallback: {
- *       value: function() {
- *         this.innerHTML = this.item.metadata.myCustomTitle;
- *       }
- *     }
- *   })
+ * layerUI.registerComponent('layer-conversation-title', {
+ *    properties: {
+ *      item: {
+ *        set: function(value) {
+ *           this.innerHTML = this.item.metadata.myCustomTitle;
+ *        }
+ *      }
+ *    }
  * });
  * ```
  *

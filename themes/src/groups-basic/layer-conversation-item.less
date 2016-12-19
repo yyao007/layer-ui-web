@@ -1,6 +1,6 @@
 layer-conversation-item {
   cursor: pointer;
-  padding: 6px 5px;
+  padding: 6px 15px;
   color: black;
   border-bottom: @border-list-item;
 
@@ -8,6 +8,7 @@ layer-conversation-item {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    height: 1.8em;
   }
 
   &.layer-conversation-item-selected {
@@ -81,7 +82,7 @@ layer-conversation-item {
     &.layer-conversation-item-selected layer-delete {
       display: block;
       opacity: 0.2;
-      padding: 2px 4px 8px;
+      padding: 2px 0px 8px 0px;
       &:hover {
         opacity: 0.8;
       }

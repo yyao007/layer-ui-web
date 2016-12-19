@@ -2,69 +2,7 @@
   <style>
     layer-avatar {
       display: block;
-      height: 40px;
-      width: 40px;
-      min-width: 40px;
     }
-    layer-avatar.layer-has-user {
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-      line-height: 40px;
-      font-size: 16px;
-    }
-    layer-avatar span, layer-avatar img {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 38px;
-      width: 38px;
-      border-radius: 50%;
-    }
-    layer-avatar.layer-avatar-cluster {
-      border-radius: 0;
-      background: none;
-    }
-
-    /* Large Avatars */
-    layer-avatar.layer-large-avatar {
-      height: 60px;
-      width: 60px;
-      min-width: 60px;
-    }
-    layer-avatar.layer-has-user.layer-large-avatar {
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-      text-align: center;
-      line-height: 60px;
-      font-size: 16px;
-    }
-
-    /* Clustered Avatars for Group Chats */
-    layer-avatar.layer-avatar-cluster > * {
-      position: absolute;
-      height: 60%;
-      width: 60%;
-      font-size: 0.666em;
-    }
-    layer-avatar.layer-avatar-cluster > *:after {
-      content: '';
-      position: absolute;
-      top: -3px;
-      left: -3px;
-      bottom: -3px;
-      right: -3px;
-      border: 2px white solid;
-      border-radius: 50%;
-    }
-
-    layer-avatar.layer-avatar-cluster > *:nth-child(2) {
-      margin-left: 33.333%;
-      margin-top: 33.333%;
-    }
-
   </style>
 </template>
 <script>

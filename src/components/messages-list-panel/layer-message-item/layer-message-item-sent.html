@@ -40,6 +40,12 @@
     layer-message-item.layer-message-item-sent layer-message-text-plain {
       display: block;
     }
+
+    .layer-avatar-delete-panel {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
   </style>
 
   <div class='layer-list-item' layer-id='innerNode'>
@@ -47,8 +53,10 @@
       <div class='layer-message-item-main'>
         <div class='layer-message-item-content' layer-id='content'></div>
       </div>
-      <layer-avatar layer-id='avatar'></layer-avatar>
-      <layer-delete layer-id='delete'></layer-delete>
+      <div class='layer-avatar-delete-panel'>
+        <layer-avatar layer-id='avatar'></layer-avatar>
+        <layer-delete layer-id='delete'></layer-delete>
+      </div>
     </div>
     <div class='layer-sender-info layer-sender-details'>
       <div class='layer-sender-name' layer-id='sender'></div>

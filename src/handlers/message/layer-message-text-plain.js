@@ -66,7 +66,7 @@ LUIComponent('layer-message-text-plain', {
         afterText: [],
       };
 
-      layerUI.textHandlersOrdered.forEach(handler => handler(textData));
+      layerUI.textHandlersOrdered.forEach(handler => handler(textData, this.message));
 
       const startDiv = '<div class="layer-message-text-plain-after-text">';
       this.innerHTML = textData.text +

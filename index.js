@@ -16,7 +16,11 @@
 require('webcomponents.js/webcomponents-lite.js');
 
 // Load layerUI namespace methods/properties
-var layerUI = require("./lib/base");
+var layerUI = require('./lib/base');
+var registerComponent = require('./lib/components/component');
+
+layerUI.registerComponent = registerComponent;
+
 var initSettings = layerUI.init;
 layerUI.init = function(settings) {
   initSettings(settings);
@@ -42,6 +46,7 @@ layerUI.init = function(settings) {
   require("./lib/components/subcomponents/layer-delete/layer-delete");
   require("./lib/components/subcomponents/layer-file-upload-button/layer-file-upload-button");
   require("./lib/components/subcomponents/layer-message-status/layer-message-status");
+  require("./lib/components/subcomponents/layer-send-button/layer-send-button");
   require("./lib/components/subcomponents/layer-typing-indicator/layer-typing-indicator");
   require("./lib/handlers/message/layer-message-image/layer-message-image");
   require("./lib/handlers/message/layer-message-text-plain");

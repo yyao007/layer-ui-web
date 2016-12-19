@@ -57,7 +57,7 @@ function initBackbone(backbone) {
     // Define the Backbone View
     const view = libraryResult[className] = backbone.View.extend({
       el: componentName,
-      initialize: (client, options) => {
+      initialize: function initialize(client, options) {
         this.client = client;
         Object.keys(options || {}).forEach((propertyName) => {
           this[propertyName] = options[propertyName];

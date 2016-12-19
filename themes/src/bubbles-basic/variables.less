@@ -16,14 +16,15 @@
 @fontsize-normal: 1.0rem;
 @fontsize-small: 0.9rem;
 
-@fontcolor-darker: #000;
 @fontcolor-normal: #313f48;
 @fontcolor-lighter: #8798a4;
 @fontcolor-lightest: #adb9c1;
 @fontcolor-inverted: #fafbfc;
+@fontcolor-emphasized: #19A5E4;
+@fontcolor-button: #C3CDD4;
 
 @fontweight-normal: 400;
-@fontweight-semibold: 600;
+@fontweight-semibold: 500; // may not show for many fonts
 @fontweight-bold: 700;
 
 .layer-text-list-heading() {
@@ -34,7 +35,7 @@
 
 .layer-text-list-heading-emphasized() {
   font-size: @fontsize-normal;
-  color: @fontcolor-darker;
+  color: @fontcolor-emphasized;
   font-weight: @fontweight-bold;
 }
 
