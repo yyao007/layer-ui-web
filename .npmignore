@@ -8,7 +8,7 @@ coverage
 .lock-wscript
 
 # Compiled files
-build
+# build
 
 # Ignore editor config files
 *.sublime-workspace
