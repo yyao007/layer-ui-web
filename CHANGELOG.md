@@ -16,6 +16,7 @@
   * Apps that customized `layer-message-item` template or widget should now customize `layer-message-item-sent` or `layer-message-item-received` instead.
   * Any custom CSS will need to be updated from `layer-message-item.layer-message-item-received` to just `layer-message-item-received`.
 
+
 ## 0.9.6
 
 * Build Fixes
