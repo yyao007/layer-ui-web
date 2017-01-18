@@ -30,6 +30,7 @@ describe('layer-compose-button-panel', function() {
     conversation = client.createConversation({
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
@@ -37,14 +38,14 @@ describe('layer-compose-button-panel', function() {
   });
 
   describe('The buttons property', function() {
-    it("Should call rerender", function() {
-      spyOn(el, "_rerender");
+    it("Should call onRender", function() {
+      spyOn(el, "onRender");
       el.buttons = [];
-      expect(el._rerender).toHaveBeenCalledWith();
+      expect(el.onRender).toHaveBeenCalledWith();
     });
   });
 
-  describe("The rerender() method", function() {
+  describe("The onRender() method", function() {
     it("Should clear the panel if no buttons", function(){
       el.buttons = [];
       expect(el.innerHTML).toEqual('');

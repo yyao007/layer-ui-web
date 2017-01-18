@@ -6,6 +6,7 @@ describe('layer-file-upload-button', function() {
     el = document.createElement('layer-file-upload-button');
     testRoot.appendChild(el);
     document.body.appendChild(testRoot);
+    layer.Util.defer.flush();
   });
 
   it("Should setup a label pointing to a file input", function() {
@@ -22,7 +23,7 @@ describe('layer-file-upload-button', function() {
     }
 
     // Run
-    el._onChange();
+    el.onChange();
 
     // Posttest
     expect(spy).toHaveBeenCalledWith([], jasmine.any(Function));
@@ -31,7 +32,7 @@ describe('layer-file-upload-button', function() {
     layerUI.files.processAttachments = tmp;
   });
 
-  it("Should trigger layer-file-selected _onChange", function() {
+  it("Should trigger layer-file-selected onChange", function() {
     var part = new layer.MessagePart({body: "Frodo is a Dodo", mimeType: "text/plain"});
     var spy = jasmine.createSpy('processAttachments').and.callFake(function(a, callback) {
       callback([part]);
@@ -46,7 +47,7 @@ describe('layer-file-upload-button', function() {
     document.body.addEventListener('layer-file-selected', eventSpy);
 
     // Run
-    el._onChange();
+    el.onChange();
 
     // Posttest
     var args = eventSpy.calls.allArgs()[0];

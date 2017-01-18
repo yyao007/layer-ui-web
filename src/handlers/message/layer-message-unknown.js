@@ -26,10 +26,10 @@ LUIComponent('layer-message-unknown', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
     },
 
     /**

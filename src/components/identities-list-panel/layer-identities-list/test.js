@@ -1,8 +1,8 @@
 describe('layer-identities-list', function() {
   var el, testRoot, client, query;
 
-  beforeEach(function(done) {
-
+  beforeEach(function() {
+    jasmine.clock().install();
     client = new layer.Client({
       appId: 'layer:///apps/staging/Fred'
     });
@@ -39,15 +39,17 @@ describe('layer-identities-list', function() {
 
     el.query = query;
     CustomElements.takeRecords();
-    setTimeout(function() {
-      done();
-    }, 10);
+    layer.Util.defer.flush();
+    jasmine.clock().tick(500);
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
     try {
+      jasmine.clock().uninstall();
       layerUI.settings.appId = null;
       document.body.removeChild(testRoot);
+      if (el) el.onDestroy();
     } catch(e) {}
   });
 
@@ -103,6 +105,7 @@ describe('layer-identities-list', function() {
     it("Should call _updateQuery if there is a queryId passed into the innerHTML", function() {
       testRoot.innerHTML = '<layer-identities-list query-id="' + query.id + '" app-id="' + client.appId + '"></layer-identities-list>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       var el = testRoot.firstChild;
       expect(el.query).toBe(query);
       spyOn(el, "_processQueryEvt"); // _updateQuery sets up the query listener to call _processQueryEvt
@@ -242,13 +245,13 @@ describe('layer-identities-list', function() {
     it("Should call _processQueryEvt", function() {
       spyOn(el, "_processQueryEvt");
       var evt = {};
-      el._rerender(evt);
+      el.onRerender(evt);
       expect(el._processQueryEvt).toHaveBeenCalledWith(evt);
     });
 
     it("Should remove any removed identities from selectedIdentities", function() {
       el.selectedIdentities = [query.data[2], query.data[1], query.data[0]];
-      el._rerender({
+      el.onRerender({
         type: 'remove',
         target: query.data[1]
       });
@@ -257,7 +260,7 @@ describe('layer-identities-list', function() {
 
     it("Should reset selectedIdentities when data is reset", function() {
       el.selectedIdentities = [query.data[2], query.data[1], query.data[0]];
-      el._rerender({
+      el.onRerender({
         type: 'reset'
       });
       expect(el.selectedIdentities).toEqual([]);
@@ -301,6 +304,7 @@ describe('layer-identities-list', function() {
     describe("Properties", function() {
       it("Should set the query given a queryId and then a client", function() {
         var el = document.createElement('layer-identities-list');
+        layer.Util.defer.flush();
         el.queryId = query.id;
         expect(el.client).toBe(null);
         expect(el.query).toBe(null);
@@ -311,6 +315,7 @@ describe('layer-identities-list', function() {
 
       it("Should set the query given a client and then a queryId", function() {
         var el = document.createElement('layer-identities-list');
+        layer.Util.defer.flush();
         el.appId = client.appId;
         expect(el.client).toBe(client);
         expect(el.query).toBe(null);
@@ -319,22 +324,24 @@ describe('layer-identities-list', function() {
         expect(el.query).toBe(query);
       });
 
-      it("Should call render on setting the query", function(done) {
+      it("Should call render on setting the query", function() {
         var el = document.createElement('layer-identities-list');
-        spyOn(el, "_render");
+        spyOn(el, "onRender");
+        layer.Util.defer.flush();
         el.query = query;
-        setTimeout(function() {
-          expect(el._render).toHaveBeenCalledWith();
-          done();
-        }, 1)
+        jasmine.clock().tick(10);
+        expect(el.onRender).toHaveBeenCalledWith();
       });
 
-      // Tests call to _rerender as rerender has already been bound to an event before we can test it
+      // Tests call to onRerender as rerender has already been bound to an event before we can test it
       it("Should wire up rerender on setting the query", function() {
         var el = document.createElement('layer-identities-list');
+        layer.Util.defer.flush();
         spyOn(el, "_processQueryEvt");
+
         el.query = query;
-        expect(el._processQueryEvt).not.toHaveBeenCalled();
+        expect(el._processQueryEvt).toHaveBeenCalledWith({ type: 'data', data: el.query.data, inRender: true });
+        expect(el._processQueryEvt).not.toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
         query.trigger("change", {type: "data", data: []});
         expect(el._processQueryEvt).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
       });
@@ -381,7 +388,7 @@ describe('layer-identities-list', function() {
       });
     });
 
-    describe("The created() method", function() {
+    describe("The onCreate() method", function() {
       it("Should wire up the scroll event handler", function(done) {
         el.properties.isSelfScrolling = false;
         spyOn(el, "_throttler").and.callFake(function() {
@@ -396,6 +403,10 @@ describe('layer-identities-list', function() {
       it("Should initialize listData", function() {
         var el = document.createElement('layer-identities-list');
         expect(el.properties.listData).toEqual([]);
+      });
+
+      it("Should set the loadIndicator to an element in the widget", function() {
+        expect(el.nodes.loadIndicator.classList.contains('layer-load-indicator')).toBe(true);
       });
     });
 
@@ -438,18 +449,16 @@ describe('layer-identities-list', function() {
     });
 
     describe("The throttle() method", function() {
-      it("Should schedule a call to perform an action", function(done) {
+      it("Should schedule a call to perform an action", function() {
         var spy = jasmine.createSpy("hello");
         el._throttler(spy);
+        jasmine.clock().tick(10);
         expect(spy).not.toHaveBeenCalled();
-        setTimeout(function() {
-          expect(spy).toHaveBeenCalled();
-          done();
-        }, 100);
+        jasmine.clock().tick(100);
+        expect(spy).toHaveBeenCalled();
       });
 
       it("Should do nothing if its already scheduled", function() {
-        jasmine.clock().install();
         var el = document.createElement('layer-identities-list');
         el.query = query;
         var spy = jasmine.createSpy("hello");
@@ -465,7 +474,6 @@ describe('layer-identities-list', function() {
         expect(spy.calls.count()).toEqual(1);
         jasmine.clock().tick(5000);
         expect(spy.calls.count()).toEqual(1);
-        jasmine.clock().uninstall();
       });
     });
 
@@ -504,21 +512,15 @@ describe('layer-identities-list', function() {
     });
 
     describe("The render() method", function() {
-      it("Should set the loadIndicator to an element in the widget", function() {
-        el.nodes.loadIndicator = null;
-        el._render();
-        expect(el.nodes.loadIndicator.classList.contains('layer-load-indicator')).toBe(true);
-      });
-
       it("Should call rerender if there is query data", function() {
-        spyOn(el, '_rerender');
-        el._render();
-        expect(el._rerender).toHaveBeenCalledWith({type: 'data', data: query.data});
-        el._rerender.calls.reset();
+        spyOn(el, 'onRerender');
+        el.onRender();
+        expect(el.onRerender).toHaveBeenCalledWith({type: 'data', data: query.data, inRender: true});
+        el.onRerender.calls.reset();
 
         query.data = [];
-        el._render();
-        expect(el._rerender).not.toHaveBeenCalled();
+        el.onRender();
+        expect(el.onRerender).not.toHaveBeenCalled();
       });
     });
 
@@ -572,9 +574,6 @@ describe('layer-identities-list', function() {
     });
 
     describe("The _gatherAndProcessAffectedItems() method", function() {
-      beforeEach(function() {
-        el._render();
-      });
 
       it("Should find all matching items and call processAffectedWidgets on them", function() {
         spyOn(el, "_processAffectedWidgets");
@@ -584,9 +583,6 @@ describe('layer-identities-list', function() {
     });
 
     describe("The _processAffectedWidgets() method", function() {
-      beforeEach(function() {
-        el._render();
-      });
 
       it("Should call _processAffectedWidgetsCustom with the correct firstIndex", function() {
         spyOn(el, "_processAffectedWidgetsCustom");
@@ -644,7 +640,7 @@ describe('layer-identities-list', function() {
       it("Should only call _renderResetData for reset event", function() {
         var evt = {type: 'reset'};
         el._processQueryEvt(evt);
-        expect(el._renderResetData).toHaveBeenCalledWith();
+        expect(el._renderResetData).toHaveBeenCalledWith(evt);
         expect(el._renderPagedData).not.toHaveBeenCalled();
         expect(el._renderInsertedData).not.toHaveBeenCalled();
         expect(el._renderWithoutRemovedData).not.toHaveBeenCalled();
@@ -680,7 +676,6 @@ describe('layer-identities-list', function() {
       });
 
       it("Should empty the list of items, but still contain a loadingIndicator node", function() {
-        el._render();
         expect(el.childNodes.length > 1).toBe(true);
         query.reset();
         expect(el.childNodes.length > 1).toBe(false);
@@ -690,8 +685,8 @@ describe('layer-identities-list', function() {
 
 
     describe("The _renderWithoutRemovedData() method", function() {
-      it("Should update listData", function(done) {
-        el._render();
+      it("Should update listData", function() {
+        el.onRender();
         var initialLength = query.data.length;
         expect(initialLength).toEqual(el.properties.listData.length);
         expect(el.properties.listData).toEqual(query.data);
@@ -700,49 +695,42 @@ describe('layer-identities-list', function() {
 
         // Run
         query.data[5].destroy();
-        setTimeout(function() {
-          expect(el._renderWithoutRemovedData).toHaveBeenCalled();
+        jasmine.clock().tick(10);
+        expect(el._renderWithoutRemovedData).toHaveBeenCalled();
 
-          // Posttest
-          expect(el.properties.listData).toEqual(query.data);
-          expect(el.properties.listData).not.toBe(query.data);
-          expect(initialLength).toEqual(el.properties.listData.length + 1);
-          done();
-        }, 10);
+        // Posttest
+        expect(el.properties.listData).toEqual(query.data);
+        expect(el.properties.listData).not.toBe(query.data);
+        expect(initialLength).toEqual(el.properties.listData.length + 1);
       });
 
-      it("Should call _gatherAndProcessAffectedItems with 3 items before and 3 after the removed item", function(done) {
+      it("Should call _gatherAndProcessAffectedItems with 3 items before and 3 after the removed item", function() {
         spyOn(el, "_gatherAndProcessAffectedItems");
 
         // Run
         query.data[5].destroy();
-        setTimeout(function() {
+        jasmine.clock().tick(10);
 
-          // Posttest
-          expect(el._gatherAndProcessAffectedItems).toHaveBeenCalledWith([
-            query.data[2],
-            query.data[3],
-            query.data[4],
-            query.data[5],
-            query.data[6],
-            query.data[7]], false);
-          done();
-        });
+        // Posttest
+        expect(el._gatherAndProcessAffectedItems).toHaveBeenCalledWith([
+          query.data[2],
+          query.data[3],
+          query.data[4],
+          query.data[5],
+          query.data[6],
+          query.data[7]], false);
       });
 
-      it("Should remove the item from the list", function(done) {
-        el._render();
+      it("Should remove the item from the list", function() {
         var displayName = ">" + query.data[5].displayName + "<";
         expect(el.innerHTML.indexOf(displayName)).not.toEqual(-1);
 
         // Run
         query.data[5].destroy();
+        jasmine.clock().tick(10);
 
-        setTimeout(function() {
-          // Posttest
-          expect(el.innerHTML.indexOf(displayName)).toEqual(-1);
-          done();
-        }, 10);
+        // Posttest
+        expect(el.innerHTML.indexOf(displayName)).toEqual(-1);
       });
     });
 
@@ -1074,6 +1062,8 @@ describe('layer-identities-list', function() {
       it("Should setup the client from the appId property", function() {
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
+
         var el = testRoot.firstChild;
         expect(el.client).toBe(null);
         el.appId = client.appId;
@@ -1083,6 +1073,7 @@ describe('layer-identities-list', function() {
       it("Should setup the client from the app-id attribute", function() {
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         expect(el.client).toBe(client);
       });
@@ -1091,6 +1082,7 @@ describe('layer-identities-list', function() {
         layerUI.settings.appId = client.appId;
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         expect(el.client).toBe(client);
         layerUI.appId = null;
@@ -1100,13 +1092,14 @@ describe('layer-identities-list', function() {
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
         var el = testRoot.firstChild;
+        layer.Util.defer.flush();
         spyOn(el, "_scheduleGeneratedQuery");
         el.client = client;
         expect(el._scheduleGeneratedQuery).toHaveBeenCalledWith();
       });
     });
 
-    describe("The created() method", function() {
+    describe("The onCreate() method", function() {
       beforeEach(function() {
         jasmine.clock().install();
       });
@@ -1122,6 +1115,7 @@ describe('layer-identities-list', function() {
         // Main test
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._setupGeneratedQuery();
         expect(el.query).toEqual(jasmine.any(layer.Query));
@@ -1130,6 +1124,7 @@ describe('layer-identities-list', function() {
         // Alt test 1
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._queryModel = '';
         el._setupGeneratedQuery();
@@ -1140,6 +1135,7 @@ describe('layer-identities-list', function() {
         layerUI.appId = '';
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._setupGeneratedQuery();
         expect(el.query).toBe(null);
@@ -1148,6 +1144,7 @@ describe('layer-identities-list', function() {
         // Alt test 3
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el.query = query;
         el._setupGeneratedQuery();
@@ -1158,6 +1155,7 @@ describe('layer-identities-list', function() {
         // Main test
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._setupGeneratedQuery();
         expect(el.hasGeneratedQuery).toBe(true);
@@ -1165,6 +1163,7 @@ describe('layer-identities-list', function() {
         // Alt test 1
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._queryModel = '';
         el._setupGeneratedQuery();
@@ -1175,6 +1174,7 @@ describe('layer-identities-list', function() {
         layerUI.appId = '';
         testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el._setupGeneratedQuery();
         expect(el.hasGeneratedQuery).toBe(false);
@@ -1183,11 +1183,39 @@ describe('layer-identities-list', function() {
         // Alt test 3
         testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
         var el = testRoot.firstChild;
         el.query = query;
         el._setupGeneratedQuery();
         expect(el.hasGeneratedQuery).toBe(false);
       });
+    });
+  });
+
+  describe("State management for list items", function() {
+    it("Should initialize list items with current state", function() {
+      el.state = {hey: "ho"};
+      el.query.reset();
+      expect(el.querySelectorAllArray('layer-identities-item').length).toEqual(0);
+      for (i = 0; i < 10; i++) {
+        query.data.push(
+          new layer.Identity({
+            client: client,
+            userId: 'user' + i,
+            id: 'layer:///identities/user' + i,
+            displayName: 'User ' + i,
+            isFullIdentity: true
+          })
+        );
+      }
+      el.onRerender({type: 'data', data: query.data});
+      layer.Util.defer.flush();
+      expect(el.childNodes[5].state).toEqual({hey: "ho"});
+    });
+
+    it("Should update existing list items with new state", function() {
+      el.state = {hey: "ho"};
+      expect(el.childNodes[5].state).toEqual({hey: "ho"});
     });
   });
 });

@@ -49,11 +49,13 @@ describe('layer-messages-list', function() {
     el.query = query;
     el.style.height = '300px';
 
+    layer.Util.defer.flush();
     jasmine.clock().tick(500);
   });
 
   afterEach(function() {
     document.body.removeChild(testRoot);
+    if (el) el.onDestroy();
     jasmine.clock().uninstall();
   });
 
@@ -73,10 +75,6 @@ describe('layer-messages-list', function() {
 
     it("Should initialize stuckToBottom", function() {
       expect(el.properties.stuckToBottom).toEqual(true);
-    });
-
-    it("Should initialize lastScroll", function() {
-      expect(el.properties.lastScroll).toEqual(0);
     });
 
     it("Should call render", function() {
@@ -107,7 +105,7 @@ describe('layer-messages-list', function() {
     });
   });
 
-  describe("The _destroyed() method", function() {
+  describe("The onDestroy() method", function() {
     it("Should unwire _checkVisibility from the focus event", function() {
       query.data[0].isRead = false;
       spyOn(el, "_markAsRead");
@@ -115,7 +113,7 @@ describe('layer-messages-list', function() {
       window.layerUI.isInBackground = function() {return false;}
       el.query = query;
       jasmine.clock().tick(150);
-      el._destroyed();
+      el.onDestroy();
 
       // Run
       evt = new CustomEvent('focus', {});
@@ -164,7 +162,6 @@ describe('layer-messages-list', function() {
       spyOn(query, 'update');
       spyOn(el, '_shouldPage').and.returnValue(true);
       el.properties.isSelfScrolling = false;
-      el.properties.lastScroll = 0;
       el.properties.delayedPagingTimeout = 0;
       el.properties.lastPagedAt = 0;
       query.isFiring = false;
@@ -189,12 +186,9 @@ describe('layer-messages-list', function() {
       expect(query.update).not.toHaveBeenCalled();
       el.properties.isSelfScrolling = false;
 
-      el.properties.isSelfScrolling = true;
-      el.properties.lastScroll = el.scrollTop + 1;
+      el.properties.isSelfScrolling = false;
       el._handleScroll();
       expect(query.update).toHaveBeenCalledWith({paginationWindow: jasmine.any(Number)});
-      el.properties.lastScroll = 0;
-      el.properties.isSelfScrolling = false;
       query.update.calls.reset();
 
       el.properties.lastPagedAt = Date.now();
@@ -211,7 +205,6 @@ describe('layer-messages-list', function() {
       spyOn(query, 'update');
       spyOn(el, '_shouldPage').and.returnValue(true);
       el.properties.isSelfScrolling = false;
-      el.properties.lastScroll = 0;
       el.properties.delayedPagingTimeout = 0;
       el.properties.lastPagedAt = Date.now() - 500;
       query.isFiring = false;
@@ -306,10 +299,14 @@ describe('layer-messages-list', function() {
     });
 
     it("Should mark visible messages as read", function() {
+      var items = el.querySelectorAllArray('layer-message-item-sent');
+      expect(items.length > 0).toBe(true);
+      items.forEach(function(messageRow) {
+        expect(messageRow.item.isRead).toBe(false);
+      });
       el.scrollTo(0);
       el._checkVisibility();
       jasmine.clock().tick(10000);
-      var items = el.querySelectorAllArray('layer-message-item');
       items.forEach(function(messageRow) {
         expect(messageRow.item.isRead).toBe(messageRow.offsetTop + messageRow.clientHeight < el.clientHeight + el.offsetTop);
       });
@@ -318,7 +315,8 @@ describe('layer-messages-list', function() {
     it("Should mark visible messages as read part 2", function() {
       el.scrollTo(100);
       jasmine.clock().tick(10000);
-      var items = el.querySelectorAllArray('layer-message-item');
+      var items = el.querySelectorAllArray('layer-message-item-sent');
+      expect(items.length > 0).toBe(true);
       items.forEach(function(messageRow) {
         if (messageRow.offsetTop - el.offsetTop < el.scrollTop) {
           expect(messageRow.item.isRead).toBe(false);
@@ -334,7 +332,8 @@ describe('layer-messages-list', function() {
     it("Should mark visible messages as read part 3", function() {
       el.scrollTo(10000);
       jasmine.clock().tick(10000);
-      var items = el.querySelectorAllArray('layer-message-item');
+      var items = el.querySelectorAllArray('layer-message-item-sent');
+      expect(items.length > 0).toBe(true);
       items.forEach(function(messageRow) {
         if (messageRow.offsetTop - el.offsetTop < el.scrollTop) {
           expect(messageRow.item.isRead).toBe(false);
@@ -385,9 +384,9 @@ describe('layer-messages-list', function() {
   });
 
   describe("The _generateItem() method", function() {
-    it("Should return a layer-message-item", function() {
+    it("Should return a layer-message-item-sent", function() {
       var m = conversation.createMessage("m?");
-      expect(el._generateItem(m).tagName).toEqual('LAYER-MESSAGE-ITEM');
+      expect(el._generateItem(m).tagName).toEqual('LAYER-MESSAGE-ITEM-SENT');
     });
 
     it("Should set a suitable _contentTag", function() {
@@ -428,8 +427,9 @@ describe('layer-messages-list', function() {
       });
 
       var generatedItem = el._generateItem(m);
-      expect(generatedItem.tagName).toEqual('LAYER-MESSAGE-ITEM');
+      expect(generatedItem.tagName).toEqual('LAYER-MESSAGE-ITEM-SENT');
       generatedItem.item = m;
+      layer.Util.defer.flush();
       expect(generatedItem.nodes.content.firstChild.tagName).toEqual('LAYER-MESSAGE-UNKNOWN');
     });
   });
@@ -521,25 +521,25 @@ describe('layer-messages-list', function() {
     });
   });
 
-  describe("The _rerender() method", function() {
+  describe("The onRerender() method", function() {
     it("Should update isEmptyList", function() {
       el.isEmptyList = true;
-      el._rerender({});
+      el.onRerender({});
       expect(el.isEmptyList).toBe(false);
 
       el.query.data = [];
-      el._rerender({});
+      el.onRerender({});
       expect(el.isEmptyList).toBe(true);
 
       el.isEmptyList = false;
       el.query.data = [];
-      el._rerender({type: "reset"});
+      el.onRerender({type: "reset"});
       expect(el.isEmptyList).toBe(false);
     });
     it("Should call _processQueryEvt", function() {
       spyOn(el, "_processQueryEvt");
       var evt = {hey: "ho"};
-      el._rerender(evt);
+      el.onRerender(evt);
       expect(el._processQueryEvt).toHaveBeenCalledWith(evt);
     });
   });
@@ -560,7 +560,7 @@ describe('layer-messages-list', function() {
     });
 
     it("Should empty the list of items, but still contain a loadingIndicator node", function() {
-      el._render();
+      el.onRender();
       jasmine.clock().tick(150);
       expect(el.childNodes.length > 2).toBe(true);
       query.reset();
@@ -572,12 +572,10 @@ describe('layer-messages-list', function() {
       el.properties.stuckToBottom = false;
       el.properties.lastPagedAt = 5;
       el.properties.isSelfScrolling = true;
-      el.properties.lastScroll = 5;
       query.reset();
       expect(el.properties.stuckToBottom).toEqual(true);
       expect(el.properties.lastPagedAt).toEqual(0);
       expect(el.properties.isSelfScrolling).toEqual(false);
-      expect(el.properties.lastScroll).toEqual(0);
     });
   });
 
@@ -662,6 +660,28 @@ describe('layer-messages-list', function() {
       });
 
       // Posttest
+      layer.Util.defer.flush();
+      jasmine.clock().tick(500);
+
+      var newElement = el.querySelector('#' + el._getItemId(message));
+      expect(newElement.item).toBe(message);
+      expect(newElement).toBe(el.childNodes[80 + 2]); // + 2 for loadingIndicator and emptyNode
+    });
+
+    it("Should insert a list item at the proper index take 2", function() {
+      var message = conversation.createMessage("What the???");
+      query.data.splice(20, 0, message);
+      query._triggerChange({
+        type: 'insert',
+        index: 20,
+        target: message,
+        query: query
+      });
+
+      // Posttest
+      layer.Util.defer.flush();
+      jasmine.clock().tick(500);
+
       var newElement = el.querySelector('#' + el._getItemId(message));
       expect(newElement.item).toBe(message);
       expect(newElement).toBe(el.childNodes[80 + 2]); // + 2 for loadingIndicator and emptyNode
@@ -776,6 +796,7 @@ describe('layer-messages-list', function() {
       });
 
       // Posttest
+      jasmine.clock().tick(200);
       expect(el.animateScrollTo).toHaveBeenCalledWith(el.scrollHeight - el.clientHeight);
     });
 
@@ -803,7 +824,7 @@ describe('layer-messages-list', function() {
   describe("The _updateLastMessageSent() method", function() {
     it("Should insure only the last message sent has this class set", function() {
       query.data[0].sender = user1;
-      el._render();
+      el.onRender();
       jasmine.clock().tick(150);
 
       el.querySelectorAllArray('.layer-last-message-sent').forEach(function(node) {
@@ -922,10 +943,10 @@ describe('layer-messages-list', function() {
       el.isEmptyList = false;
       expect(el.nodes.emptyNode.style.display).toEqual('none');
     });
-    it("Should reapply its isEmptyList value after _rerender", function() {
+    it("Should reapply its isEmptyList value after onRerender", function() {
       el.isEmptyList = true;
       query.data = [];
-      el._rerender({type: "add", messages: []});
+      el.onRerender({type: "add", messages: []});
       expect(el.nodes.emptyNode.style.display).toEqual('');
     });
   });

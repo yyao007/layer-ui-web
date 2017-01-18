@@ -40,8 +40,8 @@ LUIComponent('layer-conversation-last-message', {
     item: {
       set(newValue, oldValue) {
         if (oldValue) oldValue.off(null, null, this);
-        if (newValue) newValue.on('conversations:change', this._rerender, this);
-        this._rerender();
+        if (newValue) newValue.on('conversations:change', this.onRerender, this);
+        this.onRender();
       },
     },
 
@@ -66,10 +66,14 @@ LUIComponent('layer-conversation-last-message', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
+    },
+
+    onRender() {
+      this.onRerender();
     },
 
     /**
@@ -83,7 +87,7 @@ LUIComponent('layer-conversation-last-message', {
      * @private
      * @param {Event} evt
      */
-    _rerender(evt) {
+    onRerender(evt) {
       if (!evt || evt.hasProperty('lastMessage')) {
         const conversation = this.item;
         const message = conversation ? conversation.lastMessage : null;

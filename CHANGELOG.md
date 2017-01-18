@@ -1,5 +1,21 @@
 # Layer UI for Web Change Log
 
+## 0.9.7
+
+* Customizability Improvements
+  * Standardizes and documents widget lifecycle
+  * Adds mixin support to enable apps to customize widgets and hook into lifecycle methods
+* Flux Architecture support
+  * Provides a `state` property that is propagated to subcomponents
+  * Any change to `state` will call the `onRenderState()` method for the widget and all of its subcomponents.
+  * `state` can be used to write both application state as well as actions that widgets should be able to call.  Calling such actions are called by your mixins that enhance the widget.
+* The Message Item widget `<layer-message-item />` with its CSS class of `layer-message-item-sent` or `layer-message-item-received` is removed.
+  * Added `<layer-message-item-sent />` widget
+  * Added `<layer-message-item-received />` widget
+  * Removed support for a widget to have multiple templates to pick from
+  * Apps that customized `layer-message-item` template or widget should now customize `layer-message-item-sent` or `layer-message-item-received` instead.
+  * Any custom CSS will need to be updated from `layer-message-item.layer-message-item-received` to just `layer-message-item-received`.
+
 ## 0.9.6
 
 * Build Fixes

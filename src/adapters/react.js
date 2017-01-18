@@ -81,7 +81,7 @@ function initReact(React, ReactDom) {
        * Delay added to prevent Webcomponents property setters from being blown away in safari and firefox
        */
       componentDidMount() {
-        layerUI.defer(() => {
+        layerUI.layer.Util.defer(() => {
           // Get the properties/attributes that match those used in this.props
           const props = component.properties.filter(property =>
             this.props[property.propertyName] || this.props[property.attributeName]);

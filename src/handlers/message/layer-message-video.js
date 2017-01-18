@@ -41,7 +41,7 @@ LUIComponent('layer-message-video', {
         this.properties.video.on('url-loaded', this._render, this);
 
         // Render the Message
-        this._render();
+        this.onRender();
       },
     },
 
@@ -58,7 +58,7 @@ LUIComponent('layer-message-video', {
      * @method
      * @private
      */
-    _render() {
+    onRender() {
       const videoPlayer = document.createElement('video');
       videoPlayer.width = this.properties.sizes.width;
       videoPlayer.height = this.properties.sizes.height;

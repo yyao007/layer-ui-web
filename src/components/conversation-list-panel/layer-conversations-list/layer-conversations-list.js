@@ -201,6 +201,12 @@ LUIComponent('layer-conversations-list', {
      * `displayName`, `firstName`, `lastName` and `emailAddress` properties.
      * * A string to compare against the same list of properties as the RegEx.
      *
+     * ```
+     * conversationListWidget.filter = function(conversation) {
+     *   return conversation.metadata.priority === 'important';
+     * }
+     * ```
+     *
      * @property {String|RegEx|Function} [filter='']
      */
     filter: {
@@ -263,12 +269,11 @@ LUIComponent('layer-conversations-list', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       if (!this.id) this.id = LayerAPI.Util.generateUUID();
-      this._render();
       this.addEventListener('click', this._onClick.bind(this));
     },
 
@@ -301,6 +306,19 @@ LUIComponent('layer-conversations-list', {
           this.selectedConversationId = target.item.id;
         }
       }
+      this.onClick(evt);
+    },
+
+    /**
+     * MIXIN HOOK: Each time a Conversation is Clicked, you can hook into that by providing an onClick method.
+     *
+     * Note that prior to this call, `evt.preventDefault()` and `evt.stopPropagation()` were already called.
+     *
+     * @method onClick
+     * @param {Event} evt
+     */
+    onClick(evt) {
+      // No-op
     },
 
     /**
@@ -326,19 +344,19 @@ LUIComponent('layer-conversations-list', {
      *
      * Updates rendering of the list, and then updates rendering of the list selection.
      *
-     * @method _rerender
+     * @method onRerender
      * @private
      */
-    _rerender(evt) {
-      this._processQueryEvt(evt);
+    onRerender: function(evt) {
       this._renderSelection();
     },
 
     /**
      * Render the currently selected Conversation; remove any selection rendering from formerly selected Conversations.
      *
+     * See layerUI.components.ConversationsListPanel.List.onSelect for Mixin point for customizing Selection behavior.
+     *
      * @method _renderSelection
-     * @private
      */
     _renderSelection() {
       const selectedNodes = this.querySelectorAllArray('.layer-conversation-item-selected');

@@ -53,7 +53,7 @@ LUIComponent('layer-typing-indicator', {
         this.client = value.getClient();
         if (value) {
           const state = this.client.getTypingState(value);
-          this._rerender({
+          this.onRerender({
             conversationId: value.id,
             typing: state.typing,
             paused: state.paused,
@@ -73,7 +73,7 @@ LUIComponent('layer-typing-indicator', {
      */
     client: {
       set(client) {
-        client.on('typing-indicator-change', this._rerender.bind(this));
+        client.on('typing-indicator-change', this.onRerender.bind(this));
       },
     },
 
@@ -95,20 +95,24 @@ LUIComponent('layer-typing-indicator', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
 
+    },
+
+    onRender(evt = {}) {
+      if (this.conversation && this.conversation.id) this.onRerender(evt);
     },
 
     /**
      * Whenever there is a typing indicator event, rerender our UI
      *
-     * @method _rerender
+     * @method onRerender
      * @param {layer.LayerEvent} evt
      */
-    _rerender(evt) {
+    onRerender(evt) {
       // We receive typing indicator events for ALL Conversations; ignore them if they don't apply to the current Conversation
       if (evt.conversationId === this.conversation.id) {
 

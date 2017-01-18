@@ -296,7 +296,7 @@ LUIComponent('layer-conversation-panel', {
       set(value) {
         if (value && value.indexOf('layer:///conversations') !== 0) this.properties.conversationId = '';
         if (this.client && this.conversationId) {
-          if (this.client.isReady) {
+          if (this.client.isReady && !this.client.isDestroyed) {
             this.conversation = this.client.getConversation(this.conversationId, true);
           } else {
             this.client.once('ready', () => {
@@ -524,10 +524,10 @@ LUIComponent('layer-conversation-panel', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       this.addEventListener('keydown', this._onKeyDown.bind(this));
 
       // Typically the defaultIndex is -1, but IE11 uses 0.

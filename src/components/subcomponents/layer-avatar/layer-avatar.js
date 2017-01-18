@@ -60,10 +60,9 @@ LUIComponent('layer-avatar', {
       set(value) {
         if (!value) value = [];
         if (!Array.isArray(value)) value = [value];
-        this.users = value;
         // classList.toggle doesn't work right in IE 11
         this.classList[value.length ? 'add' : 'remove']('layer-has-user');
-        this._render();
+        this.onRender();
       },
     },
   },
@@ -72,10 +71,10 @@ LUIComponent('layer-avatar', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       this.properties.users = [];
     },
 
@@ -85,7 +84,7 @@ LUIComponent('layer-avatar', {
      * @method
      * @private
      */
-    _render() {
+    onRender() {
       // Clear the innerHTML if we have rendered something before
       if (this.childNodes.length) {
         this.innerHTML = '';

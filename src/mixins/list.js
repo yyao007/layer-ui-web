@@ -4,6 +4,7 @@
  * @class layerUI.mixins.List
  */
 import { layer as LayerAPI } from '../base';
+import LUIComponent from '../components/component';
 
 module.exports = {
   properties: {
@@ -136,11 +137,20 @@ module.exports = {
     throttlerTimeout: {
       value: 66,
     },
+
+    state: {
+      set: function(newState) {
+        Array.prototype.slice.call(this.childNodes).forEach((node) => {
+          node.state = newState;
+        });
+      }
+    },
   },
   methods: {
-    _created() {
+    onCreate() {
       this.properties.listData = [];
       this.addEventListener('scroll', this._onScroll.bind(this));
+      this.onRender();
     },
 
     /**
@@ -182,10 +192,9 @@ module.exports = {
      * @private
      */
     _updateQuery() {
-      // Allow this dom to finish being inserted into parent node so that size info can be available before rendering the items
-      setTimeout(this._render.bind(this), 1);
-      this.query.on('change', this._rerender, this);
       this.client = this.query.client;
+      this.onRender();
+      this.query.on('change', this.onRerender, this);
     },
 
     /**
@@ -212,34 +221,27 @@ module.exports = {
       this.scrollTop = position;
     },
 
-    /**
-     * Render the User List.  Called any time there is a Query is reset, or when we get assigned a new Query.
-     *
-     * @method _render
-     * @private
-     */
-    _render() {
+    onRender() {
       // Reset the query to initial state by cloning the template
-      const clone = document.importNode(this.getTemplate().content, true);
-      this.innerHTML = '';
-      this.appendChild(clone);
-      this.setupDomNodes();
+      Array.prototype.slice.call(this.childNodes).forEach((node) => {
+        if (node._isListItem) this.removeChild(node);
+      });
 
       // Render any data in the query
       if (this.query && this.query.size) {
-        this._rerender({ type: 'data', data: this.query.data });
+        this.onRerender({ type: 'data', data: this.query.data, inRender: true });
       }
-      this._postRender();
     },
 
-    /**
-     * Called after _render has finished for component-specific handling.
-     *
-     * @method _postRender
-     * @private
-     */
-    _postRender() {
-      // Noop
+    onRerender: {
+      mode: LUIComponent.MODES.BEFORE,
+      value: function(evt = {}) {
+        if (this.query.isDestroyed) {
+          this._renderResetData(evt);
+        } else {
+          this._processQueryEvt(evt);
+        }
+      },
     },
 
     /**
@@ -266,12 +268,24 @@ module.exports = {
       const itemInstance = item instanceof LayerAPI.Root ? item : this.client._getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
-
         if (widget) {
-          widget.item = itemInstance;
+          this.onGenerateListItem(widget);
           fragment.appendChild(widget);
         }
       }
+    },
+
+    /**
+     * MIXIN HOOK: Each time a List Item is generated, call this so that listeners can use this.
+     *
+     * This is intended for Mixins to hook into; apps wanting to do processing on rendered
+     * items should use `onRenderListItem`.
+     *
+     * @method
+     * @param {layerUI.mixins.ListItem} widget
+     */
+    onGenerateListItem(widget) {
+      // No-op
     },
 
     /**
@@ -356,7 +370,7 @@ module.exports = {
           this._renderWithoutRemovedData(evt);
           break;
         case 'reset':
-          this._renderResetData();
+          this._renderResetData(evt);
           break;
         case 'move':
           this._renderMovedData(evt);
@@ -371,10 +385,10 @@ module.exports = {
      * @method _renderResetData
      * @private
      */
-    _renderResetData() {
+    _renderResetData(evt) {
       this.properties.listData = [];
       this.scrollTo(0);
-      this._render();
+      this.onRender();
     },
 
     /**
@@ -391,6 +405,7 @@ module.exports = {
       const moveNode = this.childNodes[oldIndex];
       this.removeChild(moveNode);
       this.insertBefore(moveNode, this.childNodes[newIndex]);
+      if (!evt.inRender) this.onRerender();
     },
 
     /**
@@ -409,6 +424,7 @@ module.exports = {
       if (listItem) this.removeChild(listItem);
 
       this._gatherAndProcessAffectedItems(affectedItems, false);
+      if (!evt.inRender) this.onRerender();
     },
 
     /**
@@ -424,6 +440,7 @@ module.exports = {
       const fragment = this._generateFragment([evt.target]);
       this.insertBefore(fragment, this.childNodes[insertIndex]);
       this._gatherAndProcessAffectedItems(affectedItems, insertIndex === 0);
+      if (!evt.inRender) this.onRerender();
     },
 
     /**
@@ -442,6 +459,7 @@ module.exports = {
       // isTopItemNew is true if there wasn't any prior data... data length == event length
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);
       this.isDataLoading = this.properties.query.isFiring;
+      if (!evt.inRender) this.onRerender();
     },
   },
 };

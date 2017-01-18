@@ -69,7 +69,7 @@ LUIComponent('layer-composer', {
       set(value) {
         const oldValue = this.nodes.input.value;
         this.nodes.input.value = value;
-        this._resizeNode();
+        this.onRender();
         this._triggerChange(value, oldValue);
       },
       get() {
@@ -84,7 +84,7 @@ LUIComponent('layer-composer', {
     placeholder: {
       set(value) {
         this.nodes.input.placeholder = value;
-        this._resizeNode();
+        this.onRender();
       },
       get() {
         return this.nodes.input.placeholder;
@@ -95,10 +95,10 @@ LUIComponent('layer-composer', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       this.classList.add('layer-composer-one-line-of-text');
       this.properties.buttons = [];
 
@@ -253,8 +253,20 @@ LUIComponent('layer-composer', {
         title: `New Message from ${message.sender.displayName}`,
       };
       if (this.trigger('layer-send-message', { message, notification })) {
+        this.onSend(message, notification);
         message.send(notification);
       }
+    },
+
+    /**
+     * MIXIN HOOK: Called just before sending a message.
+     *
+     * @method
+     * @param {layer.Message} message
+     * @param {Object} notification   See layer.Message.send for details on the notification object
+     */
+    onSend(message, notification) {
+      // No-op
     },
 
     /**
@@ -280,7 +292,7 @@ LUIComponent('layer-composer', {
     },
 
     _onInput(event) {
-      this._resizeNode();
+      this.onRender();
       this._triggerChange(this.nodes.input.value, this.properties.value);
     },
 
@@ -290,7 +302,7 @@ LUIComponent('layer-composer', {
      * @method
      * @private
      */
-    _resizeNode() {
+    onRender() {
       setTimeout(() => {
         this.nodes.resizer.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';
         this.nodes.lineHeighter.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';

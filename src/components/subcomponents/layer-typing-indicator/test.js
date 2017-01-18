@@ -38,6 +38,7 @@ describe('layer-typing-indicator', function() {
     conversation = client.createConversation({
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
@@ -54,11 +55,11 @@ describe('layer-typing-indicator', function() {
 
   describe("The client property", function() {
     it("Should wire up typing-indicator-change event to rerender", function() {
-      spyOn(el, "_rerender");
+      spyOn(el, "onRerender");
       el.client = client;
-      expect(el._rerender).not.toHaveBeenCalled();
+      expect(el.onRerender).not.toHaveBeenCalled();
       client.trigger('typing-indicator-change');
-      expect(el._rerender).toHaveBeenCalled();
+      expect(el.onRerender).toHaveBeenCalled();
     });
   });
 
@@ -90,7 +91,7 @@ describe('layer-typing-indicator', function() {
     });
 
     it("Should render a typing user if typing into same conversation", function() {
-      el._rerender({
+      el.onRerender({
         conversationId: conversation.id,
         typing: [user1]
       });
@@ -98,7 +99,7 @@ describe('layer-typing-indicator', function() {
     });
 
     it("Should render multiple typing users if typing into same conversation", function() {
-      el._rerender({
+      el.onRerender({
         conversationId: conversation.id,
         typing: [user1, client.user]
       });
@@ -111,7 +112,7 @@ describe('layer-typing-indicator', function() {
         called = true;
         evt.preventDefault();
       });
-      el._rerender({
+      el.onRerender({
         conversationId: conversation.id,
         typing: [user1]
       });
@@ -121,7 +122,7 @@ describe('layer-typing-indicator', function() {
     });
 
     it("Should ignore typing users if typing into anohter conversation", function() {
-      el._rerender({
+      el.onRerender({
         conversationId: conversation.id + "a",
         typing: [user1]
       });

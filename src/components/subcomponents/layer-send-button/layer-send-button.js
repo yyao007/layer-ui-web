@@ -38,11 +38,21 @@ LUIComponent('layer-send-button', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
-      this.addEventListener('click', evt => this.trigger('layer-send-click'));
+    onCreate() {
+      this.addEventListener('click', this.onClick.bind(this));
+    },
+
+    /**
+     * MIXIN HOOK: Called whenever the button is clicked.
+     *
+     * @method
+     * @param {Event} evt
+     */
+    onClick(evt) {
+      this.trigger('layer-send-click');
     },
   },
 });

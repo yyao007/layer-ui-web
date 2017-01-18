@@ -18,6 +18,7 @@ describe('layer-delete', function() {
     el = document.createElement('layer-delete');
     testRoot.appendChild(el);
     el.enabled = true;
+    layer.Util.defer.flush();
   });
   afterEach(function() {
     document.body.removeChild(testRoot);
@@ -27,24 +28,28 @@ describe('layer-delete', function() {
     it('Should add layer-delete-enabled if not disabled at initialization', function() {
       testRoot.innerHTML = "<layer-delete enabled='true'>fred</layer-delete>";
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       expect(testRoot.firstChild.classList.contains('layer-delete-enabled')).toBe(true);
     });
 
     it('Should remove layer-delete-enabled if enabled not provided at initialization', function() {
       testRoot.innerHTML = '<layer-delete></layer-delete>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       expect(testRoot.firstChild.classList.contains('layer-delete-enabled')).toBe(false);
     });
 
     it('Should remove layer-delete-enabled if enabled=false at initialization', function() {
       testRoot.innerHTML = '<layer-delete enabled=false></layer-delete>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       expect(testRoot.firstChild.classList.contains('layer-delete-enabled')).toBe(false);
     });
 
     it('Should add layer-delete-enabled if not disabled after initialization', function() {
       testRoot.innerHTML = '<layer-delete enabled=true></layer-delete>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       testRoot.firstChild.enabled = false;
       expect(testRoot.firstChild.classList.contains('layer-delete-enabled')).toBe(false);
     });
@@ -52,6 +57,7 @@ describe('layer-delete', function() {
     it('Should remove layer-delete-enabled if disabled after initialization', function() {
       testRoot.innerHTML = '<layer-delete enabled=false></layer-delete>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       testRoot.firstChild.enabled = true;
       expect(testRoot.firstChild.classList.contains('layer-delete-enabled')).toBe(true);
     });

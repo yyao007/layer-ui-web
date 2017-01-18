@@ -39,6 +39,7 @@ describe('layer-conversation-item', function() {
     conversation = client.createConversation({
       participants: ['layer:///identities/FrodoTheDodo']
     });
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
@@ -56,21 +57,21 @@ describe('layer-conversation-item', function() {
       expect(el.nodes.title.item).toBe(c2);
     });
 
-    it("Should wire up the _rerender event", function() {
-      spyOn(el, "_rerender");
+    it("Should wire up the onRerender event", function() {
+      spyOn(el, "onRerender");
       el.item = conversation;
-      el._rerender.calls.reset();
+      el.onRerender.calls.reset();
       conversation.trigger('conversations:change', {property: 'unreadCount', oldValue: 5, newValue: 6});
-      expect(el._rerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
+      expect(el.onRerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
     });
 
-    it("Should unwire up the _rerender event if prior Conversation", function() {
-      spyOn(el, "_rerender");
+    it("Should unwire up the onRerender event if prior Conversation", function() {
+      spyOn(el, "onRerender");
       el.item = conversation;
       el.item = null;
-      el._rerender.calls.reset();
+      el.onRerender.calls.reset();
       conversation.trigger('conversations:change', {property: 'unreadCount', oldValue: 5, newValue: 6});
-      expect(el._rerender).not.toHaveBeenCalled();
+      expect(el.onRerender).not.toHaveBeenCalled();
     });
   });
 
@@ -84,13 +85,13 @@ describe('layer-conversation-item', function() {
     });
   });
 
-  describe("The _rerender() method", function() {
+  describe("The onRerender() method", function() {
 
 
     it("Should update layer-avatar users", function() {
       el.item = conversation;
       conversation.addParticipants(['layer:///identities/GandalfTheGruesome']);
-      el._rerender();
+      el.onRerender();
       expect(el.nodes.avatar.users).toEqual([client.getIdentity('layer:///identities/GandalfTheGruesome')]);
     });
 
@@ -99,11 +100,11 @@ describe('layer-conversation-item', function() {
       var message = new layer.Message({client: client});
       message.isRead = false;
       conversation.lastMessage = message;
-      el._rerender();
+      el.onRerender();
       expect(el.classList.contains('layer-conversation-unread-messages')).toBe(true);
 
       conversation.lastMessage.isRead = true;
-      el._rerender();
+      el.onRerender();
       expect(el.classList.contains('layer-conversation-unread-messages')).toBe(false);
     });
   });

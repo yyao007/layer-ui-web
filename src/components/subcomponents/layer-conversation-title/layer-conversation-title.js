@@ -38,8 +38,8 @@ LUIComponent('layer-conversation-title', {
     item: {
       set(newConversation, oldConversation) {
         if (oldConversation) oldConversation.off(null, null, this);
-        if (newConversation) newConversation.on('conversations:change', this._rerender, this);
-        this._rerender();
+        if (newConversation) newConversation.on('conversations:change', this.onRerender, this);
+        this.onRender();
       },
     },
   },
@@ -48,10 +48,14 @@ LUIComponent('layer-conversation-title', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
+    },
+
+    onRender() {
+      this.onRerender();
     },
 
     /**
@@ -61,7 +65,7 @@ LUIComponent('layer-conversation-title', {
      * @private
      * @param {Event} evt
      */
-    _rerender(evt) {
+    onRerender(evt) {
       if (!evt || evt.hasProperty('metadata') || evt.hasProperty('participants')) {
         const conversation = this.item;
 

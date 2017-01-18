@@ -5,8 +5,21 @@
  *
  * @class layerUI.mixins.ListItem
  */
+import LUIComponent from '../components/component';
+
 module.exports = {
   properties: {
+    /**
+     * Is this component a List Item
+     *
+     * @private
+     * @readonly
+     * @property {Boolean} [_isListItem=true]
+     */
+    _isListItem: {
+      value: true,
+    },
+
     /**
      * A custom DOM node added by your application; this is not the prior List Item.
      *
@@ -96,11 +109,29 @@ module.exports = {
      *
      * @property {layer.Root} [item=null]
      */
-    item: {},
+    item: {
+      set(newItem, oldItem) {
+        // Disconnect from any previous Message we were rendering; not currently used.
+        if (oldItem) oldItem.off(null, null, this);
+
+        // Any changes to the Message should trigger a rerender
+        if (newItem) newItem.on(newItem.constructor.eventPrefix + ':change', this.onRerender, this);
+        Object.keys(this.nodes).forEach((nodeName) => {
+          this.nodes[nodeName].item = newItem;
+        });
+        this.onRender();
+      },
+    },
   },
   methods: {
-    _created() {
+    onCreate() {
       this.innerNode = this.querySelector('.layer-list-item');
+    },
+
+    onRender: {
+      conditional: function onCanRender() {
+        return Boolean(this.item);
+      },
     },
 
     /**

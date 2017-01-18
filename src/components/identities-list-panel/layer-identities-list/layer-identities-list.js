@@ -207,14 +207,13 @@ LUIComponent('layer-identities-list', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       if (!this.id) this.id = LayerAPI.Util.generateUUID();
       this.properties.selectedIdentities = [];
 
-      this._render();
       this.addEventListener('layer-identity-item-selected', this._handleIdentitySelect.bind(this));
       this.addEventListener('layer-identity-item-deselected', this._handleIdentityDeselect.bind(this));
     },
@@ -290,12 +289,11 @@ LUIComponent('layer-identities-list', {
      *
      * This updates the selectedIdentities after doing standard query update
      *
-     * @method _rerender
+     * @method onRerender
      * @private
      * @param {Event} evt
      */
-    _rerender(evt) {
-      this._processQueryEvt(evt);
+    onRerender(evt = {}) {
       switch (evt.type) {
         // If its a remove event, find the user and remove its widget.
         case 'remove': {

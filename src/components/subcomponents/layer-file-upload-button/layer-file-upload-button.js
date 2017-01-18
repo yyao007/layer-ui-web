@@ -27,23 +27,25 @@ LUIComponent('layer-file-upload-button', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       this.nodes.input.id = LayerAPI.Util.generateUUID();
       this.nodes.label.setAttribute('for', this.nodes.input.id);
-      this.nodes.input.addEventListener('change', this._onChange.bind(this));
+      this.nodes.input.addEventListener('change', this.onChange.bind(this));
       this.addEventListener('click', evt => this.nodes.input.click());
     },
 
     /**
-     * When the file input's value has changed, gather the data and trigger an event.
+     * MIXIN HOOK: When the file input's value has changed, gather the data and trigger an event.
+     *
+     * If adding a mixin here to change behaviors on selecting a file, you can use `this.nodes.input.files` to access
+     * the selected files.
      *
      * @method
-     * @private
      */
-    _onChange() {
+    onChange() {
       const files = this.nodes.input.files;
       const inputParts = Array.prototype.map.call(files, file => new LayerAPI.MessagePart(file));
 

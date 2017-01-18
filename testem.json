@@ -1,9 +1,10 @@
 {
   "framework": "jasmine2",
   "src_files": [
-    "http://cdn.layer.com/sdk/3.0/layer-websdk.js",
+    "node_modules/layer-websdk/build/client.debug.js",
     "build/layer-ui-web.js",
     "src/**/test.js"
   ],
+  "watch_files": ["build/layer-ui-web.js"],
   "port": 7358
 }

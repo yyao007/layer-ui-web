@@ -1,6 +1,6 @@
 /* Styles for Message Items that appear within the Message List Widget */
 
-layer-messages-list layer-message-item {
+layer-messages-list layer-message-item-sent, layer-messages-list layer-message-item-received {
 
   /* Do not show the avatar if there is no user associated with the avatar
    * or if the message is not the last message in the Message Group.
@@ -29,109 +29,51 @@ layer-messages-list layer-message-item {
      * sender, date, status, etc... */
     .layer-message-item-content {
       display: inline-block;
-
-      /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
-       * between text and bubble borders.
-       */
-      layer-message-text-plain {
-        padding: 4px 12px;
-        border: solid 1px rgba(0, 0, 0, 0.05);
-      }
-
-      /* Give all messages the basic bubble treatment */
-      layer-message-text-plain, layer-message-image canvas, layer-message-video video {
-        border-radius: @chatbubbleradius;
-        .layer-text-plain();
-      }
     }
-  }
-
-
-  /**
-   * Custom formatting for Messages received by the session owner.
-   */
-  &.layer-message-item-received {
-
-    /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
+    /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
+      * between text and bubble borders.
+      */
     layer-message-text-plain {
-      background-color: @chatparticipantbubblebackground;
-
-      a, a:visited, a:focus, a:active {
-        color: @chatparticipantbubbletextcolor;
-      }
+      padding: 4px 12px;
+      border: solid 1px rgba(0, 0, 0, 0.05);
     }
 
-    /* Position the participant's avatar */
-    layer-avatar {
-      margin-right: 10px;
-      margin-left: 5px;
-    }
-
-    /* Show sender and date info for the last message in each Message Group */
-    &.layer-list-item-last {
-      .layer-sender-info {
-        margin-top: 5px;
-        margin-bottom: 10px;
-        display: block;
-        layer-date {
-          display: inline;
-        }
-      }
-      .layer-sender-name {
-        display: inline-block;
-        margin-right: 5px;
-        margin-left: 55px;
-      }
-      .layer-sender-name:after {
-          content: '-';
-          margin-left: 5px;
-      }
-    }
-  }
-
-
-  /**
-   * Custom formatting for Messages sent by the session owner.
-   */
-  &.layer-message-item-sent .layer-list-item {
+    /* Give all messages the basic bubble treatment */
     layer-message-text-plain, layer-message-image canvas, layer-message-video video {
-      color: @chatownerbubbletextcolor;
-      margin: 0px;
-    }
-
-    layer-message-text-plain {
-      margin-left: 20px;
-      background-color: @chatownerbubblebackground;
-      color: @fontcolor-inverted;
-
-      a, a:visited, a:focus, a:active {
-        color: @chatownerbubbletextcolor;
-      }
-    }
-
-    layer-avatar {
-      margin-right: 5px;
-      margin-left: 10px;
-    }
-
-    layer-delete {
-      opacity: 0;
-      &.layer-delete-enabled {
-        opacity: 0.1;
-        &:hover {
-          opacity: 0.8;
-        }
-      }
-    }
-    .layer-sender-info {
-      text-align: right;
+      border-radius: @chatbubbleradius;
+      .layer-text-plain();
     }
   }
 
-  // Last message in group
+  /* Styling for content from Text Processor's afterText properties */
+  .layer-parsed-image {
+    height: 200px;
+  }
+}
+
+/**
+  * Custom formatting for Messages received by the session owner.
+  */
+layer-messages-list layer-message-item-received {
+
+  /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
+  layer-message-text-plain {
+    background-color: @chatparticipantbubblebackground;
+
+    a, a:visited, a:focus, a:active {
+      color: @chatparticipantbubbletextcolor;
+    }
+  }
+
+  /* Position the participant's avatar */
+  layer-avatar {
+    margin-right: 10px;
+    margin-left: 5px;
+  }
+
+  /* Show sender and date info for the last message in each Message Group */
   &.layer-list-item-last {
     .layer-sender-info {
-      margin-right: 85px;
       margin-top: 5px;
       margin-bottom: 10px;
       display: block;
@@ -140,20 +82,76 @@ layer-messages-list layer-message-item {
       }
     }
     .layer-sender-name {
-      display: none;
-    }
-    layer-message-status {
       display: inline-block;
       margin-right: 5px;
+      margin-left: 55px;
     }
-    layer-message-status:after {
+    .layer-sender-name:after {
         content: '-';
         margin-left: 5px;
     }
   }
+}
 
-  /* Styling for content from Text Processor's afterText properties */
-  .layer-parsed-image {
-    height: 200px;
+
+/**
+  * Custom formatting for Messages sent by the session owner.
+  */
+layer-messages-list layer-message-item-sent .layer-list-item {
+  layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+    color: @chatownerbubbletextcolor;
+    margin: 0px;
+  }
+
+  layer-message-text-plain {
+    margin-left: 20px;
+    background-color: @chatownerbubblebackground;
+    color: @fontcolor-inverted;
+
+    a, a:visited, a:focus, a:active {
+      color: @chatownerbubbletextcolor;
+    }
+  }
+
+  layer-avatar {
+    margin-right: 5px;
+    margin-left: 10px;
+  }
+
+  layer-delete {
+    opacity: 0;
+    &.layer-delete-enabled {
+      opacity: 0.1;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+  .layer-sender-info {
+    text-align: right;
+  }
+}
+
+// Last message in group
+&.layer-list-item-last {
+  .layer-sender-info {
+    margin-right: 85px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: block;
+    layer-date {
+      display: inline;
+    }
+  }
+  .layer-sender-name {
+    display: none;
+  }
+  layer-message-status {
+    display: inline-block;
+    margin-right: 5px;
+  }
+  layer-message-status:after {
+      content: '-';
+      margin-left: 5px;
   }
 }

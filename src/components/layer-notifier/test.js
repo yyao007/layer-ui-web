@@ -23,6 +23,7 @@ if (window.Notification) {
         participants: ['layer:///identities/FrodoTheDodo']
       });
       message = conversation.createMessage("Hello");
+      layer.Util.defer.flush();
     });
     afterEach(function() {
       document.body.removeChild(testRoot);
@@ -59,7 +60,7 @@ if (window.Notification) {
         window.layerUI.isInBackground = restoreFunc;
       });
 
-      it("Should wire up the click handler to _clickToast", function() {
+      it("Should wire up the click handler to onClickToast", function() {
         spyOn(el, 'onNotificationClick');
         el.properties.toastMessage = message;
         el.click();
@@ -69,6 +70,9 @@ if (window.Notification) {
 
     describe("The _onPermissionGranted() method", function() {
       it("Should flag desktop notifications are enabled", function() {
+        testRoot.innerHTML = '<layer-notifier notify-in-background="false"></layer-notifier>';
+        CustomElements.takeRecords();
+        el = testRoot.firstChild;
         expect(el.properties.userEnabledDesktopNotifications).toBe(false);
         el._onPermissionGranted();
         expect(el.properties.userEnabledDesktopNotifications).toBe(true);
@@ -339,7 +343,7 @@ if (window.Notification) {
         });
       });
 
-      describe("The _clickToast() method", function() {
+      describe("The onClickToast() method", function() {
         beforeEach(function() {
           el.properties.toastMessage = message;
         });
@@ -348,7 +352,7 @@ if (window.Notification) {
           var stopPropagationSpy = jasmine.createSpy('stopPropagation');
 
           // Run
-          el._clickToast({
+          el.onClickToast({
             preventDefault: preventDefaultSpy,
             stopPropagation: stopPropagationSpy
           });

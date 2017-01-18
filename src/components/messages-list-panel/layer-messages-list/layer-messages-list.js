@@ -12,6 +12,71 @@
  * a different user sends a Message, or a long enough pause occurs.  Each Message will have firstInSeries/lastInSeries properties,
  * and these need to be maintained as new Messages are loaded, deleted, etc...
  *
+ * ## Advanced Customization
+ *
+ * To enhance the Message List widget with new properties, methods and capabilities, you have two options:
+ *
+ * 1. Define a custom `<layer-message-list/>` widget; this works but your now entirely responsible for all of its
+ *    behaviors, and can not easily integrate fixes and enhancements added to this repo. Defining components is discussed in
+ *    layerUI.components.Component.
+ * 2. Enhance the provided widget with Mixins.  Details of Mixins are described in layerUI.components.Component.
+ *    Below illustrates an example of a mixin for modifying this widget.
+ *
+ *
+ * The following example adds a search bar to the Message List
+ * ```
+ * layerUI.init({
+ *   appId: 'my-app-id',
+ *   layer: window.layer,
+ *   mixins: {
+ *     'layer-messages-list': {
+ *       properties: {
+ *         searchText: {
+ *           value: '',
+ *           set: function(value) {
+ *             this.nodes.searchBar.value = value;
+ *             this._runSearch();
+ *           },
+ *           get: function() {
+ *             return this.nodes.searchBar.value;
+ *           }
+ *         }
+ *       },
+ *       methods: {
+ *         // When the widget is created, setup/initialize our custom behaviors
+ *         onCreate: function() {
+ *           this.nodes.searchBar = document.createElement('input');
+ *           this.nodes.searchBar.classList.add('custom-search-bar');
+ *           this.nodes.searchBar.addEventListener('change', this._runSearch.bind(this));
+ *           this.insertBefore(this.nodes.searchBar, this.firstChild);
+ *         },
+ *
+ *
+ *         // Whenver any messages are added/removed/changed, rerun our search
+ *         onRerender: function() {
+ *           if (this.searchText) this._runSearch();
+ *         },
+ *
+ *         // Search is run whenver the user changes the search text, app changes the search text,
+ *         // or new messages arrive that need to be searched
+ *         _runSearch() {
+ *           var searchText = this.searchText;
+ *           Array.prototype.slice.call(this.childNodes).forEach(function(messageItem) {
+ *             if (messageItem._isListItem) {
+ *               var message = messageItem.item;
+ *               if (message.parts[0].body.indexOf(searchText) === -1) {
+ *                 messageItem.classList.remove('search-matches');
+ *               } else {
+ *                 messageItem.classList.add('search-matches');
+ *               }
+ *             }
+ *           });
+ *         }
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
  *
  * @class layerUI.components.MessagesListPanel.List
  * @extends layerUI.components.Component
@@ -20,12 +85,13 @@ import animatedScrollTo from 'animated-scrollto';
 import LayerUI, { layer as LayerAPI } from '../../../base';
 import LUIComponent from '../../../components/component';
 import List from '../../../mixins/list';
+import EmptyList from '../../../mixins/empty-list';
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
 const PAGING_DELAY = 2000;
 
 LUIComponent('layer-messages-list', {
-  mixins: [List],
+  mixins: [List, EmptyList],
   properties: {
 
     /**
@@ -70,63 +136,34 @@ LUIComponent('layer-messages-list', {
     screenFullsBeforePaging: {
       value: 1.5,
     },
-
-    /**
-     * If the query has no data and is not loading data, this should be true.
-     *
-     * @property {Boolean} [isEmptyList=false]
-     * @readonly
-     */
-    isEmptyList: {
-      value: false,
-      set(value) {
-        this.nodes.emptyNode.style.display = value ? '' : 'none';
-      },
-    },
-
-    /**
-     * A dom node to render when there are no messages in the list.
-     *
-     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
-     *
-     * @property {HTMLElement} [emptyNode=null]
-     */
-    emptyNode: {
-      set(value) {
-        this.nodes.emptyNode.innerHTML = '';
-        this.nodes.emptyNode.appendChild(value);
-      },
-    },
   },
   methods: {
 
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       if (!this.id) this.id = LayerAPI.Util.generateUUID();
 
       // Init some local props
       this.properties.lastPagedAt = 0;
       this.properties.isSelfScrolling = false;
       this.properties.stuckToBottom = true;
-      this.properties.lastScroll = 0;
       this.properties._checkVisibilityBound = this._checkVisibility.bind(this);
 
       window.addEventListener('focus', this.properties._checkVisibilityBound);
-      this._render();
     },
 
     /**
      * Cleanup all pointers to self created by registering event handlers.
      *
-     * @method _destroyed
+     * @method onDestroy
      * @private
      */
-    _destroyed() {
+    onDestroy() {
       window.removeEventListener('focus', this.properties._checkVisibilityBound);
     },
 
@@ -155,38 +192,38 @@ LUIComponent('layer-messages-list', {
      * @method _handleScroll
      * @private
      */
-    _handleScroll() {
-      // We may set a scrollTop higher than the current scrolltop, but the only thing that changes to a lower scrollTop is
-      // the user scrolling, which requires us to process it.
-      const userScrolled = !this.properties.isSelfScrolling || this.scrollTop < this.properties.lastScroll;
-      this.properties.lastScroll = this.scrollTop;
+    _handleScroll: {
+      mode: LUIComponent.MODES.OVERWRITE,
+      value() {
+        if (this.properties.isSelfScrolling) return;
 
-      // If the user has scrolled within screenFullsBeforePaging of the top of the page... and if the page has enough contents to actually
-      // be scrollable, page the Messages.
-      if (this._shouldPage() && userScrolled && !this.properties.delayedPagingTimeout) {
-        if (this.properties.lastPagedAt + PAGING_DELAY < Date.now()) {
-          if (!this.query.isFiring) {
-            this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
-            this.isDataLoading = this.properties.query.isFiring;
+        // If the user has scrolled within screenFullsBeforePaging of the top of the page... and if the page has enough contents to actually
+        // be scrollable, page the Messages.
+        if (this._shouldPage() && !this.properties.delayedPagingTimeout) {
+          if (this.properties.lastPagedAt + PAGING_DELAY < Date.now()) {
+            if (!this.query.isFiring) {
+              this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
+              this.isDataLoading = this.properties.query.isFiring;
+            }
+          } else if (!this.properties.delayedPagingTimeout) {
+            // User is scrolling kind of fast, lets slow things down a little
+            this.properties.delayedPagingTimeout = setTimeout(() => {
+              this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
+              this.isDataLoading = this.properties.query.isFiring;
+              this.properties.delayedPagingTimeout = 0;
+            }, 500);
           }
-        } else if (!this.properties.delayedPagingTimeout) {
-          // User is scrolling kind of fast, lets slow things down a little
-          this.properties.delayedPagingTimeout = setTimeout(() => {
-            this.query.update({ paginationWindow: this.query.paginationWindow + 50 });
-            this.isDataLoading = this.properties.query.isFiring;
-            this.properties.delayedPagingTimeout = 0;
-          }, 500);
         }
-      }
 
-      // If we have scrolled to the bottom, set stuckToBottom to true, else false.
-      const stuckToBottom = this.scrollHeight - 1 <= this.clientHeight + this.scrollTop;
-      if (stuckToBottom !== this.properties.stuckToBottom) {
-        this.properties.stuckToBottom = stuckToBottom;
-      }
+        // If we have scrolled to the bottom, set stuckToBottom to true, else false.
+        const stuckToBottom = this.scrollHeight - 10 <= this.clientHeight + this.scrollTop;
+        if (stuckToBottom !== this.properties.stuckToBottom) {
+          this.properties.stuckToBottom = stuckToBottom;
+        }
 
-      // Trigger checks on visibility to update read state
-      this._checkVisibility();
+        // Trigger checks on visibility to update read state
+        this._checkVisibility();
+      },
     },
 
     /**
@@ -201,14 +238,17 @@ LUIComponent('layer-messages-list', {
      * @method scrollTo
      * @param {Number} position
      */
-    scrollTo(position) {
-      if (position === this.scrollTop) return;
-      this.properties.isSelfScrolling = true;
-      this.scrollTop = position;
-      setTimeout(() => {
-        this.properties.isSelfScrolling = false;
-        this._checkVisibility();
-      }, 200);
+    scrollTo: {
+      mode: LUIComponent.MODES.OVERWRITE,
+      value(position) {
+        if (position === this.scrollTop) return;
+        this.properties.isSelfScrolling = true;
+        this.scrollTop = position;
+        setTimeout(() => {
+          this.properties.isSelfScrolling = false;
+          this._checkVisibility();
+        }, 200);
+      },
     },
 
     /**
@@ -226,9 +266,13 @@ LUIComponent('layer-messages-list', {
     animateScrollTo(position) {
       if (position === this.scrollTop) return;
       this.properties.isSelfScrolling = true;
-      animatedScrollTo(this, position, 200, () => {
+      if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+      const cancel = this.properties.cancelAnimatedScroll = animatedScrollTo(this, position, 200, () => {
         // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
         setTimeout(() => {
+          if (cancel !== this.properties.cancelAnimatedScroll) return;
+          this.properties.cancelAnimatedScroll = null;
+
           this.properties.isSelfScrolling = false;
           this._checkVisibility();
         }, 100);
@@ -310,12 +354,12 @@ LUIComponent('layer-messages-list', {
     _generateItem(message) {
       const handler = LayerUI.getHandler(message, this);
       if (handler) {
-        const messageWidget = document.createElement('layer-message-item');
+        const messageWidget = document.createElement(message.sender.sessionOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
         messageWidget.id = this._getItemId(message);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
-
         messageWidget._contentTag = handler.tagName;
+        messageWidget.item = message;
         return messageWidget;
       } else {
         return null;
@@ -357,74 +401,64 @@ LUIComponent('layer-messages-list', {
       if (!widgets[widgets.length - 1].nextSibling) widgets[widgets.length - 1].lastInSeries = true;
     },
 
-    _postRender() {
-      this.nodes.emptyNode.style.display = this.isEmptyList ? '' : 'none';
-      if (this.emptyNode) this.nodes.emptyNode.appendChild(this.emptyNode);
+    _renderResetData: {
+      mode: LUIComponent.MODES.AFTER,
+      value: function _renderResetData(evt) {
+        this.properties.stuckToBottom = true;
+        this.properties.lastPagedAt = 0;
+        this.properties.isSelfScrolling = false;
+      },
     },
 
-    /**
-     * Call this on any Query change events.
-     *
-     * @method _rerender
-     * @private
-     * @param {Event} evt
-     */
-    _rerender(evt) {
-      if (this.query.isDestroyed) {
-        this.isEmptyList = false;
-        this._renderResetData();
-      } else {
-        this.isEmptyList = evt.type !== 'reset' && this.query.data.length === 0;
-        this._processQueryEvt(evt);
-      }
+    _renderWithoutRemovedData: {
+      mode: LUIComponent.MODES.OVERWRITE,
+      value(evt) {
+        this.properties.listData = [].concat(this.properties.query.data).reverse();
+
+        const messageWidget = this.querySelector('#' + this._getItemId(evt.target));
+        if (messageWidget) this.removeChild(messageWidget);
+
+        const removeIndex = this.properties.listData.length - evt.index; // Inverted for reverse order
+        const affectedItems = this.properties.listData.slice(Math.max(0, removeIndex - 3), removeIndex + 3);
+        this._gatherAndProcessAffectedItems(affectedItems, false);
+        if (!evt.inRender) this.onRerender();
+      },
     },
 
-    _renderResetData() {
-      this.properties.listData = [];
-      this.scrollTo(0);
-      this.properties.stuckToBottom = true;
-      this.properties.lastPagedAt = 0;
-      this.properties.isSelfScrolling = false;
-      this.properties.lastScroll = 0;
-      this._render();
+    _renderInsertedData: {
+      mode: LUIComponent.MODES.OVERWRITE,
+      value(evt) {
+        if (this.properties.appendingMore) {
+          if (!this.properties.insertEvents) this.properties.insertEvents = [];
+          this.properties.insertEvents.push(evt);
+          return;
+        }
+        const oldListData = this.properties.listData;
+        this.properties.listData = [].concat(this.properties.query.data).reverse();
+
+        const insertIndex = oldListData.length - evt.index; // Inverted for reverse order
+        const isTopItemNew = insertIndex === 0;
+
+        const affectedItems = this.properties.listData.slice(Math.max(0, insertIndex - 3), insertIndex + 4);
+        const fragment = this._generateFragment([evt.target]);
+        if (insertIndex < oldListData.length) {
+          const insertBeforeNode = affectedItems.length > 1 ?
+            this.querySelector('#' + this._getItemId(oldListData[insertIndex])) : null;
+          this.insertBefore(fragment, insertBeforeNode);
+        } else {
+          this.appendChild(fragment);
+        }
+        this._gatherAndProcessAffectedItems(affectedItems, isTopItemNew);
+        this._updateLastMessageSent();
+        if (this.properties.stuckToBottom) {
+          setTimeout(() => this.animateScrollTo(this.scrollHeight - this.clientHeight), 0);
+        } else {
+          this._checkVisibility();
+        }
+        if (!evt.inRender) this.onRerender();
+      },
     },
 
-    _renderWithoutRemovedData(evt) {
-      this.properties.listData = [].concat(this.properties.query.data).reverse();
-
-      const messageWidget = this.querySelector('#' + this._getItemId(evt.target));
-      if (messageWidget) this.removeChild(messageWidget);
-
-      const removeIndex = this.properties.listData.length - evt.index; // Inverted for reverse order
-      const affectedItems = this.properties.listData.slice(Math.max(0, removeIndex - 3), removeIndex + 3);
-      this._gatherAndProcessAffectedItems(affectedItems, false);
-
-    },
-
-    _renderInsertedData(evt) {
-      const oldListData = this.properties.listData;
-      this.properties.listData = [].concat(this.properties.query.data).reverse();
-
-      const insertIndex = oldListData.length - evt.index; // Inverted for reverse order
-      const isTopItemNew = insertIndex === 0;
-
-      const affectedItems = this.properties.listData.slice(Math.max(0, insertIndex - 3), insertIndex + 4);
-      const fragment = this._generateFragment([evt.target]);
-      if (insertIndex < oldListData.length) {
-        const insertBeforeNode = affectedItems.length > 1 ?
-          this.querySelector('#' + this._getItemId(oldListData[insertIndex])) : null;
-        this.insertBefore(fragment, insertBeforeNode);
-      } else {
-        this.appendChild(fragment);
-      }
-      this._gatherAndProcessAffectedItems(affectedItems, isTopItemNew);
-      this._updateLastMessageSent();
-      if (this.properties.stuckToBottom) {
-        this.animateScrollTo(this.scrollHeight - this.clientHeight);
-      } else {
-        this._checkVisibility();
-      }
-    },
 
     /**
      * The last message sent by the session owner should show some pending/read-by/etc... status.
@@ -483,41 +517,47 @@ LUIComponent('layer-messages-list', {
      * @method _renderPagedData
      * @private
      */
-    _renderPagedData(evt) {
-      if (evt.data.length === 0) {
-        this.isDataLoading = this.properties.query.isFiring;
-        return;
-      }
-
-      // Set this so that if the user is clinging to the scrollbar forcing it to stay at the top,
-      // we know we just paged and won't page again.
-      this.properties.lastPagedAt = Date.now();
-
-      // Get both the query data and the event data
-      const oldListData = this.properties.listData;
-      this.properties.listData = [].concat(this.properties.query.data).reverse();
-      const newData = [].concat(evt.data).reverse();
-
-      // Get the affected items
-      let affectedItems = [].concat(newData);
-      let fragment;
-      if (oldListData.length) affectedItems = affectedItems.concat(oldListData.slice(0, 3));
-
-
-      // Append only a few items at a time, with pauses to keep browser running smoothly.
-      // Don't append anything to the document until its all generated
-      // TODO: This sucks.  For 100 items, it takes 5 iterates of 20ms each, so it adds 100ms lag to render,
-      // and the only good news is that this 100ms lag results in performance of the rest of the browser not degrading.
-      const appendMore = function appendMore() {
-        const processItems = newData.splice(0, 20);
-        fragment = this._generateFragment(processItems, fragment);
-        if (newData.length) {
-          setTimeout(() => appendMore.call(this), 20);
-        } else {
-          this._renderPagedDataDone(affectedItems, fragment, evt);
+    _renderPagedData: {
+      mode: LUIComponent.MODES.OVERWRITE,
+      value(evt) {
+        if (evt.data.length === 0) {
+          this.isDataLoading = this.properties.query.isFiring;
+          return;
         }
-      }.bind(this);
-      appendMore();
+
+        // Set this so that if the user is clinging to the scrollbar forcing it to stay at the top,
+        // we know we just paged and won't page again.
+        this.properties.lastPagedAt = Date.now();
+
+        // Get both the query data and the event data
+        const oldListData = this.properties.listData;
+        this.properties.listData = [].concat(this.properties.query.data).reverse();
+        const newData = [].concat(evt.data).reverse();
+
+        // Get the affected items
+        let affectedItems = [].concat(newData);
+        let fragment;
+        if (oldListData.length) affectedItems = affectedItems.concat(oldListData.slice(0, 3));
+
+
+        // Append only a few items at a time, with pauses to keep browser running smoothly.
+        // Don't append anything to the document until its all generated
+        // TODO: This sucks.  For 100 items, it takes 5 iterates of 20ms each, so it adds 100ms lag to render,
+        // and the only good news is that this 100ms lag results in performance of the rest of the browser not degrading.
+        const appendMore = function appendMore() {
+          if (!this.query || this.query.isDestroyed) return;
+          this.properties.appendingMore = true;
+          const processItems = newData.splice(0, 20);
+          fragment = this._generateFragment(processItems, fragment);
+          if (newData.length) {
+            setTimeout(() => appendMore.call(this), 20);
+          } else {
+            this.properties.appendingMore = false;
+            LayerAPI.Util.defer(() => this._renderPagedDataDone(affectedItems, fragment, evt));
+          }
+        }.bind(this);
+        appendMore();
+      },
     },
 
     /**
@@ -568,6 +608,10 @@ LUIComponent('layer-messages-list', {
 
       this.isDataLoading = this.properties.query.isFiring;
       this._checkVisibility();
+      if (!evt.inRender) this.onRerender();
+
+      if (this.properties.insertEvents) this.properties.insertEvents.forEach(evt => this._renderInsertedData(evt));
+      delete this.properties.insertEvents;
     },
   },
 });

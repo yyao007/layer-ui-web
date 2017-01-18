@@ -233,11 +233,11 @@ LUIComponent('layer-notifier', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
-      this.addEventListener('click', this._clickToast.bind(this));
+    onCreate() {
+      this.addEventListener('click', this.onClickToast.bind(this));
       this.addEventListener('transitionend', this._afterTransition.bind(this), true);
     },
 
@@ -309,6 +309,7 @@ LUIComponent('layer-notifier', {
           notifyClick: () => {
             window.focus();
             this.trigger('layer-notification-click', { message });
+            this.onDesktopClick(message);
           },
         });
         this.properties.desktopNotify.show();
@@ -334,6 +335,16 @@ LUIComponent('layer-notifier', {
         this.properties.desktopMessage.off(null, null, this);
         this.properties.desktopMessage = this.properties.desktopNotify = null;
       }
+    },
+
+    /**
+     * MIXIN HOOK: User has clicked on a desktop notification.
+     *
+     * @method
+     * @param {layer.Message} message
+     */
+    onDesktopClick(message) {
+      // No-op
     },
 
     /**
@@ -389,13 +400,13 @@ LUIComponent('layer-notifier', {
     },
 
     /**
-     * The user has clicked on the toast dialog
+     * MIXIN HOOK: The user has clicked on the toast dialog.
      *
-     * @method _clickToast
+     * @method onClickToast
      * @private
      * @param {Event} evt
      */
-    _clickToast(evt) {
+    onClickToast(evt) {
       if (this.properties.toastMessage) {
         evt.preventDefault();
         evt.stopPropagation();

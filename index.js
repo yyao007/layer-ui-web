@@ -35,7 +35,9 @@ layerUI.init = function(settings) {
   require("./lib/components/identities-list-panel/layer-identities-list/layer-identities-list");
   require("./lib/components/layer-conversation-panel/layer-conversation-panel");
   require("./lib/components/layer-notifier/layer-notifier");
-  require("./lib/components/messages-list-panel/layer-message-item/layer-message-item");
+  require("./lib/components/messages-list-panel/layer-message-item-mixin");
+  require("./lib/components/messages-list-panel/layer-message-item-received/layer-message-item-received");
+  require("./lib/components/messages-list-panel/layer-message-item-sent/layer-message-item-sent");
   require("./lib/components/messages-list-panel/layer-messages-list/layer-messages-list");
   require("./lib/components/subcomponents/layer-avatar/layer-avatar");
   require("./lib/components/subcomponents/layer-compose-button-panel/layer-compose-button-panel");
@@ -58,10 +60,12 @@ layerUI.init = function(settings) {
   require("./lib/handlers/text/images");
   require("./lib/handlers/text/newline");
   require("./lib/handlers/text/youtube");
+  require("./lib/mixins/empty-list");
   require("./lib/mixins/has-query");
   require("./lib/mixins/list-item");
   require("./lib/mixins/list");
   require("./lib/mixins/main-component");
+  require("./lib/mixins/state-manager");
   require("./lib/utils/date-separator");
   require("./lib/utils/files");
   require("./lib/utils/is-url");

@@ -231,7 +231,7 @@ module.exports = function (grunt) {
       grunt.file.write(outputPath, output);
       //grunt.log.writeln("Wrote " + outputPath + "; success: " + grunt.file.exists(outputPath));
       } catch(e) {
-        grunt.log.writeln('Failed to process ' + file);
+        grunt.log.writeln('Failed to process ' + file + '; ', e);
       }
     }
 

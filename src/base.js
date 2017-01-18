@@ -425,14 +425,6 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
  * layerUI.registerTemplate('layer-avatar', document.getElementById('my-avatar');
  * ```
  *
- * Finally, some widgets require *Named* templates.  For example, `layer-message-item` has one template for rendering messages received by this user,
- * and a second template for rendering messages sent by this user:
- *
- * ```
- *    var templateNode = document.getElementById('my-template');
- *    layerUI.registerTemplate('layer-message-item', templateNode, 'layer-message-item-sent');
- * ```
- *
  * Note that any styles you write for your template will require the tag-name to be a part of your CSS rules.
  * For those familiar with Shadow Dom and how it simplifies your CSS, we are **not** using Shadow Dom; these CSS
  * rules can affect everything on your page.
@@ -441,12 +433,9 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
  * @static
  * @param {String} className                The tag name for the widget your setting the template for; 'layer-avatar'
  * @param {HTMLTemplateElement} [template]  Template node to register.  If none provided, will check the ownerDocument for a template.
- * @param {String} [templateName='']        Typically this is ommitted, but some components have multiple templates,
- *                                          and name them to distinguish them.
  */
-layerUI.registerTemplate = function registerTemplate(className, template, templateName) {
+layerUI.registerTemplate = function registerTemplate(className, template) {
   if (!template) template = document._currentScript.ownerDocument.querySelector('template');
-  if (!templateName) templateName = 'default';
 
   // Since we aren't doing shadowDOM, and we don't want to insert the template <style/> tag a thousand times
   // for repeated components, remove the style from the template, and instead cache the styles in
@@ -457,12 +446,8 @@ layerUI.registerTemplate = function registerTemplate(className, template, templa
   }
 
   // Write template and style as static properties of the Component.
-  layerUI.components[className].templates[templateName] = template;
-  layerUI.components[className].styles[templateName] = styles;
-
-  // This indicates that <style> has not yet been added to <head>; it will be added when the first of these
-  // components is used in the page... and will only be added once.
-  layerUI.components[className].renderedStyles[templateName] = false;
+  layerUI.components[className].template = template;
+  layerUI.components[className].style = styles;
 };
 
 /**
@@ -479,18 +464,16 @@ layerUI.registerTemplate = function registerTemplate(className, template, templa
  * @protected
  * @param {String} className          The tag name for the widget your setting the template for; 'layer-avatar'
  * @param {String} templateStr        Template string to register.
- * @param {String} [templateName='']  Typically this is omitted, but some components have multiple templates, and use names to distinguish them.
  */
-layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr, templateName) {
+layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr) {
   if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
-  if (!templateName) templateName = 'default';
 
   // Generate a template node
   const template = document.createElement('template');
   template.innerHTML = templateStr;
 
   // Write it as a static property of the Component
-  layerUI.components[className].templates[templateName] = template;
+  layerUI.components[className].template = template;
 };
 
 /**
@@ -505,15 +488,10 @@ layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr
  * @protected
  * @param {String} className           The tag name for the widget your setting the template for; 'layer-avatar'
  * @param {String} styleStr            Style string to associate with this component.  Specifically, expects the output of `Function.toString()`
- * @param {String} [templateName='']   Typically this is ommitted, but some components have multiple templates, and use names to distinguish them.
  */
-layerUI.buildStyle = function buildStyles(className, styleStr, templateName) {
-  if (!templateName) templateName = 'default';
+layerUI.buildStyle = function buildStyles(className, styleStr) {
   if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
-
-  // Extract the style from the function
-  layerUI.components[className].styles[templateName] = styleStr;
-  layerUI.components[className].renderedStyles[templateName] = false;
+  layerUI.components[className].style = styleStr;
 };
 
 /**
@@ -549,22 +527,6 @@ layerUI.hyphenate = str =>
  * @returns {Boolean}
  */
 layerUI.isInBackground = () => !document.hasFocus() || document.hidden;
-
-let deferred = [];
-layerUI.defer = function defer(callback) {
-  if (deferred.length) deferred.push(callback);
-  else {
-    deferred.push(callback);
-    setTimeout(() => {
-      try {
-        deferred.forEach(aCallback => aCallback());
-      } catch (e) {
-        // Noop
-      }
-      deferred = [];
-    }, 1);
-  }
-};
 
 /**
  * An adapter is a bit of JS Framework specific code for making this framework work with other UI Frameworks.
@@ -615,9 +577,12 @@ layerUI.init = function init(settings) {
   } else if (!settings.layer && !layerUI.settings.layer) {
     throw new Error('layer is a required property for init');
   }
+
   Object.keys(settings || {}).forEach((name) => {
     layerUI.settings[name] = settings[name];
   });
+
+  if (!layerUI.settings.mixins) layerUI.settings.mixins = [];
 
   // Enable the text handlers
   layerUI.settings.textHandlers.forEach((handlerName) => {

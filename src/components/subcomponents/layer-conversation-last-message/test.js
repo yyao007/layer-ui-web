@@ -31,6 +31,7 @@ describe('layer-conversation-last-message', function() {
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
     message = conversation.createMessage("Hello Earthlings").send();
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
@@ -38,31 +39,31 @@ describe('layer-conversation-last-message', function() {
   });
 
   describe('The item property', function() {
-    it("Should call _rerender", function() {
-      spyOn(el, "_rerender");
+    it("Should call onRender", function() {
+      spyOn(el, "onRender");
       el.item = conversation;
-      expect(el._rerender).toHaveBeenCalledWith();
+      expect(el.onRender).toHaveBeenCalledWith();
     });
 
-    it("Should wire up the _rerender event", function() {
-      spyOn(el, "_rerender");
+    it("Should wire up the onRerender event", function() {
+      spyOn(el, "onRerender");
       el.item = conversation;
-      el._rerender.calls.reset();
+      el.onRerender.calls.reset();
       conversation.trigger('conversations:change', {});
-      expect(el._rerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
+      expect(el.onRerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
     });
 
-    it("Should unwire up the _rerender event if prior Conversation", function() {
-      spyOn(el, "_rerender");
+    it("Should unwire up the onRerender event if prior Conversation", function() {
+      spyOn(el, "onRerender");
       el.item = conversation;
       el.item = null;
-      el._rerender.calls.reset();
+      el.onRerender.calls.reset();
       conversation.trigger('conversations:change', {});
-      expect(el._rerender).not.toHaveBeenCalled();
+      expect(el.onRerender).not.toHaveBeenCalled();
     });
   });
 
-  describe("The _rerender() method", function() {
+  describe("The onRerender() method", function() {
     it("Should generate a layer-message-text-plain saying Hello Earthlings", function() {
       expect(el.querySelector('layer-message-text-plain')).toBe(null);
       el.item = conversation;

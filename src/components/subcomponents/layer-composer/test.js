@@ -30,6 +30,7 @@ describe('layer-composer', function() {
     conversation = client.createConversation({
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
+    layer.Util.defer.flush();
   });
 
   afterEach(function() {
@@ -279,8 +280,8 @@ describe('layer-composer', function() {
       layerUI.settings.disableTabAsWhiteSpace = false;
     });
 
-    it("Should call _resizeNode() whether its an ENTER or a letter", function() {
-      spyOn(el, "_resizeNode");
+    it("Should call onRender() whether its an ENTER or a letter", function() {
+      spyOn(el, "onRender");
       var preventSpy = jasmine.createSpy('preventDefault');
       el._onKeyDown({
         preventDefault: preventSpy,
@@ -289,7 +290,7 @@ describe('layer-composer', function() {
         ctrlKey: false,
         target: el.nodes.input
       });
-      expect(el._resizeNode).toHaveBeenCalledWith();
+      expect(el.onRender).toHaveBeenCalledWith();
     });
 
     it("Should call _triggerChange", function() {
@@ -309,11 +310,11 @@ describe('layer-composer', function() {
   });
 
   describe("The _onInput() method", function() {
-    it("Should call _resizeNode() ", function() {
-      spyOn(el, "_resizeNode");
+    it("Should call onRender() ", function() {
+      spyOn(el, "onRender");
       var preventSpy = jasmine.createSpy('preventDefault');
       el._onInput({});
-      expect(el._resizeNode).toHaveBeenCalledWith();
+      expect(el.onRender).toHaveBeenCalledWith();
     });
 
     it("Should call _triggerChange", function() {
@@ -352,14 +353,14 @@ describe('layer-composer', function() {
     });
   });
 
-  describe("The _resizeNode() method", function() {
+  describe("The onRender() method", function() {
     it("Should assign resizer and lineHeighter the same value as input", function() {
       el.value = "Please eat Frodo\nand then we can at last digest the Shire";
       el.nodes.resizer.innerHTML = '';
       el.nodes.lineHeighter.innerHTML = '';
 
       // Run
-      el._resizeNode();
+      el.onRender();
       jasmine.clock().tick(100);
 
       // Posttest
@@ -373,7 +374,7 @@ describe('layer-composer', function() {
       el.nodes.lineHeighter.innerHTML = '';
 
       // Run
-      el._resizeNode();
+      el.onRender();
       jasmine.clock().tick(100);
 
       // Posttest
@@ -387,7 +388,7 @@ describe('layer-composer', function() {
       el.nodes.lineHeighter.innerHTML = '';
 
       // Run
-      el._resizeNode();
+      el.onRender();
       jasmine.clock().tick(100);
 
       // Posttest
@@ -397,7 +398,7 @@ describe('layer-composer', function() {
       el.value = new Array(1).join('Frodo is a Dodo');
       el.nodes.resizer.innerHTML = '';
       el.nodes.lineHeighter.innerHTML = '';
-      el._resizeNode();
+      el.onRender();
       jasmine.clock().tick(100);
 
       // Posttest

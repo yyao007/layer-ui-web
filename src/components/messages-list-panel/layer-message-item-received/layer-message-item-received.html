@@ -1,34 +1,40 @@
 <template>
   <style>
-    layer-message-item {
+    layer-message-item-received {
       display: flex;
       flex-direction: column;
       align-content: stretch;
     }
 
-    layer-message-item.layer-message-item-received .layer-list-item .layer-list-item-container {
+    layer-message-item-received .layer-list-item {
+      display: flex;
+      flex-direction: column;
+      align-content: stretch;
+    }
+
+    layer-message-item-received .layer-message-body-and-avatar {
       display: flex;
       flex-direction: row;
       align-items: flex-end;
     }
 
-    layer-message-item.layer-message-item-received  .layer-message-item-main {
+    layer-message-item-received  .layer-message-item-main {
       flex-grow: 1;
       overflow: hidden;
     }
 
-    layer-message-item.layer-message-item-received .layer-message-item-main .layer-message-item-content {
+    layer-message-item-received .layer-message-item-main .layer-message-item-content {
       max-width: 90%;
     }
 
 
     /* Insure that text, images, videos, etc... are all left aligned */
-    layer-message-item.layer-message-item-received layer-message-text-plain {
+    layer-message-item-received layer-message-text-plain {
       display: block;
     }
   </style>
   <div class='layer-list-item' layer-id='innerNode'>
-    <div class='layer-list-item-container'>
+    <div class='layer-message-body-and-avatar'>
       <layer-avatar layer-id='avatar'></layer-avatar>
       <div class='layer-message-item-main'>
         <div class='layer-message-item-content' layer-id='content'></div>
@@ -41,5 +47,5 @@
   </div>
 </template>
 <script>
-  window.layerUI.registerTemplate('layer-message-item', null, 'layer-message-item-received');
+  window.layerUI.registerTemplate('layer-message-item-received');
 </script>

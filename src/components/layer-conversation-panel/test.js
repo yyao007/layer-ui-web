@@ -53,6 +53,7 @@ describe('layer-conversation-panel', function() {
 
   afterEach(function() {
     document.body.removeChild(testRoot);
+    if (el) el.onDestroy();
   });
 
   describe('Event Handling', function() {
@@ -89,6 +90,7 @@ describe('layer-conversation-panel', function() {
     beforeEach(function() {
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       el = testRoot.firstChild;
     });
 
@@ -140,6 +142,8 @@ describe('layer-conversation-panel', function() {
     it("Should call _scheduleGeneratedQuery once the client is set", function() {
         testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
         CustomElements.takeRecords();
+        layer.Util.defer.flush();
+
         var el = testRoot.firstChild;
         spyOn(el, "_scheduleGeneratedQuery");
         el.client = client;
@@ -184,6 +188,7 @@ describe('layer-conversation-panel', function() {
     beforeEach(function() {
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       el = testRoot.firstChild;
     });
 
@@ -210,6 +215,8 @@ describe('layer-conversation-panel', function() {
     it("Should default to true", function() {
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       expect(el.autoFocusConversation).toBe(true);
     });
@@ -217,6 +224,8 @@ describe('layer-conversation-panel', function() {
     it("Should be initializable to false", function() {
       testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="false"></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       expect(el.autoFocusConversation).toBe(false);
     });
@@ -224,6 +233,8 @@ describe('layer-conversation-panel', function() {
     it("Should be initializable to true", function() {
       testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="true"></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       expect(el.autoFocusConversation).toBe(true);
     });
@@ -233,6 +244,8 @@ describe('layer-conversation-panel', function() {
     it("Should setup the conversation if there is a conversationId", function() {
       testRoot.innerHTML = '<layer-conversation-panel conversation-id="' + conversation.id + '"></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       spyOn(el, "_setupConversation");
       el.client = client;
@@ -241,6 +254,8 @@ describe('layer-conversation-panel', function() {
       // Inverse Test
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       spyOn(el, "_setupConversation");
       el.client = client;
@@ -250,6 +265,8 @@ describe('layer-conversation-panel', function() {
     it("Should setup the query if there is a queryId", function() {
       testRoot.innerHTML = '<layer-conversation-panel query-id="' + query.id + '"></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       expect(el.query).toBe(null);
       el.client = client;
@@ -258,6 +275,8 @@ describe('layer-conversation-panel', function() {
       // Inverse test
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
       el = testRoot.firstChild;
       expect(el.query).toBe(null);
       el.client = client;
@@ -269,6 +288,7 @@ describe('layer-conversation-panel', function() {
     it("Should set the list onRenderListItem property", function() {
       var f = function() {};
       el.onRenderListItem = f;
+      layer.Util.defer.flush();
       expect(el.nodes.list.onRenderListItem).toBe(f);
     });
   });
@@ -277,6 +297,7 @@ describe('layer-conversation-panel', function() {
     it("Should set the list emptyNode property", function() {
       var div = document.createElement('div');
       el.emptyMessageListNode = div;
+      layer.Util.defer.flush();
       expect(el.nodes.list.emptyNode).toBe(div);
     });
   });
@@ -285,6 +306,7 @@ describe('layer-conversation-panel', function() {
     it("Should set the list composeButtons property", function() {
       var buttons = [document.createElement("button"), document.createElement("button")];
       el.composeButtons = buttons
+      layer.Util.defer.flush();
       expect(el.nodes.composer.buttons).toBe(buttons);
     });
   });
@@ -293,6 +315,7 @@ describe('layer-conversation-panel', function() {
   describe("The composeText property", function() {
     it("Should set the list composeText property", function() {
       el.composeText = "Frodo Must Cry";
+      layer.Util.defer.flush();
       expect(el.nodes.composer.value).toEqual("Frodo Must Cry");
     });
   });
@@ -300,6 +323,7 @@ describe('layer-conversation-panel', function() {
   describe("The composePlaceholder property", function() {
     it("Should set the list composePlaceholder property", function() {
       el.composePlaceholder = "Frodo Must Cry";
+      layer.Util.defer.flush();
       expect(el.nodes.composer.placeholder).toEqual("Frodo Must Cry");
     });
   });
@@ -308,6 +332,7 @@ describe('layer-conversation-panel', function() {
     it("Should pass the property to the list", function() {
       var f = function() {}
       el.dateRenderer = f;
+      layer.Util.defer.flush();
       expect(el.nodes.list.dateRenderer).toBe(f);
     });
   });
@@ -316,6 +341,7 @@ describe('layer-conversation-panel', function() {
     it("Should pass the property to the list", function() {
       var f = function() {}
       el.messageStatusRenderer = f;
+      layer.Util.defer.flush();
       expect(el.nodes.list.messageStatusRenderer).toBe(f);
     });
   });

@@ -1,7 +1,8 @@
 describe('layer-conversations-list', function() {
   var el, testRoot, client, query;
 
-  beforeEach(function(done) {
+  beforeEach(function() {
+    jasmine.clock().install();
     client = new layer.Client({
       appId: 'layer:///apps/staging/Fred'
     });
@@ -35,18 +36,19 @@ describe('layer-conversations-list', function() {
         })
       );
     }
-
     el.query = query;
-    setTimeout(function() {
-      jasmine.clock().install();
-      done();
-    }, 10);
+    layer.Util.defer.flush();
+    jasmine.clock().tick(50);
+    layer.Util.defer.flush();
+    jasmine.clock().tick(50);
+
   });
 
   afterEach(function() {
     try {
       jasmine.clock().uninstall();
       document.body.removeChild(testRoot);
+      if (el) el.onDestroy();
     } catch(e) {}
   });
 
@@ -102,6 +104,7 @@ describe('layer-conversations-list', function() {
     it("Should call _updateQuery if there is a queryId passed into the innerHTML", function() {
       testRoot.innerHTML = '<layer-conversations-list query-id="' + query.id + '" app-id="' + client.appId + '"></layer-conversations-list>';
       CustomElements.takeRecords();
+      layer.Util.defer.flush();
       var el = testRoot.firstChild;
       expect(el.query).toBe(query);
 
@@ -201,11 +204,13 @@ describe('layer-conversations-list', function() {
     it("Should set deleteConversationEnabled via callback", function() {
       el.deleteConversationEnabled = jasmine.createSpy('deleteEnabled').and.returnValue(true);
       var result = el._generateItem(query.data[1]);
+      layer.Util.defer.flush();
       expect(result.nodes.delete.enabled).toBe(true);
       expect(el.deleteConversationEnabled).toHaveBeenCalledWith(query.data[1]);
 
       el.deleteConversationEnabled = jasmine.createSpy('deleteEnabled').and.returnValue(false);
       var result = el._generateItem(query.data[1]);
+      layer.Util.defer.flush();
       expect(el.deleteConversationEnabled).toHaveBeenCalledWith(query.data[1]);
       expect(result.nodes.delete.enabled).toBe(false);
     });
@@ -213,21 +218,22 @@ describe('layer-conversations-list', function() {
     it("Should run the filter", function() {
       el.filter = 'Not this again';
       var result = el._generateItem(query.data[10]);
+      layer.Util.defer.flush();
       expect(result.classList.contains('layer-item-filtered')).toBe(true);
     });
   });
 
-  describe("The _rerender() method", function() {
+  describe("The onRerender() method", function() {
     it("Should call _processQueryEvt", function() {
       spyOn(el, "_processQueryEvt");
       var evt = {};
-      el._rerender(evt);
+      el.onRerender(evt);
       expect(el._processQueryEvt).toHaveBeenCalledWith(evt);
     });
 
     it("Should call _renderSelection", function() {
       spyOn(el, "_renderSelection");
-      el._rerender({
+      el.onRerender({
         type: 'remove',
         target: query.data[1]
       });

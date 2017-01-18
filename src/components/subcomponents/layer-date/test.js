@@ -3,6 +3,7 @@ describe('layer-date', function() {
   beforeEach(function() {
     layerUI.init({layer: layer});
     el = document.createElement('layer-date');
+    layer.Util.defer.flush();
   });
 
   it('Should accept a date parameter', function() {

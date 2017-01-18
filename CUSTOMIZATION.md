@@ -179,6 +179,13 @@ Suppose we want to customize messages-received:
 * This template is given an ID; this is not required, but it does allow you to create a single file with all of your templates and then easily identify them.  If you decided to go with one file per template, you can pass `null` instead of a `template`.
 * The third argument identifies what the template will be used for.  There are two supported template names for `<layer-message-item />`: `layer-message-item-received` and `layer-message-item-sent`.
 
+### Customizing a List Item
+
+List Items such as `layer-message-item`, `layer-conversation-item` and `layer-identity-item` have a built in mechanism for passing data
+to your custom widgets.  Every node within the List Item's template that contains a unique `layer-id` will have its `item` property
+set to the List Item's `item` property.  That means you can design a widget that expects an `item` property, and if you put it into
+a `layer-message-item`, its `item` property will be set to your Message.  If you put it into a `layer-conversation-item`, its `item` will be a Conversation.  This allows you to add widgets to your template without having to modify the List Item Javascript code to pass data between them.
+
 
 ## Custom Components
 

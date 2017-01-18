@@ -17,14 +17,6 @@ LUIComponent('layer-identity-item', {
   mixins: [ListItem],
   properties: {
 
-    // Every List Item has an item property, here it represents the Conversation to render
-    item: {
-      set(value) {
-        this._render();
-        value.on('identities:change', this._render, this);
-      },
-    },
-
     /**
      * Is this user item currently selected?
      *
@@ -48,10 +40,10 @@ LUIComponent('layer-identity-item', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       if (!this.id) this.id = LayerAPI.Util.generateUUID();
       this.nodes.checkbox.addEventListener('change', this._onChange.bind(this));
       this.nodes.checkbox.id = `${this.id}-checkbox`;
@@ -80,6 +72,16 @@ LUIComponent('layer-identity-item', {
       } else {
         this.selected = !checked;
       }
+      this.onSelection(evt);
+    },
+
+    /**
+     * MIXIN HOOK: Each time a an item's selection state changes, this will be called.
+     *
+     * @method onSelection
+     */
+    onSelection(evt) {
+      // No-op
     },
 
     /**
@@ -88,7 +90,17 @@ LUIComponent('layer-identity-item', {
      * @method _render
      * @private
      */
-    _render() {
+    onRender() {
+      this.onRerender();
+    },
+
+    /**
+     * Update the rendering of the avatar/username
+     *
+     * @method _render
+     * @private
+     */
+    onRerender() {
       this.nodes.avatar.users = [this.item];
       this.nodes.title.innerHTML = this.item.displayName;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);

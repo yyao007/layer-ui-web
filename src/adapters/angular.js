@@ -66,8 +66,8 @@ function initAngular(angular) {
         if (elem.properties) {
           elem[prop.propertyName] = value;
         } else {
-          if (!elem._tmpdata) elem._tmpdata = {};
-          elem._tmpdata[prop.propertyName] = value;
+          if (!elem.properties) elem.properties = {};
+          elem.properties[prop.propertyName] = value;
         }
       });
 
@@ -78,8 +78,8 @@ function initAngular(angular) {
           if (elem.properties) {
             elem[prop.propertyName] = value;
           } else {
-            if (!elem._tmpdata) elem._tmpdata = {};
-            elem._tmpdata[prop.propertyName] = value;
+            if (!elem.properties) elem.properties = {};
+            elem.properties[prop.propertyName] = value;
           }
         });
       });

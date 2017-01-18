@@ -16,13 +16,13 @@
  *    properties: {
  *      message: {
  *        set: function(value) {
- *          if (newMessage) newMessage.on('messages:change', this._rerender, this);
- *          this._rerender();
+ *          if (newMessage) newMessage.on('messages:change', this.onRerender, this);
+ *          this.onRerender();
  *        }
  *      }
  *    },
  *    methods: {
- *      _rerender: function() {
+ *      onRerender: function() {
  *          var message = this.properties.message;
  *          this.innerHTML = 'Nobody wants to read your message';
  *      }
@@ -44,11 +44,11 @@ LUIComponent('layer-message-status', {
      *
      * @property {layer.Message} [message=null]
      */
-    message: {
+    item: {
       set(newMessage, oldMessage) {
         if (oldMessage) oldMessage.off(null, null, this);
-        if (newMessage) newMessage.on('messages:change', this._rerender, this);
-        this._rerender();
+        if (newMessage) newMessage.on('messages:change', this.onRerender, this);
+        this.onRender();
       },
     },
 
@@ -65,19 +65,21 @@ LUIComponent('layer-message-status', {
      *
      * @property {Function} [messageStatusRenderer=null]
      */
-    messageStatusRenderer: {
-      order: 100, // make sure this is set before setting the message property
-    },
+    messageStatusRenderer: {},
   },
   methods: {
 
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
+    },
+
+    onRender() {
+      this.onRerender();
     },
 
     /**
@@ -89,9 +91,9 @@ LUIComponent('layer-message-status', {
      * @private
      * @param {Event} evt
      */
-    _rerender(evt) {
-      if (!evt || evt.hasProperty('recipientStatus')) {
-        const message = this.message;
+    onRerender(evt) {
+      if (this.item && (!evt || evt.hasProperty('recipientStatus'))) {
+        const message = this.item;
         if (this.messageStatusRenderer) {
           this.innerHTML = this.messageStatusRenderer(message);
         } else {

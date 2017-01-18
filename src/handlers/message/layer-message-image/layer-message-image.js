@@ -58,7 +58,7 @@ LUIComponent('layer-message-image', {
         }
 
         // Render the Message
-        this._render();
+        this.onRender();
       },
     },
 
@@ -70,10 +70,10 @@ LUIComponent('layer-message-image', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
+    onCreate() {
       this.addEventListener('click', this._handleClick.bind(this));
     },
 
@@ -100,7 +100,7 @@ LUIComponent('layer-message-image', {
      * @method
      * @private
      */
-    _render() {
+    onRender() {
       let maxSizes = UISettings.maxSizes;
       // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
       if (this.parentContainer.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };

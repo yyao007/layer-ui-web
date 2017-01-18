@@ -10,15 +10,13 @@ module.exports = {
     /**
      * Is this component a Main Component (high level for use by third party apps).
      *
-     * Used by adapters to find components to adapte.
+     * Used by adapters to find components to adapt.
      * @private
      * @readonly
      * @property {Boolean} [_isMainComponent=true]
      */
     _isMainComponent: {
       value: true,
-      order: 1,
-      setBeforeCreate: true,
     },
 
     // TODO: Some MainComponents don't have Queries; this should be moved into a has-query mixin
@@ -48,7 +46,6 @@ module.exports = {
      * @property {String} [appId=""]
      */
     appId: {
-      order: 2,
       set(value) {
         if (value && value.indexOf('layer:///') === 0) {
           const client = LayerAPI.Client.getClient(value);
@@ -72,7 +69,11 @@ module.exports = {
      *
      * @property {layer.Client} [client=null]
      */
-    client: {},
+    client: {
+      set(value) {
+        if (value) value.on('destroy', () => this.properties.client = null, this);
+      }
+    },
 
     /**
      * How many items to page in each time we page the Query.
@@ -84,7 +85,7 @@ module.exports = {
     },
   },
   methods: {
-    _created() {
+    onCreate() {
       if (settings.appId) this.appId = settings.appId;
     },
 

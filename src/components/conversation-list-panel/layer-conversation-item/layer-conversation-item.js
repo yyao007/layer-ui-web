@@ -23,17 +23,10 @@ LUIComponent('layer-conversation-item', {
     // Every List Item has an item property, here it represents the Conversation to render
     item: {
       set(newConversation, oldConversation) {
-        this._render();
-        if (oldConversation) oldConversation.off(null, null, this);
-
-        if (newConversation) {
-          newConversation.on('conversations:change', this._rerender, this);
-        }
         if (this.nodes.delete) this.nodes.delete.item = newConversation;
         if (this.nodes.title) this.nodes.title.item = newConversation;
         if (this.nodes.lastMessage) {
           this.nodes.lastMessage.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
-          this.nodes.lastMessage.item = newConversation;
         }
       },
     },
@@ -74,33 +67,11 @@ LUIComponent('layer-conversation-item', {
   },
   methods: {
 
-    /**
-     * Constructor.
-     *
-     * @method _created
-     * @private
-     */
-    _created() {
-
+    onRender() {
+      this.onRerender();
     },
 
-    /**
-     * Render this Conversation Item.
-     *
-     * @method _render
-     * @private
-     */
-    _render() {
-      this._rerender();
-    },
-
-    /**
-     * Update the rendering with new properties.
-     *
-     * @method _rerender
-     * @private
-     */
-    _rerender() {
+    onRerender() {
       const users = this.item.participants.filter(user => !user.sessionOwner);
       const isRead = !this.item.lastMessage || this.item.lastMessage.isRead;
 

@@ -9,45 +9,87 @@
  * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
  * * `layer-message-item-received`: Rendering for Messages sent by other users
  *
+ * ## Advanced Customization
+ *
+ * The simple way to customize the widget is to modify its template.
+ * For more advanced customizations where the Message Item widget needs new properties, methods and capabilities, you have two options:
+ *
+ * 1. Define a custom `<layer-message-item/>` widget; this works but your now entirely responsible for all of its
+ *    behaviors, and can not easily integrate fixes and enhancements added to this repo. This is discussed in more
+ *    detail at [docs.layer.com](https://docs.layer.com).
+ * 2. Enhance the provided widget with Mixins.  Below illustrates an example of a mixin.
+ *
+ * A Custom Mixin can be used to add Properties and Methods to this class.
+ * Any method of this class can be enhanced using a Custom Mixin, however the following methods are recommended
+ * as sufficient for most solutions:
+ *
+ * * layerUI.components.MessagesListPanel.List.onCreate: Your widget has just been created; it has a DOM node, it has child
+ *   nodes, *it has no properties*, nor does not yet have a `parentNode`.
+ *   Provide an `onCreate` if there is any DOM manipulation you want to do any initialization.  (DOM Manipulation here should NOT depend
+ *   upon property values).
+ * * layerUI.components.MessagesListPanel.List.onAttach: Your widget now has a `parentNode`.  This is solely for initialization
+ *   code that depends upon looking at the `parentNode`, and is not commonly used.
+ * * layerUI.components.MessagesListPanel.List.onRender: Your Message Item widget has just been rendered for the first time.
+ *   Your widget should have an `item` at this point and any property-based dom manipulation can be done at this time.
+ *
+ * The following example adds a search bar to the Message List
+ * ```
+ * layerUI.init({
+ *   appId: 'my-app-id',
+ *   layer: window.layer,
+ *   mixins: {
+ *     'layer-messages-item': {
+ *       properties: {
+ *         selected: {
+ *           value: false,
+ *           set: function(value) {
+ *             if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
+ *           },
+ *           get: function() {
+ *             return this.nodes.checkbox ? this.nodes.checkbox.checked : this.properties.selected;
+ *           }
+ *         }
+ *       },
+ *       methods: {
+ *         onCreate: function() {
+ *           this.nodes.checkbox = document.createElement('input');
+ *           this.nodes.checkbox.type = 'checkbox';
+ *           this.nodes.checkbox.classList.add('custom-checkbox');
+ *           this.nodes.checkbox.addEventListener('click', this._handleCustomCheckboxEvent.bind(this));
+ *           this.appendChild(this.nodes.checkbox);
+ *         },
+ *
+ *         // When the widget has been rendered is a good time to do any property based dom manipulation
+ *         onRender: function() {
+ *          this.nodes.checkbox.checked = this.selected;
+ *         },
+ *
+ *         // Search is run whenver the user changes the search text, app changes the search text,
+ *         // or new messages arrive that need to be searched
+ *         _handleCustomCheckboxEvent(evt) {
+ *           this.trigger('custom-message-checkbox-change', {
+ *             isChecked: this.selected,
+ *             message: this.item
+ *           });
+ *         }
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
+ *
  * @class layerUI.components.MessagesListPanel.Item
  * @mixins layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
-import ListItem from '../../../mixins/list-item';
+import { layer as LayerAPI } from '../../base';
+import LUIComponent from '../../components/component';
 
-LUIComponent('layer-message-item', {
-  mixins: [ListItem],
+module.exports = {
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
-    item: {
-      set(newMessage, oldMessage) {
-        // Disconnect from any previous Message we were rendering; not currently used.
-        if (oldMessage) {
-          oldMessage.off(null, null, this);
-          if (oldMessage.sender.sessionOwner) {
-            this.removeClass('layer-message-item-sent');
-          } else {
-            this.removeClass('layer-message-item-received');
-          }
-        }
-
-        if (newMessage) {
-          // Any changes to the Message should trigger a rerender
-          newMessage.on('messages:change', this._rerender, this);
-
-          // Setup the proper sent/received class
-          if (newMessage.sender.sessionOwner) {
-            this.addClass('layer-message-item-sent');
-          } else {
-            this.addClass('layer-message-item-received');
-          }
-          this._render();
-        }
-      },
-    },
+    item: {},
 
     /**
      * Deletion of this Message is enabled.
@@ -74,6 +116,7 @@ LUIComponent('layer-message-item', {
       set(newTag, oldTag) {
         if (oldTag) this.removeClass(this._contentTag);
         if (newTag) this.addClass(newTag);
+        if (this.nodes.itemNode) this.nodes.itemNode._contentTag = this.properties._contentTag;
       },
     },
 
@@ -108,39 +151,8 @@ LUIComponent('layer-message-item', {
     messageStatusRenderer: {},
   },
   methods: {
-    /**
-     * Constructor.
-     *
-     * @method _created
-     * @private
-     */
-    _created() {
-
-    },
-
-    /**
-     * Initial rendering of static properties of the Message (sender)
-     *
-     * Rendering of MessageParts is handled via layerUI.MessageItem.setContentTag().
-     *
-     * @method
-     * @private
-     */
-    _render() {
-      if (!this.properties.item) return;
-      this.innerHTML = '';
+    onRender: function onRender() {
       try {
-
-        // Select and apply the correct template
-        const isOwner = this.properties.item.sender.sessionOwner;
-        let template = this.getTemplate(isOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
-        if (!template) {
-          template = this.getTemplate();
-        }
-        const clone = document.importNode(template.content, true);
-        this.appendChild(clone);
-        this.setupDomNodes();
-        this.innerNode = this.nodes.innerNode;
 
         // Setup the layer-sender-name
         if (this.nodes.sender) {
@@ -158,14 +170,10 @@ LUIComponent('layer-message-item', {
         }
 
         // Setup the layer-message-status
-        if (this.nodes.status) {
-          if (this.messageStatusRenderer) this.nodes.status.messageStatusRenderer = this.messageStatusRenderer;
-          this.nodes.status.message = this.item;
-        }
+        if (this.nodes.status && this.messageStatusRenderer) this.nodes.status.messageStatusRenderer = this.messageStatusRenderer;
 
         // Setup the layer-delete
         if (this.nodes.delete) {
-          this.nodes.delete.item = this.properties.item;
           this.nodes.delete.enabled = this.getDeleteEnabled ? this.getDeleteEnabled(this.properties.item) : true;
         }
 
@@ -173,19 +181,13 @@ LUIComponent('layer-message-item', {
         this._applyContentTag();
 
         // Render all mutable data
-        this._rerender();
+        this.onRerender();
       } catch (err) {
         console.error('layer-message-item.render(): ', err);
       }
     },
 
-    /**
-     * Render dynamic properties of the Message (message status)
-     *
-     * @method
-     * @private
-     */
-    _rerender() {
+    onRerender() {
       const readStatus = this.properties.item.readStatus;
       const deliveryStatus = this.properties.item.deliveryStatus;
       const statusPrefix = 'layer-message-status';
@@ -213,6 +215,7 @@ LUIComponent('layer-message-item', {
       const messageHandler = document.createElement(this._contentTag);
       messageHandler.parentContainer = this;
       messageHandler.message = this.item;
+      this.nodes.messageHandler = messageHandler;
 
       this.nodes.content.appendChild(messageHandler);
       if (messageHandler.style.height) {
@@ -220,4 +223,4 @@ LUIComponent('layer-message-item', {
       }
     },
   },
-});
+};

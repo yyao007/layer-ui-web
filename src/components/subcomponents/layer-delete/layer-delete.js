@@ -18,7 +18,7 @@
  *      item: {}
  *    },
  *    methods: {
- *      _created: function() {
+ *      onCreate: function() {
  *        this.addEventListener('click', this.onDeleteClick, this);
  *      },
  *      onDeleteClick: function() {
@@ -62,23 +62,22 @@ LUIComponent('layer-delete', {
     /**
      * Constructor.
      *
-     * @method _created
+     * @method onCreate
      * @private
      */
-    _created() {
-      this.addEventListener('click', this._onDeleteClick, this);
+    onCreate() {
+      this.addEventListener('click', this.onDeleteClick, this);
     },
 
     /**
-     * If the Delete button was clicked, delete the Message.
+     * MIXIN HOOK: Called when the delete button is clicked..
      *
      * Triggers `layer-message-deleted` or `layer-conversation-deleted` allowing deletion to be handled elsewhere.
      *
      * @method
-     * @private
      * @param {Event} evt
      */
-    _onDeleteClick(evt) {
+    onDeleteClick(evt) {
       evt.preventDefault();
       evt.stopPropagation();
       if (this.enabled) {

@@ -18,6 +18,7 @@ describe('layer-avatar', function() {
     el = document.createElement('layer-avatar');
     testRoot.appendChild(el);
     el.enabled = true;
+    layer.Util.defer.flush();
   });
   afterEach(function() {
     document.body.removeChild(testRoot);

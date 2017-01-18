@@ -23,46 +23,47 @@ describe('layer-message-status', function() {
       participants: ['layer:///identities/a', 'layer:///identities/b']
     });
     message = conversation.createMessage('Hey ho');
+    layer.Util.defer.flush();
   });
   afterEach(function() {
     document.body.removeChild(testRoot);
   });
 
   it('Should call rerender on any message change events', function() {
-    spyOn(el, "_rerender");
-    el.message = message;
-    el._rerender.calls.reset();
+    spyOn(el, "onRerender");
+    el.item = message;
+    el.onRerender.calls.reset();
 
     message.trigger('messages:change', {});
-    expect(el._rerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
+    expect(el.onRerender).toHaveBeenCalledWith(jasmine.any(layer.LayerEvent));
   });
 
   it('Should not call rerender on any message change events once its no longer the right message', function() {
-    spyOn(el, "_rerender");
-    el.message = message;
-    el.message = null;
-    el._rerender.calls.reset();
+    spyOn(el, "onRerender");
+    el.item = message;
+    el.item = null;
+    el.onRerender.calls.reset();
 
     message.trigger('messages:change', {});
-    expect(el._rerender).not.toHaveBeenCalled();
+    expect(el.onRerender).not.toHaveBeenCalled();
   });
 
   it('Should show pending', function() {
     message.syncState = layer.Constants.SYNC_STATE.SAVING;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual('pending');
   });
 
   it('Should show sent', function() {
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.NONE;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual('sent');
   });
 
   it('Should show delivered', function() {
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
     message.readStatus = layer.Constants.RECIPIENT_STATE.NONE;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual('delivered');
   });
 
@@ -71,21 +72,21 @@ describe('layer-message-status', function() {
     message.recipientStatus['b'] = 'read';
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
     message.readStatus = layer.Constants.RECIPIENT_STATE.SOME;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual('read by 2 participants');
   });
 
   it('Should show read', function() {
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
     message.readStatus = layer.Constants.RECIPIENT_STATE.ALL;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual('read');
   });
 
   it("Should use messageStatusRenderer if provided", function() {
     var f = function() {return "who cares?"};
     el.messageStatusRenderer = f;
-    el.message = message;
+    el.item = message;
     expect(el.innerHTML).toEqual("who cares?");
   });
 });

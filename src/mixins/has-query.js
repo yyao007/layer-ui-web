@@ -61,7 +61,7 @@
 //     _updateQuery: function() {
 //       // Allow this dom to finish being inserted into parent node so that size info can be available before rendering the items
 //       setTimeout(this.render.bind(this), 1);
-//       this.query.on('change', this._rerender, this);
+//       this.query.on('change', this.onRerender, this);
 //       this.client = this.query.client;
 //     },
 

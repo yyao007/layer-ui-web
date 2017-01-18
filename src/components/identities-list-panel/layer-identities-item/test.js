@@ -1,6 +1,7 @@
 describe('layer-identity-item', function() {
   var el, testRoot, client;
   beforeEach(function() {
+    jasmine.clock().install();
     client = new layer.Client({
       appId: 'Fred'
     });
@@ -19,8 +20,13 @@ describe('layer-identity-item', function() {
     el = document.createElement('layer-identity-item');
     testRoot.appendChild(el);
     el.item = client.user;
+    layer.Util.defer.flush();
+    jasmine.clock().tick(1000);
+    layer.Util.defer.flush();
+    jasmine.clock().tick(10);
   });
   afterEach(function() {
+    jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
   });
 
@@ -62,6 +68,7 @@ describe('layer-identity-item', function() {
       testRoot.innerHTML = '<layer-identity-item selected="true"></layer-identity-item>';
       CustomElements.takeRecords();
       expect(testRoot.firstChild.selected).toBe(true);
+      layer.Util.defer.flush();
       expect(testRoot.firstChild.nodes.checkbox.checked).toBe(true);
     });
 
@@ -168,16 +175,16 @@ describe('layer-identity-item', function() {
     });
   });
 
-  describe("The _render() method", function() {
+  describe("The onRender() method", function() {
     it("Should setup the layer-avatar users", function() {
       el.nodes.avatar.users = [];
-      el._render();
+      el.onRender();
       expect(el.nodes.avatar.users).toEqual([client.user]);
     });
 
     it("Should _render the displayName", function() {
       el.nodes.title.innerHTML = '';
-      el._render();
+      el.onRender();
       expect(el.nodes.title.innerHTML).toEqual(client.user.displayName);
     });
 

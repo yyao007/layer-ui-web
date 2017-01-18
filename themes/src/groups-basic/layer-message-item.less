@@ -1,6 +1,6 @@
 
 // Common to all message-items
-layer-message-item {
+layer-message-item-sent, layer-message-item-received {
   .layer-list-item {
     padding: 0px 4px 0px 30px;
   }
@@ -9,9 +9,6 @@ layer-message-item {
     height: 200px;
   }
 
-  .layer-sender-info-before, .layer-sender-info-after, .layer-sender-info-before, .layer-sender-info-after * {
-    display: none;
-  }
   .layer-message-item-content-outer {
     .layer-message-item-content {
       display: inline-block;
@@ -45,7 +42,7 @@ layer-message-item {
 }
 
 // First message in group
-layer-message-item.layer-list-item-first {
+layer-message-item-sent.layer-list-item-first, layer-message-item-received.layer-list-item-first {
   .layer-list-item {
     margin-top: 8px;
   }
