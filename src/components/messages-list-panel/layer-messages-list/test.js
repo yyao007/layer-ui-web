@@ -639,7 +639,7 @@ describe('layer-messages-list', function() {
     it("Should update listData", function() {
       var message = conversation.createMessage("What the???");
       message.position = conversation.lastMessage.position + 1;
-      query._handleMessageAddEvent({
+      query._handleAddEvent('messages', {
         messages: [
           message
         ]

@@ -1,6 +1,10 @@
 # Layer UI for Web Change Log
 
-## 0.9.7
+## 0.9.9
+
+* Updates needed to work with Layer WebSDK 3.1.0
+
+## 0.9.8
 
 * Customizability Improvements
   * Standardizes and documents widget lifecycle

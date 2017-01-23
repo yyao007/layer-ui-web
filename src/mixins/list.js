@@ -265,7 +265,7 @@ module.exports = {
      * @private
      */
     _generateFragmentItem(item, fragment) {
-      const itemInstance = item instanceof LayerAPI.Root ? item : this.client._getObject(item.id);
+      const itemInstance = item instanceof LayerAPI.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
         if (widget) {

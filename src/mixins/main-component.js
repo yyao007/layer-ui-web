@@ -87,6 +87,8 @@ module.exports = {
   methods: {
     onCreate() {
       if (settings.appId) this.appId = settings.appId;
+      const useSafariCss = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
+      if (useSafariCss) this.classList.add('safari');
     },
 
     /**

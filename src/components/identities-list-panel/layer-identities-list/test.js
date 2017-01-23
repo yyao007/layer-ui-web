@@ -736,7 +736,7 @@ describe('layer-identities-list', function() {
 
     describe("The _renderInsertedData() method", function() {
       it("Should update listData", function() {
-        query._handleIdentityAddEvent({
+        query._handleAddEvent('identities', {
           identities: [
             new layer.Identity({
               client: client,
