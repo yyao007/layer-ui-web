@@ -1,7 +1,7 @@
 describe('layer-date', function() {
   var el;
   beforeEach(function() {
-    layerUI.init({layer: layer});
+    layerUI.init({});
     el = document.createElement('layer-date');
     layer.Util.defer.flush();
   });

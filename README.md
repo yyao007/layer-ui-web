@@ -41,7 +41,6 @@ Note that if you do not have an `appId` at the time you call `init()` you can in
 <link rel='stylesheet' href='https://cdn.layer.com/ui/0.9/themes/bubbles-basic.css' />
 <script>
 window.layerUI.init({
-  layer: window.layer,
   appId: 'layer:///apps/staging/UUID'
 });
 </script>
@@ -69,7 +68,6 @@ npm install layer-websdk layer-ui-web --save
 var layer = require('layer-websdk');
 var layerUI = require('layer-ui-web');
 layerUI.init({
-  layer: layer,
   appId: 'layer:///apps/staging/UUID'
 });
 ```
@@ -108,10 +106,9 @@ require("layer-ui-web/lib/utils/is-url");
 require("layer-ui-web/lib/utils/sizing");
 
 var layer = require('layer-websdk');
-var layerUI = require('layer-ui-web/lib/base');
+var layerUI = require('layer-ui-web/lib/layer-ui');
 
 layerUI.init({
-  layer: layer,
   appId: 'layer:///apps/staging/UUID'
 });
 ```
@@ -152,7 +149,7 @@ UI assuming some CSS to size and position the widgets:
     <!-- Code for instantiating a layer.Client and authenticating it: -->
     <script src='my-client-initializer.js'></script>
     <script>
-      layerUI.init({layer: window.layer, appId: 'layer:///apps/staging/UUID'});
+      layerUI.init({appId: 'layer:///apps/staging/UUID'});
     </script>
   </head>
   <body>
@@ -212,6 +209,24 @@ put them in an array and then set `composeButtons` to refer to them.  This is es
 and implemented.
 * Inclusion of standard dom nodes that go between messages, such as Date headers, Headers indicating "read up to here", etc...  For now we just include the capability to build your own.
 * Border radius on the you-tube embedded iframe is pretty sketchy during initialization of the Player
+
+## Modifying the Code
+
+The biggest problem likely to be encountered while editing this code is if you try using `npm link` to test your changes with your code.
+
+1. Your code presumably depends upon `node_modules/layer-websdk`
+2. `npm link` will convince `browserify` and `webpack` that `layer-ui-web/node_modules/layer-websdk` is something totally different from `node_modules/layer-websdk` and will include two copies of the WebSDK in your build.  These two will not talk to each other. Your app will then fail.
+
+Solution: For each project you want to try with your in-development-code:
+
+1. `cd my-project` -- Go to your project
+1. `npm install layer-ui-web` -- This will install layer-ui-web into your project, and all of its dependencies.
+1. `rm -rf node_modules/layer-ui-web` -- This removes the npm repo, but leaves all of its dependencies within your `node_modules` folder
+1. Edit `layer-ui-web/npm-link-projects.json` to contain an array of paths to projects; add the project: `['../my-project']`
+1. Run `grunt watch`
+1. Each time you change the code, your changes will be copied over into your projects.
+
+At no time is it OK to use `npm link` which will introduce errors; the `grunt watch` will replace `npm link`.
 
 ## Testing
 

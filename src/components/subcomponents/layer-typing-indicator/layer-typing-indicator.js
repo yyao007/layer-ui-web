@@ -39,9 +39,9 @@
  * @param {layer.Identity[]} evt.detail.typing
  * @param {layer.Identity[]} evt.detail.paused
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-typing-indicator', {
+registerComponent('layer-typing-indicator', {
   properties: {
     /**
      * The Conversation whose typing indicator activity we are reporting on.

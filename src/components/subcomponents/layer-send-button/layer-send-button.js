@@ -23,9 +23,9 @@
  * @class layerUI.components.subcomponents.SendButton
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-send-button', {
+registerComponent('layer-send-button', {
   properties: {
     text: {
       value: 'SEND',

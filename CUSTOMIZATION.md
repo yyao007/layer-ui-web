@@ -196,19 +196,7 @@ There are two ways to provide a custom component:
 
 Most developers we expect to use the simpler path.  Lets say we want to replace `<layer-avatar />` with an entirely different way of presenting and interacting with the Avatar.
 
-### Existing build
 
-Tell the build to NOT register the built-in definition of `<layer-avatar />` within the `init()` method:
-
-```javascript
-layerUI.init({
-  layer: window.layer,
-  appId:  'layer:///apps/staging/UUID',
-  customComponents: ['layer-avatar']
-});
-```
-
-### Custom build
 
 Create your own `layer-avatar`.  This can be loaded before or after loading this library.  If you want to use this library to help create your component, then after is recommended.  If you want to use some other JS framework or no framework at all to build your component, your component should still work, as long as you still register `layer-avatar` as your Tag Name.  This example will use this framework to register your component.
 
@@ -276,10 +264,15 @@ layerUI.registerComponent('layer-avatar', {
       }
     }
   }
-}, true);
+});
 
 // Initialize the template for this component. See examples elsewhere for full registerTemplate usage.
 layerUI.registerTemplate('layer-avatar');
+
+// Tag isn't registered with document until init is called
+layerUI.init({
+  appId: "layer:///apps/staging/my-app-id"
+});
 </script>
 ```
 
@@ -353,7 +346,6 @@ If you don't like the default set of handlers being used for your app (perhaps r
 
 ```javascript
 layerUI.init({
-  layer: window.layer,
   appId: 'layer:///apps/staging/UUID',
   textHandlers: ['emoji', 'autolinker']
 });

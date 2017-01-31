@@ -5,9 +5,9 @@
  * @class layerUI.handlers.message.Unknown
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../components/component';
+import { registerComponent } from '../../components/component';
 
-LUIComponent('layer-message-unknown', {
+registerComponent('layer-message-unknown', {
   properties: {
 
     /**

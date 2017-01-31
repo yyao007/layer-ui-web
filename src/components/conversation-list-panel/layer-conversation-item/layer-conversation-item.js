@@ -13,10 +13,14 @@
  * @class layerUI.components.ConversationsListPanel.Item
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
+import '../../subcomponents/layer-conversation-last-message/layer-conversation-last-message';
+import '../../subcomponents/layer-delete/layer-delete';
+import '../../subcomponents/layer-avatar/layer-avatar';
+import '../../subcomponents/layer-conversation-title/layer-conversation-title';
 
-LUIComponent('layer-conversation-item', {
+registerComponent('layer-conversation-item', {
   mixins: [ListItem],
   properties: {
 

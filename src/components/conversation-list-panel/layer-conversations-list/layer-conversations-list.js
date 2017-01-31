@@ -46,12 +46,13 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';
+import '../layer-conversation-item/layer-conversation-item';
 
-LUIComponent('layer-conversations-list', {
+registerComponent('layer-conversations-list', {
   mixins: [List, MainComponent],
 
   /**
@@ -223,7 +224,7 @@ LUIComponent('layer-conversations-list', {
      * @property {String} [_queryModel=layer.Query.Conversation]
      */
     _queryModel: {
-      value: LayerAPI.Query.Conversation,
+      value: Layer.Query.Conversation,
     },
 
     /**
@@ -273,7 +274,7 @@ LUIComponent('layer-conversations-list', {
      * @private
      */
     onCreate() {
-      if (!this.id) this.id = LayerAPI.Util.generateUUID();
+      if (!this.id) this.id = Layer.Util.generateUUID();
       this.addEventListener('click', this._onClick.bind(this));
     },
 
@@ -391,7 +392,7 @@ LUIComponent('layer-conversations-list', {
       else {
         for (let i = 0; i < this.childNodes.length; i++) {
           const listItem = this.childNodes[i];
-          if (listItem.item instanceof LayerAPI.Root) {
+          if (listItem.item instanceof Layer.Root) {
             listItem._runFilter(this.filter);
           }
         }

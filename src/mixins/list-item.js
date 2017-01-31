@@ -5,7 +5,6 @@
  *
  * @class layerUI.mixins.ListItem
  */
-import LUIComponent from '../components/component';
 
 module.exports = {
   properties: {

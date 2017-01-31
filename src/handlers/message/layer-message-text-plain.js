@@ -7,9 +7,9 @@
  * @extends layerUI.components.Component
  */
 import layerUI from '../../base';
-import LUIComponent from '../../components/component';
+import { registerComponent } from '../../components/component';
 
-LUIComponent('layer-message-text-plain', {
+registerComponent('layer-message-text-plain', {
   properties: {
 
     /**

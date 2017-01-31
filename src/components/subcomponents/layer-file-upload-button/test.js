@@ -1,7 +1,7 @@
 describe('layer-file-upload-button', function() {
   var el, testRoot;
   beforeEach(function() {
-    layerUI.init({layer: layer});
+    layerUI.init({});
     testRoot = document.createElement('div');
     el = document.createElement('layer-file-upload-button');
     testRoot.appendChild(el);

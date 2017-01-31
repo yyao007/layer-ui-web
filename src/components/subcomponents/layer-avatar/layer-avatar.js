@@ -14,12 +14,6 @@
  * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
  *
  * ```javascript
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-avatar']
- * });
- *
  * layerUI.registerComponent('layer-avatar', {
  *    properties: {
  *      users: {
@@ -34,6 +28,11 @@
  *      }
  *    }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * Note that the main parameter is a `users` array, not a single user:
@@ -44,9 +43,9 @@
  * @class layerUI.components.subcomponents.Avatar
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-avatar', {
+registerComponent('layer-avatar', {
   properties: {
 
     /**

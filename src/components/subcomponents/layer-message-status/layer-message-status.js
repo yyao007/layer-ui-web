@@ -6,12 +6,6 @@
  * using layerUI.components.ConversationPanel.messageStatusRenderer.
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-message-status']
- * });
- *
  * layerUI.registerComponent('layer-message-status', {
  *    properties: {
  *      message: {
@@ -28,15 +22,20 @@
  *      }
  *    }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.MessageStatus
  * @extends layerUI.components.Component
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-message-status', {
+registerComponent('layer-message-status', {
   properties: {
 
     /**
@@ -100,17 +99,17 @@ LUIComponent('layer-message-status', {
           let text = '';
           if (message.isSaving()) {
             text = 'pending';
-          } else if (message.deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE) {
+          } else if (message.deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
             text = 'sent';
-          } else if (message.readStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE) {
+          } else if (message.readStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
             text = 'delivered';
-          } else if (message.readStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL) {
+          } else if (message.readStatus === Layer.Constants.RECIPIENT_STATE.ALL) {
             text = 'read';
           } else {
             const sessionOwnerId = message.getClient().user.id;
             const status = message.recipientStatus;
             const count = Object.keys(status).filter(identityId =>
-              identityId !== sessionOwnerId && status[identityId] === LayerAPI.Constants.RECEIPT_STATE.READ).length;
+              identityId !== sessionOwnerId && status[identityId] === Layer.Constants.RECEIPT_STATE.READ).length;
             text = `read by ${count} participants`;
           }
           this.innerHTML = text;

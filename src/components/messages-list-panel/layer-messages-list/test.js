@@ -21,7 +21,7 @@ describe('layer-messages-list', function() {
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
 
-    layerUI.init({layer: layer});
+    layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-messages-list');

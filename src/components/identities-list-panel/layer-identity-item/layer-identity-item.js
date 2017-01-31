@@ -9,11 +9,12 @@
  * @mixin layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
+import '../../subcomponents/layer-avatar/layer-avatar';
 
-LUIComponent('layer-identity-item', {
+registerComponent('layer-identity-item', {
   mixins: [ListItem],
   properties: {
 
@@ -44,7 +45,7 @@ LUIComponent('layer-identity-item', {
      * @private
      */
     onCreate() {
-      if (!this.id) this.id = LayerAPI.Util.generateUUID();
+      if (!this.id) this.id = Layer.Util.generateUUID();
       this.nodes.checkbox.addEventListener('change', this._onChange.bind(this));
       this.nodes.checkbox.id = `${this.id}-checkbox`;
       this.nodes.title.setAttribute('for', this.nodes.checkbox.id);

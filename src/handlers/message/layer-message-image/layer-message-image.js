@@ -20,10 +20,10 @@ import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
 
 import layerUI, { settings as UISettings } from '../../../base';
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 import normalizeSize from '../../../utils/sizing';
 
-LUIComponent('layer-message-image', {
+registerComponent('layer-message-image', {
   properties: {
 
     /**

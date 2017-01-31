@@ -3,7 +3,8 @@
  *
  * @class layerUI.mixins.MainComponent
  */
-import { layer as LayerAPI, settings } from '../base';
+import * as Layer from 'layer-websdk';
+import { settings } from '../base';
 
 module.exports = {
   properties: {
@@ -48,7 +49,7 @@ module.exports = {
     appId: {
       set(value) {
         if (value && value.indexOf('layer:///') === 0) {
-          const client = LayerAPI.Client.getClient(value);
+          const client = Layer.Client.getClient(value);
           if (!client) throw new Error('You must create a layer.Client with your appId before creating this component');
           this.client = client;
         }
@@ -117,7 +118,7 @@ module.exports = {
       if (this._queryModel && !this.query && this.client && !this.client.isDestroyed) {
         this.query = this.client.createQuery({
           model: this._queryModel,
-          dataType: LayerAPI.Query.InstanceDataType,
+          dataType: Layer.Query.InstanceDataType,
           paginationWindow: this.pageSize || 50,
         });
         this.hasGeneratedQuery = true;

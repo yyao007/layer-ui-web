@@ -1,7 +1,9 @@
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import MessageItemMixin from '../layer-message-item-mixin';
+import '../../subcomponents/layer-avatar/layer-avatar';
+import '../../subcomponents/layer-date/layer-date';
 
-LUIComponent('layer-message-item-received', {
+registerComponent('layer-message-item-received', {
   mixins: [ListItem, MessageItemMixin],
 });

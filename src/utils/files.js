@@ -2,7 +2,8 @@ import ImageManager from 'blueimp-load-image/js/load-image';
 import 'blueimp-load-image/js/load-image-orientation';
 import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
-import layerUI, { layer as LayerAPI, settings as UISettings } from '../base';
+import * as Layer from 'layer-websdk';
+import layerUI, {settings as UISettings } from '../base';
 import normalizeSize from './sizing';
 
 (function() {
@@ -137,7 +138,7 @@ import normalizeSize from './sizing';
     }
 
     const dt = evt.dataTransfer;
-    const parts = Array.prototype.map.call(dt.files, file => new LayerAPI.MessagePart(file));
+    const parts = Array.prototype.map.call(dt.files, file => new Layer.MessagePart(file));
 
     Files.processAttachments(parts, this.callback);
     return false;
@@ -218,13 +219,13 @@ import normalizeSize from './sizing';
       const blob = new Blob([arr], { type: 'image/jpeg' });
 
       // STEP 5: Create our Preview Message Part
-      parts.push(new LayerAPI.MessagePart({
+      parts.push(new Layer.MessagePart({
         body: blob,
         mimeType: 'image/jpeg+preview',
       }));
 
       // STEP 6: Create the Metadata Message Part
-      parts.push(new LayerAPI.MessagePart({
+      parts.push(new Layer.MessagePart({
         mimeType: 'application/json+imageSize',
         body: JSON.stringify({
           orientation,
@@ -264,12 +265,12 @@ import normalizeSize from './sizing';
         arr[i] = binStr.charCodeAt(i);
       }
 
-      parts.push(new LayerAPI.MessagePart({
+      parts.push(new Layer.MessagePart({
         body: new Blob([arr], { type: 'image/jpeg' }),
         mimeType: 'image/jpeg+preview',
       }));
 
-      parts.push(new LayerAPI.MessagePart({
+      parts.push(new Layer.MessagePart({
         mimeType: 'application/json+imageSize',
         body: `{"orientation":0, "width":${originalSize.width}, "height":${originalSize.height}}`,
       }));

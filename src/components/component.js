@@ -217,7 +217,6 @@
  *
  * layerUI.init({
  *   appId: 'my-app-id',
- *   layer: window.layer,
  *   mixins: {
  *     'layer-messages-item': mixinObj
  *   }
@@ -404,10 +403,6 @@
 /**
  * Register a component using the specified HTML tagName.
  *
- * Note that if you have used layerUI.settings `customComponents` to prevent loading
- * of a Component, and are now providing your own Component definition,
- * you need to use the `force` parameter to allow this definition to register.
- *
  * Note that you may define your components and styles any way you like, you do not need to conform your
  * component structure to the expected input of this function.  This function Does however provide
  * many simplifying capabilities including
@@ -425,8 +420,8 @@
  * @param {Object} classDef.properties - Definition of your class properties
  * @param {Object} classDef.methods - Definition of your class methods
  * @param {String[]} classDef.events - Array of events to listen for and repackage as event handler properties
- * @param {Boolean} force - If set to true, layerUI.settings.customComponents will not skip this class definition.
  */
+import Layer from 'layer-websdk';
 import layerUI from '../base';
 import stateManagerMixin from '../mixins/state-manager';
 
@@ -684,8 +679,32 @@ function setupProperty(classDef, prop, propertyDefHash) {
   classDef[name] = newDef;
 }
 
-function registerComponent(tagName, classDef, force) {
-  if (layerUI.settings.customComponents.indexOf(tagName) !== -1 && !force) return;
+let registerAllCalled = false;
+function registerComponent(tagName, classDef) {
+  layerUI.components[tagName] = classDef;
+  if (registerAllCalled) _registerComponent(tagName);
+}
+
+// Docs in layer-ui.js
+function unregisterComponent(tagName) {
+  delete layerUI.components[tagName];
+}
+
+// Docs in layer-ui.js
+function registerAll() {
+  registerAllCalled = true;
+  Object.keys(layerUI.components)
+    .filter(tagName => typeof layerUI.components[tagName] !== 'function')
+    .forEach(tagName => _registerComponent(tagName));
+}
+
+
+function _registerComponent(tagName) {
+  const classDef = layerUI.components[tagName];
+  const template = classDef.template;
+  delete classDef.template;
+  const style = classDef.style;
+  delete classDef.style;
 
   // Insure property exists
   if (!classDef.properties) classDef.properties = {};
@@ -776,14 +795,14 @@ function registerComponent(tagName, classDef, force) {
 
       // Call the Component's onAfterCreate method which can handle any setup
       // that requires all properties to be set, dom nodes initialized, etc...
-      layerUI.layer.Util.defer(() => {
+      Layer.Util.defer(() => {
         this.properties._internalState.disableSetters = false;
         this.properties._internalState.disableGetters = false;
         this.properties._internalState.inPropInit = true;
         props.forEach((prop) => {
           const value = this.properties[prop.propertyName];
           // UNIT TEST: This line is primarily to keep unit tests from throwing errors
-          if (value instanceof layerUI.layer.Root && value.isDestroyed) return;
+          if (value instanceof Layer.Root && value.isDestroyed) return;
           if (value !== undefined && value !== null) {
             // Force the setter to trigger; this will force the value to be converted to the correct type,
             // and call all setters
@@ -829,10 +848,6 @@ function registerComponent(tagName, classDef, force) {
    * @property {Object} nodes
    */
 
-
-
-
-
   /**
    * attachedCallback is part of the Webcomponent lifecycle and drives this framework's lifecycle.
    *
@@ -844,8 +859,6 @@ function registerComponent(tagName, classDef, force) {
       this.onAttach();
     },
   };
-
-
 
   /**
    * Initialize the properties object.
@@ -996,7 +1009,7 @@ function registerComponent(tagName, classDef, force) {
    * @private
    * @static
    */
-  layerUI.components[tagName].template = null;
+  layerUI.components[tagName].template = template;
 
   /**
    * Stylesheet string.
@@ -1007,7 +1020,7 @@ function registerComponent(tagName, classDef, force) {
    * @private
    * @static
    */
-  layerUI.components[tagName].style = '';
+  layerUI.components[tagName].style = style;
 
   /**
    * Identifies the properties exposed by this component.
@@ -1261,4 +1274,8 @@ const standardClassMethods = {
   },
 };
 
-module.exports = registerComponent;
+module.exports = {
+  registerComponent,
+  registerAll,
+  unregisterComponent,
+};

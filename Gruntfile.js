@@ -15,7 +15,7 @@ module.exports = function (grunt) {
     browserify: {
       options: {
         separator: ';',
-        transform: ['strictify'],
+        transform: ['strictify' ],
         browserifyOptions: {
           standalone: 'layerUI'
         }
@@ -24,6 +24,17 @@ module.exports = function (grunt) {
         files: [
           {
             dest: 'build/layer-ui-web.js',
+            src: 'index.js'
+          }
+        ],
+        options: {
+          exclude: ['layer-websdk']
+        }
+      },
+      debug: {
+        files: [
+          {
+            dest: 'build/layer-ui-web-test.js',
             src: 'index.js'
           }
         ],
@@ -103,8 +114,8 @@ module.exports = function (grunt) {
 
     watch: {
       debug: {
-        files: ['src/**', "Gruntfile.js", '!**/test.js'],
-        tasks: ['debug', 'notify:watch'],
+        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js'],
+        tasks: ['debug', 'make-npm-link-safe', 'notify:watch'],
         options: {
           interrupt: true
         }
@@ -126,6 +137,24 @@ module.exports = function (grunt) {
       }
     }
   });
+
+  /* npm link causes a second layer-websdk to get built via browserify/webpack.
+   * Removing layer-ui-web/node_modules/layer-websdk while using npm link causes errors to be thrown indicating
+   * that "layer-websdk" cannot be found (even through its in ~/node_modules/layer-websdk).
+   * So now we have to copy a proper looking npm repo, and make sure that all dependencies are present.
+   */
+  grunt.registerTask('make-npm-link-safe', "Making NPM Link Safe", function() {
+    if (grunt.file.exists('npm-link-projects.json')) {
+      var projectFolders = require('./npm-link-projects.json');
+      projectFolders.forEach(function(project) {
+        grunt.file.copy('index.js', project + '/node_modules/layer-ui-web/index.js');
+        grunt.file.copy('package.json', project + '/node_modules/layer-ui-web/package.json');
+        grunt.file.copy('lib', project + '/node_modules/layer-ui-web/lib');
+        grunt.file.copy('themes/build', project + '/node_modules/layer-ui-web/themes/build');
+      });
+    }
+  });
+
 
   grunt.registerTask('wait', 'Waiting for files to appear', function() {
     console.log('Waiting...');
@@ -259,15 +288,6 @@ module.exports = function (grunt) {
       return fileName.replace(/\.js$/, "");
     });
 
-    var indexfile = grunt.file.read('index.js');
-    indexfile = indexfile.replace(/\/\*\*\* GRUNT GENERATED CODE \*\*\*\/[\s\S]*\/\*\*\* GRUNT END GENERATED CODE \*\*\*\//m,
-      // Prefix section with
-      '/*** GRUNT GENERATED CODE ***/\n' +
-      // Join text
-      '  require("' + files.join('");\n  require("') + '");\n' +
-      // Postfix section with
-      '/*** GRUNT END GENERATED CODE ***/');
-    grunt.file.write('index.js', indexfile);
   });
 
   // Building

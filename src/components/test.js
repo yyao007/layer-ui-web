@@ -2,7 +2,7 @@ describe('Components', function() {
   var el, testRoot, client, query;
 
   beforeAll(function() {
-    layerUI.init({layer: layer});
+    layerUI.init({});
   });
 
   beforeEach(function() {

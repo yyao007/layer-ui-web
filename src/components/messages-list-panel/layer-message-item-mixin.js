@@ -36,7 +36,6 @@
  * ```
  * layerUI.init({
  *   appId: 'my-app-id',
- *   layer: window.layer,
  *   mixins: {
  *     'layer-messages-item': {
  *       properties: {
@@ -82,8 +81,7 @@
  * @mixins layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import { layer as LayerAPI } from '../../base';
-import LUIComponent from '../../components/component';
+import * as Layer from 'layer-websdk';
 
 module.exports = {
   properties: {
@@ -192,13 +190,13 @@ module.exports = {
       const deliveryStatus = this.properties.item.deliveryStatus;
       const statusPrefix = 'layer-message-status';
       this.toggleClass('layer-unread-message', !this.properties.item.isRead);
-      this.toggleClass(`${statusPrefix}-read-by-all`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL);
-      this.toggleClass(`${statusPrefix}-read-by-some`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.SOME);
-      this.toggleClass(`${statusPrefix}-read-by-none`, readStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE);
+      this.toggleClass(`${statusPrefix}-read-by-all`, readStatus === Layer.Constants.RECIPIENT_STATE.ALL);
+      this.toggleClass(`${statusPrefix}-read-by-some`, readStatus === Layer.Constants.RECIPIENT_STATE.SOME);
+      this.toggleClass(`${statusPrefix}-read-by-none`, readStatus === Layer.Constants.RECIPIENT_STATE.NONE);
 
-      this.toggleClass(`${statusPrefix}-delivered-to-all`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.ALL);
-      this.toggleClass(`${statusPrefix}-delivered-to-some`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.SOME);
-      this.toggleClass(`${statusPrefix}-delivered-to-none`, deliveryStatus === LayerAPI.Constants.RECIPIENT_STATE.NONE);
+      this.toggleClass(`${statusPrefix}-delivered-to-all`, deliveryStatus === Layer.Constants.RECIPIENT_STATE.ALL);
+      this.toggleClass(`${statusPrefix}-delivered-to-some`, deliveryStatus === Layer.Constants.RECIPIENT_STATE.SOME);
+      this.toggleClass(`${statusPrefix}-delivered-to-none`, deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE);
 
       this.toggleClass(`${statusPrefix}-pending`, this.properties.item.isSaving());
     },

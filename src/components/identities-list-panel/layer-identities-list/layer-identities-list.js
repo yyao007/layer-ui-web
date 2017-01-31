@@ -37,12 +37,13 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';
+import '../layer-identity-item/layer-identity-item';
 
-LUIComponent('layer-identities-list', {
+registerComponent('layer-identities-list', {
   mixins: [List, MainComponent],
 
 
@@ -159,7 +160,7 @@ LUIComponent('layer-identities-list', {
         if (!Array.isArray(value)) return;
         if (!value) value = [];
         this.properties.selectedIdentities = value.map((identity) => {
-          if (!(identity instanceof LayerAPI.Identity)) return this.properties.client.getIdentity(identity.id);
+          if (!(identity instanceof Layer.Identity)) return this.properties.client.getIdentity(identity.id);
           return identity;
         });
         this._renderSelection();
@@ -188,7 +189,7 @@ LUIComponent('layer-identities-list', {
      * @property {String} [_queryModel=layer.Query.Identity]
      */
     _queryModel: {
-      value: LayerAPI.Query.Identity,
+      value: Layer.Query.Identity,
     },
   },
   methods: {
@@ -211,7 +212,7 @@ LUIComponent('layer-identities-list', {
      * @private
      */
     onCreate() {
-      if (!this.id) this.id = LayerAPI.Util.generateUUID();
+      if (!this.id) this.id = Layer.Util.generateUUID();
       this.properties.selectedIdentities = [];
 
       this.addEventListener('layer-identity-item-selected', this._handleIdentitySelect.bind(this));
@@ -339,7 +340,7 @@ LUIComponent('layer-identities-list', {
       } else {
         for (let i = 0; i < this.childNodes.length; i++) {
           const listItem = this.childNodes[i];
-          if (listItem.item instanceof LayerAPI.Root) {
+          if (listItem.item instanceof Layer.Root) {
             listItem._runFilter(this.filter);
           }
         }
@@ -347,4 +348,3 @@ LUIComponent('layer-identities-list', {
     },
   },
 });
-

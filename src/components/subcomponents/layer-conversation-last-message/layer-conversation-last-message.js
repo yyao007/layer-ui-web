@@ -5,12 +5,6 @@
  * provide your own Conversation Last Message rendering:
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-conversation-last-message']
- * });
- *
  * layerUI.registerComponent('layer-conversation-last-message', {
  *   properties: {
  *      item: {}
@@ -21,15 +15,20 @@
  *     }
  *   }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.ConversationLastMessage
  * @extends layerUI.components.Component
  */
 import layerUI from '../../../base';
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-conversation-last-message', {
+registerComponent('layer-conversation-last-message', {
   properties: {
 
     /**

@@ -8,7 +8,6 @@
  *
  * ```
  * layerUI.init({
- *   layer: window.layer,
  *   appId: 'layer:///apps/staging/my-app-id'
  * });
  * ```
@@ -16,7 +15,6 @@
  * Or
  *
  * layerUI.init({
- *   layer: require('layer-websdk'),
  *   appId: 'layer:///apps/staging/my-app-id'
  * });
  * ```
@@ -39,8 +37,6 @@ const layerUI = {};
  *
  * @property {Object} settings
  *
- * @property {Object} settings.layer    The Layer WebSDK
- *
  * @property {String} [settings.appId]      The app ID to use for all webcomponents.
  *    Setting this is a short-hand for using the `app-id` property on each widget;
  *    you can leave out `app-id` if using this setting.
@@ -57,25 +53,10 @@ const layerUI = {};
  *    before its marked as read.  A value too small means it was visible but the user may not
  *    have actually had time to read it as it scrolls quickly past.
  *
- * @property {String[]} [settings.customComponents=[]] List of component names to not
- *    initializing so you can provide a custom definition for the component.
- *
- *    Prevent a built-in class from initializing so you can provide a custom definition for the component.
- *
- * ```
- * layerUI.init({
- *   layer: window.layer,
- *   customComponents: ['layer-avatar']
- * });
- * ```
- *
  *    The above code will prevent the `layer-avatar` widget
  *    from being initialized, and allow you to provide your own definition for this html tag.  Your definition
  *    must be registered using the WebComponents `document.registerElement` call.  Call `registerElement` after loading layerUI
  *    because layerUI contains the WebComponents polyfills.
- *
- *    Note that in many cases, what you need is not to replace the component, but rather to replace the component's Layout,
- *    in which case you can use layerUI.registerTemplate, and leave `customComponents` empty.
  *
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
  * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'images', 'newline', 'youtube']] Specify which text handlers you want
@@ -89,7 +70,6 @@ layerUI.settings = {
   messageGroupTimeSpan: 1000 * 60 * 30,
   disableTabAsWhiteSpace: false,
   markReadDelay: 2500,
-  customComponents: [],
   defaultHandler: {
     tagName: 'layer-message-unknown',
   },
@@ -118,7 +98,7 @@ layerUI.textHandlers = {};
 /**
  * Hash of components defined using layerUI.components.Component.
  *
- * @property {Object[]} components
+ * @property {Object} components
  * @private
  */
 layerUI.components = {};
@@ -466,7 +446,6 @@ layerUI.registerTemplate = function registerTemplate(className, template) {
  * @param {String} templateStr        Template string to register.
  */
 layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr) {
-  if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
 
   // Generate a template node
   const template = document.createElement('template');
@@ -490,7 +469,6 @@ layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr
  * @param {String} styleStr            Style string to associate with this component.  Specifically, expects the output of `Function.toString()`
  */
 layerUI.buildStyle = function buildStyles(className, styleStr) {
-  if (layerUI.settings.customComponents.indexOf(className) !== -1) return;
   layerUI.components[className].style = styleStr;
 };
 
@@ -556,9 +534,7 @@ layerUI.addAdapter = (name, adapter) => { layerUI.adapters[name] = adapter; };
  *
  * ```javascript
  * layerUI.init({
- *   layer: window.layer,
- *   appId: 'layer:///apps/staging/my-app-id',
- *   customComponents: []
+ *   appId: 'layer:///apps/staging/my-app-id'
  * });
  * ```
  *
@@ -569,25 +545,7 @@ layerUI.addAdapter = (name, adapter) => { layerUI.adapters[name] = adapter; };
  * @param {Object} settings     list any settings you want changed from their default values.
  */
 layerUI.init = function init(settings) {
-  if (!settings.layer && !layerUI.settings.layer && global.layer) {
-    settings.layer = global.layer;
-  }
-  if (settings.layer) {
-    layerUI.layer = settings.layer;
-  } else if (!settings.layer && !layerUI.settings.layer) {
-    throw new Error('layer is a required property for init');
-  }
-
-  Object.keys(settings || {}).forEach((name) => {
-    layerUI.settings[name] = settings[name];
-  });
-
-  if (!layerUI.settings.mixins) layerUI.settings.mixins = [];
-
-  // Enable the text handlers
-  layerUI.settings.textHandlers.forEach((handlerName) => {
-    layerUI.registerTextHandler({ name: handlerName });
-  });
+  // No-op -- see base-index.js
 };
 
 /**

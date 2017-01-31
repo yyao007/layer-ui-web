@@ -8,11 +8,11 @@
  * @class layerUI.handlers.message.Video
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../components/component';
+import { registerComponent } from '../../components/component';
 import normalizeSize from '../../utils/sizing';
 import layerUI, { settings as UISettings } from '../../base';
 
-LUIComponent('layer-message-video', {
+registerComponent('layer-message-video', {
   properties: {
 
     /**

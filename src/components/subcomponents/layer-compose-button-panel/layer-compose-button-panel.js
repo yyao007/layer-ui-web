@@ -6,12 +6,6 @@
  * Alternatively, you can replace this by defining a custom `layer-compose-button-panel` to make the resulting component entirely yours:
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-compose-button-panel']
- * });
- *
  * document.registerElement('layer-compose-button-panel', {
  *   prototype: Object.create(HTMLElement.prototype, {
  *     createdCallback: {
@@ -21,14 +15,19 @@
  *     }
  *   })
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.ComposeButtonPanel
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-compose-button-panel', {
+registerComponent('layer-compose-button-panel', {
   properties: {
     /**
      * Custom buttons to put in the panel.

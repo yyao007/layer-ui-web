@@ -35,7 +35,7 @@ describe('layer-conversation-title', function() {
     });
     client._clientAuthenticated();
 
-    layerUI.init({layer: layer});
+    layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-conversation-title');

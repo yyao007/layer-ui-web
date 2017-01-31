@@ -15,13 +15,15 @@
  * @class layerUI.components.subcomponents.Composer
  * @extends layerUI.components.Component
  */
-import layerUI, { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import layerUI from '../../../base';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
+import '../layer-compose-button-panel/layer-compose-button-panel';
 
 const ENTER = 13;
 const TAB = 9;
 
-LUIComponent('layer-composer', {
+registerComponent('layer-composer', {
   properties: {
 
     /**
@@ -191,7 +193,7 @@ LUIComponent('layer-composer', {
       if (optionalParts) {
         parts = optionalParts;
       } else if (this.nodes.input.value) {
-        parts.push(new LayerAPI.MessagePart({
+        parts.push(new Layer.MessagePart({
           type: 'text/plain',
           body: this.nodes.input.value,
         }));
@@ -253,8 +255,13 @@ LUIComponent('layer-composer', {
         title: `New Message from ${message.sender.displayName}`,
       };
       if (this.trigger('layer-send-message', { message, notification })) {
-        this.onSend(message, notification);
-        message.send(notification);
+        if (this.conversation instanceof Layer.Channel) {
+          this.onSend(message);
+          message.send();
+        } else {
+          this.onSend(message, notification);
+          message.send(notification);
+        }
       }
     },
 

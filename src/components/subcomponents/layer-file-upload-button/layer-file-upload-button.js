@@ -15,10 +15,11 @@
  * @class layerUI.components.subcomponents.FileUploadButton
  * @extends layerUI.components.Component
  */
-import layerUI, { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import layerUI from '../../../base';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-file-upload-button', {
+registerComponent('layer-file-upload-button', {
   properties: {
 
   },
@@ -31,7 +32,7 @@ LUIComponent('layer-file-upload-button', {
      * @private
      */
     onCreate() {
-      this.nodes.input.id = LayerAPI.Util.generateUUID();
+      this.nodes.input.id = Layer.Util.generateUUID();
       this.nodes.label.setAttribute('for', this.nodes.input.id);
       this.nodes.input.addEventListener('change', this.onChange.bind(this));
       this.addEventListener('click', evt => this.nodes.input.click());
@@ -47,7 +48,7 @@ LUIComponent('layer-file-upload-button', {
      */
     onChange() {
       const files = this.nodes.input.files;
-      const inputParts = Array.prototype.map.call(files, file => new LayerAPI.MessagePart(file));
+      const inputParts = Array.prototype.map.call(files, file => new Layer.MessagePart(file));
 
       /**
        * This widget triggers a `layer-file-selected` event when the user selects files.

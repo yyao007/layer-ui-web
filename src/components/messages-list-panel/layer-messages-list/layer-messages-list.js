@@ -80,17 +80,23 @@
  *
  * @class layerUI.components.MessagesListPanel.List
  * @extends layerUI.components.Component
+ *
+ * @mixin layerUI.mixins.EmptyList
+ * @mixin layerUI.mixins.List
  */
 import animatedScrollTo from 'animated-scrollto';
-import LayerUI, { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import LayerUI from '../../../base';
+import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import EmptyList from '../../../mixins/empty-list';
+import '../layer-message-item-sent/layer-message-item-sent';
+import '../layer-message-item-received/layer-message-item-received';
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
 const PAGING_DELAY = 2000;
 
-LUIComponent('layer-messages-list', {
+registerComponent('layer-messages-list', {
   mixins: [List, EmptyList],
   properties: {
 
@@ -146,7 +152,7 @@ LUIComponent('layer-messages-list', {
      * @private
      */
     onCreate() {
-      if (!this.id) this.id = LayerAPI.Util.generateUUID();
+      if (!this.id) this.id = Layer.Util.generateUUID();
 
       // Init some local props
       this.properties.lastPagedAt = 0;
@@ -193,7 +199,7 @@ LUIComponent('layer-messages-list', {
      * @private
      */
     _handleScroll: {
-      mode: LUIComponent.MODES.OVERWRITE,
+      mode: registerComponent.MODES.OVERWRITE,
       value() {
         if (this.properties.isSelfScrolling) return;
 
@@ -239,7 +245,7 @@ LUIComponent('layer-messages-list', {
      * @param {Number} position
      */
     scrollTo: {
-      mode: LUIComponent.MODES.OVERWRITE,
+      mode: registerComponent.MODES.OVERWRITE,
       value(position) {
         if (position === this.scrollTop) return;
         this.properties.isSelfScrolling = true;
@@ -354,7 +360,8 @@ LUIComponent('layer-messages-list', {
     _generateItem(message) {
       const handler = LayerUI.getHandler(message, this);
       if (handler) {
-        const messageWidget = document.createElement(message.sender.sessionOwner ? 'layer-message-item-sent' : 'layer-message-item-received');
+        const messageWidget = document.createElement(message.sender.sessionOwner ?
+          'layer-message-item-sent' : 'layer-message-item-received');
         messageWidget.id = this._getItemId(message);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
@@ -402,7 +409,7 @@ LUIComponent('layer-messages-list', {
     },
 
     _renderResetData: {
-      mode: LUIComponent.MODES.AFTER,
+      mode: registerComponent.MODES.AFTER,
       value: function _renderResetData(evt) {
         this.properties.stuckToBottom = true;
         this.properties.lastPagedAt = 0;
@@ -411,7 +418,7 @@ LUIComponent('layer-messages-list', {
     },
 
     _renderWithoutRemovedData: {
-      mode: LUIComponent.MODES.OVERWRITE,
+      mode: registerComponent.MODES.OVERWRITE,
       value(evt) {
         this.properties.listData = [].concat(this.properties.query.data).reverse();
 
@@ -426,7 +433,7 @@ LUIComponent('layer-messages-list', {
     },
 
     _renderInsertedData: {
-      mode: LUIComponent.MODES.OVERWRITE,
+      mode: registerComponent.MODES.OVERWRITE,
       value(evt) {
         if (this.properties.appendingMore) {
           if (!this.properties.insertEvents) this.properties.insertEvents = [];
@@ -518,7 +525,7 @@ LUIComponent('layer-messages-list', {
      * @private
      */
     _renderPagedData: {
-      mode: LUIComponent.MODES.OVERWRITE,
+      mode: registerComponent.MODES.OVERWRITE,
       value(evt) {
         if (evt.data.length === 0) {
           this.isDataLoading = this.properties.query.isFiring;
@@ -553,7 +560,7 @@ LUIComponent('layer-messages-list', {
             setTimeout(() => appendMore.call(this), 20);
           } else {
             this.properties.appendingMore = false;
-            LayerAPI.Util.defer(() => this._renderPagedDataDone(affectedItems, fragment, evt));
+            Layer.Util.defer(() => this._renderPagedDataDone(affectedItems, fragment, evt));
           }
         }.bind(this);
         appendMore();
@@ -590,7 +597,8 @@ LUIComponent('layer-messages-list', {
       }
 
       const firstVisibleItem = this._findFirstVisibleItem();
-      const initialOffset = firstVisibleItem ? firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - this.scrollTop : 0;
+      const initialOffset = firstVisibleItem ?
+        firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - this.scrollTop : 0;
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
@@ -610,8 +618,9 @@ LUIComponent('layer-messages-list', {
       this._checkVisibility();
       if (!evt.inRender) this.onRerender();
 
-      if (this.properties.insertEvents) this.properties.insertEvents.forEach(evt => this._renderInsertedData(evt));
+      if (this.properties.insertEvents) this.properties.insertEvents.forEach(anEvt => this._renderInsertedData(anEvt));
       delete this.properties.insertEvents;
     },
   },
 });
+

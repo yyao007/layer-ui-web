@@ -1,5 +1,16 @@
 # Layer UI for Web Change Log
 
+## 0.9.10
+
+* `layerUI.init()` no longer expects a `layer` property
+* Build and dependencies are better organized
+* `index.js` still loads all dependencies, but `layer-ui.js` can be used to load
+   only the framework, and the widgets you need can be loaded via `require` or `import`.
+* `layerUI.settings.customComponents` is no longer needed to prevent a component from being defined; instead either:
+  * Overwrite the definition with `layerUI.registerComponent()` before calling `layerUI.init()`
+  * Call `layerUI.removeComponent('layer-avatar')` before calling `layerUI.init()` to prevent the definition from being applied.
+* A class that only exists in Layer WebSDK 3.1.0 and up is tested for in this release; do not use older versions of the WebSDK.
+
 ## 0.9.9
 
 * Updates needed to work with Layer WebSDK 3.1.0

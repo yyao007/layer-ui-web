@@ -5,12 +5,6 @@
  * provide your own Conversation titles:
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-conversation-title']
- * });
- *
  * layerUI.registerComponent('layer-conversation-title', {
  *    properties: {
  *      item: {
@@ -20,14 +14,19 @@
  *      }
  *    }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.ConversationTitle
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-conversation-title', {
+registerComponent('layer-conversation-title', {
   properties: {
 
     /**

@@ -6,12 +6,6 @@
  * using layerUI.components.ConversationPanel.dateRenderer.
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-date']
- * });
- *
  * layerUI.registerComponent('layer-date', {
  *    properties: {
  *      date: {
@@ -24,14 +18,19 @@
  *      }
  *    }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.Date
  * @extends layerUI.components.Component
  */
-import LUIComponent from '../../../components/component';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-date', {
+registerComponent('layer-date', {
   properties: {
 
     /**

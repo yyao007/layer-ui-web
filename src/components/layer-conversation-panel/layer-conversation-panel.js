@@ -50,11 +50,14 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
  */
-import { layer as LayerAPI } from '../../base';
-import LUIComponent from '../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
+import '../messages-list-panel/layer-messages-list/layer-messages-list';
+import '../subcomponents/layer-composer/layer-composer';
+import '../subcomponents/layer-typing-indicator/layer-typing-indicator';
 
-LUIComponent('layer-conversation-panel', {
+registerComponent('layer-conversation-panel', {
   mixins: [MainComponent],
 
   /**
@@ -261,7 +264,7 @@ LUIComponent('layer-conversation-panel', {
      */
     query: {
       set(value, oldValue) {
-        if (value instanceof LayerAPI.Query) {
+        if (value instanceof Layer.Query) {
           if (this.hasGeneratedQuery) {
             this.hasGeneratedQuery = false;
             oldValue.destroy();
@@ -328,7 +331,7 @@ LUIComponent('layer-conversation-panel', {
      */
     conversation: {
       set(value) {
-        if (value && !(value instanceof LayerAPI.Conversation)) this.properties.conversation = '';
+        if (value && !(value instanceof Layer.Conversation)) this.properties.conversation = '';
         if (this.client && this.conversation) this._setupConversation();
       },
     },
@@ -517,7 +520,7 @@ LUIComponent('layer-conversation-panel', {
      * @property {String} [_queryModel=layer.Query.Message]
      */
     _queryModel: {
-      value: LayerAPI.Query.Message,
+      value: Layer.Query.Message,
     },
   },
   methods: {

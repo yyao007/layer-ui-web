@@ -3,8 +3,6 @@
  *
  * @class layerUI.mixins.EmptyList
  */
-import { layer as LayerAPI } from '../base';
-
 module.exports = {
   properties: {
 /**

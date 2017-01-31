@@ -41,3 +41,5 @@ docs
 .vscode
 
 /lib
+
+npm-link-projects.json

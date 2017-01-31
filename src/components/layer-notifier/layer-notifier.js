@@ -30,12 +30,14 @@
  */
 import NotifyLib from 'notifyjs';
 import { isInBackground as IsInBackground, getHandler as GetHandler } from '../../base';
-import LUIComponent from '../../components/component';
+import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
+import '../subcomponents/layer-avatar/layer-avatar';
 
-const Notify = NotifyLib.default;
+let Notify = NotifyLib;
+if ('default' in Notify) Notify = Notify.default; // Annoying difference between webpack and browserify...
 
-LUIComponent('layer-notifier', {
+registerComponent('layer-notifier', {
   mixins: [MainComponent],
 
   /**

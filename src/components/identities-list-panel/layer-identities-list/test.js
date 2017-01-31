@@ -15,7 +15,7 @@ describe('layer-identities-list', function() {
     });
     client._clientAuthenticated();
 
-    layerUI.init({layer: layer});
+    layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-identities-list');
@@ -1196,7 +1196,7 @@ describe('layer-identities-list', function() {
     it("Should initialize list items with current state", function() {
       el.state = {hey: "ho"};
       el.query.reset();
-      expect(el.querySelectorAllArray('layer-identities-item').length).toEqual(0);
+      expect(el.querySelectorAllArray('layer-identity-item').length).toEqual(0);
       for (i = 0; i < 10; i++) {
         query.data.push(
           new layer.Identity({

@@ -12,66 +12,33 @@
  * * Pick and choose modules from the lib folder to include
  */
 
-// Load the polyfil
-require('webcomponents.js/webcomponents-lite.js');
+const LayerUI = require('./lib/layer-ui');
 
-// Load layerUI namespace methods/properties
-var layerUI = require('./lib/base');
-var registerComponent = require('./lib/components/component');
+// Load Adapters
+require('./lib/adapters/angular');
+require('./lib/adapters/backbone');
+require('./lib/adapters/react');
 
-layerUI.registerComponent = registerComponent;
+// Load Main Components
+require('./lib/components/conversation-list-panel/layer-conversations-list/layer-conversations-list');
+require('./lib/components/identities-list-panel/layer-identities-list/layer-identities-list');
+require('./lib/components/layer-conversation-panel/layer-conversation-panel');
+require('./lib/components/layer-notifier/layer-notifier');
 
-var initSettings = layerUI.init;
-layerUI.init = function(settings) {
-  initSettings(settings);
-
-/*** GRUNT GENERATED CODE ***/
-  require("./lib/adapters/angular");
-  require("./lib/adapters/backbone");
-  require("./lib/adapters/react");
-  require("./lib/components/conversation-list-panel/layer-conversation-item/layer-conversation-item");
-  require("./lib/components/conversation-list-panel/layer-conversations-list/layer-conversations-list");
-  require("./lib/components/identities-list-panel/layer-identities-item/layer-identity-item");
-  require("./lib/components/identities-list-panel/layer-identities-list/layer-identities-list");
-  require("./lib/components/layer-conversation-panel/layer-conversation-panel");
-  require("./lib/components/layer-notifier/layer-notifier");
-  require("./lib/components/messages-list-panel/layer-message-item-mixin");
-  require("./lib/components/messages-list-panel/layer-message-item-received/layer-message-item-received");
-  require("./lib/components/messages-list-panel/layer-message-item-sent/layer-message-item-sent");
-  require("./lib/components/messages-list-panel/layer-messages-list/layer-messages-list");
-  require("./lib/components/subcomponents/layer-avatar/layer-avatar");
-  require("./lib/components/subcomponents/layer-compose-button-panel/layer-compose-button-panel");
-  require("./lib/components/subcomponents/layer-composer/layer-composer");
-  require("./lib/components/subcomponents/layer-conversation-last-message/layer-conversation-last-message");
-  require("./lib/components/subcomponents/layer-conversation-title/layer-conversation-title");
-  require("./lib/components/subcomponents/layer-date/layer-date");
-  require("./lib/components/subcomponents/layer-delete/layer-delete");
-  require("./lib/components/subcomponents/layer-file-upload-button/layer-file-upload-button");
-  require("./lib/components/subcomponents/layer-message-status/layer-message-status");
-  require("./lib/components/subcomponents/layer-send-button/layer-send-button");
-  require("./lib/components/subcomponents/layer-typing-indicator/layer-typing-indicator");
-  require("./lib/handlers/message/layer-message-image/layer-message-image");
-  require("./lib/handlers/message/layer-message-text-plain");
-  require("./lib/handlers/message/layer-message-unknown");
-  require("./lib/handlers/message/layer-message-video");
-  require("./lib/handlers/text/autolinker");
-  require("./lib/handlers/text/code-blocks");
-  require("./lib/handlers/text/emoji");
-  require("./lib/handlers/text/images");
-  require("./lib/handlers/text/newline");
-  require("./lib/handlers/text/youtube");
-  require("./lib/mixins/empty-list");
-  require("./lib/mixins/has-query");
-  require("./lib/mixins/list-item");
-  require("./lib/mixins/list");
-  require("./lib/mixins/main-component");
-  require("./lib/mixins/state-manager");
-  require("./lib/utils/date-separator");
-  require("./lib/utils/files");
-  require("./lib/utils/is-url");
-  require("./lib/utils/sizing");
-/*** GRUNT END GENERATED CODE ***/
-};
+// Load standard utilities
+require('./lib/components/subcomponents/layer-file-upload-button/layer-file-upload-button');
+require('./lib/components/subcomponents/layer-send-button/layer-send-button');
+require('./lib/handlers/message/layer-message-text-plain');
+require('./lib/handlers/message/layer-message-image/layer-message-image');
+require('./lib/handlers/message/layer-message-video');
+require('./lib/handlers/text/autolinker');
+require('./lib/handlers/text/code-blocks');
+require('./lib/handlers/text/emoji');
+require('./lib/handlers/text/images');
+require('./lib/handlers/text/newline');
+require('./lib/handlers/text/youtube');
+require('./lib/utils/date-separator');
+require('./lib/utils/files');
 
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
-module.exports = global.layerUI = layerUI;
+module.exports = global.layerUI = LayerUI;

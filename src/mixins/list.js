@@ -3,8 +3,8 @@
  *
  * @class layerUI.mixins.List
  */
-import { layer as LayerAPI } from '../base';
-import LUIComponent from '../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../components/component';
 
 module.exports = {
   properties: {
@@ -58,7 +58,7 @@ module.exports = {
      */
     query: {
       set(newValue, oldValue) {
-        if (newValue instanceof LayerAPI.Query) {
+        if (newValue instanceof Layer.Query) {
           // If there is an oldQuery that we didn't generate, its up to the app to destroy it when it is done.
           if (this.hasGeneratedQuery) {
             this.hasGeneratedQuery = false;
@@ -234,7 +234,7 @@ module.exports = {
     },
 
     onRerender: {
-      mode: LUIComponent.MODES.BEFORE,
+      mode: registerComponent.MODES.BEFORE,
       value: function(evt = {}) {
         if (this.query.isDestroyed) {
           this._renderResetData(evt);
@@ -265,7 +265,7 @@ module.exports = {
      * @private
      */
     _generateFragmentItem(item, fragment) {
-      const itemInstance = item instanceof LayerAPI.Root ? item : this.client.getObject(item.id);
+      const itemInstance = item instanceof Layer.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
         if (widget) {

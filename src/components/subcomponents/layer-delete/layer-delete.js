@@ -7,12 +7,6 @@
  * Note that the `item` property can refer to any type of data that can be deleted, including layer.Message and layer.Conversation.
  *
  * ```
- * layerUI.init({
- *   layer: window.layer,
- *   appId:  'layer:///apps/staging/UUID',
- *   customComponents: ['layer-delete']
- * });
- *
  * layerUI.registerComponent('layer-delete', {
  *    properties: {
  *      item: {}
@@ -26,15 +20,20 @@
  *      }
  *    }
  * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
  * ```
  *
  * @class layerUI.components.subcomponents.Delete
  * @extends layerUI.components.Component
  */
-import { layer as LayerAPI } from '../../../base';
-import LUIComponent from '../../../components/component';
+import * as Layer from 'layer-websdk';
+import { registerComponent } from '../../../components/component';
 
-LUIComponent('layer-delete', {
+registerComponent('layer-delete', {
   properties: {
 
     /**
@@ -81,7 +80,7 @@ LUIComponent('layer-delete', {
       evt.preventDefault();
       evt.stopPropagation();
       if (this.enabled) {
-        if (this.item instanceof LayerAPI.Message) {
+        if (this.item instanceof Layer.Message) {
           /**
            * A request has been made through the UI to delete a Message.
            *
@@ -99,7 +98,7 @@ LUIComponent('layer-delete', {
            */
           if (this.trigger('layer-message-deleted', { message: this.item })) {
             if (window.confirm('Are you sure you want to delete this message?')) {
-              this.item.delete(LayerAPI.Constants.DELETION_MODE.ALL);
+              this.item.delete(Layer.Constants.DELETION_MODE.ALL);
             }
           }
         }
@@ -121,7 +120,7 @@ LUIComponent('layer-delete', {
          */
         else if (this.trigger('layer-conversation-deleted', { conversation: this.item })) {
           if (window.confirm('Are you sure you want to delete this conversation?')) {
-            this.item.delete(LayerAPI.Constants.DELETION_MODE.ALL);
+            this.item.delete(Layer.Constants.DELETION_MODE.ALL);
           }
         }
       }
