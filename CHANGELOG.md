@@ -1,5 +1,9 @@
 # Layer UI for Web Change Log
 
+## 0.9.11
+
+Fixes issue where client property is lost causing widgets to stop performing actions.
+
 ## 0.9.10
 
 * `layerUI.init()` no longer expects a `layer` property

@@ -72,8 +72,12 @@ module.exports = {
      */
     client: {
       set(value) {
-        if (value) value.on('destroy', () => this.properties.client = null, this);
-      }
+        if (value) {
+          value.on('destroy', (evt) => {
+            if (evt.target === value) this.properties.client = null;
+          }, this);
+        }
+      },
     },
 
     /**
