@@ -75,10 +75,10 @@ function initAngular(angular) {
       // that need to be applied to the property value.
       attrs.$observe(ngPropertyName, (expression) => {
         scope.$watch(expression, (value) => {
-          if (elem.properties) {
+          if (!elem.properties) elem.properties = {};
+          if (elem.properties._internalState && !elem.properties._internalState.disableSetters) {
             elem[prop.propertyName] = value;
           } else {
-            if (!elem.properties) elem.properties = {};
             elem.properties[prop.propertyName] = value;
           }
         });

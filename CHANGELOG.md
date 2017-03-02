@@ -1,5 +1,13 @@
 # Layer UI for Web Change Log
 
+## 0.9.13
+
+Fixes issue in Angular Adapter where it tries to trigger a property setter prior to the component being initialized.
+
+## 0.9.12
+
+Fixes issue in component base class for handling properties object set prior to constructor; impact on Safari + Angular Adapter
+
 ## 0.9.11
 
 Fixes issue where client property is lost causing widgets to stop performing actions.

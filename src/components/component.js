@@ -884,6 +884,9 @@ function _registerComponent(tagName) {
        * All properties are stored in `this.properties`; any property defined in the class definition's `properties` hash
        * are read and written here.
        *
+       * Properties may have already been setup by a UI Framework adapter for caching properties passed from the app; if properties
+       * exists, they may still need to be setup.
+       *
        * @property {Object} properties
        */
       if (this.properties && this.properties._internalState) return;
