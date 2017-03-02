@@ -1,9 +1,16 @@
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
- * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel.
+ * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel:
+ *
+ * ```
+ * myConversationPanel.composeButtons = [
+ *    document.createElement('layer-file-upload-button')
+ * ];
+ * ```
+ *
  * If using it elsewhere, note that it triggers a `layer-file-selected` event that you would listen for to do your own processing.
- * If using it in the ComposeButtonPanel, this event will be received by the Composer and will not propagate any further.
+ * If using it in the ComposeButtonPanel, this event will be received by the Composer and will not propagate any further:
  *
  * ```
  * document.body.addEventListener('layer-file-selected', function(evt) {

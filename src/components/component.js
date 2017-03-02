@@ -877,7 +877,7 @@ function _registerComponent(tagName) {
    */
   classDef._initializeProperties = {
     value: function _initializeProperties() {
-      if (this.properties) return;
+
       /**
        * Values for all properties of this widget.
        *
@@ -886,17 +886,18 @@ function _registerComponent(tagName) {
        *
        * @property {Object} properties
        */
-      this.properties = {
-        _internalState: {
-          layerEventSubscriptions: [],
-          onCreateCalled: false,
-          onAfterCreateCalled: false,
-          onAttachCalled: false,
-          onDetachCalled: false,
-          disableSetters: true,
-          disableGetters: true,
-          inPropInit: false,
-        },
+      if (this.properties && this.properties._internalState) return;
+      if (!this.properties) this.properties = {};
+
+      this.properties._internalState = {
+        layerEventSubscriptions: [],
+        onCreateCalled: false,
+        onAfterCreateCalled: false,
+        onAttachCalled: false,
+        onDetachCalled: false,
+        disableSetters: true,
+        disableGetters: true,
+        inPropInit: false,
       };
 
       // props.forEach((prop) => {
