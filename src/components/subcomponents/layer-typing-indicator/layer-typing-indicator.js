@@ -50,8 +50,8 @@ registerComponent('layer-typing-indicator', {
      */
     conversation: {
       set(value) {
-        this.client = value.getClient();
         if (value) {
+          this.client = value.getClient();
           const state = this.client.getTypingState(value);
           this.onRerender({
             conversationId: value.id,
@@ -72,8 +72,9 @@ registerComponent('layer-typing-indicator', {
      * @property {layer.Client} [client=null]
      */
     client: {
-      set(client) {
-        client.on('typing-indicator-change', this.onRerender.bind(this));
+      set(newClient, oldClient) {
+        if (oldClient) oldClient.off(null, null, this);
+        if (newClient) newClient.on('typing-indicator-change', this.onRerender, this);
       },
     },
 
@@ -102,8 +103,8 @@ registerComponent('layer-typing-indicator', {
 
     },
 
-    onRender(evt = {}) {
-      if (this.conversation && this.conversation.id) this.onRerender(evt);
+    onRender() {
+      if (this.conversation && this.conversation.id) this.onRerender();
     },
 
     /**

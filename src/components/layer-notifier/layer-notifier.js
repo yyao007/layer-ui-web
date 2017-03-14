@@ -49,7 +49,7 @@ registerComponent('layer-notifier', {
    *
    * ```
    * document.body.addEventListener('layer-message-notification', function(evt) {
-   *   if (evt.detail.message.conversationId === myOpenConversationId) {
+   *   if (evt.detail.item.conversationId === myOpenConversationId) {
    *     evt.preventDefault();
    *   }
    * }
@@ -58,7 +58,7 @@ registerComponent('layer-notifier', {
    * @event layer-message-notification
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message  The Message that has triggered this notification
+   * @param {layer.Message} evt.detail.item     The Message that has triggered this notification
    * @param {Boolean} evt.detail.isBackground   Is the app running in the background
    * @param {String} evt.detail.type            What type of notification has been configured for this event ("desktop" or "toast")
    */
@@ -71,7 +71,7 @@ registerComponent('layer-notifier', {
    *
    * ```
    * notifier.onMessageNotification = function(evt) {
-   *   if (evt.detail.message.conversationId === myOpenConversationId && !evt.detail.isBackground) {
+   *   if (evt.detail.item.conversationId === myOpenConversationId && !evt.detail.isBackground) {
    *     evt.preventDefault();
    *   }
    * }
@@ -80,7 +80,7 @@ registerComponent('layer-notifier', {
    * @property {Function} onMessageNotification
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message  The Message that has triggered this notification
+   * @param {layer.Message} evt.detail.item     The Message that has triggered this notification
    * @param {Boolean} evt.detail.isBackground   Is the app running in the background
    * @param {String} evt.detail.type            What type of notification has been configured for this event ("desktop" or "toast")
    */
@@ -90,9 +90,9 @@ registerComponent('layer-notifier', {
    *
    * ```
    * document.body.addEventListener('layer-notification-click', function(evt) {
-   *   if (evt.detail.message.conversationId !== myOpenConversationId && !evt.detail.isBackground) {
+   *   if (evt.detail.item.conversationId !== myOpenConversationId && !evt.detail.isBackground) {
    *     // Open the Conversation:
-   *     document.querySelector('layer-conversation').conversationId = evt.detail.message.conversationId;
+   *     document.querySelector('layer-conversation').conversationId = evt.detail.item.conversationId;
    *   }
    * });
    * ```
@@ -100,7 +100,7 @@ registerComponent('layer-notifier', {
    * @event layer-notification-click
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message   The Message that has triggered this notification
+   * @param {layer.Message} evt.detail.item   The Message that has triggered this notification
    */
 
   /**
@@ -108,9 +108,9 @@ registerComponent('layer-notifier', {
    *
    * ```
    * notifier.onNotificationClick = function(evt) {
-   *   if (evt.detail.message.conversationId !== myOpenConversationId) {
+   *   if (evt.detail.item.conversationId !== myOpenConversationId) {
    *     // Open the Conversation:
-   *     document.querySelector('layer-conversation').conversationId = evt.detail.message.conversationId;
+   *     document.querySelector('layer-conversation').conversationId = evt.detail.item.conversationId;
    *   }
    * };
    * ```
@@ -118,7 +118,7 @@ registerComponent('layer-notifier', {
    * @property {Function} onNotificationClick
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message   The Message that has triggered this notification
+   * @param {layer.Message} evt.detail.item   The Message that has triggered this notification
    */
 
   events: ['layer-message-notification', 'layer-notification-click'],
@@ -280,7 +280,7 @@ registerComponent('layer-notifier', {
       const type = isBackground ? this.notifyInBackground : this.notifyInForeground;
       const message = evt.message;
       if (type && type !== 'none') {
-        if (this.trigger('layer-message-notification', { message, type, isBackground })) {
+        if (this.trigger('layer-message-notification', { item: message, type, isBackground })) {
           if (type === 'desktop' && this.properties.userEnabledDesktopNotifications) {
             this.desktopNotify(evt.message);
           } else if (type === 'toast') {
@@ -310,7 +310,7 @@ registerComponent('layer-notifier', {
           closeOnClick: true,
           notifyClick: () => {
             window.focus();
-            this.trigger('layer-notification-click', { message });
+            this.trigger('layer-notification-click', { item: message });
             this.onDesktopClick(message);
           },
         });
@@ -412,7 +412,7 @@ registerComponent('layer-notifier', {
       if (this.properties.toastMessage) {
         evt.preventDefault();
         evt.stopPropagation();
-        this.trigger('layer-notification-click', { message: this.properties.toastMessage });
+        this.trigger('layer-notification-click', { item: this.properties.toastMessage });
         this.closeToast();
       }
     },

@@ -1,6 +1,11 @@
 describe('layer-conversations-list', function() {
   var el, testRoot, client, query;
 
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   beforeEach(function() {
     jasmine.clock().install();
     client = new layer.Client({
@@ -16,7 +21,7 @@ describe('layer-conversations-list', function() {
     client._clientAuthenticated();
 
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-conversations-list');
@@ -68,14 +73,6 @@ describe('layer-conversations-list', function() {
     });
   });
 
-  describe("The selectedConversationId property", function() {
-    it("Should call _renderSelection on change", function() {
-      spyOn(el, '_renderSelection');
-      el.selectedConversationId = query.data[5].id;
-      expect(el._renderSelection).toHaveBeenCalledWith();
-    });
-  });
-
   describe("The deleteConversationEnabled property", function() {
     it("Should accept a function", function() {
       var f = function() {console.log("F-ing Function");};
@@ -97,6 +94,21 @@ describe('layer-conversations-list', function() {
       spyOn(el, "_runFilter");
       el.filter = "User";
       expect(el._runFilter).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("The canFullyRenderLastMessage property", function() {
+    it("Should default to only rendering text", function(){
+      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/plain", body: "hey"}]}))).toBe(true);
+      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/javascript", body: "hey"}]}))).toBe(false);
+    });
+
+    it("Should call any method you give it", function() {
+      el.canFullyRenderLastMessage = function(message) {
+        return message.parts[0].mimeType == "text/javascript";
+      };
+      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/plain", body: "hey"}]}))).toBe(false);
+      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/javascript", body: "hey"}]}))).toBe(true);
     });
   });
 
@@ -201,6 +213,11 @@ describe('layer-conversations-list', function() {
       expect(result.item).toBe(query.data[10]);
     });
 
+    it("Should return a layer-channel-item with a channel setup", function() {
+      var result = el._generateItem(client.createChannel({name: "hey"}));
+      expect(result.tagName).toEqual('LAYER-CHANNEL-ITEM');
+    });
+
     it("Should set deleteConversationEnabled via callback", function() {
       el.deleteConversationEnabled = jasmine.createSpy('deleteEnabled').and.returnValue(true);
       var result = el._generateItem(query.data[1]);
@@ -229,28 +246,6 @@ describe('layer-conversations-list', function() {
       var evt = {};
       el.onRerender(evt);
       expect(el._processQueryEvt).toHaveBeenCalledWith(evt);
-    });
-
-    it("Should call _renderSelection", function() {
-      spyOn(el, "_renderSelection");
-      el.onRerender({
-        type: 'remove',
-        target: query.data[1]
-      });
-      expect(el._renderSelection).toHaveBeenCalledWith();
-    });
-  });
-
-  describe("The _renderSelection() method", function() {
-    it("Should select and deselect appropriately", function() {
-      el.firstChild.classList.add('layer-conversation-item-selected');
-      el.childNodes[1].classList.add('layer-conversation-item-selected');;
-
-      el.selectedConversationId = query.data[6].id;
-      expect(el.childNodes[0].classList.contains('layer-conversation-item-selected')).toBe(false);
-      expect(el.childNodes[1].classList.contains('layer-conversation-item-selected')).toBe(false);
-      expect(el.childNodes[5].classList.contains('layer-conversation-item-selected')).toBe(false);
-      expect(el.childNodes[6].classList.contains('layer-conversation-item-selected')).toBe(true);
     });
   });
 

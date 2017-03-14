@@ -24,8 +24,10 @@
  * @extends layerUI.components.Component
  */
 import { registerComponent } from '../../../components/component';
+import MainComponent from '../../../mixins/main-component';
 
 registerComponent('layer-send-button', {
+  mixins: [MainComponent],
   properties: {
     text: {
       value: 'SEND',

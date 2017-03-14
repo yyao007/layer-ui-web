@@ -18,7 +18,7 @@
  * ```javascript
  * var list = document.querySelector('layer-conversations-list');
  * list.onConversationSelected = function(evt) {
- *    alert(evt.detail.conversation.id + ' has been selected');
+ *    alert(evt.detail.item.id + ' has been selected');
  * }
  * ```
  *
@@ -31,7 +31,7 @@
  *
  * ```
  * document.body.addEventListener('layer-conversation-selected', function(evt) {
- *    alert(evt.detail.conversation.id + ' has been selected');
+ *    alert(evt.detail.item.id + ' has been selected');
  * });
  * ```
  *
@@ -46,14 +46,16 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
+import ListSelection from '../../../mixins/list-selection';
 import MainComponent from '../../../mixins/main-component';
 import '../layer-conversation-item/layer-conversation-item';
+import '../layer-channel-item/layer-channel-item';
 
 registerComponent('layer-conversations-list', {
-  mixins: [List, MainComponent],
+  mixins: [List, ListSelection, MainComponent],
 
   /**
    * Configure a custom action when a Conversation is selected;
@@ -62,7 +64,7 @@ registerComponent('layer-conversations-list', {
    *
    * ```javascript
    *    document.body.addEventListener('layer-conversation-selected', function(evt) {
-   *      var conversation = evt.detail.conversation;
+   *      var conversation = evt.detail.item;
    *
    *      // To prevent the UI from proceding to select this conversation:
    *      evt.preventDefault();
@@ -73,7 +75,7 @@ registerComponent('layer-conversations-list', {
    *
    * ```javascript
    *    converationList.onConversationSelected = function(evt) {
-   *      var conversation = evt.detail.conversation;
+   *      var conversation = evt.detail.item;
    *
    *      // To prevent the UI from proceding to select this conversation:
    *      evt.preventDefault();
@@ -83,7 +85,7 @@ registerComponent('layer-conversations-list', {
    * @property {Function} onConversationSelected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Conversation} evt.detail.conversation   The selected Conversation
+   * @param {layer.Conversation} evt.detail.item   The selected Conversation
    * @param {Event} evt.detail.originalEvent               The click event that selected the Conversation
    */
 
@@ -93,7 +95,7 @@ registerComponent('layer-conversations-list', {
    * @event layer-conversation-selected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Conversation} evt.detail.conversation   The selected Conversation
+   * @param {layer.Conversation} evt.detail.item   The selected Conversation
    * @param {Event} evt.detail.originalEvent               The click event that selected the Conversation
    */
 
@@ -102,7 +104,7 @@ registerComponent('layer-conversations-list', {
    *
    * ```javascript
    *    conversationListNode.onConversationDeleted = function(evt) {
-   *      var conversation = evt.detail.conversation;
+   *      var conversation = evt.detail.item;
    *
    *      // To prevent the UI from proceding to delete this conversation (perhaps you want
    *      // to leave the Conversation instead of delete it):
@@ -115,7 +117,7 @@ registerComponent('layer-conversations-list', {
    *
    * ```javascript
    *    document.body.addEventListener('layer-conversation-deleted', function(evt) {
-   *      var conversation = evt.detail.conversation;
+   *      var conversation = evt.detail.item;
    *
    *      // To prevent the UI from proceding to delete this conversation (perhaps you want
    *      // to leave the Conversation instead of delete it):
@@ -127,16 +129,16 @@ registerComponent('layer-conversations-list', {
    * @property {Function} onConversationDeleted
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Conversation} evt.detail.conversation
+   * @param {layer.Conversation} evt.detail.item
    */
 
   /**
-   * See layerUI.components.ConversationsListPanel.onConversationDeleted.
+   * See layerUI.components.ConversationsListPanel.List.onConversationDeleted.
    *
    * @event layer-conversation-deleted
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Conversation} evt.detail.conversation
+   * @param {layer.Conversation} evt.detail.item
    */
 
   events: ['layer-conversation-selected', 'layer-conversation-deleted'],
@@ -158,10 +160,14 @@ registerComponent('layer-conversations-list', {
      * The above code will set the selected Conversation and render the conversation as selected.
      *
      * @property {String} [selectedConversationId='']
+     * @deprecated see layerUI.components.ConversationsListPanel.ListSelection.selectedId
      */
     selectedConversationId: {
       set(value) {
-        this._renderSelection();
+        this.selectedId = value;
+      },
+      get() {
+        return this.selectedId;
       },
     },
 
@@ -188,35 +194,6 @@ registerComponent('layer-conversations-list', {
     },
 
     /**
-     * Set a filter to control which Conversations should be listed.
-     *
-     * NOTE: This filters the data that the query has retreived, it does not change the query,
-     * so you may filter out all results, even though there are matching results waiting on the server.
-     * Take control of the layerUI.components.ConversationsListPanel.query property if you need complete results.
-     *
-     * Accepted values for the filter property include:
-     *
-     * * A function that looks at each Conversation and returns a Boolean
-     * * A Regular Expression that will be tested against each
-     * layer.Conversation's `metadata.conversationName` property, and each particpants
-     * `displayName`, `firstName`, `lastName` and `emailAddress` properties.
-     * * A string to compare against the same list of properties as the RegEx.
-     *
-     * ```
-     * conversationListWidget.filter = function(conversation) {
-     *   return conversation.metadata.priority === 'important';
-     * }
-     * ```
-     *
-     * @property {String|RegEx|Function} [filter='']
-     */
-    filter: {
-      set(value) {
-        this._runFilter();
-      },
-    },
-
-    /**
      * The model to generate a Query for if a Query is not provided.
      *
      * @readonly
@@ -225,6 +202,17 @@ registerComponent('layer-conversations-list', {
      */
     _queryModel: {
       value: Layer.Query.Conversation,
+    },
+
+    /**
+     * The event name to trigger on selecting a Conversation.
+     *
+     * @readonly
+     * @private
+     * @property {String} [_selectedItemEventName=layer-conversation-selected]
+     */
+    _selectedItemEventName: {
+      value: 'layer-conversation-selected',
     },
 
     /**
@@ -245,83 +233,18 @@ registerComponent('layer-conversations-list', {
      * If you prevent rendering of a Message, it will instead render the `label` attribute for that message handler;
      * see layerUI.registerMessageHandler for more info on the `label`.
      *
+     * TODO: Should test to see what handler is returned rather than testing the mimeType
+     *
      * @property {Function} canFullyRenderLastMessage
      */
     canFullyRenderLastMessage: {
       type: Function,
       value(message) {
-        return (message.parts.length === 1 && message.parts[0].mimeType === 'text/plain');
+        return message.parts[0].mimeType === 'text/plain';
       },
     },
   },
   methods: {
-    /**
-     * Generate a unique but consistent DOM ID for each layerUI.components.ConversationsListPanel.Item.
-     *
-     * @method _getItemId
-     * @param {layer.Conversation} conversation
-     * @private
-     */
-    _getItemId(conversation) {
-      const uuid = conversation.id.replace(/^.*\//, '');
-      return `conversation-list-item-${this.id}-${uuid}`;
-    },
-
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate() {
-      if (!this.id) this.id = Layer.Util.generateUUID();
-      this.addEventListener('click', this._onClick.bind(this));
-    },
-
-    /**
-     * User has selected something in the Conversation List that didn't handle that click event.
-     *
-     * Find the Conversation Item selected and generate a `layer-conversation-selected` event.
-     * Click events do NOT bubble up; they must either be handled by the layerUI.components.ConversationsListPanel.Item or
-     * they are treated as a selection event.
-     *
-     * Listening to `layer-conversation-selected` you will still receive the original click event
-     * in case you wish to process that futher; see `originalEvent` below.
-     *
-     * Calling `evt.preventDefault()` will prevent selection from occuring.
-     *
-     * @method _onClick
-     * @private
-     * @param {Event} evt
-     */
-    _onClick(evt) {
-      let target = evt.target;
-      while (target && target !== this && !target.item) {
-        target = target.parentNode;
-      }
-
-      if (target.item) {
-        evt.preventDefault();
-        evt.stopPropagation();
-        if (this.trigger('layer-conversation-selected', { conversation: target.item, originalEvent: evt })) {
-          this.selectedConversationId = target.item.id;
-        }
-      }
-      this.onClick(evt);
-    },
-
-    /**
-     * MIXIN HOOK: Each time a Conversation is Clicked, you can hook into that by providing an onClick method.
-     *
-     * Note that prior to this call, `evt.preventDefault()` and `evt.stopPropagation()` were already called.
-     *
-     * @method onClick
-     * @param {Event} evt
-     */
-    onClick(evt) {
-      // No-op
-    },
-
     /**
      * Generate a `layer-conversation-item` widget.
      *
@@ -330,73 +253,15 @@ registerComponent('layer-conversations-list', {
      * @param {layer.Conversation} conversation
      */
     _generateItem(conversation) {
-      const conversationWidget = document.createElement('layer-conversation-item');
-      conversationWidget.id = this._getItemId(conversation);
+      const isChannel = conversation instanceof Layer.Channel;
+      const conversationWidget = document.createElement(`layer-${isChannel ? 'channel' : 'conversation'}-item`);
+      conversationWidget.id = this._getItemId(conversation.id);
       conversationWidget.deleteConversationEnabled = typeof this.deleteConversationEnabled === 'function' ?
         this.deleteConversationEnabled(conversation) : true;
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
-    },
-
-    /**
-     * Handle Query data changes.
-     *
-     * Updates rendering of the list, and then updates rendering of the list selection.
-     *
-     * @method onRerender
-     * @private
-     */
-    onRerender: function(evt) {
-      this._renderSelection();
-    },
-
-    /**
-     * Render the currently selected Conversation; remove any selection rendering from formerly selected Conversations.
-     *
-     * See layerUI.components.ConversationsListPanel.List.onSelect for Mixin point for customizing Selection behavior.
-     *
-     * @method _renderSelection
-     */
-    _renderSelection() {
-      const selectedNodes = this.querySelectorAllArray('.layer-conversation-item-selected');
-      const itemId = this.selectedConversationId ? this._getItemId({ id: this.selectedConversationId }) : null;
-      const nodeToSelect = this.selectedConversationId ? this.querySelector('#' + itemId) : null;
-
-      // Deselect everything if the selected nodes are not the node to select...
-      // assumes only one item would ever be selected at a time.
-      if (selectedNodes.length !== 1 || selectedNodes[0] !== nodeToSelect) {
-        if (selectedNodes) {
-          selectedNodes.forEach(node => node.removeClass('layer-conversation-item-selected'));
-        }
-
-        // Select the new item
-        if (nodeToSelect) nodeToSelect.addClass('layer-conversation-item-selected');
-      }
-    },
-
-    /**
-     * Run the filter on all Conversation Items.
-     *
-     * @method _runFilter
-     * @private
-     */
-    _runFilter() {
-      // If the filter has been reset, remove all filtering
-      if (!this.filter) {
-        this.querySelectorAllArray('.layer-item-filtered').forEach(item => item.removeClass('layer-item-filtered'));
-      }
-
-      // Run all filtering
-      else {
-        for (let i = 0; i < this.childNodes.length; i++) {
-          const listItem = this.childNodes[i];
-          if (listItem.item instanceof Layer.Root) {
-            listItem._runFilter(this.filter);
-          }
-        }
-      }
     },
   },
 });

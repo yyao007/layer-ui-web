@@ -28,7 +28,7 @@ module.exports = {
     emptyNode: {
       set(value) {
         this.nodes.emptyNode.innerHTML = '';
-        this.nodes.emptyNode.appendChild(value);
+        if (value) this.nodes.emptyNode.appendChild(value);
       },
     },
   },

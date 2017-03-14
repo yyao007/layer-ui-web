@@ -1,7 +1,13 @@
 describe('layer-file-upload-button', function() {
   var el, testRoot;
+
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   beforeEach(function() {
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     el = document.createElement('layer-file-upload-button');
     testRoot.appendChild(el);
@@ -56,5 +62,19 @@ describe('layer-file-upload-button', function() {
 
     // Cleanup
     layerUI.files.processAttachments = tmp;
+  });
+
+  // This test causes IE to open a file dialog, and no more tests run after that.
+  xit("Should forward clicks to the input", function() {
+    var called = false;
+
+    el.nodes.input.addEventListener('click', function() {
+      called = true;
+    });
+
+
+    // Run
+    el.nodes.label.click();
+    expect(called).toBe(true);
   });
 });

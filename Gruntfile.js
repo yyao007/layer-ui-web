@@ -3,11 +3,15 @@
 var fs = require('fs');
 var path = require('path');
 var version = require('./package.json').version;
+var websdkVersion = require('layer-websdk/package.json').version;
 var HTML_HEAD = fs.readFileSync('./jsduck-config/head.html').toString();
 var CSS = fs.readFileSync('./jsduck-config/style.css').toString();
-var babel = require("babel-core");
+var babel = require('babel-core');
+
 
 module.exports = function (grunt) {
+
+  var saucelabsTests = require('./sauce-gruntfile')(grunt, version);
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -15,7 +19,7 @@ module.exports = function (grunt) {
     browserify: {
       options: {
         separator: ';',
-        transform: ['strictify' ],
+        transform: [ ],
         browserifyOptions: {
           standalone: 'layerUI'
         }
@@ -24,29 +28,50 @@ module.exports = function (grunt) {
         files: [
           {
             dest: 'build/layer-ui-web.js',
-            src: 'index.js'
+            src: 'lib-es5/index.js'
           }
-        ],
-        options: {
-          exclude: []
-        }
+        ]
       },
       debug: {
         files: [
           {
-            dest: 'build/layer-ui-web-test.js',
-            src: 'index.js'
+            dest: 'test/layer-ui-web-test.js',
+            src: 'lib-es5/index.js'
           }
         ],
         options: {}
+      },
+      'debug-es6': {
+        files: [
+          {
+            dest: 'test/layer-ui-web-test-es6.js',
+            src: 'lib-es6/index.js'
+          }
+        ],
+        options: {
+          transform: [['babelify', {
+            presets: ['es2015']}]],
+        }
+      },
+      coverage: {
+        files: {
+          'test/layer-ui-web-test.js': ['lib-es5/index.js']
+        },
+        options: {
+          transform: [[fixBrowserifyForIstanbul], ["istanbulify"]],
+          browserifyOptions: {
+            standalone: false,
+            debug: false
+          }
+        }
       }
     },
+
     webcomponents: {
       debug: {
         files: [
           {
-            dest: 'lib',
-            src: ['src/**/*.js']
+            src: ['src/**/*.js', '!src/**/test.js', '!src/**/tests/*.js']
           }
         ],
         options: {
@@ -58,8 +83,7 @@ module.exports = function (grunt) {
         files: [
           {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'},
           {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'},
-          {src: ['themes/src/layerblue/theme.less'], dest: 'themes/build/layerblue.css'},
-          {src: ['themes/src/slacklike/theme.less'], dest: 'themes/build/slacklike.css'}
+          {src: ['themes/src/layerblue/theme.less'], dest: 'themes/build/layerblue.css'}
         ]
       }
     },
@@ -97,7 +121,7 @@ module.exports = function (grunt) {
     // Documentation
     jsduck: {
       build: {
-        src: ["lib/**/*.js", "node_modules/layer-websdk/lib/**/*.js"],
+        src: ["lib-es5/**/*.js", "node_modules/layer-websdk/lib/**/*.js"],
         dest: 'docs',
         options: {
           'builtin-classes': false,
@@ -107,14 +131,14 @@ module.exports = function (grunt) {
           'categories': ['jsduck-config/categories.json'],
           'head-html': HTML_HEAD,
           'css': [CSS],
-          'footer': 'Layer UI for Web v' + version
+          'footer': 'Layer WebSDK v' + websdkVersion + '; Layer UI for Web v' + version
         }
       }
     },
 
     watch: {
       debug: {
-        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js'],
+        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js'],
         tasks: ['debug', 'make-npm-link-safe', 'notify:watch'],
         options: {
           interrupt: true
@@ -122,7 +146,7 @@ module.exports = function (grunt) {
       },
       themes: {
         files: ['themes/src/**'],
-        tasks: ['theme'],
+        tasks: ['theme', 'make-npm-link-safe'],
         options: {
           interrupt: true
         }
@@ -135,7 +159,31 @@ module.exports = function (grunt) {
           message: 'Build Complete', //required
         }
       }
-    }
+    },
+    connect: {
+      saucelabs: {
+        options: {
+          base: "",
+          port: 9999
+        }
+      },
+      develop: {
+        options: {
+          base: "",
+          port: 8004
+        }
+      }
+    },
+    'generate-tests': {
+      debug: {
+        files: [
+          {
+            src: ['src/**/test.js', 'src/**/tests/**.js']
+          }
+        ],
+      }
+    },
+    'saucelabs-jasmine': saucelabsTests.tasks.saucelabs,
   });
 
   /* npm link causes a second layer-websdk to get built via browserify/webpack.
@@ -147,12 +195,29 @@ module.exports = function (grunt) {
     if (grunt.file.exists('npm-link-projects.json')) {
       var projectFolders = require('./npm-link-projects.json');
       projectFolders.forEach(function(project) {
-        grunt.file.copy('index.js', project + '/node_modules/layer-ui-web/index.js');
         grunt.file.copy('package.json', project + '/node_modules/layer-ui-web/package.json');
-        grunt.file.copy('lib', project + '/node_modules/layer-ui-web/lib');
+        grunt.file.copy('lib-es5', project + '/node_modules/layer-ui-web/lib-es5');
         grunt.file.copy('themes/build', project + '/node_modules/layer-ui-web/themes/build');
       });
     }
+  });
+
+  /* There is some path of using expose and external that should allow us to do a require('layer-websdk')
+     without it being in this build, but I do not see it.  So, brute force:
+     1. Before browserify, we replace layer-websdk/index.js with `module.exports = global.layer`,
+     2. after browserify, we restore index.js
+  */
+  grunt.registerTask('before-browserify', 'Swap layer-websdk for global', function() {
+    var newcode = 'module.exports = global.layer;';
+    var contents = grunt.file.read('node_modules/layer-websdk/index.js');
+    if (contents != newcode) {
+      grunt.file.write('node_modules/layer-websdk/index-stashed.js', contents);
+    }
+    grunt.file.write('node_modules/layer-websdk/index.js', newcode);
+  });
+
+  grunt.registerTask('after-browserify', 'Swap layer-websdk back', function() {
+    grunt.file.copy('node_modules/layer-websdk/index-stashed.js', 'node_modules/layer-websdk/index.js');
   });
 
 
@@ -195,7 +260,7 @@ module.exports = function (grunt) {
   grunt.registerMultiTask('webcomponents', 'Building Web Components', function() {
     var options = this.options();
 
-    function createCombinedComponentFile(file, outputPath) {
+    function createCombinedComponentFile(file, outputPathES5, outputPathES6) {
       try {
       // Extract the class name; TODO: class name should be same as file name.
       var jsFileName = file.replace(/^.*\//, '');
@@ -204,32 +269,14 @@ module.exports = function (grunt) {
       if (jsFileName === 'test.js') return;
 
       var output = grunt.file.read(file);
-      var babelResult = babel.transform(output, {
-        presets: ["babel-preset-es2015"]
-      });
-      output = babelResult.code;
-
-      // Babel sometimes moves our jsduck comments defining the class to the end of the file, causing JSDuck to quack.
-      // Move it back to the top so that JSDuck knows what class all the properties and methods belong to
-      var indexOfClass = output.indexOf('@class');
-      if (indexOfClass !== -1) var indexOfClassCodeBlock = output.lastIndexOf('/**', indexOfClass);
-      if (indexOfClassCodeBlock !== -1) {
-        var endOfClassCodeBlock = output.indexOf('*/', indexOfClass);
-        if (endOfClassCodeBlock !== -1) {
-          endOfClassCodeBlock += 2;
-          var prefix = output.substring(0, indexOfClassCodeBlock);
-          var classComment = output.substring(indexOfClassCodeBlock, endOfClassCodeBlock);
-          var postfix =  output.substring(endOfClassCodeBlock);
-          output = classComment + prefix + postfix;
-        }
-      }
 
       var templateCount = 0;
-      var outputFolder = path.dirname(outputPath);
+      var outputFolderES6 = path.dirname(outputPathES6);
+      var outputFolderES5 = path.dirname(outputPathES5);
 
       // Find the template file by checking for an html file of the same name as the js file in the same folder.
       var parentFolder = path.dirname(file);
-      var pathToBase = parentFolder.replace(/[/|\bsrc][^/]*/g, "/..").substring(1) + "/lib/base"
+      var pathToBase = parentFolder.replace(/[/|\bsrc][^/]*/g, "/..").substring(4) + "/base"
 
       var templates = grunt.file.expand(parentFolder + "/*.html")
       templates.forEach(function(templateFileName) {
@@ -266,47 +313,120 @@ module.exports = function (grunt) {
           templateContents = templateContents.replace(/>\s+</g, '><');
 
           // Generate the <template /> and <style> objects
-          output += '\nvar layerUI = require("' + pathToBase + '");\n';
+          output += '\n(function() {\n';
+          output += 'var layerUI = require(\'' + pathToBase + '\');\n';
           output += 'layerUI.buildAndRegisterTemplate("' + className + '", ' + JSON.stringify(templateContents.replace(/\n/g,'').trim()) + ', "' + templateId + '");\n';
           output += 'layerUI.buildStyle("' + className + '", ' + JSON.stringify(style.trim()) + ', "' + templateId + '");\n';
+          output += '})()';
         });
       });
 
-      if (!grunt.file.exists(outputFolder)) {
-        grunt.file.mkdir(outputFolder);
+      //var outputES5 = output.replace(/\/\*[\s\S]*?\*\//g, '');
+      var outputES5 = output;
+      var outputES6 = output.replace(/import\s+Layer\s+from\s+'layer-websdk'\s*;/g, 'import Layer from \'layer-websdk/index-es6\'');
+
+      if (!grunt.file.exists(outputFolderES6)) {
+        grunt.file.mkdir(outputFolderES6);
       }
-      grunt.file.write(outputPath, output);
+      grunt.file.write(outputPathES6, outputES6);
+
+      if (!grunt.file.exists(outputFolderES5)) {
+        grunt.file.mkdir(outputFolderES5);
+      }
+      var babelResult = babel.transform(outputES5, {
+        presets: ["babel-preset-es2015"]
+      });
+      outputES5 = babelResult.code;
+
+      // Babel sometimes moves our jsduck comments defining the class to the end of the file, causing JSDuck to quack.
+      // Move it back to the top so that JSDuck knows what class all the properties and methods belong to.
+      var indexOfClass = outputES5.indexOf('@class');
+      if (indexOfClass !== -1) var indexOfClassCodeBlock = outputES5.lastIndexOf('/**', indexOfClass);
+      if (indexOfClassCodeBlock !== -1) {
+        var endOfClassCodeBlock = outputES5.indexOf('*/', indexOfClass);
+        if (endOfClassCodeBlock !== -1) {
+          endOfClassCodeBlock += 2;
+          var prefix = outputES5.substring(0, indexOfClassCodeBlock);
+          var classComment = outputES5.substring(indexOfClassCodeBlock, endOfClassCodeBlock);
+          var postfix =  outputES5.substring(endOfClassCodeBlock);
+          outputES5 = classComment + prefix + postfix;
+        }
+      }
+
+      grunt.file.write(outputPathES5, outputES5);
       //grunt.log.writeln("Wrote " + outputPath + "; success: " + grunt.file.exists(outputPath));
       } catch(e) {
         grunt.log.writeln('Failed to process ' + file + '; ', e);
       }
     }
 
-    this.files.forEach(function(fileGroup) {
-      grunt.file.delete(fileGroup.dest);
-    });
+    grunt.file.delete('lib-es5');
+    grunt.file.delete('lib-es6');
 
     var files = [];
     // Iterate over each file set and generate the build file specified for that set
     this.files.forEach(function(fileGroup) {
       fileGroup.src.forEach(function(file, index) {
         files.push(file);
-        var outputPath = file.replace(/^src/, fileGroup.dest);;
-        createCombinedComponentFile(file, outputPath);
+        var outputPathES5 = file.replace(/^src/, 'lib-es5');
+        var outputPathES6 = file.replace(/^src/, 'lib-es6');
+        createCombinedComponentFile(file, outputPathES5, outputPathES6);
       });
     });
+  });
 
-    files = files.filter(function(fileName) {
-      if (['src/base.js', 'src/components/component.js'].indexOf(fileName) !== -1) return false;
-      if (fileName.match(/\/test\.js$/)) return false;
-      return true;
-    }).map(function(fileName) {
-      return fileName.replace(/^src\//, './lib/');
-    }).map(function(fileName) {
-      return fileName.replace(/\.js$/, "");
+  grunt.registerTask('version', 'Assign Versions', function() {
+    var contents = grunt.file.read('src/base.js');
+    var newContents = contents.replace(/layerUI\.version = (.*)$/m, "layerUI.version = '" + version + "';");
+    if (newContents != contents) grunt.file.write('src/base.js', newContents);
+  });
+
+    /* Insure that browserify and babelify generated code does not get counted against our test coverage */
+  var through = require('through');
+  function fixBrowserifyForIstanbul(file) {
+    var generatedLines = [
+      "function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }",
+    ];
+      var data = '';
+      return through(write, end);
+
+      function write (buf) {
+          data += buf;
+      }
+      function end () {
+        var lines = data.split(/\n/);
+
+        for (var i = 0; i < lines.length; i++) {
+          if (generatedLines.indexOf(lines[i]) !== -1) {
+            lines[i] = "/* istanbul ignore next */ " + lines[i];
+          }
+        }
+
+        this.queue(lines.join('\n'));
+        this.queue(null);
+      }
+    }
+
+    grunt.registerMultiTask('generate-tests', 'Building SpecRunner.html', function() {
+      var options = this.options();
+      var specFile = grunt.file.read('test/SpecRunner.html');
+      var startStr = "<!-- START GENERATED SPEC LIST -->";
+      var endStr = "<!-- END GENERATED SPEC LIST -->";
+      var startIndex = specFile.indexOf(startStr) + startStr.length;
+      var endIndex = specFile.indexOf(endStr);
+
+      var scripts = [];
+      // Iterate over each file set and generate the build file specified for that set
+      this.files.forEach(function(fileGroup) {
+        fileGroup.src.forEach(function(file, index) {
+          scripts.push('<script src="../' + file + '" type="text/javascript"></script>');
+        });
+      });
+
+      specFile = specFile.substring(0, startIndex) + '\n' + scripts.join('\n') + '\n' + specFile.substring(endIndex);
+      grunt.file.write('test/SpecRunner.html', specFile);
     });
 
-  });
 
   // Building
   grunt.loadNpmTasks('grunt-browserify');
@@ -317,11 +437,20 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-notify');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-saucelabs');
 
+  grunt.registerTask('coverage', ['webcomponents', 'browserify:coverage', "generate-tests"]);
   grunt.registerTask('theme', ['less', 'copy']),
-  grunt.registerTask('docs', ['jsduck']);
-  grunt.registerTask('debug', ['webcomponents', 'before-browserify', 'browserify', 'after-browserify']);
-  grunt.registerTask('build', ['debug', 'uglify', 'theme', 'cssmin']);
+
+  grunt.registerTask('docs', ['debug', 'jsduck']);
+  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests"]);
+  grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
+
   grunt.registerTask('default', ['build', 'docs']);
   grunt.registerTask('prepublish', ['build', 'theme', 'wait']);
+
+  // NOTE: use testem rather than grunt test for quick testing on your desktop; this is for saucelabs cross-browser testing.
+  grunt.registerTask("test", ["generate-tests", "connect:saucelabs", "saucelabs-jasmine"]);
+  grunt.registerTask("develop", ["connect:develop", "watch"]);
 };

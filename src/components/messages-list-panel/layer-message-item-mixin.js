@@ -68,7 +68,7 @@
  *         _handleCustomCheckboxEvent(evt) {
  *           this.trigger('custom-message-checkbox-change', {
  *             isChecked: this.selected,
- *             message: this.item
+ *             item: this.item
  *           });
  *         }
  *       }
@@ -81,7 +81,7 @@
  * @mixins layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 
 module.exports = {
   properties: {
@@ -112,9 +112,8 @@ module.exports = {
      */
     _contentTag: {
       set(newTag, oldTag) {
-        if (oldTag) this.removeClass(this._contentTag);
+        if (oldTag) this.removeClass(oldTag);
         if (newTag) this.addClass(newTag);
-        if (this.nodes.itemNode) this.nodes.itemNode._contentTag = this.properties._contentTag;
       },
     },
 
@@ -216,9 +215,11 @@ module.exports = {
       this.nodes.messageHandler = messageHandler;
 
       this.nodes.content.appendChild(messageHandler);
-      if (messageHandler.style.height) {
-        this.nodes.content.style.height = messageHandler.style.height;
-      }
+      Layer.Util.defer(() => {
+        if (messageHandler.style.height) {
+          this.nodes.content.style.height = messageHandler.style.height;
+        }
+      });
     },
   },
 };

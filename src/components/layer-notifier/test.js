@@ -1,6 +1,12 @@
 if (window.Notification) {
   describe('layer-notifier', function() {
     var el, testRoot, client, conversation, message;
+
+    beforeAll(function(done) {
+      if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+      setTimeout(done, 1000);
+    });
+
     beforeEach(function() {
       client = new layer.Client({
         appId: 'Fred'
@@ -13,7 +19,7 @@ if (window.Notification) {
       });
       client._clientAuthenticated();
 
-      layerUI.init({});
+      if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
       testRoot = document.createElement('div');
       document.body.appendChild(testRoot);
       el = document.createElement('layer-notifier');
@@ -152,7 +158,7 @@ if (window.Notification) {
           expect(args[0].detail).toEqual({
             type: 'toast',
             isBackground: true,
-            message: message
+            item: message
           });
 
           // Cleanup
@@ -373,7 +379,7 @@ if (window.Notification) {
           var args = spy1.calls.allArgs()[0];
           expect(args.length).toEqual(1);
           expect(args[0].detail).toEqual({
-            message: message
+            item: message
           });
         });
       });

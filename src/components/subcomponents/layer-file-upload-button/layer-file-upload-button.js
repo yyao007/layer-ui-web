@@ -22,7 +22,7 @@
  * @class layerUI.components.subcomponents.FileUploadButton
  * @extends layerUI.components.Component
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
 
@@ -42,7 +42,12 @@ registerComponent('layer-file-upload-button', {
       this.nodes.input.id = Layer.Util.generateUUID();
       this.nodes.label.setAttribute('for', this.nodes.input.id);
       this.nodes.input.addEventListener('change', this.onChange.bind(this));
-      this.addEventListener('click', evt => this.nodes.input.click());
+
+      // This causes test to fail by causing the click event to fire twice.
+      // but without this, the click event is not received at all.
+      this.addEventListener('click', (evt) => {
+        if (evt.target !== this.nodes.input) this.nodes.input.click();
+      });
     },
 
     /**
@@ -55,6 +60,8 @@ registerComponent('layer-file-upload-button', {
      */
     onChange() {
       const files = this.nodes.input.files;
+
+      /* istanbul ignore next */
       const inputParts = Array.prototype.map.call(files, file => new Layer.MessagePart(file));
 
       /**

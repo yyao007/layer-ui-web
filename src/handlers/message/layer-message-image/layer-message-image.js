@@ -22,8 +22,10 @@ import 'blueimp-load-image/js/load-image-exif';
 import layerUI, { settings as UISettings } from '../../../base';
 import { registerComponent } from '../../../components/component';
 import normalizeSize from '../../../utils/sizing';
+import MessageHandler from '../../../mixins/message-handler';
 
 registerComponent('layer-message-image', {
+  mixins: [MessageHandler],
   properties: {
 
     /**
@@ -44,7 +46,7 @@ registerComponent('layer-message-image', {
         if (this.properties.preview && this.properties.image) {
           if (!this.properties.preview.body) {
             this.properties.preview.fetchContent();
-            this.properties.preview.on('content-loaded', this._render, this);
+            this.properties.preview.on('content-loaded', this.onRender, this);
           }
           // TODO: remove body test once all websdk changes are merged and url is gaurenteed to have a value if body has a value
           // If image does not have a url, call fetchStream to get an updated url
@@ -54,11 +56,8 @@ registerComponent('layer-message-image', {
         // If there is no preview, only an image, we're going to pass it into the ImageManager so fetch its body
         else if (!this.properties.image.body) {
           this.properties.image.fetchContent();
-          this.properties.image.on('content-loaded', this._render, this);
+          this.properties.image.on('content-loaded', this.onRender, this);
         }
-
-        // Render the Message
-        this.onRender();
       },
     },
 
@@ -86,6 +85,7 @@ registerComponent('layer-message-image', {
      */
     _handleClick(evt) {
       // Don't open images clicked within the Conversations List
+      /* istanbul ignore next */
       if (this.parentNode.tagName !== 'LAYER-CONVERSATION-LAST-MESSAGE') {
         evt.preventDefault();
         if (this.properties.image && this.properties.image.url) window.open(this.properties.image.url);
@@ -103,7 +103,7 @@ registerComponent('layer-message-image', {
     onRender() {
       let maxSizes = UISettings.maxSizes;
       // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
-      if (this.parentContainer.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };
+      if (this.parentContainer && this.parentContainer.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };
       this.properties.sizes = normalizeSize(this.properties.meta, { width: maxSizes.width, height: maxSizes.height });
       this.style.height = (UISettings.verticalMessagePadding + this.properties.sizes.height) + 'px';
       if (this.properties.preview && this.properties.preview.body) {

@@ -11,8 +11,11 @@
 import { registerComponent } from '../../components/component';
 import normalizeSize from '../../utils/sizing';
 import layerUI, { settings as UISettings } from '../../base';
+import MessageHandler from '../../mixins/message-handler';
 
 registerComponent('layer-message-video', {
+  mixins: [MessageHandler],
+  template: '<video layer-id="video"></video>',
   properties: {
 
     /**
@@ -35,13 +38,12 @@ registerComponent('layer-message-video', {
         });
 
         if (!this.properties.video.url) this.properties.video.fetchStream();
-        if (!this.properties.preview.url) this.properties.preview.fetchStream();
+        this.properties.video.on('url-loaded', this.onRender, this);
 
-        this.properties.preview.on('url-loaded', this._render, this);
-        this.properties.video.on('url-loaded', this._render, this);
-
-        // Render the Message
-        this.onRender();
+        if (this.properties.preview) {
+          if (!this.properties.preview.url) this.properties.preview.fetchStream();
+          this.properties.preview.on('url-loaded', this.onRender, this);
+        }
       },
     },
 
@@ -59,16 +61,13 @@ registerComponent('layer-message-video', {
      * @private
      */
     onRender() {
-      const videoPlayer = document.createElement('video');
-      videoPlayer.width = this.properties.sizes.width;
-      videoPlayer.height = this.properties.sizes.height;
-      videoPlayer.src = this.properties.video.url;
+      this.nodes.video.width = this.properties.sizes.width;
+      this.nodes.video.height = this.properties.sizes.height;
+      this.nodes.video.src = this.properties.video.url;
       if (this.properties.preview) {
-        videoPlayer.poster = this.properties.preview.url;
+        this.nodes.video.poster = this.properties.preview.url;
       }
-      videoPlayer.controls = true;
-      while (this.firstChild) this.removeChild(this.firstChild);
-      this.appendChild(videoPlayer);
+      this.nodes.video.controls = true;
     },
   },
 });

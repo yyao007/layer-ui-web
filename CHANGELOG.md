@@ -1,12 +1,65 @@
 # Layer UI for Web Change Log
 
-## 0.9.13
 
-Fixes issue in Angular Adapter where it tries to trigger a property setter prior to the component being initialized.
+# 0.10.0
 
-## 0.9.12
+### Breaking Changes
 
-Fixes issue in component base class for handling properties object set prior to constructor; impact on Safari + Angular Adapter
+* Events that previously had properties such as `evt.detail.conversation`, `evt.detail.message`, `evt.detail.identity`
+  now just use `evt.detail.item`
+
+### Bug fixes
+
+* Fixes bug in image renderer that caused it to call the out-dated `_render` method instead of `onRender`
+* Previously Main Components that use Queries would generate a Query automatically after waiting 50ms
+  to see if the app was going to provide it a Query.  Now the Main Components automatically and promptly generate their own Query.
+  If you are providing your own query, initialize the widget with `useGeneratedQuery=false`.
+* Calling `query.update({...})` will now reapply any `filter` property you've applied to your list.
+
+### For Defining Custom Components:
+
+* Adds `message-handler.js` mixin for easier Card creation; accessed via `layerUI.mixins.MessageHandler`
+* Adds support for a `template` property that takes a String or `<template />` in `layerUI.registerComponent`
+* Restores use of property definition ordering to insure that `app-id` setter can set a `client` prior to other setters triggering
+* Insures that setters get called only once per value prior to `onAfterCreate`
+* Adds `noGetterFromSetter` to property definitions to pevent getter from being called
+  every time the setter is called.  Used for getters that do more than just return a value (i.e. use a REST API call to get a value).
+* Adds `layer-message-text-plain-has-after-text` css class to any text-message renderer that adds an `afterText`
+
+
+### Refactoring
+
+* Added `list-selection` and `list-item-selection` mixins, and removed selection code from `layer-conversation-list`.
+* Added `has-query` mixin, migrated functionality for managing a `query`, `query-id`, `hasGeneratedQuery` property into the new mixin.
+
+### Misc
+
+* Adds support for a `LayerConversationPanel.composeButtonsLeft` which adds a panel of buttons to the left of the Composer;
+  can be used on conjunction with `LayerConversationPanel.composeButtons` which adds a panel of buttons to the right of the Composer.
+* Adjust React Adaptor to insure widget is fully initialized before `didComponentMount` is called within your app.
+* Adds version check to insure compatible version of websdk is included.
+* Changes to UI Framework Adapters:
+  * SendButton and FileUploadButton are now Main Components that can be accsessed via all of the adapters.
+  * React now accepts a React Component instead of a DOM node for most properties that expect a DOM node.
+* Adds Coverage test process and better test coverage.
+* Adds saucelabs test integration.
+* Adds matrix of supported browser to README.md
+* Font size set to 16px for all inputs in all themes to prevent IOS Zooming
+
+### Preview Features
+
+These features currently require access to our Preview Server, but should be available in production in the near future:
+
+* Adds Channel support: `<layer-channels-list />` and `<layer-membership-list />`
+* Adds `<layer-presence />` widget, which is now built into `<layer-avatar />`
+
+# 0.9.13
+
+* Fixes another bug in how Angular Adapater worked with Webcomponents lifecycle within Webcomponents Polyfil
+
+# 0.9.12
+
+* Fixes bug in how Angular Adapater worked with Webcomponents lifecycle within Webcomponents Polyfil
 
 ## 0.9.11
 

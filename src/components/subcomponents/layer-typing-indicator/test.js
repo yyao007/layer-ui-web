@@ -30,7 +30,7 @@ describe('layer-typing-indicator', function() {
 
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-typing-indicator');
@@ -50,6 +50,13 @@ describe('layer-typing-indicator', function() {
       expect(el.client).toBe(null);
       el.conversation = conversation;
       expect(el.client).toBe(client);
+    });
+
+    it("Non-conversation values should set value to empty string", function() {
+      el.value = "hey";
+      el.conversation = conversation;
+      el.conversation = null;
+      expect(el.value).toEqual("");
     });
   });
 
@@ -78,14 +85,25 @@ describe('layer-typing-indicator', function() {
     });
   });
 
-  describe("The created() method", function() {
+  describe("The onCreate() method", function() {
 
     it("Should setup panel", function() {
       expect(el.nodes.panel).toEqual(jasmine.any(HTMLElement));
     });
   });
 
-  describe("The rerender() method", function() {
+  describe("The onRerender() method", function() {
+    it("Should call onRerender if there is a conversation", function() {
+      el = document.createElement('layer-typing-indicator');
+      spyOn(el, "onRerender");
+      el.conversation = conversation;
+      layer.Util.defer.flush();
+
+      expect(el.onRerender).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("The onRerender() method", function() {
     beforeEach(function() {
       el.conversation = conversation;
     });

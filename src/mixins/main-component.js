@@ -3,7 +3,7 @@
  *
  * @class layerUI.mixins.MainComponent
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { settings } from '../base';
 
 module.exports = {
@@ -18,18 +18,6 @@ module.exports = {
      */
     _isMainComponent: {
       value: true,
-    },
-
-    // TODO: Some MainComponents don't have Queries; this should be moved into a has-query mixin
-    /**
-     * The Query was generated internally, not passed in as an attribute or property.
-     *
-     * @property {Boolean} [hasGeneratedQuery=false]
-     * @readonly
-     */
-    hasGeneratedQuery: {
-      value: false,
-      type: Boolean,
     },
 
     /**
@@ -47,6 +35,7 @@ module.exports = {
      * @property {String} [appId=""]
      */
     appId: {
+      order: 1,
       set(value) {
         if (value && value.indexOf('layer:///') === 0) {
           const client = Layer.Client.getClient(value);
@@ -71,6 +60,7 @@ module.exports = {
      * @property {layer.Client} [client=null]
      */
     client: {
+      order: 2,
       set(value) {
         if (value) {
           value.on('destroy', (evt) => {
@@ -79,54 +69,12 @@ module.exports = {
         }
       },
     },
-
-    /**
-     * How many items to page in each time we page the Query.
-     *
-     * @property {Number} [pageSize=50]
-     */
-    pageSize: {
-      value: 50,
-    },
   },
   methods: {
     onCreate() {
       if (settings.appId) this.appId = settings.appId;
       const useSafariCss = navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
       if (useSafariCss) this.classList.add('safari');
-    },
-
-    /**
-     * A Main Component typically expects a Query as an input... or it needs to create its own.
-     *
-     * The app using the widget may not have passed in a query at initialization time, but may have done
-     * so immediately after initialization, so pause a moment, let properties arrive, and then see if we need to
-     * create the Query.
-     *
-     * @method
-     * @private
-     */
-    _scheduleGeneratedQuery() {
-      setTimeout(this._setupGeneratedQuery.bind(this), 50);
-    },
-
-    /**
-     * A Main Component typically expects a Query as an input... or it needs to create its own.
-     *
-     * This method tests to see if it expects a Query and if it has a query, and creates one if needed.
-     *
-     * @method
-     * @private
-     */
-    _setupGeneratedQuery() {
-      if (this._queryModel && !this.query && this.client && !this.client.isDestroyed) {
-        this.query = this.client.createQuery({
-          model: this._queryModel,
-          dataType: Layer.Query.InstanceDataType,
-          paginationWindow: this.pageSize || 50,
-        });
-        this.hasGeneratedQuery = true;
-      }
     },
   },
 };

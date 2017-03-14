@@ -1,5 +1,11 @@
 describe('layer-identity-item', function() {
   var el, testRoot, client;
+
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   beforeEach(function() {
     jasmine.clock().install();
     client = new layer.Client({
@@ -14,7 +20,7 @@ describe('layer-identity-item', function() {
     });
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-identity-item');
@@ -180,6 +186,7 @@ describe('layer-identity-item', function() {
       el.nodes.avatar.users = [];
       el.onRender();
       expect(el.nodes.avatar.users).toEqual([client.user]);
+      expect(el.querySelector('layer-presence').tagName).toEqual('LAYER-PRESENCE');
     });
 
     it("Should _render the displayName", function() {

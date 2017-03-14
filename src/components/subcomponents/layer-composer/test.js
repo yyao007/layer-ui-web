@@ -1,6 +1,11 @@
 describe('layer-composer', function() {
   var el, testRoot, client, conversation;
 
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   afterEach(function() {
     jasmine.clock().uninstall();
   });
@@ -22,7 +27,7 @@ describe('layer-composer', function() {
 
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-composer');
@@ -70,9 +75,12 @@ describe('layer-composer', function() {
   describe("The buttons property", function() {
     it("Should pass buttons to the button panel", function() {
       var div1 = document.createElement("div"),
-        div2 = document.createElement("div");
+        div2 = document.createElement("div"),
+        div3 = document.createElement("div");
       el.buttons = [div1, div2];
+      el.buttonsLeft = [div3];
       expect(el.nodes.buttonPanel.buttons).toEqual([div1, div2]);
+      expect(el.nodes.buttonPanelLeft.buttons).toEqual([div3]);
     });
   });
 
@@ -129,6 +137,7 @@ describe('layer-composer', function() {
 
     it("Should setup buttonPanel and editPanel", function() {
       expect(el.nodes.buttonPanel).toEqual(jasmine.any(HTMLElement));
+      expect(el.nodes.buttonPanelLeft).toEqual(jasmine.any(HTMLElement));
       expect(el.nodes.editPanel).toEqual(jasmine.any(HTMLElement));
     });
 
@@ -152,6 +161,8 @@ describe('layer-composer', function() {
 
   describe("The focus() method", function() {
     it("Should set the focus", function() {
+      document.body.tabIndex = 1;
+      document.body.focus();
       expect(document.activeElement).toBe(document.body);
       el.focus();
       expect(document.activeElement).toBe(el.nodes.input);
@@ -182,7 +193,7 @@ describe('layer-composer', function() {
     it("Should trigger layer-send-message and send the message typed", function() {
       var calledFor = null;
       document.body.addEventListener("layer-send-message", function(evt) {
-        calledFor = evt.detail.message;
+        calledFor = evt.detail.item;
       });
       el.send();
 
@@ -194,7 +205,7 @@ describe('layer-composer', function() {
     it("Should trigger layer-send-message and cancel the message on evt.preventDefault()", function() {
       var calledFor = null;
       document.body.addEventListener("layer-send-message", function(evt) {
-        calledFor = evt.detail.message;
+        calledFor = evt.detail.item;
         evt.preventDefault();
       });
       el.send();
@@ -208,7 +219,7 @@ describe('layer-composer', function() {
 
       var calledFor = null;
       document.body.addEventListener("layer-send-message", function(evt) {
-        calledFor = evt.detail.message;
+        calledFor = evt.detail.item;
         evt.preventDefault();
       });
 

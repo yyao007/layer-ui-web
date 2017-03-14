@@ -86,6 +86,9 @@
  *    * if type is Boolean, and "false", "null", "undefined", "" and "0" are evaluated as `false`; all other values are `true`
  *    * Using this with functions will cause your function string to be evaled, but will lose your function scope and `this` pointer.
  *    * Using this with a number will turn "1234" into `1234`
+ * *  noGetterFromSetter: Do **not** use the getter function from within the setter.  Used for special cases where
+ *    you have a getter that calculates the values, but where your setter should just make do with the last known value
+ *    when determining if the value has changed.
  *
  * Example
  *
@@ -396,6 +399,49 @@
    the document for more than a few moments. Use this function to unsubscribe from any custom event listeners you setup for your widget.
 
  *
+ * #### Templates
+ *
+ * There are a number of ways that a template can be registered to your component.
+ *
+ * _Define a full Template while registering Component_:
+ *
+ * ```
+ * var template = document.querySelector('template');
+ * layerUI.registerComponent('my-widget', {
+ *     template: template
+ * });
+ * ```
+ *
+ * _Define a template string while registering Component_:
+ *
+ * Note that unless the `<template/>` node, the template string is assumed to be DOM nodes only, and no `<style/>` blocks.
+ * If using a template string, you may separately provide a style string:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ *     template: '<div><button />Click me</div>',
+ *     styles: 'my-widget {display: block}'
+ * });
+ * ```
+ *
+ * _Define a template after defining your component_:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ * });
+ *
+ * layerUI.registerTemplate('my-widget', document.querySelector('template'));
+ * ```
+ *
+ * _Define a template string after defining your component_:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ * });
+ *
+ * layerUI.buildAndRegisterTemplate('my-widget', '<div><button />Click me</div>');
+ * ```
+ *
  * @class layerUI.components.Component
  */
 
@@ -415,11 +461,13 @@
  *
  * @method registerComponent
  * @static
- * @param {String} tagName - Tag name that is being defined (`layer-avatar`)
- * @param {Object} classDef - Definition of your class
- * @param {Object} classDef.properties - Definition of your class properties
- * @param {Object} classDef.methods - Definition of your class methods
- * @param {String[]} classDef.events - Array of events to listen for and repackage as event handler properties
+ * @param {String} tagName    Tag name that is being defined (`layer-avatar`)
+ * @param {Object} classDef    Definition of your class
+ * @param {Object} classDef.properties    Definition of your class properties
+ * @param {Object} classDef.methods    Definition of your class methods
+ * @param {String[]} classDef.events    Array of events to listen for and repackage as event handler properties
+ * @param {Mixed} template     A `<template />` node or a template string such as `<div><button /></div>`
+ * @param {String} style       A String with CSS styles for this widget
  */
 import Layer from 'layer-websdk';
 import layerUI from '../base';
@@ -456,6 +504,7 @@ function setupMethods(classDef, methodsIn) {
   });
 }
 
+
 /*
  * Provides a basic mixin mechanism.
  *
@@ -482,7 +531,16 @@ function setupMixin(classDef, mixin) {
 
     // Make sure that this becomes a part of the properties definition of the class if the prop
     // isn't already defined.  used by the props array.
-    if (!classDef.properties[name]) classDef.properties[name] = mixin.properties[name];
+    if (!classDef.properties[name]) {
+      classDef.properties[name] = mixin.properties[name];
+    } else {
+      if (mixin.properties[name].order !== undefined && classDef.properties[name].order === undefined) {
+        classDef.properties[name].order = mixin.properties[name].order;
+      }
+      if (mixin.properties[name].value !== undefined && classDef.properties[name].value === undefined) {
+        classDef.properties[name].value = mixin.properties[name].value;
+      }
+    }
   });
 
   setupMethods(classDef, mixin.methods || {});
@@ -499,8 +557,19 @@ function finalizeMixinMerge(classDef) {
   const propNames = Object.keys(classDef.properties || {});
   propNames.forEach((name) => {
     if (classDef['__' + name]) {
-      const setters = classDef['__' + name].filter(def => def.set);
-      classDef['__set_' + name] = setters.map(def => def.set);
+
+      // NOTE: Modes are currently applied to properties, but we do not yet support OVERWRITE mode.
+      const setters = Layer.Util.sortBy(classDef['__' + name].filter(def => def.set), (setter) => {
+        switch (setter.mode) {
+          case registerComponent.MODES.BEFORE:
+            return 1;
+          case registerComponent.MODES.AFTER:
+            return 3;
+          default:
+            return 2;
+        }
+      });
+      classDef['__set_' + name] = setters.map(setter => setter.set);
     }
   });
 
@@ -514,19 +583,25 @@ function finalizeMixinMerge(classDef) {
       classDef.methods[methodName] = methodList[0];
     } else {
       classDef['__method_' + methodName] = methodList;
-      classDef.methods[methodName] = function runMixinMethods(...args) {
-        let result;
-        for (let i = 0; i < methodDef.conditional.length; i++) {
-          if (!methodDef.conditional[i].apply(this, args)) return;
-        }
-
-        classDef['__method_' + methodName].forEach((method) => {
-          result = method.apply(this, args);
-        });
-        return result;
-      };
+      classDef.methods[methodName] = getMethod(classDef, methodDef.conditional, classDef['__method_' + methodName]);
     }
   });
+}
+
+
+function getMethod(classDef, conditionals, methods) {
+  return function runMethod(...args) {
+    let result;
+    for (let i = 0; i < conditionals.length; i++) {
+      if (!conditionals[i].apply(this, args)) return;
+    }
+
+    methods.forEach((method) => {
+      const resultTmp = method.apply(this, args);
+      if (resultTmp !== undefined) result = resultTmp;
+    });
+    return result;
+  };
 }
 
 /*
@@ -588,9 +663,22 @@ function getPropArray(classDef) {
       propertyName,
       attributeName: layerUI.hyphenate(propertyName),
       type: classDef.properties[propertyName].type,
+      order: classDef.properties[propertyName].order,
+      noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
     };
+  }).sort((a, b) => {
+    if (a.order !== undefined && b.order !== undefined) {
+      return a.order - b.order;
+    } else if (a.order !== undefined) {
+      return -1;
+    } else if (b.order !== undefined) {
+      return 1;
+    } else {
+      return 0;
+    }
   });
 }
+
 
 /*
  * Cast a property value to its specified type
@@ -659,19 +747,19 @@ function setupProperty(classDef, prop, propertyDefHash) {
 
     if (propDef.type) value = castProperty(propDef.type, value);
 
-    const oldValue = this[name];
-    if (oldValue !== value || this.properties._internalState.inPropInit) {
+    const oldValue = prop.noGetterFromSetter ? this.properties[name] : this[name];
+    if (oldValue !== value || this.properties._internalState.inPropInit.indexOf(name) !== -1) {
 
       // can't call setters with this on because the setters will set other properties which should not
       // trigger further setters if there was no actual change
-      const wasInit = this.properties._internalState.inPropInit;
-      this.properties._internalState.inPropInit = false;
+      const initIndex = this.properties._internalState.inPropInit.indexOf(name);
+      const wasInit = initIndex !== -1;
+      if (wasInit) this.properties._internalState.inPropInit.splice(initIndex, 1);
 
       this.properties[name] = value;
       if (classDef['__set_' + name] && !this.properties._internalState.disableSetters) {
         classDef['__set_' + name].forEach(setter => setter.call(this, value, wasInit ? null : oldValue));
       }
-      this.properties._internalState.inPropInit = wasInit;
     }
   };
 
@@ -681,7 +769,19 @@ function setupProperty(classDef, prop, propertyDefHash) {
 
 let registerAllCalled = false;
 function registerComponent(tagName, classDef) {
-  layerUI.components[tagName] = classDef;
+  if (!layerUI.components[tagName]) layerUI.components[tagName] = {};
+  layerUI.components[tagName].def = classDef;
+
+  if (classDef.template) {
+    layerUI.components[tagName].template = classDef.template;
+    delete classDef.template;
+  }
+
+  if (classDef.style) {
+    layerUI.components[tagName].style = classDef.style;
+    delete classDef.style;
+  }
+
   if (registerAllCalled) _registerComponent(tagName);
 }
 
@@ -698,13 +798,17 @@ function registerAll() {
     .forEach(tagName => _registerComponent(tagName));
 }
 
-
 function _registerComponent(tagName) {
-  const classDef = layerUI.components[tagName];
-  const template = classDef.template;
-  delete classDef.template;
-  const style = classDef.style;
-  delete classDef.style;
+  const classDef = layerUI.components[tagName].def;
+  const { template } = layerUI.components[tagName];
+
+  if (template) {
+    if (typeof template === 'string') {
+      layerUI.buildAndRegisterTemplate(tagName, template);
+    } else if (template.getAttribute('layer-template-registered') !== 'true') {
+      layerUI.registerTemplate(tagName, template);
+    }
+  }
 
   // Insure property exists
   if (!classDef.properties) classDef.properties = {};
@@ -729,19 +833,23 @@ function _registerComponent(tagName) {
   setupMethods(classDef, methods);
 
   // Propare the classDef's properties to merge with Mixin properties
-  setupMixin(classDef, { properties: classDef.properties });
+  const properties = classDef.properties;
+  classDef.properties = {};
+  setupMixin(classDef, { properties });
+
+  // Some mixins may have mixins of their own; add them to the list;
+  // every newly added item must also be processed, so insure loop touches on new items as well
+  for (let i = 0; i < classDef.mixins.length; i++) {
+    const mixins = classDef.mixins[i].mixins;
+    if (mixins) {
+      mixins.forEach((submixin) => {
+        if (classDef.mixins.indexOf(submixin) === -1) classDef.mixins.push(submixin);
+      });
+    }
+  }
 
   classDef.mixins.forEach(mixin => setupMixin(classDef, mixin));
   finalizeMixinMerge(classDef);
-
-  // Insure that lifecycle methods are present
-  const noOp = function() {};
-  const noopMethods = ['onRerender'];
-  noopMethods.forEach((methodName) => {
-    if (!classDef.methods[methodName]) {
-      classDef.methods[methodName] = noOp;
-    }
-  });
 
   // For each property in the methods hash, setup the setter/getter
   const propertyDefHash = {};
@@ -782,9 +890,9 @@ function _registerComponent(tagName) {
       // If a template has been assigned for this class, append it to this node, and parse for layer-ids
       // TODO: Rearchitect layer-message-item to be a place holder for a layer-message-sent-item or layer-message-received-item so that
       // we don't need this hokey stuff here
-      const template = this.getTemplate();
-      if (template) {
-        const clone = document.importNode(template.content, true);
+      const templateNode = this.getTemplate();
+      if (templateNode) {
+        const clone = document.importNode(templateNode.content, true);
         this.appendChild(clone);
         this.setupDomNodes();
       }
@@ -795,23 +903,31 @@ function _registerComponent(tagName) {
 
       // Call the Component's onAfterCreate method which can handle any setup
       // that requires all properties to be set, dom nodes initialized, etc...
-      Layer.Util.defer(() => {
-        this.properties._internalState.disableSetters = false;
-        this.properties._internalState.disableGetters = false;
-        this.properties._internalState.inPropInit = true;
-        props.forEach((prop) => {
-          const value = this.properties[prop.propertyName];
-          // UNIT TEST: This line is primarily to keep unit tests from throwing errors
-          if (value instanceof Layer.Root && value.isDestroyed) return;
-          if (value !== undefined && value !== null) {
-            // Force the setter to trigger; this will force the value to be converted to the correct type,
-            // and call all setters
-            this[prop.propertyName] = value;
-          }
-        });
-        this.properties._internalState.inPropInit = false;
-        this.onAfterCreate();
+      Layer.Util.defer(() => this._onAfterCreate());
+    },
+  };
+
+  classDef._onAfterCreate = {
+    value: function _onAfterCreate() {
+      // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
+      if (this.properties._internalState.onAfterCreateCalled) return;
+      this.properties._internalState.disableSetters = false;
+      this.properties._internalState.disableGetters = false;
+      this.properties._internalState.inPropInit =
+        layerUI.components[tagName].properties.map(propDef => propDef.propertyName);
+
+      props.forEach((prop) => {
+        const value = this.properties[prop.propertyName];
+        // UNIT TEST: This line is primarily to keep unit tests from throwing errors
+        if (value instanceof Layer.Root && value.isDestroyed) return;
+        if (value !== undefined && value !== null) {
+          // Force the setter to trigger; this will force the value to be converted to the correct type,
+          // and call all setters
+          this[prop.propertyName] = value;
+        }
       });
+      this.properties._internalState.inPropInit = [];
+      this.onAfterCreate();
     },
   };
 
@@ -896,11 +1012,12 @@ function _registerComponent(tagName) {
         layerEventSubscriptions: [],
         onCreateCalled: false,
         onAfterCreateCalled: false,
+        onRenderCalled: false,
         onAttachCalled: false,
         onDetachCalled: false,
         disableSetters: true,
         disableGetters: true,
-        inPropInit: false,
+        inPropInit: [],
       };
 
       // props.forEach((prop) => {
@@ -927,8 +1044,9 @@ function _registerComponent(tagName) {
   classDef._copyInAttribute = {
     value: function _copyInAttribute(prop) {
 
-      let finalValue = null,
-        value = this.getAttribute(prop.attributeName);
+      let finalValue = null;
+      let value = this.getAttribute(prop.attributeName);
+
       // Firefox seems to need this alternative to getAttribute().
       // TODO: Verify this and determine if it uses the getter here.
       if (value === null && this[prop.attributeName] !== undefined) {
@@ -945,6 +1063,9 @@ function _registerComponent(tagName) {
         delete this[prop.propertyName];
       } else if ('value' in propertyDefHash[prop.propertyName]) {
         finalValue = propertyDefHash[prop.propertyName].value;
+
+        // Don't treat a default value of [] as a static value shared among all instances
+        if (Array.isArray(finalValue)) finalValue = finalValue.concat([]);
       }
 
       this.properties[prop.propertyName] = prop.type ? castProperty(prop.type, finalValue) : finalValue;
@@ -1000,31 +1121,12 @@ function _registerComponent(tagName) {
   };
 
   // Register the component with our components hash as well as with the document.
-  layerUI.components[tagName] = document.registerElement(tagName, {
+  // WARNING: Calling this in some browsers may cause immediate registeration of the component prior
+  // to reaching the next line of code; putting code after this line may be problematic.
+  layerUI.components[tagName].classDef = document.registerElement(tagName, {
     prototype: Object.create(HTMLElement.prototype, classDef),
   });
 
-  /**
-   * A `<template />` dom node
-   *
-   * These templates are used during Component initializations.
-   *
-   * @type {HTMLTemplateElement}
-   * @private
-   * @static
-   */
-  layerUI.components[tagName].template = template;
-
-  /**
-   * Stylesheet string.
-   *
-   * A stylesheet string can be added to the document via `styleNode.innerHTML = value` assignment.
-   *
-   * @type {String}
-   * @private
-   * @static
-   */
-  layerUI.components[tagName].style = style;
 
   /**
    * Identifies the properties exposed by this component.
@@ -1045,6 +1147,41 @@ function _registerComponent(tagName) {
   layerUI.components[tagName].properties = props;
 };
 
+/**
+   * A `<template />` dom node
+   *
+   * These templates are used during Component initializations.
+   *
+   * @type {HTMLTemplateElement}
+   * @private
+   * @static
+   */
+
+  /**
+   * Stylesheet string.
+   *
+   * A stylesheet string can be added to the document via `styleNode.innerHTML = value` assignment.
+   *
+   * @type {String}
+   * @private
+   * @static
+   */
+
+/**
+ * Mixin modes determines how a new method being added to a class will be executed with respect to any other methods.
+ *
+ * * BEFORE: Run your method before other methods of the same name
+ * * AFTER: Run your method after other methods of the same name
+ * * OVERWRITE: Run only your method, no other methods of the same name
+ * * DEFAULT: Run your method in normal ordering.
+ *
+ * @static
+ * @property {Object} MODES
+ * @property {String} MODES.BEFORE
+ * @property {String} MODES.AFTER
+ * @property {String} MODES.OVERWRITE
+ * @property {String} MODES.DEFAULT
+ */
 registerComponent.MODES = {
   BEFORE: 'BEFORE',
   AFTER: 'AFTER',
@@ -1096,7 +1233,7 @@ const standardClassMethods = {
   getTemplate: function getTemplate() {
     const tagName = this.tagName.toLocaleLowerCase();
 
-    if (layerUI.components[tagName].style ) {
+    if (layerUI.components[tagName].style) {
       const styleNode = document.createElement('style');
       styleNode.id = 'style-' + this.tagName.toLowerCase();
       styleNode.innerHTML = layerUI.components[tagName].style;
@@ -1193,6 +1330,7 @@ const standardClassMethods = {
     value: function onAfterCreate() {
       this.properties._internalState.onAfterCreateCalled = true;
       this.onRender();
+      this.properties._internalState.onRenderCalled = true;
       if (this.properties._callOnAttachAfterCreate) {
         this.properties._callOnAttachAfterCreate = false;
         this.onAttach();
@@ -1217,7 +1355,7 @@ const standardClassMethods = {
    *
    * @method onRerender
    */
-
+  onRerender: function onRender() {},
 
   /**
    * MIXIN HOOK: Each time a Component is inserted into a Document, its onAttach methods will be called.
@@ -1272,7 +1410,8 @@ const standardClassMethods = {
    * @private
    */
   onDestroy: function onDestroy() {
-    this.properties._internalState.layerEventSubscriptions.forEach(subscribedObject => subscribedObject.off(null, null, this));
+    this.properties._internalState.layerEventSubscriptions
+      .forEach(subscribedObject => subscribedObject.off(null, null, this));
     this.properties._internalState.layerEventSubscriptions = [];
     this.classList.add('layer-node-destroyed');
   },

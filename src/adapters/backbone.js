@@ -12,6 +12,8 @@ import layerUI from '../base';
  * var conversationsListView = new LayerUIViews.ConversationsList(client);
  * var identitiesListView = new LayerUIViews.UserList(client);
  * var notifierView = new LayerUIViews.Notifier(client, {notifyInForeground: 'toast'});
+ * var sendButton = new LayerUIViews.SendButton(client);
+ * var fileUploadButton = new LayerUIViews.FileUploadButton(client);
  * ```
  *
 * Calling this will expose the following React Components:
@@ -20,6 +22,10 @@ import layerUI from '../base';
  * * ConversationsListView: A wrapper around a layerUI.components.ConversationsListPanel
  * * IdentitiesListView: A wrapper around a layerUI.components.IdentitiesListPanel
  * * NotifierView: A wrapper around a layerUI.components.misc.Notifier
+ * * SendButton: An optional button that can be provided to ConversationPanelView's `composeButtons` property
+ *   to add a simple Send button to the Composer
+ * * FileUploadButton: An optional button that can be provided to ConversationPanelView's `composeButtons` property
+ *   to add a simple Select and Send File button to the Composer
  *
  *
  * Any occurances of a layer widget in your html should be associated with these views:

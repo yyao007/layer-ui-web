@@ -4,7 +4,7 @@
  * This widget appears within
  *
  * * layerUI.components.MessagesListPanel.Item: Represents the sender of a Message
- * * layerUI.components.ConversationsListPanel.Item: Represents the participants of a Conversation
+ * * layerUI.components.ConversationsListPanel.Item.Conversation: Represents the participants of a Conversation
  * * layerUI.components.IdentitiesListPanel.Item: Represents a user in a User List
  *
  * Rendering is done using data from the `layer.Identity` object for each user, using the layer.Identity.avatarUrl if available to
@@ -44,6 +44,7 @@
  * @extends layerUI.components.Component
  */
 import { registerComponent } from '../../../components/component';
+import '../layer-presence/layer-presence';
 
 registerComponent('layer-avatar', {
   properties: {
@@ -56,17 +57,25 @@ registerComponent('layer-avatar', {
      * @property {layer.Identity[]} [users=[]}
      */
     users: {
-      set(value) {
-        if (!value) value = [];
-        if (!Array.isArray(value)) value = [value];
+      set(newValue, oldValue) {
+        if (oldValue && newValue && newValue.length === oldValue.length) {
+          const matches = newValue.filter(identity => oldValue.indexOf(identity) !== -1);
+          if (matches !== newValue.length) return;
+        }
+        if (!newValue) newValue = [];
+        if (!Array.isArray(newValue)) newValue = [newValue];
         // classList.toggle doesn't work right in IE 11
-        this.classList[value.length ? 'add' : 'remove']('layer-has-user');
+        this.classList[newValue.length ? 'add' : 'remove']('layer-has-user');
         this.onRender();
       },
     },
+
+    showPresence: {
+      value: true,
+      type: Boolean,
+    },
   },
   methods: {
-
     /**
      * Constructor.
      *
@@ -85,7 +94,7 @@ registerComponent('layer-avatar', {
      */
     onRender() {
       // Clear the innerHTML if we have rendered something before
-      if (this.childNodes.length) {
+      if (this.users.length) {
         this.innerHTML = '';
       }
 
@@ -95,6 +104,11 @@ registerComponent('layer-avatar', {
       // Add the "cluster" css if rendering multiple users
       // No classList.toggle due to poor IE11 support
       this.classList[this.users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
+      if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
+        this.nodes.presence = document.createElement('layer-presence');
+        this.nodes.presence.item = this.users[0];
+        this.appendChild(this.nodes.presence);
+      }
     },
 
     /**

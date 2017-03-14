@@ -7,6 +7,8 @@
 
 module.exports = function isURL(extensions) {
   let resource = '?';
+
+  /* istanbul ignore else */
   if (extensions) resource = '.(' + extensions.join('|') + ')';
 
   // Taken from https://gist.github.com/dperini/729294

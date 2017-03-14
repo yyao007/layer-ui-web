@@ -3,73 +3,13 @@
  *
  * @class layerUI.mixins.List
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { registerComponent } from '../components/component';
+import HasQuery from './has-query';
 
 module.exports = {
+  mixins: [HasQuery],
   properties: {
-
-    /**
-     * The Client is needed in order for the list to get a Query from a queryId
-     *
-     * TODO: Insure this does not conflict with main-component's client property!
-     *
-     * @property {layer.Client} [client=null]
-     */
-    client: {
-      set(value) {
-        if (value) {
-          if (this.queryId) {
-            this.query = value.getQuery(this.queryId);
-          } else if (this._isMainComponent) {
-            this._scheduleGeneratedQuery();
-          }
-        }
-      },
-    },
-
-    /**
-     * The ID for the layer.Query providing the items to render.
-     *
-     * Note that you can directly set the layerUI.mixins.List.query property as well.
-     *
-     * Leaving this and the query properties empty will cause a layer.Query to be generated for you.
-     *
-     * @property {String} [queryId='']
-     */
-    queryId: {
-      set(value) {
-        if (value && value.indexOf('layer:///') !== 0) this.properties.queryId = '';
-        if (this.client && this.queryId) {
-          this.query = this.client.getQuery(this.queryId);
-        }
-      },
-    },
-
-    /**
-     * A layer.Query provides the items to render.
-     *
-     * Suggested practices:
-     *
-     * * If your not using this query elsewhere in your app, let this widget generate its own Query
-     * * If setting this from an html template, use layerUI.mixins.List.queryId instead.
-     *
-     * @property {layer.Query} [query=null]
-     */
-    query: {
-      set(newValue, oldValue) {
-        if (newValue instanceof Layer.Query) {
-          // If there is an oldQuery that we didn't generate, its up to the app to destroy it when it is done.
-          if (this.hasGeneratedQuery) {
-            this.hasGeneratedQuery = false;
-            oldValue.destroy();
-          }
-          this._updateQuery();
-        } else {
-          this.properties.query = null;
-        }
-      },
-    },
 
     /**
      * Set/get state related to whether the Query data is loading data from the server.
@@ -139,15 +79,30 @@ module.exports = {
     },
 
     state: {
-      set: function(newState) {
+      set(newState) {
         Array.prototype.slice.call(this.childNodes).forEach((node) => {
           node.state = newState;
         });
-      }
+      },
+    },
+
+    /**
+     * String, Regular Expression or Function for filtering Conversations.
+     *
+     * Defaults to filtering by comparing input against things like Conversation.metadata.conversationName, or Identity.displayName, etc.
+     * Provide your own Function to change this behavior
+     *
+     * @property {String|RegEx|Function} [filter='']
+     */
+    filter: {
+      set(value) {
+        this._runFilter();
+      },
     },
   },
   methods: {
     onCreate() {
+      if (!this.id) this.id = Layer.Util.generateUUID();
       this.properties.listData = [];
       this.addEventListener('scroll', this._onScroll.bind(this));
       this.onRender();
@@ -192,9 +147,7 @@ module.exports = {
      * @private
      */
     _updateQuery() {
-      this.client = this.query.client;
-      this.onRender();
-      this.query.on('change', this.onRerender, this);
+      this.query.on('change:property', this._runFilter, this);
     },
 
     /**
@@ -235,7 +188,7 @@ module.exports = {
 
     onRerender: {
       mode: registerComponent.MODES.BEFORE,
-      value: function(evt = {}) {
+      value(evt = {}) {
         if (this.query.isDestroyed) {
           this._renderResetData(evt);
         } else {
@@ -259,6 +212,17 @@ module.exports = {
     },
 
     /**
+     * Generate a unique but consistent DOM ID for each layerUI.mixins.ListItem.
+     *
+     * @method _getItemId
+     * @param {String} itemId
+     * @private
+     */
+    _getItemId(itemId) {
+      return 'list-item-' + this.id + '-' + itemId.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-');
+    },
+
+    /**
      * Generate an list-item for one query result.
      *
      * @method _generateFragmentItem
@@ -268,6 +232,7 @@ module.exports = {
       const itemInstance = item instanceof Layer.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
+        widget.setAttribute('layer-item-id', item.id.replace(/^layer:\/\/\//, '').replace(/\//g, '_'));
         if (widget) {
           this.onGenerateListItem(widget);
           fragment.appendChild(widget);
@@ -296,7 +261,7 @@ module.exports = {
      */
     _gatherAndProcessAffectedItems(affectedItems, isTopItemNew) {
       if (affectedItems.length) {
-        const itemIds = affectedItems.map(message => this._getItemId(message));
+        const itemIds = affectedItems.map(item => this._getItemId(item.id));
         const affectedWidgets = this.querySelectorAllArray('#' + itemIds.join(', #'));
         this._processAffectedWidgets(affectedWidgets, isTopItemNew);
       }
@@ -420,11 +385,10 @@ module.exports = {
       this.properties.listData = [].concat(this.properties.query.data);
       const removeIndex = evt.index;
       const affectedItems = this.properties.listData.slice(Math.max(0, removeIndex - 3), removeIndex + 3);
-      const listItem = this.querySelector('#' + this._getItemId(evt.target));
+      const listItem = this.querySelector('#' + this._getItemId(evt.target.id));
       if (listItem) this.removeChild(listItem);
 
       this._gatherAndProcessAffectedItems(affectedItems, false);
-      if (!evt.inRender) this.onRerender();
     },
 
     /**
@@ -440,7 +404,6 @@ module.exports = {
       const fragment = this._generateFragment([evt.target]);
       this.insertBefore(fragment, this.childNodes[insertIndex]);
       this._gatherAndProcessAffectedItems(affectedItems, insertIndex === 0);
-      if (!evt.inRender) this.onRerender();
     },
 
     /**
@@ -450,7 +413,9 @@ module.exports = {
      * @private
      */
     _renderPagedData(evt) {
-      const affectedItems = this.properties.listData.slice(this.properties.listData.length - 3, this.properties.listData.length).concat(evt.data);
+      const affectedItems = this.properties.listData
+        .slice(this.properties.listData.length - 3, this.properties.listData.length)
+        .concat(evt.data);
       this.properties.listData = [].concat(this.properties.query.data);
       const fragment = this._generateFragment(evt.data);
 
@@ -460,6 +425,25 @@ module.exports = {
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);
       this.isDataLoading = this.properties.query.isFiring;
       if (!evt.inRender) this.onRerender();
+    },
+
+    /**
+     * Run the filter on all Identity Items.
+     *
+     * @method _runFilter
+     * @private
+     */
+    _runFilter() {
+      if (!this.filter) {
+        this.querySelectorAllArray('.layer-item-filtered').forEach(item => item.removeClass('layer-item-filtered'));
+      } else {
+        for (let i = 0; i < this.childNodes.length; i++) {
+          const listItem = this.childNodes[i];
+          if (listItem.item instanceof Layer.Root) {
+            listItem._runFilter(this.filter);
+          }
+        }
+      }
     },
   },
 };

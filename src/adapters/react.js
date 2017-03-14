@@ -20,13 +20,16 @@ import Layer from 'layer-websdk';
  * * ConversationsList: A wrapper around a layerUI.components.ConversationsListPanel
  * * IdentitiesList: A wrapper around a layerUI.components.IdentitiesListPanel
  * * Notifier: A wrapper around a layerUI.components.misc.Notifier
+ * * SendButton: A wrapper around a layerUI.components.subcomponents.SendButton
+ * * FileUploadButton: A wrapper around a layerUI.components.subcomponents.FileUploadButton
  *
  * You can then use:
  *
  * ```
  * render() {
  *    return <ConversationList
- *      on-conversation-selected={this.mySelectHandler}></ConversationList>
+ *      composeButtons={SendButton, FileUploadButton}
+ *      onConversationSelected={this.mySelectHandler}></ConversationList>
  * }
  * ```
  *
@@ -36,7 +39,7 @@ import Layer from 'layer-websdk';
  * ```
  * import React, { Component, PropTypes } from 'react';
  * import ReactDom from 'react-dom';
- * import * as Layer from 'layer-websdk';
+ * import Layer from 'layer-websdk';
  * import * as LayerUI from 'layer-ui-web';
  *
  * LayerUI.init({
@@ -75,25 +78,35 @@ function initReact(React, ReactDom) {
         .replace(/^Layer/, '');
 
     libraryResult[className] = React.createClass({
-
       /**
        * On mounting, copy in all properties, and optionally setup a Query.
        *
        * Delay added to prevent Webcomponents property setters from being blown away in safari and firefox
        */
       componentDidMount() {
-        Layer.Util.defer(() => {
-          // Get the properties/attributes that match those used in this.props
-          const props = component.properties.filter(property =>
-            this.props[property.propertyName] || this.props[property.attributeName]);
+        // Get the properties/attributes that match those used in this.props
+        const props = component.properties.filter(property =>
+          this.props[property.propertyName] || this.props[property.attributeName]);
 
-          // Set the webcomponent properties
-          props.forEach((propDef) => {
-            const value = propDef.propertyName in this.props ?
-              this.props[propDef.propertyName] : this.props[propDef.attributeName];
-            this.node[propDef.propertyName] = value;
-          });
+        // Set the webcomponent properties
+        props.forEach((propDef) => {
+          let value = propDef.propertyName in this.props ?
+            this.props[propDef.propertyName] : this.props[propDef.attributeName];
+          if (propDef.type === HTMLElement && value) {
+            value = this.handleReactDom(propDef, value);
+          }
+          this.node[propDef.propertyName] = value;
         });
+
+        // Browsers running the polyfil may not yet have initialized the component at this point.
+        // Force them to be initialized so that by the time the parent component's didComponentMount
+        // is called, this will be an initialized widget.
+        if (!this.node._onAfterCreate) {
+          const evt = document.createEvent('CustomEvent');
+          evt.initCustomEvent('HTMLImportsLoaded', true, true, null);
+          document.dispatchEvent(evt);
+        }
+        this.node._onAfterCreate();
       },
 
       /**
@@ -107,11 +120,43 @@ function initReact(React, ReactDom) {
         // Set the webcomponent properties if they have changed
         props.forEach((propDef) => {
           const name = propDef.propertyName in this.props ? propDef.propertyName : propDef.attributeName;
-          if (nextProps[name] !== this.props[name]) {
-            this.node[propDef.propertyName] = nextProps[name];
+          let value = nextProps[name];
+          if (propDef.type === HTMLElement && value) {
+            value = this.handleReactDom(propDef, value);
+          }
+
+          if (value !== this.props[name]) {
+            this.node[propDef.propertyName] = value;
           }
         }, this);
         return false;
+      },
+
+      handleReactDom(propDef, value) {
+        if (!this.layerUIGeneratedNodes) this.layerUIGeneratedNodes = {};
+
+        if (Array.isArray(value)) {
+          const array = [];
+          if (!this.layerUIGeneratedNodes[propDef.propertyName]) {
+            this.layerUIGeneratedNodes[propDef.propertyName] = array;
+          }
+          array.length = value.length;
+          value.forEach((item, index) => {
+            if (item.tagName) {
+              array[index] = item;
+            } else {
+              const node = array[index] || document.createElement('div');
+              ReactDom.render(typeof item === 'function' ? React.createElement(item) : item, node);
+              array[index] = node;
+            }
+          });
+        } else if (value.tagName === undefined) {
+          if (!this.layerUIGeneratedNodes[propDef.propertyName]) {
+            this.layerUIGeneratedNodes[propDef.propertyName] = document.createElement('div');
+          }
+          ReactDom.render(value, this.layerUIGeneratedNodes[propDef.propertyName]);
+        }
+        return this.layerUIGeneratedNodes[propDef.propertyName];
       },
 
       render() {

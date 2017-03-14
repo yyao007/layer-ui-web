@@ -50,15 +50,16 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
+import HasQuery from '../../mixins/has-query';
 import '../messages-list-panel/layer-messages-list/layer-messages-list';
 import '../subcomponents/layer-composer/layer-composer';
 import '../subcomponents/layer-typing-indicator/layer-typing-indicator';
 
 registerComponent('layer-conversation-panel', {
-  mixins: [MainComponent],
+  mixins: [MainComponent, HasQuery],
 
   /**
    * This event is triggered before any Message is sent.
@@ -68,7 +69,7 @@ registerComponent('layer-conversation-panel', {
    * ```javascript
    * conversationPanel.onSendMessage = function(evt) {
    *   evt.preventDefault();
-   *   var message = evt.detail.message;
+   *   var message = evt.detail.item;
    *   myAsyncLookup(function(result) {
    *     var part = new layer.MessagePart({
    *       mimeType: 'application/json',
@@ -83,7 +84,7 @@ registerComponent('layer-conversation-panel', {
    * @property {Function} onSendMessage
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message
+   * @param {layer.Message} evt.detail.item
    */
 
   /**
@@ -94,7 +95,7 @@ registerComponent('layer-conversation-panel', {
    * ```javascript
    * document.body.addEventListener('layer-send-message', function(evt) {
    *   evt.preventDefault();
-   *   var message = evt.detail.message;
+   *   var message = evt.detail.item;
    *   myAsyncLookup(function(result) {
    *     var part = new layer.MessagePart({
    *       mimeType: 'application/json',
@@ -109,7 +110,7 @@ registerComponent('layer-conversation-panel', {
    * @event layer-send-message
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message
+   * @param {layer.Message} evt.detail.item
    * @param {Object} evt.detail.notification
    */
 
@@ -121,7 +122,7 @@ registerComponent('layer-conversation-panel', {
    * ```javascript
    * conversationPanel.onMessageDeleted = function(evt) {
    *   evt.preventDefault();
-   *   var message = evt.detail.message;
+   *   var message = evt.detail.item;
    *   message.delete(layer.Constants.DELETION_MODES.MY_DEVICES);
    * };
    * ```
@@ -129,7 +130,7 @@ registerComponent('layer-conversation-panel', {
    * @property {Function} onMessageDeleted
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message
+   * @param {layer.Message} evt.detail.item
    */
 
   /**
@@ -140,7 +141,7 @@ registerComponent('layer-conversation-panel', {
    * ```javascript
    * document.body.addEventListener('layer-message-deleted', function(evt) {
    *   evt.preventDefault();
-   *   var message = evt.detail.message;
+   *   var message = evt.detail.item;
    *   message.delete(layer.Constants.DELETION_MODES.MY_DEVICES);
    * });
    * ```
@@ -148,7 +149,7 @@ registerComponent('layer-conversation-panel', {
    * @event layer-message-deleted
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Message} evt.detail.message
+   * @param {layer.Message} evt.detail.item
    */
 
   /**
@@ -231,48 +232,10 @@ registerComponent('layer-conversation-panel', {
 
   properties: {
 
-    /**
-     * A Query ID identifies the layer.Query that provides the Messages we are to render and page through.
-     *
-     * You may use the layerUI.components.ConversationPanel.query property instead of layerUI.components.ConversationPanel.queryId,
-     * however, if putting the value within an HTML attribute
-     * rather than doing DOM manipulation, only string values work.
-     *
-     * Leaving this and the query properties empty will cause a Query to be generated for you.
-     *
-     * @property {String} [queryId='']
-     */
-    queryId: {
-      set(value) {
-        if (value && value.indexOf('layer:///queries') !== 0) this.properties.queryId = '';
-        if (this.properties.client && this.queryId) {
-          this.query = this.properties.client.getQuery(this.queryId);
-        }
-      },
-    },
-
-    /**
-     * A Query identifies the layer.Query that provides the Messages we are to render and page through.
-     *
-     * You may use the layerUI.components.ConversationPanel.queryId property instead of layerUI.components.ConversationPanel.query,
-     * however, if putting the value within an HTML attribute
-     * rather than doing DOM manipulation, only string values work.
-     *
-     * Leaving this and the queryId properties empty will cause a Query to be generated for you.
-     *
-     * @property {layer.Query} [query=null]
-     */
+    // Documented in mixins/has-query.js
     query: {
-      set(value, oldValue) {
-        if (value instanceof Layer.Query) {
-          if (this.hasGeneratedQuery) {
-            this.hasGeneratedQuery = false;
-            oldValue.destroy();
-          }
-          this.nodes.list.query = value;
-        } else {
-          this.properties.query = null;
-        }
+      set(value) {
+        this.nodes.list.query = value;
       },
     },
 
@@ -297,13 +260,13 @@ registerComponent('layer-conversation-panel', {
      */
     conversationId: {
       set(value) {
-        if (value && value.indexOf('layer:///conversations') !== 0) this.properties.conversationId = '';
+        if (value && value.indexOf('layer:///conversations') !== 0 && value.indexOf('layer:///channels') !== 0) this.properties.conversationId = '';
         if (this.client && this.conversationId) {
           if (this.client.isReady && !this.client.isDestroyed) {
-            this.conversation = this.client.getConversation(this.conversationId, true);
+            this.conversation = this.client.getObject(this.conversationId, true);
           } else {
             this.client.once('ready', () => {
-              if (this.conversationId) this.conversation = this.client.getConversation(this.conversationId, true);
+              if (this.conversationId) this.conversation = this.client.getObject(this.conversationId, true);
             });
           }
         }
@@ -327,16 +290,17 @@ registerComponent('layer-conversation-panel', {
      * }
      * ```
      *
-     * @property {String}
+     * @property {layer.Container}
      */
     conversation: {
       set(value) {
-        if (value && !(value instanceof Layer.Conversation)) this.properties.conversation = '';
+        if (value && !(value instanceof Layer.Conversation || value instanceof Layer.Channel)) this.properties.conversation = null;
         if (this.client && this.conversation) this._setupConversation();
       },
     },
 
-    // Docs in mixins/main-component.js
+    // Docs in mixins/has-query.js; new behavior here is that any change to hasGeneratedQuery means
+    // that now THIS component is responsible for managing the query predicate; call _setupConversation to see that done.
     hasGeneratedQuery: {
       set(value) {
         if (value && this.conversationId && this.client) this._setupConversation();
@@ -361,13 +325,8 @@ registerComponent('layer-conversation-panel', {
     client: {
       set(value) {
         if (value) {
-          if (!this.conversation && this.conversationId) this.conversation = value.getConversation(this.conversationId, true);
+          if (!this.conversation && this.conversationId) this.conversation = value.getObject(this.conversationId, true);
           if (this.conversation) this._setupConversation();
-          if (this.queryId) {
-            this.query = value.getQuery(this.queryId);
-          } else {
-            this._scheduleGeneratedQuery();
-          }
         }
       },
     },
@@ -449,6 +408,7 @@ registerComponent('layer-conversation-panel', {
     },
 
     emptyMessageListNode: {
+      type: HTMLElement,
       set(value) {
         this.nodes.list.emptyNode = value;
       },
@@ -458,7 +418,7 @@ registerComponent('layer-conversation-panel', {
     },
 
     /**
-     * An array of buttons (dom nodes) to be added to the Compose bar.
+     * An array of buttons (dom nodes) to be added to the Compose bar, right side.
      *
      * ```
      * widget.composeButtons = [
@@ -470,8 +430,28 @@ registerComponent('layer-conversation-panel', {
      * @property {HTMLElement[]} [composeButtons=[]]
      */
     composeButtons: {
+      type: HTMLElement,
       set(value) {
         this.nodes.composer.buttons = value;
+      },
+    },
+
+    /**
+     * An array of buttons (dom nodes) to be added to the Compose bar, left side.
+     *
+     * ```
+     * widget.composeButtonsLeft = [
+     *     document.createElement('button'),
+     *     document.createElement('button')
+     * ];
+     * ```
+     *
+     * @property {HTMLElement[]} [composeButtonsLeft=[]]
+     */
+    composeButtonsLeft: {
+      type: HTMLElement,
+      set(value) {
+        this.nodes.composer.buttonsLeft = value;
       },
     },
 
@@ -534,6 +514,7 @@ registerComponent('layer-conversation-panel', {
       this.addEventListener('keydown', this._onKeyDown.bind(this));
 
       // Typically the defaultIndex is -1, but IE11 uses 0.
+      /* istanbul ignore next */
       const defaultIndex = document.head ? document.head.tabIndex : null;
       if (this.tabIndex === '' || this.tabIndex === -1 || this.tabIndex === defaultIndex) this.tabIndex = -1;
     },
@@ -553,6 +534,7 @@ registerComponent('layer-conversation-panel', {
       const ctrlKey = evt.ctrlKey;
       if (metaKey || ctrlKey) return;
 
+      /* istanbul ignore next */
       if (keyCode >= 65 && keyCode <= 90 || // a-z
           keyCode >= 48 && keyCode <= 57 || // 0-9
           keyCode >= 97 && keyCode <= 111 || // NUMPAD
@@ -617,9 +599,15 @@ registerComponent('layer-conversation-panel', {
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {
-        this.query.update({
-          predicate: `conversation.id = "${conversation.id}"`,
-        });
+        if (conversation instanceof Layer.Conversation) {
+          this.query.update({
+            predicate: `conversation.id = "${conversation.id}"`,
+          });
+        } else if (conversation instanceof Layer.Channel) {
+          this.query.update({
+            predicate: `channel.id = "${conversation.id}"`,
+          });
+        }
       }
       if (this.autoFocusConversation) this.focusText();
     },

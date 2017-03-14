@@ -8,31 +8,11 @@
  */
 import layerUI from '../../base';
 import { registerComponent } from '../../components/component';
+import MessageHandler from '../../mixins/message-handler';
 
 registerComponent('layer-message-text-plain', {
-  properties: {
-
-    /**
-     * The Message property provides the MessageParts we are going to render.
-     *
-     * @property {layer.Message}
-     */
-    message: {
-      set(value) {
-        this.render();
-      },
-    },
-  },
+  mixins: [MessageHandler],
   methods: {
-
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate() {
-    },
 
     /**
      * Replaces any html tags with escaped html tags so that the recipient
@@ -55,9 +35,8 @@ registerComponent('layer-message-text-plain', {
      * Renders the results after all TextHandlers have run.
      *
      * @method
-     * @private
      */
-    render() {
+    onRender() {
       if (!layerUI.textHandlersOrdered) this._setupOrderedHandlers();
 
       const text = this.message.parts[0].body;
@@ -65,12 +44,16 @@ registerComponent('layer-message-text-plain', {
         text: this._fixHtml(text),
         afterText: [],
       };
+      let afterText = '';
 
       layerUI.textHandlersOrdered.forEach(handler => handler(textData, this.message));
 
-      const startDiv = '<div class="layer-message-text-plain-after-text">';
-      this.innerHTML = textData.text +
-        (textData.afterText.length ? startDiv + textData.afterText.join('</div>' + startDiv) + '</div>' : '');
+      if (textData.afterText.length) {
+        const startDiv = '<div class="layer-message-text-plain-after-text">';
+        afterText = startDiv + textData.afterText.join('</div>' + startDiv) + '</div>';
+        this.classList.add('layer-message-text-plain-has-after-text');
+      }
+      this.innerHTML = textData.text + afterText;
     },
 
     /**
@@ -100,7 +83,7 @@ layerUI.registerMessageHandler({
   tagName: 'layer-message-text-plain',
   label: 'Text',
   handlesMessage(message, container) {
-    return message.parts.length === 1 && message.parts[0].mimeType === 'text/plain';
+    return message.parts[0].mimeType === 'text/plain';
   },
 });
 

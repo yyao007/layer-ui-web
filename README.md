@@ -1,5 +1,26 @@
 # Layer UI for Web
 
+## Browser Support Matrix:
+
+| Browser          | Version    | OS Tested Against  |
+|------------------|------------|--------------------|
+| Internet Explorer| 11.0       | Windows 8.1        |
+| Edge             | 13.0       | Windows 10         |
+| Edge             | 14.0       | Windows 10         |
+| Safari           | 10.0       | OSX 10.12          |
+| Safari           | 9.0        | OSX 10.11          |
+| Safari           | 9.x        | IOS 10.0           |
+| Safari           | 10.0       | IOS 9.3            |
+| Chrome           | 55         | OSX 10.9           |
+| Chrome           | 48         | Linus              |
+| Firefox          | 51         | OSX 10.9           |
+| Firefox          | 50         | Windows 8          |
+
+Older versions of Safari do not support Websockets and will not work with the Layer WebSDK.
+
+
+## Introduction
+
 The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.
 
 It is implemented using the [Webcomponents Polyfill](https://github.com/WebComponents/webcomponentsjs); in particular, this project uses the "light" version of the polyfill which means we do not use Shadow Dom.
@@ -71,6 +92,17 @@ layerUI.init({
   appId: 'layer:///apps/staging/UUID'
 });
 ```
+
+If you have your own babel build process, you may prefer to take es6 classes as input:
+
+```javascript
+var layer = require('layer-websdk/index-es6');
+var layerUI = require('layer-ui-web/lib-es6/index');
+layerUI.init({
+  appId: 'layer:///apps/staging/UUID'
+});
+```
+
 
 ```html
 <link rel='stylesheet' href='node_modules/layer-ui-web/themes/build/groups-basic.css' />
@@ -223,17 +255,44 @@ Solution: For each project you want to try with your in-development-code:
 1. `npm install layer-ui-web` -- This will install layer-ui-web into your project, and all of its dependencies.
 1. `rm -rf node_modules/layer-ui-web` -- This removes the npm repo, but leaves all of its dependencies within your `node_modules` folder
 1. Edit `layer-ui-web/npm-link-projects.json` to contain an array of paths to projects; add the project: `['../my-project']`
-1. Run `grunt watch`
+1. Run `grunt develop`
 1. Each time you change the code, your changes will be copied over into your projects.
 
 At no time is it OK to use `npm link` which will introduce errors; the `grunt watch` will replace `npm link`.
 
-## Testing
+## Testing & Development
 
-This is setup so that you can run testem from the root folder
+Other than dealing with issues around `npm link`, development is done as follows:
 
-```console
-> testem
+1. `grunt develop` will startup `grunt watch` and startup a server for running tests
+1. Changes will build a test build file in `test/layer-ui-web-test.js` that includes both the WebSDK and Layer UI.
+1. Tests are run on `http://localhost:8004/test/SpecRunner.html`
+
+## Coverage Tests
+
+To run coverage tests:
+
+1. `grunt coverage` will overwrite `test/layer-ui-web-test.js` with an instrumented version of the build file
+1. Run tests on `http://localhost:8004/test/SpecRunner.html`
+1. Open the javascript console and modify the test results with:
 ```
+Object.keys(__coverage__).forEach(key => {
+    var newKey = key.replace(/^.*?lib-es5/, '');
+    newKey = newKey.replace(/components\/.*\//, "components/");
+    var parts = newKey.split(/\//);
+    if (parts[parts.length-2] + '.js' == parts[parts.length-1]) {
+        parts.splice(parts.length-2, 1);
+    }
+    if (parts.length > 2 || parts[1] == 'base.js') {
+        newKey = parts.join('/');
+        __coverage__[newKey] = __coverage__[key];
+    }
+    delete __coverage__[key];
+})
+```
+1. Copy the results with `copy(JSON.stringify(__coverage__))`
+1. Paste the results into `coverage/coverage.json`
+1. Run the report generation tool with `istanbul report --root coverage --dir coverage/report html`
+1. Open the report with `open coverage/report/index.html`
 
-and then test this in any browser with the URL output by the command.
+> WARNING: `grunt develop` may overwrite your coverage-instrumented `test/layer-ui-web-test.js` file

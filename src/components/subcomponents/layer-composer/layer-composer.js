@@ -15,8 +15,8 @@
  * @class layerUI.components.subcomponents.Composer
  * @extends layerUI.components.Component
  */
+import Layer from 'layer-websdk';
 import layerUI from '../../../base';
-import * as Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import '../layer-compose-button-panel/layer-compose-button-panel';
 
@@ -52,13 +52,24 @@ registerComponent('layer-composer', {
     },
 
     /**
-     * Custom buttons to put in the panel.
+     * Custom buttons to put in the panel, on the right side.
      *
      * @property {HTMLElement[]} [buttons=[]]
      */
     buttons: {
       set(value) {
         this.nodes.buttonPanel.buttons = value;
+      },
+    },
+
+    /**
+     * Custom buttons to put in the panel, on the left side.
+     *
+     * @property {HTMLElement[]} [buttonsLeft=[]]
+     */
+    buttonsLeft: {
+      set(value) {
+        this.nodes.buttonPanelLeft.buttons = value;
       },
     },
 
@@ -212,12 +223,12 @@ registerComponent('layer-composer', {
        *
        * ```javascript
        * document.body.addEventListener('layer-send-message', function(evt) {
-       *   var message = evt.detail.message;
+       *   var message = evt.detail.item;
        *   var notification = evt.detail.notification;
        *   notification.title = 'You have a new Message from ' + message.sender.displayName;
        *   notification.sound = 'sneeze.aiff';
        *   if (message.parts[0].mimeType === 'text/plain') {
-       *     notification.text = evt.detail.message.parts[0].body;
+       *     notification.text = evt.detail.item.parts[0].body;
        *   } else {
        *     notification.text = 'You have received a file';
        *   }
@@ -243,7 +254,7 @@ registerComponent('layer-composer', {
        * @event layer-send-message
        * @param {Event} evt
        * @param {Object} evt.detail
-       * @param {layer.Message} evt.detail.message
+       * @param {layer.Message} evt.detail.item
        * @param {Object} evt.detail.notification
        * @param {String} evt.detail.notification.text
        * @param {String} evt.detail.notification.title
@@ -254,7 +265,8 @@ registerComponent('layer-composer', {
         text: textPart ? textPart.body : 'File received',
         title: `New Message from ${message.sender.displayName}`,
       };
-      if (this.trigger('layer-send-message', { message, notification })) {
+
+      if (this.trigger('layer-send-message', { item: message, notification })) {
         if (this.conversation instanceof Layer.Channel) {
           this.onSend(message);
           message.send();
@@ -313,7 +325,7 @@ registerComponent('layer-composer', {
       setTimeout(() => {
         this.nodes.resizer.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';
         this.nodes.lineHeighter.innerHTML = this.nodes.input.value.replace(/\n/g, '<br/>') || '&nbsp;';
-        const willBeOneLine = this.nodes.resizer.clientHeight - this.nodes.lineHeighter.clientHeight < 10;
+        const willBeOneLine = !this.nodes.input.value.match(/\n/) && (this.nodes.resizer.clientHeight - this.nodes.lineHeighter.clientHeight < 10);
 
         // Prevent scrollbar flickering in and then out
         if (willBeOneLine) {

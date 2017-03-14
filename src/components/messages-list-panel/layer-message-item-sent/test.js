@@ -1,6 +1,11 @@
 describe('layer-message-item', function() {
   var el, testRoot, client, conversation, message, user1;
 
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   afterEach(function() {
     jasmine.clock().uninstall();
   });
@@ -30,7 +35,7 @@ describe('layer-message-item', function() {
 
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-message-item-sent');
@@ -81,6 +86,22 @@ describe('layer-message-item', function() {
     });
   });
 
+ describe("The _contentTag property", function() {
+  it("Should remove the css class from the prior content tag", function() {
+    el._contentTag = 'my-test-tag';
+    expect(el.classList.contains('my-test-tag')).toBe(true);
+    el._contentTag = 'hey-ho';
+    expect(el.classList.contains('my-test-tag')).toBe(false);
+  });
+
+  it("Should add the css class for the new tag, if there is a new tag", function() {
+    el._contentTag = 'my-test-tag';
+    expect(el.classList.contains('my-test-tag')).toBe(true);
+    el._contentTag = '';
+    expect(el.classList.contains('my-test-tag')).toBe(false);
+  });
+ });
+
   describe("The dateRenderer property", function() {
     it("Should be passed to the sentAt widget", function() {
       var f = function() {};
@@ -103,28 +124,69 @@ describe('layer-message-item', function() {
   });
 
   describe("The onRender() method", function() {
+    it("Should setup the layer-sender-name", function() {
+      el.item = message;
+      layer.Util.defer.flush();
+
+      // Test with an avatar
+      expect(el.querySelector('.layer-sender-name').innerHTML).toEqual(message.sender.displayName);
+
+      // Test without a layer-sender-name; basically verifying it does not throw an error if this is missing
+      delete el.nodes.sender;
+      el.item = null;
+      el.item = message;
+      layer.Util.defer.flush();
+    });
+
     it("Should setup the layer-avatar", function() {
       el.item = message;
       layer.Util.defer.flush();
+
+      // Test with an avatar
       expect(el.querySelector('layer-avatar').users).toEqual([message.sender]);
+      expect(el.querySelector('layer-presence')).toBe(null);
+
+      // Test without an avatar; basically verifying it does not throw an error if this is missing
+      delete el.nodes.avatar;
+      el.item = null;
+      el.item = message;
+      layer.Util.defer.flush();
     });
 
     it("Should setup the layer-date", function() {
       el.item = message;
       layer.Util.defer.flush();
       expect(el.querySelector('layer-date').date).toEqual(message.sentAt);
+
+      // Test without a date; basically verifying it does not throw an error if this is missing
+      delete el.nodes.date;
+      el.item = null;
+      el.item = message;
+      layer.Util.defer.flush();
     });
 
     it("Should setup the layer-message-status", function() {
       el.item = message;
       layer.Util.defer.flush();
       expect(el.querySelector('layer-message-status').item).toEqual(message);
+
+      // Test without a status; basically verifying it does not throw an error if this is missing
+      delete el.nodes.status;
+      el.item = null;
+      el.item = message;
+      layer.Util.defer.flush();
     });
 
     it("Should setup the layer-delete", function() {
       el.item = message;
       layer.Util.defer.flush();
       expect(el.querySelector('layer-delete').item).toEqual(message);
+
+      // Test without a delete; basically verifying it does not throw an error if this is missing
+      delete el.nodes.delete;
+      el.item = null;
+      el.item = message;
+      layer.Util.defer.flush();
     });
 
     it("Should call _applyContentTag", function() {
@@ -139,6 +201,17 @@ describe('layer-message-item', function() {
       el.item = message;
       layer.Util.defer.flush();
       expect(el.onRerender).toHaveBeenCalledWith();
+    });
+
+    it("Should manage the delete widgets enabled property", function() {
+      el.getDeleteEnabled = function() {return false;}
+      el.item = message;
+      expect(el.nodes.delete.enabled).toBe(false);
+
+      el.getDeleteEnabled = function() {return true;}
+      el.item = null;
+      el.item = message;
+      expect(el.nodes.delete.enabled).toBe(true);
     });
   });
 
@@ -240,8 +313,26 @@ describe('layer-message-item', function() {
 
     // Dont know how to test this
     it("Should propagate the message handlers height to the content node", function() {
+      layerUI.registerMessageHandler({
+        tagName: 'test-handler-height',
+        label: 'Test',
+        handlesMessage: function(message, container) {return message.parts[0].mimeType=='text/height-test';}
+      });
+      layerUI.registerComponent('test-handler-height', {
+        methods: {
+          onRender: function() {
+            this.style.height = "234px";
+          }
+        }
+      });
 
+      el.item = conversation.createMessage({parts: [{mimeType: "text/height-test", body: "bbb"}]});
+      layer.Util.defer.flush();
+      el._contentTag = 'test-handler-height';
+      el._applyContentTag();
+      layer.Util.defer.flush();
 
+      expect(el.nodes.content.style.height).toEqual("234px");
     });
   });
 });

@@ -1,6 +1,11 @@
 describe('layer-conversation-last-message', function() {
   var el, testRoot, client, conversation, message;
 
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   afterEach(function() {
     jasmine.clock().uninstall();
   });
@@ -22,7 +27,7 @@ describe('layer-conversation-last-message', function() {
 
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-conversation-last-message');
@@ -101,6 +106,29 @@ describe('layer-conversation-last-message', function() {
       jasmine.clock().tick(1);
       expect(el.querySelector('layer-message-text-plain')).toBe(null);
       expect(el.querySelector('layer-message-image')).not.toBe(null);
+    });
+
+    it("Should generate a handler if canFullyRenderLastMessage says it can", function() {
+      el.canFullyRenderLastMessage = function() {return true;}
+      el.item = conversation;
+      expect(el.querySelector('layer-message-text-plain')).not.toBe(null);
+    });
+
+    it("Should generate a label if canFullyRenderLastMessage says it can not", function() {
+      el.canFullyRenderLastMessage = function() {return false;}
+      el.item = conversation;
+      message = conversation.createMessage({
+        parts: {
+          body: 'blah',
+          mimeType: 'image/png'
+        }
+      }).send();
+      jasmine.clock().tick(1);
+
+      expect(el.querySelector('layer-message-text-plain')).toBe(null);
+      var label = el.querySelector('.layer-custom-mime-type');
+      expect(label).not.toBe(null);
+      expect(label.innerHTML).toMatch(/Image message/);
     });
   });
 });

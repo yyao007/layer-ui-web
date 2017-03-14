@@ -1,8 +1,9 @@
 describe('Components', function() {
   var el, testRoot, client, query;
 
-  beforeAll(function() {
-    layerUI.init({});
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
   });
 
   beforeEach(function() {
@@ -405,6 +406,60 @@ describe('Components', function() {
       expect(foundValue).toEqual(66);
     });
 
+    it("Should use default property values", function() {
+      var setterCalled = false;
+      layerUI.registerComponent('property-value-test1', {
+        properties: {
+          hasValue: {
+            type: Number,
+            value: 5,
+            set: function() {
+              setterCalled = true;
+            }
+          }
+        }
+      });
+
+      var el1 = document.createElement('property-value-test1');
+      expect(setterCalled).toBe(false);
+      expect(el1.properties._internalState.onAfterCreateCalled).toBe(false);
+      expect(el1.properties._internalState.disableSetters).toBe(true);
+
+      layer.Util.defer.flush();
+      CustomElements.takeRecords();
+
+      expect(setterCalled).toBe(true);
+      expect(el1.hasValue).toEqual(5);
+      expect(el1.properties._internalState.onAfterCreateCalled).toBe(true);
+      expect(el1.properties._internalState.disableSetters).toBe(false);
+    });
+
+    it("Should create new array from default property values", function() {
+      var setterCalled = false;
+      layerUI.registerComponent('property-value-test2', {
+        properties: {
+          hasValue: {
+            value: [],
+            set: function() {
+              setterCalled = true;
+            }
+          }
+        }
+      });
+
+      var el1 = document.createElement('property-value-test2');
+      var el2 = document.createElement('property-value-test2');
+      expect(setterCalled).toBe(false);
+
+      layer.Util.defer.flush();
+      CustomElements.takeRecords();
+
+      expect(setterCalled).toBe(true);
+      expect(el1.hasValue).toEqual([]);
+      expect(el2.hasValue).toEqual([]);
+      expect(el1.hasValue).not.toBe(el2.hasValue)
+    });
+
     it("Should cast property setters before properties are resolved", function() {
       var setterCalled = false;
       layerUI.registerComponent('mixin-conditional-test5', {
@@ -431,9 +486,267 @@ describe('Components', function() {
       expect(el1.properties._internalState.onAfterCreateCalled).toBe(true);
       expect(el1.properties._internalState.disableSetters).toBe(false);
     });
+
+    it("Should call setters in the designated order", function() {
+      var calls = [];
+      layerUI.registerComponent('mixin-ordering-test1', {
+        properties: {
+          prop10: {
+            order: 10,
+            value: 1,
+            set: function() {
+              calls.push(10);
+            }
+          },
+          prop5: {
+            order: 5,
+            value: 1,
+            set: function() {
+              calls.push(5);
+            }
+          },
+          prop15: {
+            order: 15,
+            value: 1,
+            set: function() {
+              calls.push(15);
+            }
+          },
+          prop3: {
+            order: 3,
+            value: 1,
+            set: function() {
+              calls.push(3);
+            }
+          },
+          prop35: {
+            order: 35,
+            value: 1,
+            set: function() {
+              calls.push(35);
+            }
+          },
+          propX: {
+            value: 1,
+            set: function() {
+              calls.push("X");
+            }
+          },
+        }
+      });
+
+      var el1 = document.createElement('mixin-ordering-test1');
+
+      layer.Util.defer.flush();
+      expect(calls).toEqual([3, 5, 10, 15, 35, "X"]);
+    });
+
+    it("Should call setters only once", function() {
+      var calls = [];
+      layerUI.registerComponent('mixin-ordering-test2', {
+        properties: {
+          prop10: {
+            order: 10,
+            value: 1,
+            set: function() {
+              calls.push(10);
+            }
+          },
+          prop5: {
+            order: 5,
+            value: 1,
+            set: function() {
+              calls.push(5);
+              this.prop10 = this.prop10 + 1;
+            }
+          },
+          prop15: {
+            order: 15,
+            value: 1,
+            set: function() {
+              calls.push(15);
+            }
+          },
+          prop3: {
+            order: 3,
+            value: 1,
+            set: function() {
+              calls.push(3);
+              this.prop5 = this.prop5 + 1;
+            }
+          },
+          prop35: {
+            order: 35,
+            value: 1,
+            set: function() {
+              calls.push(35);
+            }
+          },
+          propX: {
+            value: 1,
+            set: function() {
+              calls.push("X");
+            }
+          },
+        }
+      });
+
+      var el1 = document.createElement('mixin-ordering-test2');
+
+      layer.Util.defer.flush();
+      expect(calls).toEqual([3, 5, 10, 15, 35, "X"]);
+    });
+
+    it("Should not call the getter except from outside the setter if noGetterFromSetter", function() {
+      var inGetter = false;
+      layerUI.registerComponent('mixin-prop-test1', {
+        properties: {
+          prop10: {
+            noGetterFromSetter: true,
+            get: function() {
+              inGetter = true;
+              return 100;
+            }
+          }
+        }
+      });
+
+      var el1 = document.createElement('mixin-prop-test1');
+      el1.prop10 = 10;
+
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(inGetter).toBe(false);
+      var tmp = el1.prop10;
+      expect(inGetter).toBe(true);
+      expect(tmp).toEqual(100);
+    });
+
+    it("Should call mixin methods in the right order", function() {
+      var results = [];
+      var mixins = [
+        {
+          properties: {
+            prop10: {
+              mode: layerUI.registerComponent.MODES.AFTER,
+              set: function() {results.push("mixin1");}
+            }
+          }
+        },
+
+        {
+          properties: {
+            prop10: {
+              mode: layerUI.registerComponent.MODES.DEFAULT,
+              set: function() {results.push("mixin2");}
+            }
+          }
+        },
+
+        {
+          properties: {
+            prop10: {
+              mode: layerUI.registerComponent.MODES.BEFORE,
+              set: function() {results.push("mixin3");}
+            }
+          }
+        }
+      ];
+
+      layerUI.registerComponent('mixin-prop-test2', {
+        mixins: mixins,
+        properties: {
+          prop10: {
+            set: function() {results.push("widget");}
+          }
+        }
+      });
+
+      var el1 = document.createElement('mixin-prop-test2');
+      el1.prop10 = 10;
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(results).toEqual(["mixin3", "widget", "mixin2", "mixin1"]);
+
+
+      results = [];
+      layerUI.registerComponent('mixin-prop-test3', {
+        mixins: mixins.reverse(),
+        properties: {
+          prop10: {
+            set: function() {results.push("widget");}
+          }
+        }
+      });
+
+      var el1 = document.createElement('mixin-prop-test3');
+      el1.prop10 = 10;
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      // Results shouldn't be affected by mixin order, only by the mode property
+      expect(results).toEqual(["mixin3", "widget", "mixin2", "mixin1"]);
+    });
+
+
+
+    it("Should support submixins without duplication", function() {
+      var results = [];
+      var submixin = {
+        properties: {
+          prop11: {
+            set: function(value) {
+              results.push("submixin: " + value);
+            }
+          }
+        }
+      };
+      var mixins = [
+        {
+          mixins: [submixin],
+          properties: {
+            prop10: {
+            }
+          }
+        },
+
+        {
+          properties: {
+            mixins: [submixin],
+            prop10: {
+            }
+          }
+        },
+
+        {
+          properties: {
+            mixins: [submixin],
+            prop10: {
+            }
+          }
+        }
+      ];
+
+      layerUI.registerComponent('mixin-prop-test4', {
+        mixins: mixins,
+        properties: {
+        }
+      });
+
+      // Run test
+      var el1 = document.createElement('mixin-prop-test4');
+      el1.prop11 = 10;
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      // Posttest
+      expect(results).toEqual(["submixin: 10"]);
+    });
   });
 
-  describe("The onRender method", function() {
+  describe("The onRender() method", function() {
     var called = false;
     beforeAll(function() {
       layerUI.registerComponent('onrender-test1', {
@@ -529,47 +842,102 @@ describe('Components', function() {
     });
   });
 
+  describe("The template property", function() {
+    it("Should accept a string", function() {
+      var called = false;
+      layerUI.registerComponent('template-test1', {
+        template: '<label layer-id="label">Frodo must die</label>',
+        methods: {
+          onCreate: function() {
+            expect(this.nodes.label.tagName).toEqual('LABEL');
+            expect(this.nodes.label.innerHTML).toEqual('Frodo must die');
+            expect(this.nodes.label.parentNode).toBe(this);
+            called = true;
+          }
+        }
+      });
 
-  describe("State property", function() {
-    it("Should trigger onRenderState", function() {
-      layerUI.registerComponent('state-test1', {});
-      var el = document.createElement('state-test1');
+      var el = document.createElement('template-test1');
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
       layer.Util.defer.flush();
 
-      spyOn(el, "onRenderState");
-      el.state = {hey: "ho"};
-      expect(el.onRenderState).toHaveBeenCalledWith();
+      expect(called).toBe(true);
     });
 
-    it("Should be set to its parent when onAttached is called", function() {
-      layerUI.registerComponent('state-test2', {});
-      var elParent = document.createElement('layer-avatar');
-      elParent.state = {hey: "ho2"};
-      var el = document.createElement('state-test2');
-      elParent.nodes.el = el;
-      spyOn(el, "onRenderState");
-      elParent.appendChild(el);
-      testRoot.appendChild(elParent);
+    it("Should accept a template node", function() {
+      var called = false;
+      var template = document.createElement('template');
+      template.innerHTML = '<label layer-id="label">Frodo must die</label>';
+      layerUI.registerComponent('template-test2', {
+        template: template,
+        methods: {
+          onCreate: function() {
+            expect(this.nodes.label.tagName).toEqual('LABEL');
+            expect(this.nodes.label.innerHTML).toEqual('Frodo must die');
+            expect(this.nodes.label.parentNode).toBe(this);
+            called = true;
+          }
+        }
+      });
 
+      var el = document.createElement('template-test2');
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
       layer.Util.defer.flush();
-      expect(el.state).toEqual({hey: "ho2"});
-      expect(el.onRenderState).toHaveBeenCalledWith();
-      expect(el.onRenderState.calls.count()).toEqual(1);
 
-      elParent.state = {hey: "ho3"};
-      expect(el.onRenderState.calls.count()).toEqual(2);
+      expect(called).toBe(true);
+
     });
 
-    it("Should not call onRenderState if no state is set", function() {
-      layerUI.registerComponent('state-test3', {});
-      var elParent = document.createElement('layer-avatar');
-      var el = document.createElement('state-test3');
-      spyOn(el, "onRenderState");
-      elParent.appendChild(el);
-      testRoot.appendChild(elParent);
+    it("Should support a template sent via registerTemplate", function() {
+      var called = false;
+      var template = document.createElement('template');
+      template.innerHTML = '<label layer-id="label">Frodo must die</label>';
+      layerUI.registerComponent('template-test3', {
+        methods: {
+          onCreate: function() {
+            expect(this.nodes.label.tagName).toEqual('LABEL');
+            expect(this.nodes.label.innerHTML).toEqual('Frodo must die');
+            expect(this.nodes.label.parentNode).toBe(this);
+            called = true;
+          }
+        }
+      });
+      layerUI.registerTemplate('template-test3', template);
+
+      var el = document.createElement('template-test3');
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
       layer.Util.defer.flush();
-      expect(el.state).toEqual(null);
-      expect(el.onRenderState).not.toHaveBeenCalled();
+
+      expect(called).toBe(true);
+    });
+
+    it("Should support a template sent via buildAndRegisterTemplate", function() {
+      var called = false;
+      layerUI.registerComponent('template-test4', {
+        methods: {
+          onCreate: function() {
+            expect(this.nodes.label.tagName).toEqual('LABEL');
+            expect(this.nodes.label.innerHTML).toEqual('Frodo must die');
+            expect(this.nodes.label.parentNode).toBe(this);
+            called = true;
+          }
+        }
+      });
+      layerUI.buildAndRegisterTemplate('template-test4', '<label layer-id="label">Frodo must die</label>');
+
+      var el = document.createElement('template-test4');
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(called).toBe(true);
     });
   });
 });

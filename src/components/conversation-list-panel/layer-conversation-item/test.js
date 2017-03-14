@@ -1,8 +1,9 @@
 describe('layer-conversation-item', function() {
   var el, testRoot, client, conversation, user;
 
-  afterEach(function() {
-    jasmine.clock().uninstall();
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
   });
 
   beforeEach(function() {
@@ -31,7 +32,7 @@ describe('layer-conversation-item', function() {
     client._clientAuthenticated();
 
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-conversation-item');
@@ -43,6 +44,7 @@ describe('layer-conversation-item', function() {
   });
 
   afterEach(function() {
+    jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
   });
 

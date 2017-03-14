@@ -12,7 +12,7 @@ describe('layer-delete', function() {
     });
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-delete');
@@ -80,7 +80,7 @@ describe('layer-delete', function() {
 
       // Events
       testRoot.addEventListener('layer-message-deleted', function(evt) {
-        expect(evt.detail.message).toBe(message);
+        expect(evt.detail.item).toBe(message);
         calledMessage = true;
       });
       testRoot.addEventListener('layer-conversation-deleted', function(evt) {
@@ -112,7 +112,7 @@ describe('layer-delete', function() {
       });
       testRoot.addEventListener('layer-conversation-deleted', function(evt) {
         calledConversation = true;
-        expect(evt.detail.conversation).toBe(conversation);
+        expect(evt.detail.item).toBe(conversation);
       });
 
       // Run

@@ -35,23 +35,14 @@ registerComponent('layer-compose-button-panel', {
      * @property {HTMLElement[]} [buttons=[]]
      */
     buttons: {
+      value: [],
       set(value) {
+        this.classList[value && value.length ? 'remove' : 'add']('is-empty');
         this.onRender();
       },
     },
   },
   methods: {
-
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate() {
-      this.properties.buttons = [];
-    },
-
     /**
      * Render any custom buttons provided via the `buttons` property.
      *
@@ -60,9 +51,11 @@ registerComponent('layer-compose-button-panel', {
      */
     onRender() {
       this.innerHTML = '';
-      const fragment = document.createDocumentFragment();
-      this.buttons.forEach(button => fragment.appendChild(button));
-      this.appendChild(fragment);
+      if (this.buttons.length) {
+        const fragment = document.createDocumentFragment();
+        this.buttons.forEach(button => fragment.appendChild(button));
+        this.appendChild(fragment);
+      }
     },
   },
 });

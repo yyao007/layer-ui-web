@@ -48,7 +48,7 @@
 .layer-text-plain-emphasized() {
   font-size: @fontsize-normal;
   color: @fontcolor-normal;
-  font-weight: @fontweight-semibold;
+  font-weight: @fontweight-bold;
 }
 
 .layer-text-plain-deemphasized() {
@@ -64,7 +64,8 @@
 }
 
 .layer-text-composer() {
-  font-size: @fontsize-large;
+  /* Before tinkering with font-size, see http://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone/6394497#6394497 */
+  font-size: 16px;
   color: @fontcolor-normal;
   font-weight: @fontweight-normal;
 }

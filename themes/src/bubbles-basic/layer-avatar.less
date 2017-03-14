@@ -1,5 +1,5 @@
 layer-avatar {
-  * {
+  span, img {
     background-color: white;
     border: solid 1px rgba(0, 0, 0, 0.1);
   }
@@ -7,6 +7,32 @@ layer-avatar {
     position: relative;
     overflow: hidden;
     text-align: center;
+  }
+
+  layer-presence {
+    width: 16px;
+    height: 16px;
+
+    &:before {
+      content: " ";
+      border: solid 2px white;
+      position: absolute;
+      border-radius: 16px;
+      top: -2px;
+      bottom: -2px;
+      left: -2px;
+      right: -2px;
+    }
+    &.layer-presence-offline:before,
+    &.layer-presence-invisible:before {
+      content: " ";
+      border: solid 2px white;
+      position: absolute;
+      top: -6px;
+      bottom: -6px;
+      left: -6px;
+      right: -6px;
+    }
   }
 
   span, img {
@@ -37,7 +63,7 @@ layer-avatar {
 }
 
 /* Larger Avatar */
-layer-conversations-list, layer-identities-list {
+layer-conversations-list, layer-identities-list, layer-membership-list {
   layer-avatar {
     height: 50px;
     width: 50px;

@@ -26,6 +26,15 @@
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
  */
+import Layer from 'layer-websdk';
+
+/*
+ * NOTES TO MAINTAINER:
+ *
+ * * Avoid using `this`, rather use `layerUI` instead.  Otherwise usage such as:
+ *   `import { registerMessage} from 'layer-ui-web'` will give developers a method that
+ *   needs scope but won't have it.
+ */
 const layerUI = {};
 
 /**
@@ -275,9 +284,20 @@ layerUI.adapters = {
  * @param {String} tagName                                  Dom node to create if this handler accepts the Message.
  * @param {String} label                                    Label to show when we can't render the whole message.
  *                                                          Typically identifies the type of content to the user.
+ * @param {Number} [order=0]                                Some handlers may need to be tested before other handlers to control which one gets
+ *                                                          selected; Defaults to order=0, this handler is first
  */
 layerUI.registerMessageHandler = function registerMessageHandler(options) {
-  this.handlers.push(options);
+  if (!options.order) options.order = 0;
+  let pushed = false;
+  for (let i = 0; i < layerUI.handlers.length; i++) {
+    if (options.order <= layerUI.handlers[i].order) {
+      layerUI.handlers.splice(i, 0, options);
+      pushed = true;
+      break;
+    }
+  }
+  if (!pushed) layerUI.handlers.push(options);
 };
 
 /**
@@ -358,7 +378,8 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
     }
   } else {
     options.enabled = !options.handler || !options.requiresEnable;
-    this.textHandlers[options.name] = options;
+    if (!('order' in options)) options.order = 100000;
+    layerUI.textHandlers[options.name] = options;
   }
 };
 
@@ -428,6 +449,7 @@ layerUI.registerTemplate = function registerTemplate(className, template) {
   // Write template and style as static properties of the Component.
   layerUI.components[className].template = template;
   layerUI.components[className].style = styles;
+  template.setAttribute('layer-template-registered', 'true');
 };
 
 /**
@@ -453,6 +475,7 @@ layerUI.buildAndRegisterTemplate = function buildTemplate(className, templateStr
 
   // Write it as a static property of the Component
   layerUI.components[className].template = template;
+  template.setAttribute('layer-template-registered', 'true');
 };
 
 /**
@@ -547,6 +570,18 @@ layerUI.addAdapter = (name, adapter) => { layerUI.adapters[name] = adapter; };
 layerUI.init = function init(settings) {
   // No-op -- see base-index.js
 };
+
+/**
+ * Layer UI for Web version string
+ *
+ * @type {String}
+ */
+layerUI.version = '0.10.0';
+
+const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
+if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {
+  console.error('This version or Layer UI for Web requires Layer WebSDK version 3.1.1 or up');
+}
 
 /**
  * This method is shorthand for accessing layerUI.components.Component.registerComponent

@@ -10,6 +10,8 @@ import layerUI from '../base';
  *    <layer-notifier notify-in-foreground="toast"></layer-notifier>
  *    <layer-conversation-panel ng-query="myscopeProp.query"></layer-conversation-panel>
  *    <layer-conversations-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversations-list>
+ *    <layer-send-button></layer-send-button>
+ *    <layer-file-upload-button></layer-file-upload-button>
  * ```
  *
  * Call this function to initialize angular 1.x Directives which will be part of the "layerUIControllers" controller:

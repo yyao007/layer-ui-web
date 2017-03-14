@@ -1,7 +1,13 @@
 describe('layer-date', function() {
   var el;
+
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   beforeEach(function() {
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     el = document.createElement('layer-date');
     layer.Util.defer.flush();
   });

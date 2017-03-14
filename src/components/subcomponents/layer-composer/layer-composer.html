@@ -51,12 +51,13 @@
         left: -1000px;
       }
   </style>
+  <layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel>
   <div class='layer-compose-edit-panel' layer-id='editPanel'>
     <div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div>
     <div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div>
     <textarea rows="1" autoFocus layer-id='input'></textarea>
   </div>
-  <layer-compose-button-panel layer-id='buttonPanel'></layer-compose-button-panel>
+  <layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>
 </template>
 <script>
   window.layerUI.registerTemplate('layer-composer');

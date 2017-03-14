@@ -32,7 +32,7 @@
  * @class layerUI.components.subcomponents.MessageStatus
  * @extends layerUI.components.Component
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-message-status', {
@@ -91,15 +91,18 @@ registerComponent('layer-message-status', {
      * @param {Event} evt
      */
     onRerender(evt) {
-      if (this.item && (!evt || evt.hasProperty('recipientStatus'))) {
+      if (this.item && (!evt || evt.hasProperty('recipientStatus') || evt.hasProperty('syncState'))) {
         const message = this.item;
         if (this.messageStatusRenderer) {
           this.innerHTML = this.messageStatusRenderer(message);
         } else {
           let text = '';
-          if (message.isSaving()) {
+          if (message.isNew()) {
+            text = '';
+          } else if (message.isSaving() || message.isNew()) {
             text = 'pending';
-          } else if (message.deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
+          } else if (message instanceof Layer.Message.ChannelMessage ||
+            message.deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
             text = 'sent';
           } else if (message.readStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
             text = 'delivered';
@@ -118,4 +121,3 @@ registerComponent('layer-message-status', {
     },
   },
 });
-

@@ -1,6 +1,11 @@
 describe('layer-conversation-panel', function() {
   var el, testRoot, client, conversation, user1, query;
 
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   afterEach(function() {
     jasmine.clock().uninstall();
   });
@@ -30,7 +35,7 @@ describe('layer-conversation-panel', function() {
 
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-conversation-panel');
@@ -88,7 +93,7 @@ describe('layer-conversation-panel', function() {
 
   describe("The query properties", function() {
     beforeEach(function() {
-      testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
+      testRoot.innerHTML = '<layer-conversation-panel use-generated-query="false"></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
       el = testRoot.firstChild;
@@ -139,15 +144,27 @@ describe('layer-conversation-panel', function() {
       expect(el.properties.hasGeneratedQuery).toBe(false);
     });
 
-    it("Should call _scheduleGeneratedQuery once the client is set", function() {
+    it("Should call _setupGeneratedQuery once the client is set", function() {
         testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
         CustomElements.takeRecords();
         layer.Util.defer.flush();
 
         var el = testRoot.firstChild;
-        spyOn(el, "_scheduleGeneratedQuery");
+        spyOn(el, "_setupGeneratedQuery");
         el.client = client;
-        expect(el._scheduleGeneratedQuery).toHaveBeenCalledWith();
+        expect(el._setupGeneratedQuery).toHaveBeenCalledWith();
+      });
+
+      it("Should not call _setupGeneratedQuery once the client is set if useGeneratedQuery is false", function() {
+        testRoot.innerHTML = '<layer-conversation-panel use-generated-query="false"></layer-conversation-panel>';
+        CustomElements.takeRecords();
+        layer.Util.defer.flush();
+
+        var el = testRoot.firstChild;
+        spyOn(el, "_setupGeneratedQuery");
+        el.client = client;
+        expect(el.useGeneratedQuery).toBe(false);
+        expect(el._setupGeneratedQuery).not.toHaveBeenCalledWith();
       });
   });
 
@@ -178,6 +195,7 @@ describe('layer-conversation-panel', function() {
 
     it("Should not call _setupConversation if no client", function() {
       el.conversationId = conversation.id;
+      el.client = null;
       spyOn(el, "_setupConversation");
       el.hasGeneratedQuery = true;
       expect(el._setupConversation).not.toHaveBeenCalled();
@@ -208,6 +226,47 @@ describe('layer-conversation-panel', function() {
       spyOn(el, "_setupConversation");
       el.conversationId = conversation.id;
       expect(el._setupConversation).not.toHaveBeenCalled();
+    });
+
+    it("Should wait until client.isReady", function() {
+      client.isReady = false;
+      el.client = client;
+      spyOn(el, "_setupConversation");
+
+      // Run
+      el.conversationId = conversation.id;
+      expect(el._setupConversation).not.toHaveBeenCalled();
+
+      // Second run
+      client._clientReady();
+      expect(el._setupConversation).toHaveBeenCalled();
+    });
+
+    it("Should load the conversation if not cached", function() {
+      el.client = client;
+      expect(el.conversation).toBe(null);
+
+      // Run
+      el.conversationId = conversation.id.replace(/.$/, 'z');
+
+      // Posttest
+      expect(el.conversation).toEqual(jasmine.any(layer.Conversation));
+      expect(el.conversation.isLoading).toBe(true);
+
+    });
+  });
+
+  describe("The conversation property", function() {
+    beforeEach(function() {
+      testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+      el = testRoot.firstChild;
+    });
+
+    it("Should ignore invalid values", function() {
+      el.conversation = {hey: "ho"};
+      expect(el.conversation).toBe(null);
     });
   });
 
@@ -263,7 +322,7 @@ describe('layer-conversation-panel', function() {
     });
 
     it("Should setup the query if there is a queryId", function() {
-      testRoot.innerHTML = '<layer-conversation-panel query-id="' + query.id + '"></layer-conversation-panel>';
+      testRoot.innerHTML = '<layer-conversation-panel use-generated-query="false" query-id="' + query.id + '"></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -273,7 +332,7 @@ describe('layer-conversation-panel', function() {
       expect(el.query).toBe(query);
 
       // Inverse test
-      testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
+      testRoot.innerHTML = '<layer-conversation-panel use-generated-query="false"></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -305,9 +364,12 @@ describe('layer-conversation-panel', function() {
   describe("The composeButtons property", function() {
     it("Should set the list composeButtons property", function() {
       var buttons = [document.createElement("button"), document.createElement("button")];
-      el.composeButtons = buttons
+      var moreButtons = [document.createElement("button")];
+      el.composeButtons = buttons;
+      el.composeButtonsLeft = moreButtons;
       layer.Util.defer.flush();
       expect(el.nodes.composer.buttons).toBe(buttons);
+      expect(el.nodes.composer.buttonsLeft).toBe(moreButtons);
     });
   });
 
@@ -428,6 +490,12 @@ describe('layer-conversation-panel', function() {
       el.send();
       expect(el.nodes.composer.send).toHaveBeenCalledWith();
     });
+
+    it("Should send optional parts", function() {
+      spyOn(el.nodes.composer, "send");
+      el.send([{mimeType: "hey", body: "ho"}]);
+      expect(el.nodes.composer.send).toHaveBeenCalledWith([{mimeType: "hey", body: "ho"}]);
+    });
   });
 
   describe("The _setupConversation() method", function() {
@@ -457,6 +525,56 @@ describe('layer-conversation-panel', function() {
       el.autoFocusConversation = false;
       el.conversationId = conversation.id;
       expect(el.focusText).not.toHaveBeenCalled();
+    });
+
+    it("Should abort if no conversation", function() {
+      spyOn(el, "_setupConversation").and.callThrough();
+      el.hasGeneratedQuery = true;
+      el._setupConversation();
+
+      expect(el._setupConversation).toHaveBeenCalled();
+      expect(el.nodes.composer.conversation).toBe(null);
+    });
+
+    it("Should retry when client isReady", function() {
+      spyOn(el, "_setupConversation").and.callThrough();
+      client.isReady = false;
+      el.conversationId = conversation.id.replace(/.$/, 'z');
+      el.hasGeneratedQuery = true;
+
+      expect(el._setupConversation).toHaveBeenCalled();
+      el._setupConversation.calls.reset();
+
+      client._clientReady();
+      expect(el._setupConversation).toHaveBeenCalled();
+    });
+
+    it("Should not update the predicate if its not a generated query", function() {
+      spyOn(query, "update");
+      el.hasGeneratedQuery = false;
+      el.conversation = conversation;
+      expect(query.update).not.toHaveBeenCalled();
+    });
+
+    it("Should update conversation query predicate", function() {
+      spyOn(query, "update");
+      el.hasGeneratedQuery = true;
+      el.conversation = conversation;
+      expect(query.update).toHaveBeenCalledWith({
+        predicate: 'conversation.id = "' + conversation.id + '"'
+      });
+    });
+
+    it("Should update channel query predicate", function() {
+      spyOn(query, "update");
+      el.hasGeneratedQuery = true;
+      var channel = client.createChannel({
+        name: "test"
+      });
+      el.conversation = channel;
+      expect(query.update).toHaveBeenCalledWith({
+        predicate: 'channel.id = "' + channel.id +'"'
+      });
     });
   });
 });

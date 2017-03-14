@@ -1,5 +1,11 @@
 describe('layer-message-status', function() {
   var el, testRoot, client, conversation, message;
+
+  beforeAll(function(done) {
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    setTimeout(done, 1000);
+  });
+
   beforeEach(function() {
     client = new layer.Client({
       appId: 'Fred'
@@ -12,7 +18,7 @@ describe('layer-message-status', function() {
     });
     client._clientAuthenticated();
 
-    layerUI.init({});
+    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-message-status');
@@ -55,12 +61,14 @@ describe('layer-message-status', function() {
   });
 
   it('Should show sent', function() {
+    message.syncState = layer.Constants.SYNC_STATE.SYNCED;
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.NONE;
     el.item = message;
     expect(el.innerHTML).toEqual('sent');
   });
 
   it('Should show delivered', function() {
+    message.syncState = layer.Constants.SYNC_STATE.SYNCED;
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
     message.readStatus = layer.Constants.RECIPIENT_STATE.NONE;
     el.item = message;
@@ -68,6 +76,7 @@ describe('layer-message-status', function() {
   });
 
   it('Should show read by some', function() {
+    message.syncState = layer.Constants.SYNC_STATE.SYNCED;
     message.recipientStatus['a'] = 'read';
     message.recipientStatus['b'] = 'read';
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
@@ -77,6 +86,7 @@ describe('layer-message-status', function() {
   });
 
   it('Should show read', function() {
+    message.syncState = layer.Constants.SYNC_STATE.SYNCED;
     message.deliveryStatus = layer.Constants.RECIPIENT_STATE.SOME;
     message.readStatus = layer.Constants.RECIPIENT_STATE.ALL;
     el.item = message;

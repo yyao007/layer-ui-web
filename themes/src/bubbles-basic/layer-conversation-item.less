@@ -15,7 +15,7 @@ layer-conversation-item {
   }
 
   /* Style the selected Conversation Item */
-  &.layer-conversation-item-selected  .layer-list-item {
+  &.layer-selected-item  .layer-list-item {
     border-left: 3px solid #19A5E4;
   }
 
@@ -37,7 +37,7 @@ layer-conversation-item {
     .layer-text-list-heading-emphasized();
   }
 
-  &.layer-conversation-item-selected layer-conversation-title {
+  &.layer-selected-item layer-conversation-title {
 
   }
 
@@ -47,27 +47,13 @@ layer-conversation-item {
    * 2. Unread
    * 3. Selected
    */
-   layer-avatar * {
+   layer-avatar img, layer-avatar span {
       color: @fontcolor-lightest;
       border: @border-lightest;
       border: 1px solid rgba(0,0,0,0.1);
    }
 
-   &.layer-conversation-unread-messages layer-avatar.layer-has-user::after {
-      width: 19px;
-      height: 19px;
-      display: inline-block;
-      background-color: #19A5E4;
-      content: "•";
-      position: absolute;
-      bottom: -3px;
-      right: -3px;
-      border-radius: 20px;
-      border: solid 3px white;
-      z-index: 8;
-   }
-
-   &.layer-conversation-item-selected layer-avatar {
+   &.layer-selected-item layer-avatar {
 
    }
 
@@ -90,7 +76,7 @@ layer-conversation-item {
       .layer-text-plain-emphasized();
    }
 
-   &.layer-conversation-item-selected  layer-conversation-last-message {
+   &.layer-selected-item  layer-conversation-last-message {
 
    }
 
@@ -101,11 +87,11 @@ layer-conversation-item {
    * 2. Selected
    */
    layer-delete {
-      display: none;
+      visibility: hidden;
     }
 
-    &.layer-conversation-item-selected layer-delete {
-      display: block;
+    &.layer-selected-item layer-delete {
+      visibility: visible;
       opacity: 0.2;
       padding: 2px 4px 8px;
       &:hover {
@@ -113,3 +99,4 @@ layer-conversation-item {
       }
     }
 }
+

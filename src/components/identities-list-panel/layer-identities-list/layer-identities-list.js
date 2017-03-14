@@ -37,14 +37,15 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  */
-import * as Layer from 'layer-websdk';
+import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';
+import HasQuery from '../../../mixins/has-query';
 import '../layer-identity-item/layer-identity-item';
 
 registerComponent('layer-identities-list', {
-  mixins: [List, MainComponent],
+  mixins: [List, MainComponent, HasQuery],
 
 
   /**
@@ -52,7 +53,7 @@ registerComponent('layer-identities-list', {
    *
    * ```javascript
    *    identityList.onIdentitySelected = function(evt) {
-   *      var identityAdded = evt.detail.identity;
+   *      var identityAdded = evt.detail.item;
    *      var selectedIdentities = evt.target.selectedIdentities;
    *
    *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
@@ -65,7 +66,7 @@ registerComponent('layer-identities-list', {
    *
    * ```javascript
    *    document.body.addEventListener('layer-identity-selected', function(evt) {
-   *      var identityAdded = evt.detail.identity;
+   *      var identityAdded = evt.detail.item;
    *      var selectedIdentities = evt.target.selectedIdentities;
    *
    *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
@@ -77,7 +78,7 @@ registerComponent('layer-identities-list', {
    * @event layer-identity-selected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Identity} evt.detail.identity
+   * @param {layer.Identity} evt.detail.item
    */
   /**
    * A identity selection change has occurred
@@ -87,14 +88,14 @@ registerComponent('layer-identities-list', {
    * @property {Function} onIdentitySelected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Identity} evt.detail.identity
+   * @param {layer.Identity} evt.detail.item
    */
 
   /**
    * The user has clicked to deselect a identity in the identities list.
    *
    *    identityList.onIdentityDeselected = function(evt) {
-   *      var identityRemoved = evt.detail.identity;
+   *      var identityRemoved = evt.detail.item;
    *      var selectedIdentities = evt.target.selectedIdentities;
    *
    *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
@@ -105,7 +106,7 @@ registerComponent('layer-identities-list', {
    *  OR
    *
    *    document.body.addEventListener('layer-identity-deselected', function(evt) {
-   *      var identityRemoved = evt.detail.identity;
+   *      var identityRemoved = evt.detail.item;
    *      var selectedIdentities = evt.target.selectedIdentities;
    *
    *      // To prevent the UI from proceding to add the identity to the selectedIdentities:
@@ -116,7 +117,7 @@ registerComponent('layer-identities-list', {
    * @event layer-identity-deselected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Identity} evt.detail.identity
+   * @param {layer.Identity} evt.detail.item
    */
   /**
    * A identity selection change has occurred
@@ -126,7 +127,7 @@ registerComponent('layer-identities-list', {
    * @property {Function} onIdentityDeselected
    * @param {Event} evt
    * @param {Object} evt.detail
-   * @param {layer.Identity} evt.detail.identity
+   * @param {layer.Identity} evt.detail.item
    */
 
   events: ['layer-identity-selected', 'layer-identity-deselected'],
@@ -168,20 +169,6 @@ registerComponent('layer-identities-list', {
     },
 
     /**
-     * String, Regular Expression or Function for filtering Conversations.
-     *
-     * Defaults to filtering by `conversation.metadata.conversationName`, as well as `displayName`, `firstName`, `lastName` and `emailAddress`
-     * of every participant.  Provide your own Function to change this behavior
-     *
-     * @property {String|RegEx|Function} [filter='']
-     */
-    filter: {
-      set(value) {
-        this._runFilter();
-      },
-    },
-
-    /**
      * The model to generate a Query for if a Query is not provided.
      *
      * @readonly
@@ -193,17 +180,6 @@ registerComponent('layer-identities-list', {
     },
   },
   methods: {
-
-    /**
-     * Generate a DOM ID for each Identity ID
-     *
-     * @method
-     * @private
-     * @param {String} id
-     */
-    _getItemId(identity) {
-      return `identities-list-item-${this.id}-${identity.internalId}`;
-    },
 
     /**
      * Constructor.
@@ -230,19 +206,20 @@ registerComponent('layer-identities-list', {
      */
     _handleIdentitySelect(evt) {
       evt.stopPropagation();
-      const identity = evt.detail.identity;
+      const identity = evt.detail.item;
       const index = this.selectedIdentities.indexOf(identity);
 
       // If the item is not in our selectedIdentities array, add it
       if (index === -1) {
         // If app calls prevent default, then don't add the identity to our selectedIdentities list, just call preventDefault on the original event.
-        if (this.trigger('layer-identity-selected', { identity })) {
+        if (this.trigger('layer-identity-selected', { item: identity })) {
           this.selectedIdentities.push(identity);
         } else {
           evt.preventDefault();
         }
       }
     },
+
 
     /**
      * Handle a user Deselection event triggered by a layerUI.components.IdentitiesListPanel.Item
@@ -255,13 +232,13 @@ registerComponent('layer-identities-list', {
      */
     _handleIdentityDeselect(evt) {
       evt.stopPropagation();
-      const identity = evt.detail.identity;
+      const identity = evt.detail.item;
       const index = this.selectedIdentities.indexOf(identity);
 
       // If the item is in our selectedIdentities array, remove it
       if (index !== -1) {
         // If app calls prevent default, then don't remove the identity, just call preventDefault on the original event.
-        if (this.trigger('layer-identity-deselected', { identity })) {
+        if (this.trigger('layer-identity-deselected', { item: identity })) {
           this.selectedIdentities.splice(index, 1);
         } else {
           evt.preventDefault();
@@ -279,7 +256,7 @@ registerComponent('layer-identities-list', {
     _generateItem(identity) {
       const identityWidget = document.createElement('layer-identity-item');
       identityWidget.item = identity;
-      identityWidget.id = this._getItemId(identity);
+      identityWidget.id = this._getItemId(identity.id);
       identityWidget.selected = this.selectedIdentities.indexOf(identity) !== -1;
       identityWidget._runFilter(this.filter);
       return identityWidget;
@@ -318,7 +295,7 @@ registerComponent('layer-identities-list', {
      */
     _renderSelection() {
       const selectedNodes = this.querySelectorAllArray('.layer-identity-item-selected').map(node => node.parentNode);
-      const selectedIds = this.selectedIdentities.map(identity => '#' + this._getItemId(identity));
+      const selectedIds = this.selectedIdentities.map(identity => '#' + this._getItemId(identity.id));
       const nodesToSelect = this.selectedIdentities.length ? this.querySelectorAllArray(selectedIds.join(', ')) : [];
       selectedNodes.forEach((node) => {
         if (nodesToSelect.indexOf(node) === -1) node.selected = false;
@@ -326,25 +303,6 @@ registerComponent('layer-identities-list', {
       nodesToSelect.forEach((node) => {
         if (selectedNodes.indexOf(node) === -1) node.selected = true;
       });
-    },
-
-    /**
-     * Run the filter on all Identity Items.
-     *
-     * @method _runFilter
-     * @private
-     */
-    _runFilter() {
-      if (!this.filter) {
-        this.querySelectorAllArray('.layer-item-filtered').forEach(item => item.removeClass('layer-item-filtered'));
-      } else {
-        for (let i = 0; i < this.childNodes.length; i++) {
-          const listItem = this.childNodes[i];
-          if (listItem.item instanceof Layer.Root) {
-            listItem._runFilter(this.filter);
-          }
-        }
-      }
     },
   },
 });
