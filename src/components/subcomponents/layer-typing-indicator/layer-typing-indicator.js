@@ -104,7 +104,11 @@ registerComponent('layer-typing-indicator', {
     },
 
     onRender() {
-      if (this.conversation && this.conversation.id) this.onRerender();
+      if (this.conversation && this.conversation.id) {
+        const data = this.client.getTypingState(this.conversation.id);
+        data.conversationId = this.conversation.id;
+        this.onRerender(data);
+      }
     },
 
     /**

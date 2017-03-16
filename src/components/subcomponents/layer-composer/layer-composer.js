@@ -33,7 +33,7 @@ registerComponent('layer-composer', {
      */
     conversation: {
       set(value) {
-        this.client = value.getClient();
+        if (value) this.client = value.getClient();
         this._setTypingListenerConversation();
       },
     },

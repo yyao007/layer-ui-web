@@ -9,10 +9,10 @@
 | Edge             | 14.0       | Windows 10         |
 | Safari           | 10.0       | OSX 10.12          |
 | Safari           | 9.0        | OSX 10.11          |
-| Safari           | 9.x        | IOS 10.0           |
-| Safari           | 10.0       | IOS 9.3            |
+| Safari (IOS)     | 9.x        | IOS 10.0           |
+| Safari (IOS)     | 10.0       | IOS 9.3            |
 | Chrome           | 55         | OSX 10.9           |
-| Chrome           | 48         | Linus              |
+| Chrome           | 48         | Linux              |
 | Firefox          | 51         | OSX 10.9           |
 | Firefox          | 50         | Windows 8          |
 

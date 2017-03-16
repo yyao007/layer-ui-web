@@ -1,5 +1,12 @@
 # Layer UI for Web Change Log
 
+# 0.10.1
+
+* Bug Fixes
+  * First message in conversation now has `layer-list-item-first` css class which was missing.
+  * `<layer-delete />` widgets should have been hidden if deletion was not enabled
+  * Can now set `ConversationPanel.conversation = null` to clear the conversation
+  * Restores the missing `ConversationPanel.getMessageDeleteEnabled` callback to enable the delete button on a per-message basis
 
 # 0.10.0
 

@@ -24,6 +24,7 @@
  *
  *
  * The following example adds a search bar to the Message List
+ *
  * ```
  * layerUI.init({
  *   appId: 'my-app-id',
@@ -131,6 +132,19 @@ registerComponent('layer-messages-list', {
      * @property {Function} [messageStatusRenderer=null]
      */
     messageStatusRenderer: {},
+
+    /**
+     * Deletion of this Message is enabled.
+     *
+     * ```
+     * widget.getMessageDeleteEnabled = function(message) {
+     *    return message.sender.sessionOwner;
+     * }
+     * ```
+     *
+     * @property {Function}
+     */
+    getMessageDeleteEnabled: {},
 
     /**
      * If the user scrolls within this many screen-fulls of the top of the list, page the Query.
@@ -354,6 +368,7 @@ registerComponent('layer-messages-list', {
         messageWidget.id = this._getItemId(message.id);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
+        messageWidget.getDeleteEnabled = this.getMessageDeleteEnabled;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
         return messageWidget;
@@ -386,7 +401,7 @@ registerComponent('layer-messages-list', {
      * @private
      * @param {layerUI.components.MessagesListPanel.Item[]} widgets
      */
-    _processAffectedWidgetsCustom(widgets, isTopItemNew) {
+    _processAffectedWidgetsCustom(widgets, firstIndex, isTopItemNew) {
       if (widgets.length === 0) return;
       if (isTopItemNew) widgets[0].firstInSeries = true;
       for (let i = 1; i < widgets.length; i++) {

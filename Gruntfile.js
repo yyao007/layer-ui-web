@@ -138,7 +138,7 @@ module.exports = function (grunt) {
 
     watch: {
       debug: {
-        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js'],
+        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js', 'node_modules/layer-websdk/lib'],
         tasks: ['debug', 'make-npm-link-safe', 'notify:watch'],
         options: {
           interrupt: true
@@ -444,7 +444,7 @@ module.exports = function (grunt) {
   grunt.registerTask('theme', ['less', 'copy']),
 
   grunt.registerTask('docs', ['debug', 'jsduck']);
-  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests"]);
+  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
   grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
 
   grunt.registerTask('default', ['build', 'docs']);

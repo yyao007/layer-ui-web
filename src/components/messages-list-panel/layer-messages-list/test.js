@@ -427,6 +427,16 @@ describe('layer-messages-list', function() {
       expect(item.messageStatusRenderer).toBe(messageStatusRenderer);
     });
 
+    it("Should setup getMessageDeleteEnabled", function() {
+      var getMessageDeleteEnabled = jasmine.createSpy('getMessageDeleteEnabled');
+
+      el.getMessageDeleteEnabled = getMessageDeleteEnabled;
+
+      var m = conversation.createMessage("m?");
+      var item = el._generateItem(m);
+      expect(item.getDeleteEnabled).toBe(getMessageDeleteEnabled);
+    });
+
     it("Should return layer-message-unknown if no handlers", function() {
       var m = conversation.createMessage({
         parts: {
@@ -488,30 +498,30 @@ describe('layer-messages-list', function() {
     });
 
     it("Should set firstInSeries for the first item is isTopItemNew", function() {
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], true);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, true);
       expect(m1.firstInSeries).toBe(true);
     });
 
     it("Should not set firstInSeries for the first item is not isTopItemNew", function() {
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], false);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, false);
       expect(m1.firstInSeries).toBe(false);
     });
 
     it("Should nto set lastInSeries for any item having a nextSibling", function() {
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], false);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, false);
       expect(m1.lastInSeries).toBe(false);
     });
 
     it("Should set lastInSeries for any item lacking a nextSibling", function() {
       while (el.childNodes[55]) el.removeChild(el.childNodes[55]);
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], false);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, false);
       expect(m5.lastInSeries).toBe(true);
     });
 
     it("Should set lastInSeries for any item that is not in the same group as the next item", function() {
       m3.item.sender = user1;
       m4.item.sender = user1;
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], false);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, false);
       expect(m1.lastInSeries).toBe(false);
       expect(m2.lastInSeries).toBe(true);
       expect(m3.lastInSeries).toBe(false);
@@ -521,7 +531,7 @@ describe('layer-messages-list', function() {
 
     it("Should set firstInSeries for any item following an item that is not in the same group", function() {
       m3.item.sender = user1;
-      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], false);
+      el._processAffectedWidgetsCustom([m1, m2, m3, m4, m5], 2000, false);
       expect(m1.firstInSeries).toBe(false);
       expect(m2.firstInSeries).toBe(false);
       expect(m3.firstInSeries).toBe(true);

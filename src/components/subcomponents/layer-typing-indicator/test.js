@@ -92,6 +92,43 @@ describe('layer-typing-indicator', function() {
     });
   });
 
+  describe("The onRender() method", function() {
+    it("Should call onRerender if there is a conversation", function() {
+      var userA = client._fixIdentities(["a"])[0];
+      var userB = client._fixIdentities(["b"])[0];
+      var userC = client._fixIdentities(["c"])[0];
+      client._typingIndicators.state[conversation.id] = {
+        typing: ["a", "b"],
+        paused: ["c"],
+        users: {
+          "a": { identity: userA},
+          "b": { identity: userB},
+          "c": { identity: userC},
+        }
+      };
+      el.properties.conversation = conversation;
+      el.properties.client = client;
+      spyOn(el, "onRerender");
+      el.onRender();
+      expect(el.onRerender).toHaveBeenCalledWith({
+        conversationId: conversation.id,
+        typing: [userA.toObject(), userB.toObject()],
+        paused: [userC.toObject()]
+      });
+    });
+
+    it("Should not call onRerender without a conversation", function() {
+      client._typingIndicators.state[conversation.id] = {
+        typing: ["a", "b"],
+        paused: ["c"]
+      };
+      el.properties.conversation = null;
+      spyOn(el, "onRerender");
+      el.onRender();
+      expect(el.onRerender).not.toHaveBeenCalled();
+    });
+  });
+
   describe("The onRerender() method", function() {
     it("Should call onRerender if there is a conversation", function() {
       el = document.createElement('layer-typing-indicator');
@@ -99,7 +136,11 @@ describe('layer-typing-indicator', function() {
       el.conversation = conversation;
       layer.Util.defer.flush();
 
-      expect(el.onRerender).toHaveBeenCalledWith();
+      expect(el.onRerender).toHaveBeenCalledWith({
+        conversationId: conversation.id,
+        typing: [],
+        paused: []
+      });
     });
   });
 

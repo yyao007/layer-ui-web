@@ -261,13 +261,17 @@ registerComponent('layer-conversation-panel', {
     conversationId: {
       set(value) {
         if (value && value.indexOf('layer:///conversations') !== 0 && value.indexOf('layer:///channels') !== 0) this.properties.conversationId = '';
-        if (this.client && this.conversationId) {
-          if (this.client.isReady && !this.client.isDestroyed) {
-            this.conversation = this.client.getObject(this.conversationId, true);
+        if (this.client) {
+          if (this.conversationId) {
+            if (this.client.isReady && !this.client.isDestroyed) {
+              this.conversation = this.client.getObject(this.conversationId, true);
+            } else {
+              this.client.once('ready', () => {
+                if (this.conversationId) this.conversation = this.client.getObject(this.conversationId, true);
+              });
+            }
           } else {
-            this.client.once('ready', () => {
-              if (this.conversationId) this.conversation = this.client.getObject(this.conversationId, true);
-            });
+            this.conversation = null;
           }
         }
       },
@@ -295,7 +299,7 @@ registerComponent('layer-conversation-panel', {
     conversation: {
       set(value) {
         if (value && !(value instanceof Layer.Conversation || value instanceof Layer.Channel)) this.properties.conversation = null;
-        if (this.client && this.conversation) this._setupConversation();
+        if (this.client) this._setupConversation();
       },
     },
 
@@ -407,6 +411,19 @@ registerComponent('layer-conversation-panel', {
       },
     },
 
+    /**
+     * A dom node to render when there are no messages in the list.
+     *
+     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
+     *
+     * ```
+     * var div = document.createElement('div');
+     * div.innerHTML = 'Empty Conversation';
+     * widget.emptyMessageListNode = div;
+     * ```
+     *
+     * @property {HTMLElement} [emptyMessageListNode=null]
+     */
     emptyMessageListNode: {
       type: HTMLElement,
       set(value) {
@@ -414,6 +431,27 @@ registerComponent('layer-conversation-panel', {
       },
       get(value) {
         return this.nodes.list.emptyNode;
+      },
+    },
+
+    /**
+     * Deletion of this Message is enabled.
+     *
+     * ```
+     * widget.getMessageDeleteEnabled = function(message) {
+     *    return message.sender.sessionOwner;
+     * }
+     * ```
+     *
+     * @property {Function}
+     */
+    getMessageDeleteEnabled: {
+      type: Function,
+      value(message) {
+        return message.sender.sessionOwner;
+      },
+      set(value) {
+        this.nodes.list.getMessageDeleteEnabled = value;
       },
     },
 
@@ -588,14 +626,14 @@ registerComponent('layer-conversation-panel', {
     _setupConversation() {
       const conversation = this.properties.conversation;
 
-      // No Conversation? Not much to do... except if not yet authenticated,
-      // in which case retry once authenticated.
-      if (!conversation) {
-        if (this.client && !this.client.isReady) {
-          this.client.once('ready', this._setupConversation.bind(this));
-        }
+      // Client not ready yet? retry once authenticated.
+      if (this.client && !this.client.isReady) {
+        this.client.once('ready', this._setupConversation.bind(this));
+        return;
+      } else if (!this.client) {
         return;
       }
+
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {
@@ -606,6 +644,10 @@ registerComponent('layer-conversation-panel', {
         } else if (conversation instanceof Layer.Channel) {
           this.query.update({
             predicate: `channel.id = "${conversation.id}"`,
+          });
+        } else {
+          this.query.update({
+            predicate: '',
           });
         }
       }

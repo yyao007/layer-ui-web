@@ -247,7 +247,7 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
   const parts = [part];
   const video = document.createElement('video');
 
-  video.addEventListener('canplay', () => {
+  video.addEventListener('loadedmetadata', () => {
     const originalSize = {
       width: video.videoWidth,
       height: video.videoHeight,

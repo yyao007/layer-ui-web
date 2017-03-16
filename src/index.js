@@ -1,4 +1,4 @@
-/**
+/*
  * This file is used to create a browserified build with the following properties:
  *
  * * Initializes webcomponent-light polyfil
@@ -10,6 +10,9 @@
  * * webcomponent polyfil
  * * Hooks up all methods/properties in the layerUI namespace
  * * Pick and choose modules from the lib folder to include
+ *
+ * NOTE: JSDuck is picking up on LayerUI and defining it to be a class
+ * which we don't want; do not let JSDuck parse this file.
  */
 
 var LayerUI = require('./layer-ui');

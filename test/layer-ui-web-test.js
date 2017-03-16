@@ -82,10 +82,10 @@ function initAngular(angular) {
       // that need to be applied to the property value.
       attrs.$observe(ngPropertyName, function (expression) {
         scope.$watch(expression, function (value) {
-          if (elem.properties) {
+          if (!elem.properties) elem.properties = {};
+          if (elem.properties._internalState && !elem.properties._internalState.disableSetters) {
             elem[prop.propertyName] = value;
           } else {
-            if (!elem.properties) elem.properties = {};
             elem.properties[prop.propertyName] = value;
           }
         });
@@ -1003,13 +1003,13 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '0.10.0';
+layerUI.version = '0.10.1';
 
 var clientVersions = _layerWebsdk2.default.Client.version.split('.').map(function (value) {
   return Number(value);
 });
-if (clientVersions[0] !== 3 || clientVersions[1] < 2) {
-  console.error('This version or Layer UI for Web requires Layer WebSDK version 3.2.x');
+if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1') {
+  console.error('This version or Layer UI for Web requires Layer WebSDK version 3.1.1 or up');
 }
 
 /**
@@ -2060,27 +2060,30 @@ function _registerComponent(tagName) {
     value: function _initializeProperties() {
       var _this5 = this;
 
-      if (this.properties) return;
       /**
        * Values for all properties of this widget.
        *
        * All properties are stored in `this.properties`; any property defined in the class definition's `properties` hash
        * are read and written here.
        *
+       * Properties may have already been setup by a UI Framework adapter for caching properties passed from the app; if properties
+       * exists, they may still need to be setup.
+       *
        * @property {Object} properties
        */
-      this.properties = {
-        _internalState: {
-          layerEventSubscriptions: [],
-          onCreateCalled: false,
-          onAfterCreateCalled: false,
-          onRenderCalled: false,
-          onAttachCalled: false,
-          onDetachCalled: false,
-          disableSetters: true,
-          disableGetters: true,
-          inPropInit: []
-        }
+      if (this.properties && this.properties._internalState) return;
+      if (!this.properties) this.properties = {};
+
+      this.properties._internalState = {
+        layerEventSubscriptions: [],
+        onCreateCalled: false,
+        onAfterCreateCalled: false,
+        onRenderCalled: false,
+        onAttachCalled: false,
+        onDetachCalled: false,
+        disableSetters: true,
+        disableGetters: true,
+        inPropInit: []
       };
 
       // props.forEach((prop) => {
@@ -2785,6 +2788,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @extends layerUI.components.Component
      * @mixin layerUI.mixins.List
      * @mixin layerUI.mixins.MainComponent
+     * @mixin layerUI.mixins.ListSelection
      */'use strict';
 
 var _layerWebsdk = require('layer-websdk');
@@ -3809,13 +3813,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         var _this = this;
 
         if (value && value.indexOf('layer:///conversations') !== 0 && value.indexOf('layer:///channels') !== 0) this.properties.conversationId = '';
-        if (this.client && this.conversationId) {
-          if (this.client.isReady && !this.client.isDestroyed) {
-            this.conversation = this.client.getObject(this.conversationId, true);
+        if (this.client) {
+          if (this.conversationId) {
+            if (this.client.isReady && !this.client.isDestroyed) {
+              this.conversation = this.client.getObject(this.conversationId, true);
+            } else {
+              this.client.once('ready', function () {
+                if (_this.conversationId) _this.conversation = _this.client.getObject(_this.conversationId, true);
+              });
+            }
           } else {
-            this.client.once('ready', function () {
-              if (_this.conversationId) _this.conversation = _this.client.getObject(_this.conversationId, true);
-            });
+            this.conversation = null;
           }
         }
       }
@@ -3843,7 +3851,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     conversation: {
       set: function set(value) {
         if (value && !(value instanceof _layerWebsdk2.default.Conversation || value instanceof _layerWebsdk2.default.Channel)) this.properties.conversation = null;
-        if (this.client && this.conversation) this._setupConversation();
+        if (this.client) this._setupConversation();
       }
     },
 
@@ -3956,6 +3964,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     },
 
+    /**
+     * A dom node to render when there are no messages in the list.
+     *
+     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
+     *
+     * ```
+     * var div = document.createElement('div');
+     * div.innerHTML = 'Empty Conversation';
+     * widget.emptyMessageListNode = div;
+     * ```
+     *
+     * @property {HTMLElement} [emptyMessageListNode=null]
+     */
     emptyMessageListNode: {
       type: HTMLElement,
       set: function set(value) {
@@ -3963,6 +3984,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       },
       get: function get(value) {
         return this.nodes.list.emptyNode;
+      }
+    },
+
+    /**
+     * Deletion of this Message is enabled.
+     *
+     * ```
+     * widget.getMessageDeleteEnabled = function(message) {
+     *    return message.sender.sessionOwner;
+     * }
+     * ```
+     *
+     * @property {Function}
+     */
+    getMessageDeleteEnabled: {
+      type: Function,
+      value: function value(message) {
+        return message.sender.sessionOwner;
+      },
+      set: function set(value) {
+        this.nodes.list.getMessageDeleteEnabled = value;
       }
     },
 
@@ -4144,14 +4186,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     _setupConversation: function _setupConversation() {
       var conversation = this.properties.conversation;
 
-      // No Conversation? Not much to do... except if not yet authenticated,
-      // in which case retry once authenticated.
-      if (!conversation) {
-        if (this.client && !this.client.isReady) {
-          this.client.once('ready', this._setupConversation.bind(this));
-        }
+      // Client not ready yet? retry once authenticated.
+      if (this.client && !this.client.isReady) {
+        this.client.once('ready', this._setupConversation.bind(this));
+        return;
+      } else if (!this.client) {
         return;
       }
+
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {
@@ -4162,6 +4204,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         } else if (conversation instanceof _layerWebsdk2.default.Channel) {
           this.query.update({
             predicate: 'channel.id = "' + conversation.id + '"'
+          });
+        } else {
+          this.query.update({
+            predicate: ''
           });
         }
       }
@@ -4738,6 +4784,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
+ * @mixin layerUI.mixins.ListSelection
  */'use strict';
 
 var _layerWebsdk = require('layer-websdk');
@@ -5240,6 +5287,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                           *
                           *
                           * The following example adds a search bar to the Message List
+                          *
                           * ```
                           * layerUI.init({
                           *   appId: 'my-app-id',
@@ -5371,6 +5419,19 @@ var PAGING_DELAY = 2000;
      * @property {Function} [messageStatusRenderer=null]
      */
     messageStatusRenderer: {},
+
+    /**
+     * Deletion of this Message is enabled.
+     *
+     * ```
+     * widget.getMessageDeleteEnabled = function(message) {
+     *    return message.sender.sessionOwner;
+     * }
+     * ```
+     *
+     * @property {Function}
+     */
+    getMessageDeleteEnabled: {},
 
     /**
      * If the user scrolls within this many screen-fulls of the top of the list, page the Query.
@@ -5609,6 +5670,7 @@ var PAGING_DELAY = 2000;
         messageWidget.id = this._getItemId(message.id);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
+        messageWidget.getDeleteEnabled = this.getMessageDeleteEnabled;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
         return messageWidget;
@@ -5643,7 +5705,7 @@ var PAGING_DELAY = 2000;
      * @private
      * @param {layerUI.components.MessagesListPanel.Item[]} widgets
      */
-    _processAffectedWidgetsCustom: function _processAffectedWidgetsCustom(widgets, isTopItemNew) {
+    _processAffectedWidgetsCustom: function _processAffectedWidgetsCustom(widgets, firstIndex, isTopItemNew) {
       if (widgets.length === 0) return;
       if (isTopItemNew) widgets[0].firstInSeries = true;
       for (var i = 1; i < widgets.length; i++) {
@@ -6171,7 +6233,7 @@ var TAB = 9;
      */
     conversation: {
       set: function set(value) {
-        this.client = value.getClient();
+        if (value) this.client = value.getClient();
         this._setTypingListenerConversation();
       }
     },
@@ -6971,15 +7033,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
-  layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
+  layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"layer-websdk":69}],26:[function(require,module,exports){
 /**
      * The Layer file upload button widget allows users to select a File to send.
      *
-     * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel.
+     * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel:
+     *
+     * ```
+     * myConversationPanel.composeButtons = [
+     *    document.createElement('layer-file-upload-button')
+     * ];
+     * ```
+     *
      * If using it elsewhere, note that it triggers a `layer-file-selected` event that you would listen for to do your own processing.
-     * If using it in the ComposeButtonPanel, this event will be received by the Composer and will not propagate any further.
+     * If using it in the ComposeButtonPanel, this event will be received by the Composer and will not propagate any further:
      *
      * ```
      * document.body.addEventListener('layer-file-selected', function(evt) {
@@ -7015,12 +7084,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     onCreate: function onCreate() {
+      var _this = this;
+
       this.nodes.input.id = _layerWebsdk2.default.Util.generateUUID();
       this.nodes.label.setAttribute('for', this.nodes.input.id);
       this.nodes.input.addEventListener('change', this.onChange.bind(this));
-      // this.addEventListener('click', (evt) => {
-      //   if (evt.target !== this.nodes.input) this.nodes.input.click();
-      // });
+
+      // This causes test to fail by causing the click event to fire twice.
+      // but without this, the click event is not received at all.
+      this.addEventListener('click', function (evt) {
+        if (evt.target !== _this.nodes.input) _this.nodes.input.click();
+      });
     },
 
 
@@ -7033,7 +7107,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @method
      */
     onChange: function onChange() {
-      var _this = this;
+      var _this2 = this;
 
       var files = this.nodes.input.files;
 
@@ -7054,7 +7128,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
        * @[aram {layer.MessagePart[]} evt.detail.parts
        */
       _base2.default.files.processAttachments(inputParts, function (parts) {
-        _this.trigger('layer-file-selected', { parts: parts });
+        _this2.trigger('layer-file-selected', { parts: parts });
       });
     }
   }
@@ -7476,7 +7550,11 @@ var _component = require('../../../components/component');
      */
     onCreate: function onCreate() {},
     onRender: function onRender() {
-      if (this.conversation && this.conversation.id) this.onRerender();
+      if (this.conversation && this.conversation.id) {
+        var data = this.client.getTypingState(this.conversation.id);
+        data.conversationId = this.conversation.id;
+        this.onRerender(data);
+      }
     },
 
 
@@ -8258,7 +8336,7 @@ _base2.default.registerTextHandler({
 (function (global){
 'use strict';
 
-/**
+/*
  * This file is used to create a browserified build with the following properties:
  *
  * * Initializes webcomponent-light polyfil
@@ -8270,9 +8348,12 @@ _base2.default.registerTextHandler({
  * * webcomponent polyfil
  * * Hooks up all methods/properties in the layerUI namespace
  * * Pick and choose modules from the lib folder to include
+ *
+ * NOTE: JSDuck is picking up on LayerUI and defining it to be a class
+ * which we don't want; do not let JSDuck parse this file.
  */'use strict';
 
-/**
+/*
  * This file is used to create a browserified build with the following properties:
  *
  * * Initializes webcomponent-light polyfil
@@ -8284,6 +8365,9 @@ _base2.default.registerTextHandler({
  * * webcomponent polyfil
  * * Hooks up all methods/properties in the layerUI namespace
  * * Pick and choose modules from the lib folder to include
+ *
+ * NOTE: JSDuck is picking up on LayerUI and defining it to be a class
+ * which we don't want; do not let JSDuck parse this file.
  */
 
 var LayerUI = require('./layer-ui');
@@ -10095,7 +10179,7 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
   var parts = [part];
   var video = document.createElement('video');
 
-  video.addEventListener('canplay', function () {
+  video.addEventListener('loadedmetadata', function () {
     var originalSize = {
       width: video.videoWidth,
       height: video.videoHeight
@@ -20297,6 +20381,10 @@ var ClientAuthenticator = function (_Root) {
         var userData = Util.decode(identityToken.split('.')[1]);
         var identityObj = JSON.parse(userData);
 
+        if (!identityObj.prn) {
+          throw new Error("Your identity token prn (user id) is empty");
+        }
+
         if (this.user.userId && this.user.userId !== identityObj.prn) {
           throw new Error(LayerError.dictionary.invalidUserIdChange);
         }
@@ -20616,15 +20704,15 @@ var ClientAuthenticator = function (_Root) {
     key: '_resetSession',
     value: function _resetSession() {
       this.isReady = false;
+      this.isConnected = false;
+      this.isAuthenticated = false;
+
       if (this.sessionToken) {
         this.sessionToken = '';
         if (global.localStorage) {
           localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
         }
       }
-
-      this.isConnected = false;
-      this.isAuthenticated = false;
 
       this.trigger('deauthenticated');
       this.onlineManager.stop();
@@ -21014,6 +21102,7 @@ var ClientAuthenticator = function (_Root) {
         if (result.status === 401 && this.isAuthenticated) {
           logger.warn('SESSION EXPIRED!');
           this.isAuthenticated = false;
+          this.isReady = false;
           if (global.localStorage) localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
           this.trigger('deauthenticated');
           this._authenticate(result.data.getNonce());
@@ -22661,7 +22750,7 @@ Client.prototype._scheduleCheckAndPurgeCacheAt = 0;
  * @static
  * @type {String}
  */
-Client.version = '3.2.0';
+Client.version = '3.2.1';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -27125,6 +27214,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Finally, to access a list of Messages in a Channel, see layer.Query.
  *
  * @class  layer.Channel
+ * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Container
  * @author  Michael Kantor
  */
@@ -30866,6 +30956,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Identities are created by the System, never directly by apps.
  *
  * @class layer.Membership
+ * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Syncable
  */
 
@@ -31311,7 +31402,7 @@ var MessagePart = function (_Root) {
         this.isFiring = true;
         var type = this.mimeType === 'image/jpeg+preview' ? 'image/jpeg' : this.mimeType;
         this._content.loadContent(type, function (err, result) {
-          return _this2._fetchContentCallback(err, result, callback);
+          if (!_this2.isDestroyed) _this2._fetchContentCallback(err, result, callback);
         });
       }
       return this;
@@ -36266,11 +36357,8 @@ var Query = function (_Root) {
     value: function destroy() {
       this.data = [];
       this._triggerChange({
-        type: 'data',
-        target: this.client,
-        query: this,
-        isChange: false,
-        data: []
+        data: [],
+        type: 'reset'
       });
       this.client.off(null, null, this);
       this.client._removeQuery(this);
@@ -36500,7 +36588,7 @@ var Query = function (_Root) {
       var _this2 = this;
 
       if (requestUrl !== this._firingRequest || this.isDestroyed) return;
-      // _isSyncingCount == 9 means we've waited roughly 45 seconds; give up if we've waited longer, and report the results that we have.
+      // _isSyncingCount == 9 means we've waited roughly 30 seconds; give up if we've waited longer, and report the results that we have.
       var isSyncing = results.xhr.getResponseHeader('Layer-Conversation-Is-Syncing') === 'true' && this._isSyncingCount < 9;
 
       // isFiring is false... unless we are still syncing
@@ -36522,6 +36610,10 @@ var Query = function (_Root) {
 
           if (results.data.length < pageSize) this.pagedToEnd = true;
         }
+      } else if (results.data.getNonce()) {
+        this.client.once('ready', function () {
+          _this2._run();
+        });
       } else {
         this.trigger('error', { error: results.data });
       }

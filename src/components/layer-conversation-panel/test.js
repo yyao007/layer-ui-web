@@ -252,7 +252,16 @@ describe('layer-conversation-panel', function() {
       // Posttest
       expect(el.conversation).toEqual(jasmine.any(layer.Conversation));
       expect(el.conversation.isLoading).toBe(true);
+    });
 
+    it("Should clear the conversation if set to empty string", function() {
+      el.client = client;
+      el.conversation = conversation;
+      expect(el.nodes.typingIndicators.conversation).toBe(conversation);
+
+      el.conversationId = "";
+      expect(el.conversation).toBe(null);
+      expect(el.nodes.typingIndicators.conversation).toBe(null);
     });
   });
 
@@ -267,6 +276,17 @@ describe('layer-conversation-panel', function() {
     it("Should ignore invalid values", function() {
       el.conversation = {hey: "ho"};
       expect(el.conversation).toBe(null);
+    });
+
+    it("Should call _setupConversation if there is a value or not", function() {
+      spyOn(el, "_setupConversation");
+      el.client = client;
+      el.conversation = conversation;
+      expect(el._setupConversation).toHaveBeenCalled();
+      el._setupConversation.calls.reset();
+
+      el.conversation = null;
+      expect(el._setupConversation).toHaveBeenCalled();
     });
   });
 
@@ -500,6 +520,8 @@ describe('layer-conversation-panel', function() {
 
   describe("The _setupConversation() method", function() {
     beforeEach(function() {
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
       el.client = client;
     });
     it("Should setup the composers Conversation", function() {
@@ -527,10 +549,23 @@ describe('layer-conversation-panel', function() {
       expect(el.focusText).not.toHaveBeenCalled();
     });
 
-    it("Should abort if no conversation", function() {
-      spyOn(el, "_setupConversation").and.callThrough();
+    it("Should delay if client is not ready", function() {
+      spyOn(el.query, "update");
+      client.isReady = false;
       el.hasGeneratedQuery = true;
-      el._setupConversation();
+      el.conversation = conversation;
+
+      expect(el.query.update).not.toHaveBeenCalled();
+      client._clientReady();
+      expect(el.query.update).toHaveBeenCalled();
+    });
+
+    it("Should clear the conversation", function() {
+      spyOn(el, "_setupConversation").and.callThrough();
+      el.conversation = conversation;
+      expect(el.nodes.composer.conversation).toBe(conversation);
+
+      el.conversation = null;
 
       expect(el._setupConversation).toHaveBeenCalled();
       expect(el.nodes.composer.conversation).toBe(null);

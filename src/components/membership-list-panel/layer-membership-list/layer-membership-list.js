@@ -19,6 +19,7 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
+ * @mixin layerUI.mixins.ListSelection
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../component';
