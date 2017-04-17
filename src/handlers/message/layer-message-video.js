@@ -8,15 +8,18 @@
  * @class layerUI.handlers.message.Video
  * @extends layerUI.components.Component
  */
-import { registerComponent } from '../../components/component';
+import { registerMessageComponent } from '../../components/component';
 import normalizeSize from '../../utils/sizing';
-import layerUI, { settings as UISettings } from '../../base';
+import { settings as UISettings } from '../../base';
 import MessageHandler from '../../mixins/message-handler';
 
-registerComponent('layer-message-video', {
+registerMessageComponent('layer-message-video', {
   mixins: [MessageHandler],
   template: '<video layer-id="video"></video>',
   properties: {
+    label: {
+      value: '<i class="fa fa-file-video-o layer-video-message-icon" aria-hidden="true"></i> Video message',
+    },
 
     /**
      * The Message property provides the MessageParts we are going to render.
@@ -46,11 +49,15 @@ registerComponent('layer-message-video', {
         }
       },
     },
-
-    parentContainer: {},
   },
   methods: {
-
+    handlesMessage(message, container) {
+      const videoParts = message.parts.filter(part => part.mimeType === 'video/mp4').length;
+      const previewParts = message.parts.filter(part => part.mimeType === 'image/jpeg+preview').length;
+      const metaParts = message.parts.filter(part => part.mimeType === 'application/json+imageSize').length;
+      return (message.parts.length === 1 && videoParts ||
+        message.parts.length === 3 && videoParts === 1 && previewParts === 1 && metaParts === 1);
+    },
 
     /**
      * Render the Message.
@@ -69,21 +76,6 @@ registerComponent('layer-message-video', {
       }
       this.nodes.video.controls = true;
     },
-  },
-});
-
-/*
-  * Handle any Message that contains a Video + Preview + Metadata or is just an Video
-  */
-layerUI.registerMessageHandler({
-  tagName: 'layer-message-video',
-  label: '<i class="fa fa-file-video-o" aria-hidden="true"></i> Video message',
-  handlesMessage(message, container) {
-    const videoParts = message.parts.filter(part => part.mimeType === 'video/mp4').length;
-    const previewParts = message.parts.filter(part => part.mimeType === 'image/jpeg+preview').length;
-    const metaParts = message.parts.filter(part => part.mimeType === 'application/json+imageSize').length;
-    return (message.parts.length === 1 && videoParts ||
-      message.parts.length === 3 && videoParts === 1 && previewParts === 1 && metaParts === 1);
   },
 });
 

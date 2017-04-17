@@ -63,6 +63,30 @@ describe('layer-messages-list', function() {
     jasmine.clock().uninstall();
   });
 
+  describe("The disable property", function() {
+    it("Should scroll to bottom and stick to bottom when turned off", function() {
+      el.properties.stuckToBottom = false;
+      el.scrollTop = 0;
+      el.disable = true;
+
+      // Run
+      el.disable = false;
+
+      expect(el.properties.stuckToBottom).toBe(true);
+      expect(el.scrollTop).not.toEqual(0);
+    });
+
+    it("Should call _checkVisibility when turned off", function() {
+      spyOn(el, "_checkVisibility");
+      el.disable = true;
+
+      // Run
+      el.disable = false;
+
+      expect(el._checkVisibility).toHaveBeenCalledWith();
+    });
+  });
+
   describe('The created() method', function() {
     beforeEach(function() {
       el = document.createElement('layer-messages-list');
@@ -353,14 +377,47 @@ describe('layer-messages-list', function() {
         }
       });
     });
+
+    it("Should mark nothing if disabled", function() {
+      var items = el.querySelectorAllArray('layer-message-item-sent');
+      expect(items.length > 0).toBe(true);
+      items.forEach(function(messageRow) {
+        expect(messageRow.item.isRead).toBe(false);
+      });
+      el.scrollTo(0);
+      el.properties.disable = true;
+      el._checkVisibility();
+      jasmine.clock().tick(10000);
+      items.forEach(function(messageRow) {
+        expect(messageRow.item.isRead).toBe(false);
+      });
+    });
   });
 
   describe("The _markAsRead() method", function() {
+    var isInBackground = window.layerUI.isInBackground;;
+    beforeAll(function() {
+      window.layerUI.isInBackground = function() {return false;}
+    });
+
+    afterAll(function() {
+      window.layerUI.isInBackground = isInBackground;
+    });
+
+
     it("Should mark the first message as read", function() {
       el.childNodes[2].item.isRead = false;
       el.scrollTop = 0;
       el._markAsRead(el.childNodes[2]);
       expect(el.childNodes[2].item.isRead).toBe(true);
+    });
+
+    it("Should not mark the first message as read if disabled", function() {
+      el.childNodes[2].item.isRead = false;
+      el.scrollTop = 0;
+      el.properties.disable = true;
+      el._markAsRead(el.childNodes[2]);
+      expect(el.childNodes[2].item.isRead).toBe(false);
     });
 
     it("Should not mark the first message as read if scrolled partially out of view", function() {

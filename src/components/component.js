@@ -44,6 +44,14 @@
  *     myRenderer: function() {
  *        this.innerHTML = this.properties.prop1;
  *     }
+ *   },
+ *   listeners: {
+ *     'layer-notification-click': function notificationClick(evt) {
+ *          const message = evt.detail.item;
+ *          const conversation = message.getConversation();
+ *          if (conversation) this.selectedId = conversation.id;
+ *       },
+ *    }
  *   }
  * };
  * ```
@@ -51,8 +59,8 @@
  * A component defined this way can be registered as follows:
  *
  * ```
- * var layerUI = require('websdk-ui-webcomponents');
- * layerUI.registerComponent(componentDefinition);
+ * var layerUI = require('layer-ui-web');
+ * layerUI.registerComponent(tagName, componentDefinition);
  * ```
  *
  * ### Properties
@@ -60,7 +68,7 @@
  * A property definition can be as simple as:
  *
  * ```
- * layerUI.registerComponent({
+ * layerUI.registerComponent(tagName, {
  *    properties: {
  *       prop1: {}
  *    }
@@ -113,7 +121,7 @@
  * Example:
  *
  * ```
- * layerUI.registerComponent({
+ * layerUI.registerComponent(tagName, {
  *    events: ['layer-something-happening', 'layer-nothing-happening', 'your-custom-event']
  * });
  * ```
@@ -197,7 +205,7 @@
  * });
  *
  * // Create a Component with prop1, prop2, method1 and method2
- * registerComponent(componentDefinition);
+ * registerComponent(tagName, componentDefinition);
  * ```
  *
  * An app can modify an existing component by adding custom mixins to it using `layerUI.init()`.  The `mixins` parameter
@@ -540,6 +548,10 @@ function setupMixin(classDef, mixin) {
       if (mixin.properties[name].value !== undefined && classDef.properties[name].value === undefined) {
         classDef.properties[name].value = mixin.properties[name].value;
       }
+      if (mixin.properties[name].propagateToChildren !== undefined &&
+          classDef.properties[name].propagateToChildren === undefined) {
+        classDef.properties[name].propagateToChildren = mixin.properties[name].propagateToChildren;
+      }
     }
   });
 
@@ -665,6 +677,7 @@ function getPropArray(classDef) {
       type: classDef.properties[propertyName].type,
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
+      propagateToChildren: classDef.properties[propertyName].propagateToChildren,
     };
   }).sort((a, b) => {
     if (a.order !== undefined && b.order !== undefined) {
@@ -684,25 +697,25 @@ function getPropArray(classDef) {
  * Cast a property value to its specified type
  */
 function castProperty(type, value) {
-    // Some special handling is needed for some properties as they may be delivered
-    // as strings HTML delivers attributes as strings.
-    switch (type) {
-      // Translate strings into booleans
-      case Boolean:
-        if (['false', '0', 'null', 'undefined'].indexOf(value) !== -1) {
-          return false;
-        } else {
-          return Boolean(value);
-        }
+  // Some special handling is needed for some properties as they may be delivered
+  // as strings HTML delivers attributes as strings.
+  switch (type) {
+    // Translate strings into booleans
+    case Boolean:
+      if (['false', '0', 'null', 'undefined'].indexOf(value) !== -1) {
+        return false;
+      } else {
+        return Boolean(value);
+      }
 
-      case Number:
-        return Number(value);
+    case Number:
+      return Number(value);
 
-      // Translate strings into functions
-      case Function:
-        return typeof value === 'string' ? eval('(' + value + ')') : value;
-    }
-    return value;
+    // Translate strings into functions
+    case Function:
+      return typeof value === 'string' ? eval('(' + value + ')') : value;
+  }
+  return value;
 }
 
 /*
@@ -759,6 +772,19 @@ function setupProperty(classDef, prop, propertyDefHash) {
       this.properties[name] = value;
       if (classDef['__set_' + name] && !this.properties._internalState.disableSetters) {
         classDef['__set_' + name].forEach(setter => setter.call(this, value, wasInit ? null : oldValue));
+      }
+
+      if (propDef.propagateToChildren) {
+        Object.keys(this.nodes).forEach((nodeName) => {
+          this.nodes[nodeName][name] = value;
+        });
+        if (this._isList) {
+          const childNodes = this.childNodes;
+          let i;
+          for (i = 0; i < childNodes.length; i++) {
+            if (childNodes[i]._isListItem) childNodes[i][name] = value;
+          }
+        }
       }
     }
   };
@@ -836,6 +862,7 @@ function _registerComponent(tagName) {
   const properties = classDef.properties;
   classDef.properties = {};
   setupMixin(classDef, { properties });
+  setupMixin(classDef, { properties: standardClassProperties });
 
   // Some mixins may have mixins of their own; add them to the list;
   // every newly added item must also be processed, so insure loop touches on new items as well
@@ -847,6 +874,10 @@ function _registerComponent(tagName) {
       });
     }
   }
+
+  classDef.properties._listeners = {
+    value: Object.keys(classDef.listeners || {}),
+  };
 
   classDef.mixins.forEach(mixin => setupMixin(classDef, mixin));
   finalizeMixinMerge(classDef);
@@ -869,6 +900,15 @@ function _registerComponent(tagName) {
     };
   });
   delete classDef.methods;
+
+  // This veresion of listeners does not blend listeners from multiple mixins
+  Object.keys(classDef.listeners || {}).forEach((name) => {
+    classDef['__listener-' + name] = {
+      value: classDef.listeners[name],
+      writable: true,
+    };
+  });
+  delete classDef.listeners;
 
   /**
    * createdCallback is part of the Webcomponent lifecycle and drives this framework's lifecycle.
@@ -907,8 +947,25 @@ function _registerComponent(tagName) {
     },
   };
 
+  classDef._setupListeners = {
+    value: function _setupListeners() {
+      this._listeners.forEach((eventName) => {
+        document.body.addEventListener(eventName, this._handleListenerEvent.bind(this, '__listener-' + eventName));
+      });
+    },
+  };
+
+  classDef._handleListenerEvent = {
+    value: function _handleListenerEvent(methodName, evt) {
+      if (this.properties.listenTo.indexOf(evt.target.id) !== -1) {
+        this[methodName].apply(this, [evt]);
+      }
+    },
+  };
+
   classDef._onAfterCreate = {
     value: function _onAfterCreate() {
+
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
       this.properties._internalState.disableSetters = false;
@@ -924,9 +981,27 @@ function _registerComponent(tagName) {
           // Force the setter to trigger; this will force the value to be converted to the correct type,
           // and call all setters
           this[prop.propertyName] = value;
+
+          if (prop.propagateToChildren) {
+            Object.keys(this.nodes).forEach(nodeName => (this.nodes[nodeName][prop.propertyName] = value));
+          }
+        }
+
+
+        // If there is no value, but the parent component has the same property name, presume it to also be
+        // propagateToChildren, and copy its value; useful for allowing list-items to automatically grab
+        // all parent propagateToChildren properties.
+        else if (prop.propagateToChildren && this.parentComponent) {
+          const parentValue = this.parentComponent.properties[prop.propertyName];
+          if (parentValue) this[prop.propertyName] = parentValue;
         }
       });
       this.properties._internalState.inPropInit = [];
+
+      // Warning: these listeners may miss events triggered while initializing properties
+      // only way around this is to add another Layer.Util.defer() to our lifecycle
+      this._setupListeners();
+
       this.onAfterCreate();
     },
   };
@@ -969,6 +1044,7 @@ function _registerComponent(tagName) {
    *
    * This calls `onAttach`.
    * @method
+   * @private
    */
   classDef.attachedCallback = {
     value: function onAttach() {
@@ -987,7 +1063,7 @@ function _registerComponent(tagName) {
    * for this Object. So we delete the property `appId` from the object so that the getter/setter up the prototype chain can
    * once again function.
    *
-   * @method
+   * @method _initializeProperties
    * @private
    * @param {Object} prop   A property def whose value should be stashed
    */
@@ -1004,6 +1080,7 @@ function _registerComponent(tagName) {
        * exists, they may still need to be setup.
        *
        * @property {Object} properties
+       * @protected
        */
       if (this.properties && this.properties._internalState) return;
       if (!this.properties) this.properties = {};
@@ -1108,7 +1185,7 @@ function _registerComponent(tagName) {
    * Any time a widget's attribute has changed, copy that change over to the properties where it can trigger the property setter.
    *
    * @method attributeChangedCallback
-   * @ignore
+   * @private
    * @param {String} name      Attribute name
    * @param {Mixed} oldValue   Original value of the attribute
    * @param {Mixed} newValue   Newly assigned value of the attribute
@@ -1189,6 +1266,28 @@ registerComponent.MODES = {
   DEFAULT: 'DEFAULT',
 };
 
+const standardClassProperties = {
+  parentComponent: {},
+  mainComponent: {
+    get() {
+      if (this.properties._isMainComponent) return this;
+      if (!this.properties.mainComponent) {
+        this.properties.mainComponent = this.properties.parentComponent.mainComponent;
+      }
+      return this.properties.mainComponent;
+    },
+  },
+  client: {
+    propagateToChildren: true,
+  },
+  listenTo: {
+    value: [],
+    set(value) {
+      if (typeof value === 'string') this.properties.listenTo = value.split(/\s*,\s*/);
+    },
+  },
+};
+
 const standardClassMethods = {
   /**
    * The setupDomNodes method looks at all child nodes of this node that have layer-id properties and indexes them in the `nodes` property.
@@ -1199,13 +1298,45 @@ const standardClassMethods = {
    * you may need to call this directly.
    *
    * @method setupDomNodes
+   * @protected
    */
   setupDomNodes: function setupDomNodes() {
     this.nodes = {};
-    this.querySelectorAllArray('*').forEach((node) => {
-      const id = node.getAttribute('layer-id');
-      if (id) this.nodes[id] = node;
+
+    this._findNodesWithin(this, (node, isComponent) => {
+      const layerId = node.getAttribute && node.getAttribute('layer-id');
+      if (layerId) this.nodes[layerId] = node;
+
+      if (isComponent) {
+        if (!node.properties) node.properties = {};
+        node.properties.parentComponent = this;
+      }
     });
+  },
+
+  /**
+   * Iterate over all child nodes generated by the template; skip all subcomponent's child nodes.
+   *
+   * @method _findNodesWithin
+   * @private
+   * @param {HTMLElement} node    Node whose subtree should be called with the callback
+   * @param {Function} callback   Function to call on each node in the tree
+   * @param {HTMLElement} callback.node   Node that the callback is called on
+   * @param {Boolean} isComponent         Is the node a Component from this framework
+   */
+  _findNodesWithin: function _findNodesWithin(node, callback) {
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      const innerNode = children[i];
+
+      const isLUIComponent = Boolean(innerNode instanceof HTMLElement && layerUI.components[innerNode.tagName.toLowerCase()]);
+      callback(innerNode, isLUIComponent);
+
+      // If its not a custom webcomponent with children that it manages and owns, iterate on it
+      if (!isLUIComponent) {
+        this._findNodesWithin(innerNode, callback);
+      }
+    }
   },
 
   /**
@@ -1228,6 +1359,7 @@ const standardClassMethods = {
    * ```
    *
    * @method getTemplate
+   * @protected
    * @returns {HTMLTemplateElement}
    */
   getTemplate: function getTemplate() {
@@ -1274,6 +1406,7 @@ const standardClassMethods = {
    * ```
    *
    * @method trigger
+   * @protected
    * @param {String} eventName
    * @param {Object} detail
    * @returns {Boolean} True if process should continue with its actions, false if application has canceled
@@ -1295,6 +1428,7 @@ const standardClassMethods = {
    * This basically just calls this.querySelectorAll and then returns a proper Array rather than a NodeList.
    *
    * @method querySelectorAllArray
+   * @protected
    * @param {String} XPath selector
    * @returns {HTMLElement[]}
    */
@@ -1355,7 +1489,11 @@ const standardClassMethods = {
    *
    * @method onRerender
    */
-  onRerender: function onRender() {},
+  onRerender: {
+    conditional: function onCanRerender() {
+      return this.properties._internalState.onAfterCreateCalled;
+    },
+  },
 
   /**
    * MIXIN HOOK: Each time a Component is inserted into a Document, its onAttach methods will be called.
@@ -1392,6 +1530,8 @@ const standardClassMethods = {
   onDetach: {
     mode: registerComponent.MODES.AFTER,
     value: function onDetach() {
+      this.properties.mainComponent = null;
+      this.properties.parentComponent = null;
       this.properties._internalState.onDetachCalled = true;
     },
   },
@@ -1417,8 +1557,22 @@ const standardClassMethods = {
   },
 };
 
+function registerMessageComponent(tagName, componentDefinition) {
+  const handlesMessage = componentDefinition.methods.handlesMessage;
+  const label = componentDefinition.properties.label.value;
+  const order = componentDefinition.properties.order;
+  registerComponent(tagName, componentDefinition);
+  layerUI.registerMessageHandler({
+    handlesMessage,
+    tagName,
+    label,
+    order,
+  });
+}
+
 module.exports = {
   registerComponent,
+  registerMessageComponent,
   registerAll,
   unregisterComponent,
 };

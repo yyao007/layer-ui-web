@@ -6,13 +6,25 @@
  * @class layerUI.handlers.message.TextPlain
  * @extends layerUI.components.Component
  */
-import layerUI from '../../base';
-import { registerComponent } from '../../components/component';
+import { registerMessageComponent } from '../../components/component';
 import MessageHandler from '../../mixins/message-handler';
 
-registerComponent('layer-message-text-plain', {
+registerMessageComponent('layer-message-text-plain', {
   mixins: [MessageHandler],
+  properties: {
+    label: {
+      label: 'Text',
+    },
+  },
   methods: {
+    /**
+     * This component can render any message that starts with text/plain message part
+     *
+     * @method
+     */
+    handlesMessage(message, container) {
+      return message.parts[0].mimeType === 'text/plain';
+    },
 
     /**
      * Replaces any html tags with escaped html tags so that the recipient
@@ -75,15 +87,6 @@ registerComponent('layer-message-text-plain', {
       })
       .map(handlerObj => handlerObj.handler);
     },
-  },
-});
-
-// Handle any text/plain Message
-layerUI.registerMessageHandler({
-  tagName: 'layer-message-text-plain',
-  label: 'Text',
-  handlesMessage(message, container) {
-    return message.parts[0].mimeType === 'text/plain';
   },
 });
 

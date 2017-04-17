@@ -51,6 +51,102 @@ if (window.Notification) {
       });
     });
 
+    describe("The flagTitlebar property", function() {
+      var title
+      beforeAll(function() {
+        title = document.title;
+      });
+      afterAll(function() {
+        document.title = title;
+      });
+
+      it("Should show the badge", function() {
+        document.title = "hello";
+        el.flagTitlebar = true;
+        expect(document.title).toEqual("⬤ hello");
+        el.flagTitlebar = false;
+        el.flagTitlebar = true;
+        expect(document.title).toEqual("⬤ hello");
+      });
+
+      it("Should hide the badge", function() {
+        document.title = "⬤ hello";
+        el.properties.flagTitlebar = true;
+        el.flagTitlebar = false; // trigger the setter
+        expect(document.title).toEqual("hello");
+        el.flagTitlebar = true;
+        el.flagTitlebar = false;
+        expect(document.title).toEqual("hello");
+      });
+    });
+
+    describe("The notifyCharacterForTitlebar property", function() {
+      var title
+      beforeAll(function() {
+        title = document.title;
+      });
+      afterAll(function() {
+        document.title = title;
+      });
+
+      it("Should set how bading is rendered", function() {
+        el.notifyCharacterForTitlebar = "frodo says";
+        document.title = "hello";
+        el.flagTitlebar = true;
+        expect(document.title).toEqual("frodo says hello");
+      });
+    });
+
+    describe("The flagTitlebarForMessage property", function() {
+      var title
+      beforeAll(function() {
+        title = document.title;
+      });
+      afterAll(function() {
+        document.title = title;
+      });
+
+      it("Should flag the titlebar if message is unread, but not if message is read", function() {
+        message.isRead = true;
+        el.flagTitlebar = false;
+
+        el.flagTitlebarForMessage = message;
+        expect(el.flagTitlebar).toBe(false);
+        el.flagTitlebarForMessage = null;
+
+        message.isRead = false;
+
+        el.flagTitlebarForMessage = message;
+        expect(el.flagTitlebar).toBe(true);
+      });
+
+      it("Should wire up _handleTitlebarMessageChange for the message if unread", function() {
+        spyOn(el, "_handleTitlebarMessageChange");
+        message.isRead = true;
+
+        el.flagTitlebarForMessage = message;
+        message.trigger("messages:change");
+        expect(el._handleTitlebarMessageChange).not.toHaveBeenCalled();
+        el.flagTitlebarForMessage = null;
+
+        message.isRead = false;
+        el.flagTitlebarForMessage = message;
+        message.trigger("messages:change");
+        expect(el._handleTitlebarMessageChange).toHaveBeenCalled();
+      });
+
+      it("Should unwire up _handleTitlebarMessageChange for prior message", function() {
+        spyOn(el, "_handleTitlebarMessageChange");
+        message.isRead = false;
+        el.flagTitlebarForMessage = message;
+
+        el.flagTitlebarForMessage = conversation.createMessage("hey");
+
+        message.trigger("messages:change");
+        expect(el._handleTitlebarMessageChange).not.toHaveBeenCalled();
+      });
+    });
+
     describe("The created() method", function() {
       it("Should setup the avatar, title and container", function() {
         expect(el.nodes.avatar.tagName).toEqual('LAYER-AVATAR');
@@ -90,6 +186,35 @@ if (window.Notification) {
         el.properties.userEnabledDesktopNotifications = true;
       });
       describe("The notify() method", function() {
+
+        it("Should set flagTitlebarForMessage if isInBackground and notifyInTitlebar is true", function() {
+          el.flagTitlebarForMessage = null;
+          message.isRead = false;
+          var restoreFunc = window.layerUI.isInBackground;
+          spyOn(window.layerUI, 'isInBackground').and.returnValue(true);
+
+          el._notify({message: message});
+          expect(el.flagTitlebarForMessage).toBe(message);
+
+
+          // Run 2: notifyInTitlebar is false
+          el.flagTitlebarForMessage = null;
+          el.notifyInTitlebar = false;
+          el._notify({message: message});
+          expect(el.flagTitlebarForMessage).toBe(null);
+
+          // Run 3: isInBackground is false
+          el.flagTitlebarForMessage = null;
+          el.notifyInTitlebar = true;
+          window.layerUI.isInBackground = restoreFunc;
+          spyOn(window.layerUI, 'isInBackground').and.returnValue(false);
+          el._notify({message: message});
+          expect(el.flagTitlebarForMessage).toBe(null);
+
+          // Restore
+          window.layerUI.isInBackground = restoreFunc;
+        });
+
         it("Should use background notification setting if isInBackground returns true", function() {
           spyOn(el, "desktopNotify");
           spyOn(el, "toastNotify");
@@ -208,6 +333,49 @@ if (window.Notification) {
         });
       });
 
+      describe("The _handleTitlebarMessageChange() method", function() {
+        it("Should clear the badge if the message is read", function() {
+          message.isRead = false;
+          el.flagTitlebarForMessage = message;
+          expect(el.flagTitlebar).toBe(true);
+
+          message.__isRead = true;
+
+          el._handleTitlebarMessageChange();
+          expect(el.flagTitlebar).toBe(false);
+        });
+
+        it("Should clear the event handler if the message is read", function() {
+          message.isRead = false;
+          el.flagTitlebarForMessage = message;
+          expect(el.flagTitlebar).toBe(true);
+
+          message.__isRead = true;
+
+          el._handleTitlebarMessageChange();
+          expect(el.flagTitlebar).toBe(false);
+
+          // Run
+          spyOn(el, "_handleTitlebarMessageChange");
+          message.trigger("messages:change");
+
+          expect(el._handleTitlebarMessageChange).not.toHaveBeenCalled();
+        });
+
+
+        it("Should clear the badge if the message is destroyed", function() {
+          spyOn(el, "_handleTitlebarMessageChange").and.callThrough();
+          message.isRead = false;
+          el.flagTitlebarForMessage = message;
+          expect(el.flagTitlebar).toBe(true);
+
+          message.destroy();
+
+          expect(el._handleTitlebarMessageChange).toHaveBeenCalled();
+          expect(el.flagTitlebar).toBe(false);
+        });
+      });
+
       describe("The desktopNotify() method", function() {
         it("Should calls closeDesktopNotify if needed", function() {
           spyOn(el, "closeDesktopNotify");
@@ -246,6 +414,17 @@ if (window.Notification) {
           expect(el.closeDesktopNotify).not.toHaveBeenCalled();
           message.isRead = true;
           message.trigger('messages:change', {});
+          expect(el.closeDesktopNotify).toHaveBeenCalled();
+        });
+
+        it("Should listen for the message to be destroyed and call closeDesktopNotify", function() {
+          spyOn(el, "closeDesktopNotify");
+          message.isRead = false;
+
+          // Run
+          el.desktopNotify(message);
+          expect(el.closeDesktopNotify).not.toHaveBeenCalled();
+          message.trigger('destroy', {});
           expect(el.closeDesktopNotify).toHaveBeenCalled();
         });
       });
@@ -308,6 +487,17 @@ if (window.Notification) {
           expect(el.closeToast).not.toHaveBeenCalled();
           message.isRead = true;
           message.trigger('messages:change', {});
+          expect(el.closeToast).toHaveBeenCalled();
+        });
+
+        it("Should listen for the message to be destroyed and call closeToast", function() {
+          spyOn(el, "closeToast");
+          message.isRead = false;
+
+          // Run
+          el.toastNotify(message);
+          expect(el.closeToast).not.toHaveBeenCalled();
+          message.trigger('destroy');
           expect(el.closeToast).toHaveBeenCalled();
         });
 

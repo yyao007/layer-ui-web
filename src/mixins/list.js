@@ -2,6 +2,7 @@
  * A List Mixin that provides common list patterns
  *
  * @class layerUI.mixins.List
+ * @mixin layerUI.mixins.HasQuery
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../components/component';
@@ -10,6 +11,16 @@ import HasQuery from './has-query';
 module.exports = {
   mixins: [HasQuery],
   properties: {
+    /**
+     * Lists have some special behaviors; its useful to be able to test if a component is in fact a list.
+     *
+     * @property {Boolean} [_isList=true]
+     * @private
+     * @readonly
+     */
+    _isList: {
+      value: true,
+    },
 
     /**
      * Set/get state related to whether the Query data is loading data from the server.
@@ -232,6 +243,7 @@ module.exports = {
       const itemInstance = item instanceof Layer.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
+        widget.parentComponent = this;
         widget.setAttribute('layer-item-id', item.id.replace(/^layer:\/\/\//, '').replace(/\//g, '_'));
         if (widget) {
           this.onGenerateListItem(widget);

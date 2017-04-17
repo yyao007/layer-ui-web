@@ -8,7 +8,6 @@
  */
 module.exports = {
   properties: {
-
     /**
      * Get/Set the selected Conversation by ID.
      *
@@ -43,6 +42,9 @@ module.exports = {
   methods: {
     onCreate() {
       this.addEventListener('click', this._onClick.bind(this));
+    },
+    onAfterCreate() {
+      if (!this.properties._selectedItemEventName) this.properties._selectedItemEventName = 'layer-item-selected';
     },
 
     /**

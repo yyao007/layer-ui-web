@@ -210,7 +210,7 @@ module.exports = {
      */
     _applyContentTag() {
       const messageHandler = document.createElement(this._contentTag);
-      messageHandler.parentContainer = this;
+      messageHandler.parentComponent = this;
       messageHandler.message = this.item;
       this.nodes.messageHandler = messageHandler;
 

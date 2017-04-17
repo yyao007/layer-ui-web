@@ -53,6 +53,7 @@ LayerUI.mixins = {
   ListItem: require('./mixins/list-item'),
   ListSelection: require('./mixins/list-selection'),
   ListItemSelection: require('./mixins/list-item-selection'),
+  FocusOnKeydown: require('./mixins/focus-on-keydown'),
 };
 
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()

@@ -24,6 +24,7 @@ import LayerUI, { utils } from '../base';
 const dateClassName = 'layer-list-item-separator-date';
 
 module.exports = utils.dateSeparator = (widget, messages, index) => {
+  if (index > messages.length) return;
   const message = widget.item;
   const needsBoundary = index === 0 || message.sentAt.toDateString() !== messages[index - 1].sentAt.toDateString();
 

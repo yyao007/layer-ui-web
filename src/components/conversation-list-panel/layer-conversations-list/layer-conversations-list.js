@@ -206,6 +206,26 @@ registerComponent('layer-conversations-list', {
     },
 
     /**
+     * Sort by takes as value `lastMessage` or `createdAt`
+     *
+     * @property {String} [sortBy=lastMessage]
+     */
+    sortBy: {
+      order: -1, // needs to fire before appId and client are set
+      value: 'lastMessage',
+      set(value) {
+        switch (value) {
+          case 'lastMessage':
+            this.properties.sortBy = [{ 'lastMessage.sentAt': 'desc' }];
+            break;
+          default:
+            this.properties.sortBy = null;
+        }
+        if (this.query) this.query.update({ sortBy: this.properties.sortBy });
+      },
+    },
+
+    /**
      * The event name to trigger on selecting a Conversation.
      *
      * @readonly
@@ -263,6 +283,13 @@ registerComponent('layer-conversations-list', {
       conversationWidget.item = conversation;
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
+    },
+  },
+  listeners: {
+    'layer-notification-click': function notificationClick(evt) {
+      const message = evt.detail.item;
+      const conversation = message.getConversation();
+      if (conversation) this.selectedId = conversation.id;
     },
   },
 });

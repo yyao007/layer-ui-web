@@ -281,10 +281,10 @@ layerUI.adapters = {
  * @param {HTMLElement} options.handlesMessage.container     The container that this will be rendered within; typically identifies a specific
  *                                                          layerUI.MessageList or layerUI.ConversationItem.
  * @param {Boolean} options.handlesMessage.returns          Return true to signal that this handler accepts this Message.
- * @param {String} tagName                                  Dom node to create if this handler accepts the Message.
- * @param {String} label                                    Label to show when we can't render the whole message.
+ * @param {String} options.tagName                          Dom node to create if this handler accepts the Message.
+ * @param {String} options.label                            Label to show when we can't render the whole message.
  *                                                          Typically identifies the type of content to the user.
- * @param {Number} [order=0]                                Some handlers may need to be tested before other handlers to control which one gets
+ * @param {Number} [options.order=0]                        Some handlers may need to be tested before other handlers to control which one gets
  *                                                          selected; Defaults to order=0, this handler is first
  */
 layerUI.registerMessageHandler = function registerMessageHandler(options) {
@@ -566,9 +566,10 @@ layerUI.addAdapter = (name, adapter) => { layerUI.adapters[name] = adapter; };
  * @method init
  * @static
  * @param {Object} settings     list any settings you want changed from their default values.
+ * @param {Object} mixins       hash of component names with mixins to add to the component
  */
 layerUI.init = function init(settings) {
-  // No-op -- see base-index.js
+  // No-op -- see layer-ui.js
 };
 
 /**
@@ -576,7 +577,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '0.10.1';
+layerUI.version = '1.0.0';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

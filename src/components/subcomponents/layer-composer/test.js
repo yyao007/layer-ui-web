@@ -231,6 +231,32 @@ describe('layer-composer', function() {
       expect(calledFor.parts[0].body).toEqual("After death he became Lord Dork Laugh");
       expect(el.value).toEqual("Frodo shall hang until he is dead or until we get tired of watching him laugh at us");
     });
+
+    it("Should trigger events even if no conversation", function() {
+      var calledFor = null;
+      document.body.addEventListener("layer-send-message", function(evt) {
+        calledFor = evt.detail.parts[0];
+        evt.preventDefault();
+      });
+      el.conversation = null;
+      el.send();
+
+
+      expect(calledFor.body).toEqual("Frodo shall hang until he is dead or until we get tired of watching him laugh at us");
+    });
+
+    it("Should not send, nor create a message with no conversation", function() {
+      var calledFor = null;
+      document.body.addEventListener("layer-send-message", function(evt) {
+        calledFor = evt.detail.parts[0];
+        expect(evt.detail.item).toBe(null);
+        expect(evt.detail.conversation).toBe(null);
+      });
+      el.conversation = null;
+      el.send();
+
+      expect(calledFor.body).toEqual("Frodo shall hang until he is dead or until we get tired of watching him laugh at us");
+    });
   });
 
   describe("The _onKeyDown() method", function() {
@@ -305,8 +331,8 @@ describe('layer-composer', function() {
     });
 
     it("Should call _triggerChange", function() {
-      el.nodes.input.value = "hi ho";
       el.properties.value = "hi";
+      el.properties.client = client;
 
       spyOn(el, "_triggerChange");
       el._onKeyDown({
@@ -316,7 +342,7 @@ describe('layer-composer', function() {
         ctrlKey: false,
         target: el.nodes.input
       });
-      expect(el._triggerChange).toHaveBeenCalledWith("hi ho", "hi");
+      expect(el._triggerChange).toHaveBeenCalledWith("", "hi");
     });
   });
 

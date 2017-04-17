@@ -5,8 +5,12 @@ describe("Has Query Mixin", function() {
       properties: {
         _queryModel: {
           value: layer.Query.Identity
-        }
-      }
+        },
+        sortBy: {
+          order: 10,
+          value: [{ 'ardvarks': 'desc' }]
+        },
+      },
     });
   });
 
@@ -274,6 +278,15 @@ describe("Has Query Mixin", function() {
         el.query = query;
         el._setupGeneratedQuery();
         expect(el.hasGeneratedQuery).toBe(false);
+      });
+
+      it("Should respect any sortBy property", function() {
+        testRoot.innerHTML = '<has-query-test use-generated-query="false" app-id="' + client.appId + '"></has-query-test>';
+        CustomElements.takeRecords();
+        layer.Util.defer.flush();
+        var el = testRoot.firstChild;
+        el._setupGeneratedQuery();
+        expect(el.query.sortBy).toEqual([{ 'ardvarks': 'desc' }]);
       });
     });
 

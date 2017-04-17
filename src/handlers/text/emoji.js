@@ -8,6 +8,7 @@ import RemarkableParser from 'remarkable-emoji/setEmoji';
 import layerUI from '../../base';
 
 layerUI.registerTextHandler({
+  base: location.protocol + '://twemoji.maxcdn.com/',
   name: 'emoji',
   order: 300,
   requiresEnable: true,

@@ -54,12 +54,14 @@ import Layer from 'layer-websdk';
 import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
 import HasQuery from '../../mixins/has-query';
+import FocusOnKeydown from '../../mixins/focus-on-keydown';
+
 import '../messages-list-panel/layer-messages-list/layer-messages-list';
 import '../subcomponents/layer-composer/layer-composer';
 import '../subcomponents/layer-typing-indicator/layer-typing-indicator';
 
 registerComponent('layer-conversation-panel', {
-  mixins: [MainComponent, HasQuery],
+  mixins: [MainComponent, HasQuery, FocusOnKeydown],
 
   /**
    * This event is triggered before any Message is sent.
@@ -278,6 +280,23 @@ registerComponent('layer-conversation-panel', {
     },
 
     /**
+     * If you have an initial conversation id, but what this property to be otherwise ignored.
+     *
+     * When to use this? You have set your Conversation Panel to `listen-to` your Conversation List,
+     * but you still want to be able to set an initial conversation.  Any changes to this property
+     * will be ignored.
+     *
+     * @property {String} initialConversationId
+     */
+    initialConversationId: {
+      set(value) {
+        if (!this.properties._internalState.onAfterCreateCalled) {
+          this.conversationId = value;
+        }
+      },
+    },
+
+    /**
      * The Conversation being shown by this panel.
      *
      * This Conversation ID specifies what conversation to render and interact with.
@@ -318,11 +337,20 @@ registerComponent('layer-conversation-panel', {
      * So, the user clicked on a Conversation in a Conversation List, and focus is no longer on this widget?
      * Automatically refocus on it.
      *
-     * @property {Boolean} [autoFocusConversation=true]
+     * Possible values:
+     *
+     * * always
+     * * desktop-only
+     * * never
+     *
+     * Note that the definition we'd like to have for desktop-only is any device that automatically opens
+     * an on-screen keyboard.  There are no good techniques for that.  But if we detect your on an Android device
+     * we're going to assume it uses an on-screen keyboard.
+     *
+     * @property {String} [autoFocusConversation=desktop-only]
      */
     autoFocusConversation: {
-      value: true,
-      type: Boolean,
+      value: 'desktop-only',
     },
 
     // Docs in mixins/main-component.js
@@ -531,6 +559,22 @@ registerComponent('layer-conversation-panel', {
     },
 
     /**
+     * Disable the widget to disable read receipts and other behaviors that may occur while the widget is hidden.
+     *
+     * ```
+     * widget.disable = true;
+     * ```
+     *
+     * @property {Boolean}
+     */
+    disable: {
+      type: Boolean,
+      set(value) {
+        this.nodes.list.disable = value;
+      },
+    },
+
+    /**
      * The model to generate a Query for if a Query is not provided.
      *
      * @readonly
@@ -549,39 +593,15 @@ registerComponent('layer-conversation-panel', {
      * @private
      */
     onCreate() {
-      this.addEventListener('keydown', this._onKeyDown.bind(this));
-
-      // Typically the defaultIndex is -1, but IE11 uses 0.
-      /* istanbul ignore next */
-      const defaultIndex = document.head ? document.head.tabIndex : null;
-      if (this.tabIndex === '' || this.tabIndex === -1 || this.tabIndex === defaultIndex) this.tabIndex = -1;
     },
 
     /**
-     * Focus on compose bar if key is pressed within this panel.
+     * When a key is pressed and text is not focused, focus on the composer
      *
-     * Unless the focus is on an input or textarea, in which case, let the user type.
-     *
-     * @method _onKeyDown
-     * @param {Event} evt
-     * @private
+     * @method onKeyDown
      */
-    _onKeyDown(evt) {
-      const keyCode = evt.keyCode;
-      const metaKey = evt.metaKey;
-      const ctrlKey = evt.ctrlKey;
-      if (metaKey || ctrlKey) return;
-
-      /* istanbul ignore next */
-      if (keyCode >= 65 && keyCode <= 90 || // a-z
-          keyCode >= 48 && keyCode <= 57 || // 0-9
-          keyCode >= 97 && keyCode <= 111 || // NUMPAD
-          keyCode >= 186 && keyCode <= 191 || // Puncuation
-          [32, 219, 220, 222].indexOf(keyCode) !== -1) {  // Punctuation
-        if (['INPUT', 'TEXTAREA'].indexOf(document.activeElement.tagName) === -1) {
-          this.focusText();
-        }
-      }
+    onKeyDown() {
+      this.focusText();
     },
 
     /**
@@ -651,7 +671,35 @@ registerComponent('layer-conversation-panel', {
           });
         }
       }
-      if (this.autoFocusConversation) this.focusText();
+      if (this.shouldAutoFocusConversation(navigator)) this.focusText();
+    },
+    shouldAutoFocusConversation({ userAgent = '', maxTouchPoints }) {
+      switch (this.autoFocusConversation) {
+        case 'always':
+          return true;
+        case 'desktop-only':
+          if (maxTouchPoints !== undefined && maxTouchPoints > 0) return false;
+          return !(userAgent.match(/(mobile|android|phone)/i));
+        case 'never':
+          return false;
+      }
+    },
+  },
+  listeners: {
+    'layer-conversation-selected': function conversationSelected(evt) {
+      this.conversation = evt.detail.item;
+    },
+    'layer-notification-click': function notificationClick(evt) {
+      const message = evt.detail.item;
+      const conversation = message.getConversation();
+      if (conversation !== this.conversation) this.conversation = conversation;
+    },
+    'layer-message-notification': function messageNotification(evt) {
+      // If the notification is not background, and we have toast notifications enabled, and message isn't in the selected conversation,
+      // to a toast notify
+      if (!evt.detail.isBackground && evt.detail.item.conversationId === this.conversation.id && evt.target.notifyInForeground === 'toast') {
+        evt.preventDefault();
+      }
     },
   },
 });

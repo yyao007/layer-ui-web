@@ -91,6 +91,7 @@ registerComponent('layer-conversation-last-message', {
         const conversation = this.item;
         const message = conversation ? conversation.lastMessage : null;
         this.innerHTML = '';
+        if (message && message.id == "layer:///messages/66320b84-ad65-4c73-8dc8-4df4566e2137") debugger;
         if (message) {
           const handler = layerUI.getHandler(message, this);
           if (handler) {
@@ -98,7 +99,7 @@ registerComponent('layer-conversation-last-message', {
             // Create the element specified by the handler and add it as a childNode.
             if (!this.canFullyRenderLastMessage || this.canFullyRenderLastMessage(message)) {
               const messageHandler = document.createElement(handler.tagName);
-              messageHandler.parentContainer = this;
+              messageHandler.parentComponent = this;
               messageHandler.message = message;
               this.appendChild(messageHandler);
             } else if (handler.label) {

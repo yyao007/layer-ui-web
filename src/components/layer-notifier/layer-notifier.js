@@ -180,6 +180,75 @@ registerComponent('layer-notifier', {
     },
 
     /**
+     * Modify the window titlebar to notify users of new messages
+     *
+     * NOTE: Rather than always show this indicator whenever there are unread messages, we only show
+     * this indicator if the most recently received message is unread.  Further, this will not show
+     * after reloading the app; its assumed that the user who reloads your app has seen what they want
+     * to see, and that the purpose of this indicator is to flag new stuff that should bring them back to your window.
+     *
+     * See layerUI.components.Notifier.notifyCharacterForTitlebar for more controls.
+     *
+     * @property {String} notifyInTitleBar
+     */
+    notifyInTitlebar: {
+      type: Boolean,
+      value: true,
+    },
+
+    /**
+     * Set a character or string to prefix your window titlebar with when there are unread messages.
+     *
+     * This property is used if layerUI.components.Notifier.notifyInTitlebar is enabled.
+     *
+     * @property {String} notifyCharacterForTitlebar
+     */
+    notifyCharacterForTitlebar: {
+      value: '⬤',
+    },
+
+    /**
+     * Set to true to force the notifier to show the unread badge in the titlebar, or set to false to force it to remove this.
+     *
+     * Use this at runtime to modify the badging behavior, use layerUI.components.Notifier.notifyInTitlebar to enable/disable
+     * badging.  Treat this as state rather than setting.
+     *
+     * If you want to just set the badge until the message is marked as read, use layerUI.components.Notifier.flagTitlebarForMessage
+     *
+     * @property {Boolean} flagTitlebar
+     */
+    flagTitlebar: {
+      type: Boolean,
+      value: false,
+      set(value) {
+        if (value) {
+          if (document.title.indexOf(this.notifyCharacterForTitlebar) !== 0) {
+            document.title = this.notifyCharacterForTitlebar + ' ' + document.title;
+          }
+        } else if (document.title.indexOf(this.notifyCharacterForTitlebar) === 0) {
+          document.title = document.title.substring(this.notifyCharacterForTitlebar.length + 1);
+        }
+      },
+    },
+
+    /**
+     * Tells the notifier to put a badge in the titlebar for the specified message if its unread, and clear it once read.
+     *
+     * @property {layer.Message} flagTitlebarForMessage
+     */
+    flagTitlebarForMessage: {
+      set(message, oldMessage) {
+        if (oldMessage) oldMessage.off(null, this._handleTitlebarMessageChange, this);
+        if (!message || message.isRead) {
+          this.flagTitlebar = false;
+        } else {
+          this.flagTitlebar = true;
+          message.on('messages:change destroy', this._handleTitlebarMessageChange, this);
+        }
+      },
+    },
+
+    /**
      * If the user hasn't granted priveledges to use desktop notifications, they won't be shown.
      *
      * This is a state property set by this component if/when the user/browser has approved the necessary permissions.
@@ -279,6 +348,14 @@ registerComponent('layer-notifier', {
       const isBackground = IsInBackground();
       const type = isBackground ? this.notifyInBackground : this.notifyInForeground;
       const message = evt.message;
+
+      // Note: desktopNotify does a message.off() call that deletes all event handlers associated with this widget;
+      // so make sure it gets called AFTER titlebarNotify which has a more precise off() call
+      // TODO: Fix this.
+      if (this.notifyInTitlebar && isBackground) {
+        this.flagTitlebarForMessage = message;
+      }
+
       if (type && type !== 'none') {
         if (this.trigger('layer-message-notification', { item: message, type, isBackground })) {
           if (type === 'desktop' && this.properties.userEnabledDesktopNotifications) {
@@ -287,6 +364,20 @@ registerComponent('layer-notifier', {
             this.toastNotify(evt.message);
           }
         }
+      }
+    },
+
+    /**
+     * Whenever the flagTitlebarForMessage message changes, check if its now read.
+     *
+     * @method _handleTitlebarMessageChange
+     * @private
+     */
+    _handleTitlebarMessageChange(evt) {
+      const message = this.flagTitlebarForMessage;
+      if (message && (message.isRead || evt.eventName === 'destroy')) {
+        this.flagTitlebar = false;
+        this.flagTitlebarForMessage = null;
       }
     },
 
@@ -316,8 +407,8 @@ registerComponent('layer-notifier', {
         });
         this.properties.desktopNotify.show();
 
-        message.on('messages:change', (evt) => {
-          if (message.isRead) {
+        message.on('messages:change destroy', (evt) => {
+          if (message.isRead || evt.eventName === 'destroy') {
             this.closeDesktopNotify();
           }
         }, this);
@@ -368,7 +459,7 @@ registerComponent('layer-notifier', {
         this.classList.add(handler.tagName);
 
         const messageHandler = document.createElement(handler.tagName);
-        messageHandler.parentContainer = this;
+        messageHandler.parentComponent = this;
         messageHandler.message = message;
 
         messageHandler.classList.add('layer-message-item-placeholder');
@@ -378,8 +469,8 @@ registerComponent('layer-notifier', {
         this.properties._toastTimeout = setTimeout(this.closeToast.bind(this), this.timeoutSeconds * 1000);
 
         this.properties.toastMessage = message;
-        message.on('messages:change', (evt) => {
-          if (message.isRead) {
+        message.on('messages:change destroy', (evt) => {
+          if (message.isRead || evt.eventName === 'destroy') {
             this.closeToast();
           }
         }, this);

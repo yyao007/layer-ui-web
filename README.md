@@ -11,9 +11,9 @@
 | Safari           | 9.0        | OSX 10.11          |
 | Safari (IOS)     | 9.x        | IOS 10.0           |
 | Safari (IOS)     | 10.0       | IOS 9.3            |
-| Chrome           | 55         | OSX 10.9           |
+| Chrome           | 55         | OSX 11.0           |
 | Chrome           | 48         | Linux              |
-| Firefox          | 51         | OSX 10.9           |
+| Firefox          | 51         | OSX 11.0           |
 | Firefox          | 50         | Windows 8          |
 
 Older versions of Safari do not support Websockets and will not work with the Layer WebSDK.
@@ -57,9 +57,9 @@ Note that if you do not have an `appId` at the time you call `init()` you can in
 ### CDN
 
 ```html
-<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
-<script src='https://cdn.layer.com/ui/0.9/layer-ui-web.min.js'></script>
-<link rel='stylesheet' href='https://cdn.layer.com/ui/0.9/themes/bubbles-basic.css' />
+<script src='https://cdn.layer.com/sdk/3.2/layer-websdk.min.js'></script>
+<script src='https://cdn.layer.com/ui/1.0/layer-ui-web.min.js'></script>
+<link rel='stylesheet' href='https://cdn.layer.com/ui/1.0/themes/bubbles-basic.css' />
 <script>
 window.layerUI.init({
   appId: 'layer:///apps/staging/UUID'
@@ -70,14 +70,22 @@ window.layerUI.init({
 Alternatively, a separate theme and templates can be loaded using:
 
 ```html
-<link rel='stylesheet' href='https://cdn.layer.com/ui/0.9/themes/groups-basic.css' />
-<link rel='import' href="https://cdn.layer.com/ui/0.9/themes/groups-basic-templates.html">
+<link rel='stylesheet' href='https://cdn.layer.com/ui/1.0/themes/groups-basic.css' />
+<!-- This file can be copied from https://cdn.layer.com/ui/1.0/themes/groups-basic-templates.html but
+     generates CORS errors if loaded directly from CDN -->
+<link rel='import' href="groups-basic-templates.html">
 ```
 
 > Note: Using a custom template must access this package from the `window` object; as such, regardless of what module system you use, the default
 build will assign `window.layerUI` to this package.
 
 More information on creating/customizing themes is in the [Themes](CUSTOMIZATION.md#themes) section.
+
+The following themes are available:
+
+* https://cdn.layer.com/ui/1.0/themes/bubbles-basic.min.css
+* https://cdn.layer.com/ui/1.0/themes/bubbles-compact.min.css
+* https://cdn.layer.com/ui/1.0/themes/groups-basic.min.css
 
 ### NPM
 
@@ -109,41 +117,11 @@ layerUI.init({
 <link rel='import' href="node_modules/layer-ui-web/themes/build/groups-basic-templates.html">
 ```
 
-Note that you can create a custom build that does not compile in all components; this would replace use of the index.js file in this repository with your own:
+The following themes are available:
 
-```javascript
-// Load the polyfill
-require('webcomponents.js/webcomponents-lite.js');
-
-// Register the components we want
-require("layer-ui-web/lib/components/conversation-panel/layer-compose-button-panel/layer-compose-button-panel");
-require("layer-ui-web/lib/components/conversation-panel/layer-composer/layer-composer");
-require("layer-ui-web/lib/components/conversation-panel/layer-conversation/layer-conversation");
-require("layer-ui-web/lib/components/conversation-panel/layer-message-item/layer-message-item");
-require("layer-ui-web/lib/components/conversation-panel/layer-messages-list/layer-messages-list");
-require("layer-ui-web/lib/components/conversation-panel/layer-typing-indicator/layer-typing-indicator");
-require("layer-ui-web/lib/components/misc/layer-avatar/layer-avatar");
-require("layer-ui-web/lib/components/misc/layer-date/layer-date");
-require("layer-ui-web/lib/components/misc/layer-delete/layer-delete");
-require("layer-ui-web/lib/components/misc/layer-message-status/layer-message-status");
-require("layer-ui-web/lib/handlers/messages/layer-message-image");
-require("layer-ui-web/lib/handlers/messages/layer-message-text-plain");
-require("layer-ui-web/lib/handlers/messages/layer-message-unknown");
-require("layer-ui-web/lib/handlers/messages/layer-message-video");
-require("layer-ui-web/lib/mixins/list-item");
-require("layer-ui-web/lib/mixins/list");
-require("layer-ui-web/lib/mixins/main-component");
-require("layer-ui-web/lib/utils/files");
-require("layer-ui-web/lib/utils/is-url");
-require("layer-ui-web/lib/utils/sizing");
-
-var layer = require('layer-websdk');
-var layerUI = require('layer-ui-web/lib/layer-ui');
-
-layerUI.init({
-  appId: 'layer:///apps/staging/UUID'
-});
-```
+* node_modules/layer-ui-web/themes/build/bubbles-basic.min.css
+* node_modules/layer-ui-web/themes/build/bubbles-compact.min.css
+* node_modules/layer-ui-web/themes/build/groups-basic.min.css
 
 ### Install from Github
 
@@ -157,7 +135,7 @@ grunt
 ```
 
 ```html
-<script src='https://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
+<script src='https://cdn.layer.com/sdk/3.2/layer-websdk.min.js'></script>
 <script src='layer-ui-web/build/layer-ui-web.min.js'></script>
 ```
 
@@ -175,8 +153,8 @@ UI assuming some CSS to size and position the widgets:
 ```html
 <html>
   <head>
-    <script src='http://cdn.layer.com/sdk/3.0/layer-websdk.min.js'></script>
-    <script src='https://cdn.layer.com/ui/0.9/layer-ui-web.min.js'></script>
+    <script src='http://cdn.layer.com/sdk/3.2/layer-websdk.min.js'></script>
+    <script src='https://cdn.layer.com/ui/1.0/layer-ui-web.min.js'></script>
 
     <!-- Code for instantiating a layer.Client and authenticating it: -->
     <script src='my-client-initializer.js'></script>
@@ -296,3 +274,10 @@ Object.keys(__coverage__).forEach(key => {
 1. Open the report with `open coverage/report/index.html`
 
 > WARNING: `grunt develop` may overwrite your coverage-instrumented `test/layer-ui-web-test.js` file
+
+## FUTURE WORK
+
+* A widget should know who its parent component is, not just who its parentNode is.  A parentNode could be a `div`,
+  but that widget was created from the template for `layer-xxx`, which is the parent component.
+* There are properties that are passed to a widget solely for it to pass to its subcomponents.  There should be
+  a way to identify for a child component that all of its properties be automatically exposed on the parent component.

@@ -744,7 +744,124 @@ describe('Components', function() {
       // Posttest
       expect(results).toEqual(["submixin: 10"]);
     });
+
+    it("Should propagate propagateToChildren properties", function() {
+      var el1 = document.createElement('layer-conversation-panel');
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      // Run
+      var client = new layer.Client({appId: "fred53"});
+      el1.client = client
+
+      // Posttest
+      expect(layerUI.components['layer-conversation-panel'].properties.filter(function(prop) {
+        return prop.propertyName === 'client'
+      })[0].propagateToChildren).toBe(true);
+      expect(el1.nodes.composer.client).toBe(client);
+      expect(el1.nodes.typingIndicators.client).toBe(client);
+      expect(el1.nodes.list.client).toBe(client);
+      expect(el1.nodes.composer.nodes.buttonPanel.client).toBe(client);
+      expect(el1.nodes.composer.nodes.buttonPanelLeft.client).toBe(client);
+
+      // Run Test 2
+      var client2 = new layer.Client({appId: "fred55"});
+      el1.client = client2;
+
+      // Posttest 2
+      expect(layerUI.components['layer-conversation-panel'].properties.filter(function(prop) {
+        return prop.propertyName === 'client'
+      })[0].propagateToChildren).toBe(true);
+      expect(el1.nodes.composer.client).toBe(client2);
+      expect(el1.nodes.typingIndicators.client).toBe(client2);
+      expect(el1.nodes.list.client).toBe(client2);
+      expect(el1.nodes.composer.nodes.buttonPanel.client).toBe(client2);
+      expect(el1.nodes.composer.nodes.buttonPanelLeft.client).toBe(client2);
+    });
+
+    it("Should propagate propagateToChildren properties to list items", function() {
+      var client = new layer.Client({appId: "fred53"});
+      client.user = new layer.Identity({
+        client: client,
+        userId: 'FrodoTheDodo',
+        displayName: 'Frodo the Dodo',
+        id: 'layer:///identities/FrodoTheDodo',
+        isFullIdentity: true
+      });
+      client._clientAuthenticated();
+      client._clientReady();
+      var query = client.createQuery({model: layer.Query.Conversation});
+      var el = document.createElement('layer-conversations-list');
+      query.data = [
+        client.createConversation({participants: ["a"]}),
+        client.createConversation({participants: ["b"]}),
+        client.createConversation({participants: ["c"]})
+      ];
+
+      // Run Test 1
+      var testState1 = {hey: "ho"};
+      el.state = testState1;
+      el.query = query;
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+      var listItems = el.querySelectorAll("layer-conversation-item");
+
+      // Posttest 1
+      expect(listItems.length).toEqual(3);
+      for (var i = 0; i < listItems.length; i++) {
+        var item = listItems[i];
+        expect(item.state).toBe(testState1);
+      }
+
+      // Run test 2
+      var testState2 = {ho: "hey"};
+      el.state = testState2;
+
+      // Posttest 2
+      for (var i = 0; i < listItems.length; i++) {
+        var item = listItems[i];
+        expect(item.state).toBe(testState2);
+      }
+    });
   });
+
+  describe("The mainComponent property", function() {
+    it("Should return itself if is a main component", function() {
+      var el1 = document.createElement('layer-conversation-panel');
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el1.mainComponent).toBe(el1);
+    });
+
+    it("Should return its parent main component", function() {
+      var el1 = document.createElement('layer-conversation-panel');
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el1.nodes.composer.nodes.buttonPanel.mainComponent).toBe(el1);
+    });
+  });
+
+  describe("The parentComponent property", function() {
+    it("Should return null if no parent component", function() {
+      var el1 = document.createElement('layer-conversation-panel');
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el1.parentComponent).toBe(null);
+    });
+
+    it("Should return its parent component", function() {
+      var el1 = document.createElement('layer-conversation-panel');
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el1.nodes.composer.nodes.buttonPanel.parentComponent).toBe(el1.nodes.composer);
+    });
+  });
+
+
 
   describe("The onRender() method", function() {
     var called = false;
@@ -938,6 +1055,71 @@ describe('Components', function() {
       layer.Util.defer.flush();
 
       expect(called).toBe(true);
+    });
+  });
+
+  describe("The listeners and listenTo behaviors", function() {
+    it("Should listen for events listed by the listeners property if they come from a listenTo id", function() {
+      var eventOneCalled = false, eventTwoCalled = false;
+      layerUI.registerComponent('listener-test1', {
+        listeners: {
+          'event-one': function() {
+            eventOneCalled = true;
+          },
+          'event-two': function() {
+            eventTwoCalled = true;
+          }
+        }
+      });
+      layerUI.registerComponent('listener-test1-source', {});
+
+      var el = document.createElement('listener-test1');
+      el.listenTo = 'source1,source2, source3';
+      testRoot.appendChild(el);
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      var source1 = document.createElement('listener-test1-source');
+      source1.id = 'source1';
+      testRoot.appendChild(source1);
+
+      var source2 = document.createElement('listener-test1-source');
+      source2.id = 'source2';
+      testRoot.appendChild(source2);
+
+      var source3 = document.createElement('listener-test1-source');
+      source3.id = 'source3';
+      testRoot.appendChild(source3);
+
+      var source4 = document.createElement('listener-test1-source');
+      source4.id = 'source4';
+      testRoot.appendChild(source4);
+
+      expect(eventOneCalled).toBe(false);
+      expect(eventTwoCalled).toBe(false);
+
+      // Test Run 1
+      source1.trigger('event-one');
+      expect(eventOneCalled).toBe(true);
+      expect(eventTwoCalled).toBe(false);
+      eventOneCalled = false;
+
+      // Test Run 2
+      source2.trigger('event-two');
+      expect(eventOneCalled).toBe(false);
+      expect(eventTwoCalled).toBe(true);
+      eventTwoCalled = false;
+
+      // Test Run 3
+      source3.trigger('event-one');
+      expect(eventOneCalled).toBe(true);
+      expect(eventTwoCalled).toBe(false);
+      eventOneCalled = false;
+
+      // Test Run 4
+      source4.trigger('event-one');
+      expect(eventOneCalled).toBe(false);
+      expect(eventTwoCalled).toBe(false);
     });
   });
 });

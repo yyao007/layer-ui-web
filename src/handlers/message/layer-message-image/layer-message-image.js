@@ -19,14 +19,18 @@ import 'blueimp-load-image/js/load-image-orientation';
 import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
 
-import layerUI, { settings as UISettings } from '../../../base';
-import { registerComponent } from '../../../components/component';
+import { settings as UISettings } from '../../../base';
+import { registerMessageComponent } from '../../../components/component';
 import normalizeSize from '../../../utils/sizing';
 import MessageHandler from '../../../mixins/message-handler';
 
-registerComponent('layer-message-image', {
+registerMessageComponent('layer-message-image', {
   mixins: [MessageHandler],
   properties: {
+    label: {
+      // TODO: Remove font awsome css classes!
+      value: '<i class="fa fa-file-image-o layer-image-message-icon" aria-hidden="true"></i> Image message'
+    },
 
     /**
      * The Message property provides the MessageParts we are going to render.
@@ -60,11 +64,26 @@ registerComponent('layer-message-image', {
         }
       },
     },
-
-    parentContainer: {},
-
   },
   methods: {
+
+    handlesMessage(message) {
+      // Get the Image Parts
+      const imageParts = message.parts.filter(part =>
+        ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1).length;
+
+      // Get the Preview Parts
+      const previewParts = message.parts.filter(part =>
+        part.mimeType === 'image/jpeg+preview').length;
+
+      // Get the Metadata Parts
+      const metaParts = message.parts.filter(part =>
+        part.mimeType === 'application/json+imageSize').length;
+
+      // We handle 1 part images or 3 part images.
+      return (message.parts.length === 1 && imageParts ||
+        message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1);
+    },
 
     /**
      * Constructor.
@@ -103,7 +122,7 @@ registerComponent('layer-message-image', {
     onRender() {
       let maxSizes = UISettings.maxSizes;
       // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
-      if (this.parentContainer && this.parentContainer.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };
+      if (this.parentComponent && this.parentComponent.tagName === 'LAYER-NOTIFIER') maxSizes = { height: 140, width: maxSizes.width };
       this.properties.sizes = normalizeSize(this.properties.meta, { width: maxSizes.width, height: maxSizes.height });
       this.style.height = (UISettings.verticalMessagePadding + this.properties.sizes.height) + 'px';
       if (this.properties.preview && this.properties.preview.body) {
@@ -155,26 +174,26 @@ registerComponent('layer-message-image', {
 /*
  * Handle any Message that contains an IMage + Preview + Metadata or is just an Image
  */
-layerUI.registerMessageHandler({
-  tagName: 'layer-message-image',
-  label: '<i class="fa fa-file-image-o" aria-hidden="true"></i> Image message',
-  handlesMessage(message, container) {
-    // Get the Image Parts
-    const imageParts = message.parts.filter(part =>
-      ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1).length;
+// layerUI.registerMessageHandler({
+//   tagName: 'layer-message-image',
+//   label: '<i class="fa fa-file-image-o" aria-hidden="true"></i> Image message',
+//   handlesMessage(message, container) {
+//     // Get the Image Parts
+//     const imageParts = message.parts.filter(part =>
+//       ['image/png', 'image/gif', 'image/jpeg'].indexOf(part.mimeType) !== -1).length;
 
-    // Get the Preview Parts
-    const previewParts = message.parts.filter(part =>
-      part.mimeType === 'image/jpeg+preview').length;
+//     // Get the Preview Parts
+//     const previewParts = message.parts.filter(part =>
+//       part.mimeType === 'image/jpeg+preview').length;
 
-    // Get the Metadata Parts
-    const metaParts = message.parts.filter(part =>
-      part.mimeType === 'application/json+imageSize').length;
+//     // Get the Metadata Parts
+//     const metaParts = message.parts.filter(part =>
+//       part.mimeType === 'application/json+imageSize').length;
 
-    // We handle 1 part images or 3 part images.
-    return (message.parts.length === 1 && imageParts ||
-      message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1);
-  },
-});
+//     // We handle 1 part images or 3 part images.
+//     return (message.parts.length === 1 && imageParts ||
+//       message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1);
+//   },
+// });
 
 

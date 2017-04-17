@@ -1,5 +1,29 @@
 # Layer UI for Web Change Log
 
+# 1.0.0
+
+* Breaking Changes
+    * Conversation List now defaults to being sorted by `lastMessage` rather than `createdAt`; change this using the Conversation List `sortBy` property.
+
+GA Release of Layer UI for Web
+
+* The `<layer-presence />` widget is now enabled, as long as you run this with Layer WebSDK 3.2; this is automatically added to all `<layer-avatar />` widgets.
+* `<layer-notifier />` now has a `notifyInTitlebar` to enable/disable putting unread indicators in
+  your web page's titlebar.
+* You can now call `layerUI.registerMessageComponent` in place of separately calling `layerUI.registerComponent` and `layerUI.registerMessageHandler`
+* All components now have a `parentComponent` property; similar to `parentNode` but references the Webcomponent
+  whose template caused this widget to be created.
+* All components now have a `mainComponent` property pointing at the root webcomponent that caused them to be added to the page.
+* All components now automatically propagate the `layer.Client` property to all children
+* `<layer-composer />` now can work without a conversation by triggering events on send, without actually sending.
+* `<layer-conversation-panel />` now has a `disable` property; use it to disable read receipts from being sent when this widget is hidden.
+* Emojis now use http/https to load emoji images based on your web application's protocol
+* Adds support for a `listen-to` attribute to remove the need for boiler plate code to wire events from one widget to the next
+  * Conversation Panel if listening to a Conversation List will change conversation whenever there is a selection event
+  * Conversation Panel if listening to a Notifier widget will show any Conversation for any notification the user has clicked on
+* Adds ConversationPanel property `initialConversationId` for setting an initial Conversation; changes to this value do not
+  affect the widget.  This property works well when using `listen-to` to change conversations, but still want an initial conversation.
+
 # 0.10.1
 
 * Bug Fixes

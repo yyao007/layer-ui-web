@@ -38,24 +38,18 @@ module.exports = {
      * @property {Object} state
      */
     state: {
-      set: function(newState) {
-        Object.keys(this.nodes).forEach((nodeName) => {
-          this.nodes[nodeName].state = newState;
-        });
-        this.onRenderState();
-      }
-    }
+      propagateToChildren: true,
+      set(newState) {
+        if (this.onRenderState) this.onRenderState();
+      },
+    },
+    /**
+     * MIXIN HOOK: onRenderState is called whenever a new state object is assigned.
+     *
+     * This is for use sharing a state object across your entire app,
+     * or an entire set of LUI components.
+     *
+     * @method onRenderState
+     */
   },
-  methods: {
-    onRenderState: function() {
-      // No-op
-    },
-    onAfterCreate: function() {
-      const state = this.properties.state;
-      if (state) Object.keys(this.nodes).forEach(nodeName => this.nodes[nodeName].state = state);
-    },
-    onGenerateListItem: function(widget) {
-      widget.state = this.state;
-    }
-  }
 };

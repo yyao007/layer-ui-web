@@ -54,7 +54,7 @@ var supportedBrowsers = {
   },
   'chrome-0': {
     browserName: 'chrome',
-    platform: 'Linux',
+    platform: 'WIN8',
     version: 'latest'
   },
   'firefox-1': {
@@ -121,7 +121,7 @@ var unsupportedBrowsers = {
         "max-duration": 400,
         maxRetries: 2,
         onTestComplete: function(result, callback) {
-          console.log("Saucelabs Results:" + result.passed);
+          console.log("----------------------------------------\nSaucelabs Results:" + result.passed);
           require("request").put({
               url: ['https://saucelabs.com/rest/v1', process.env.SAUCE_USERNAME, 'jobs', result.job_id].join('/'),
               auth: { user: process.env.SAUCE_USERNAME, pass: process.env.SAUCE_ACCESS_KEY },

@@ -291,31 +291,31 @@ describe('layer-conversation-panel', function() {
   });
 
   describe("The autoFocusConversation property", function() {
-    it("Should default to true", function() {
+    it("Should default to desktop-only", function() {
       testRoot.innerHTML = '<layer-conversation-panel></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
       el = testRoot.firstChild;
-      expect(el.autoFocusConversation).toBe(true);
+      expect(el.autoFocusConversation).toEqual('desktop-only');
     });
 
-    it("Should be initializable to false", function() {
-      testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="false"></layer-conversation-panel>';
+    it("Should be initializable to never", function() {
+      testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="never"></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
       el = testRoot.firstChild;
-      expect(el.autoFocusConversation).toBe(false);
+      expect(el.autoFocusConversation).toBe('never');
     });
 
-    it("Should be initializable to true", function() {
-      testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="true"></layer-conversation-panel>';
+    it("Should be initializable to always", function() {
+      testRoot.innerHTML = '<layer-conversation-panel auto-focus-conversation="always"></layer-conversation-panel>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
       el = testRoot.firstChild;
-      expect(el.autoFocusConversation).toBe(true);
+      expect(el.autoFocusConversation).toBe('always');
     });
   });
 
@@ -428,6 +428,15 @@ describe('layer-conversation-panel', function() {
     });
   });
 
+  describe("The disable property", function() {
+    it("Should pass the property to the list", function() {
+      el.disable = true;
+      expect(el.nodes.list.disable).toBe(true);
+      el.disable = false;
+      expect(el.nodes.list.disable).toBe(false);
+    });
+  });
+
   describe("The created() method", function() {
     it("Should setup basic properties", function() {
       expect(el.nodes.list.tagName).toEqual('LAYER-MESSAGES-LIST');
@@ -446,53 +455,11 @@ describe('layer-conversation-panel', function() {
     });
   });
 
-  describe("The _onKeyDown() method", function() {
-    beforeEach(function() {
-      spyOn(el, "focusText");
-    });
-
-    it("Should call focusText if a character is hit while not focusing on an input", function(done) {
-      el.focus();
-      jasmine.clock().uninstall();
-      setTimeout(function() {
-        el._onKeyDown({
-          keyCode: 70,
-          metaKey: false,
-          ctrlKey: false
-        });
+  describe("The onKeyDown() method", function() {
+    it("Should call focusText onKeyDown is called", function() {
+        spyOn(el, "focusText");
+        el.onKeyDown();
         expect(el.focusText).toHaveBeenCalledWith();
-        done();
-      }, 1);
-    });
-
-    it("Should not call focusText if a character is hit while focusing on an input", function() {
-      var input = document.createElement("input");
-      testRoot.appendChild(input);
-      input.focus();
-      el._onKeyDown({
-        keyCode: 70,
-        metaKey: false,
-        ctrlKey: false
-      });
-      expect(el.focusText).not.toHaveBeenCalled();
-    });
-
-    it("Should not call focusText if a charater is hit while holding a metaKey or ctrlKey", function() {
-      el._onKeyDown({
-        keyCode: 70,
-        metaKey: false,
-        ctrlKey: true
-      });
-      expect(el.focusText).not.toHaveBeenCalled();
-    });
-
-    it("Should not call focusText if a non-character key is hit", function() {
-      el._onKeyDown({
-        keyCode: 4,
-        metaKey: false,
-        ctrlKey: false
-      });
-      expect(el.focusText).not.toHaveBeenCalled();
     });
   });
 
@@ -537,14 +504,15 @@ describe('layer-conversation-panel', function() {
 
     });
 
-    it("Should call focusText if autoFocusConversation", function() {
+    it("Should call focusText if showAutoFocusConversation returns true", function() {
+      el.autoFocusConversation = "always";
       spyOn(el, "focusText");
       el.conversationId = conversation.id;
       expect(el.focusText).toHaveBeenCalledWith();
 
       // Inverse
       el.focusText.calls.reset();
-      el.autoFocusConversation = false;
+      el.autoFocusConversation = "never";
       el.conversationId = conversation.id;
       expect(el.focusText).not.toHaveBeenCalled();
     });
@@ -610,6 +578,62 @@ describe('layer-conversation-panel', function() {
       expect(query.update).toHaveBeenCalledWith({
         predicate: 'channel.id = "' + channel.id +'"'
       });
+    });
+  });
+
+  describe("The shouldAutoFocusConversation() method", function() {
+    beforeEach(function() {
+      el.autoFocusConversation = 'desktop-only';
+    });
+
+    it("Should return true if always", function() {
+      el.autoFocusConversation = 'always';
+      expect(el.shouldAutoFocusConversation('')).toBe(true);
+    });
+
+    it("Should return false if never", function() {
+      el.autoFocusConversation = 'never';
+      expect(el.shouldAutoFocusConversation('')).toBe(false);
+    });
+
+    it("Should return false for an iphone", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) CriOS/30.0.1599.12 Mobile/11A465 Safari/8536.25 (3B92C18B-D9DE-4CB7-A02A-22FD2AF17C8F)'})).toBe(false);
+    });
+
+    it("Should return false for an ipad", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: 'Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10'})).toBe(false);
+    });
+
+    it("Should return false for IOS Chrome", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1'})).toBe(false);
+    });
+
+    it("Should return false for Chrome on Android", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: 'Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19'})).toBe(false);
+    });
+
+    it("Should return false for Firefox on Android Tablet", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: 'Mozilla/5.0 (Android 4.4; Tablet; rv:41.0) Gecko/41.0 Firefox/41.0'})).toBe(false);
+    });
+
+    it("Should return false for mobile Edge", function() {
+      expect(el.shouldAutoFocusConversation({maxTouchPoints: 3})).toBe(false);
+    });
+
+    it("Should return true for safari", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30"})).toBe(true);
+    });
+
+    it("Should return true for Chrome", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36"})).toBe(true);
+    });
+
+    it("Should return true for Firefox", function() {
+      expect(el.shouldAutoFocusConversation({userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:52.0) Gecko/20100101 Firefox/52.0"})).toBe(true);
+    });
+
+    it("Should return true for Edge", function() {
+      expect(el.shouldAutoFocusConversation({maxTouchPoints: 0})).toBe(true);
     });
   });
 });

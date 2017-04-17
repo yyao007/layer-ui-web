@@ -338,7 +338,11 @@ describe("List Mixin", function() {
         expect(fragment.childNodes.length).toEqual(0);
       });
 
-
+      it("Should setup the parentComponent of each new item", function() {
+        var fragment = document.createDocumentFragment();
+        el._generateFragmentItem(client.user, fragment);
+        expect(fragment.childNodes[0].parentComponent).toBe(el);
+      });
     });
 
     describe("The _gatherAndProcessAffectedItems() method", function() {

@@ -121,6 +121,7 @@ module.exports = {
           model: this._queryModel,
           dataType: Layer.Query.InstanceDataType,
           paginationWindow: this.pageSize || 50,
+          sortBy: this.sortBy,
         });
         this.hasGeneratedQuery = true;
       }

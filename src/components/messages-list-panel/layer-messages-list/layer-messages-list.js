@@ -147,6 +147,25 @@ registerComponent('layer-messages-list', {
     getMessageDeleteEnabled: {},
 
     /**
+     * Disable read receipts and other behaviors; typically used when the widget has been hidden from view.
+     *
+     * ```
+     * widget.disable = true;
+     * ```
+     *
+     * @property {Boolean}
+     */
+    disable: {
+      set(value) {
+        if (!value) {
+          this.properties.stuckToBottom = true;
+          this.scrollTo(this.scrollHeight - this.clientHeight);
+          this._checkVisibility();
+        }
+      },
+    },
+
+    /**
      * If the user scrolls within this many screen-fulls of the top of the list, page the Query.
      *
      * If value is 0, will page once the user reaches the top.  If the value is 0.5, will page once the user
@@ -316,7 +335,7 @@ registerComponent('layer-messages-list', {
      * @private
      */
     _checkVisibility() {
-      if (LayerUI.isInBackground()) return;
+      if (LayerUI.isInBackground() || this.disable) return;
 
       // The top that we can see is marked by how far we have scrolled.
       // However, all offsetTop values of the child nodes will be skewed by the value of this.nodes.loadIndicator.offsetTop, so add that in.
@@ -347,6 +366,8 @@ registerComponent('layer-messages-list', {
      * @param {layerUI.components.MessagesListPanel.Item} child
      */
     _markAsRead(child) {
+      if (LayerUI.isInBackground() || this.disable) return;
+
       const visibleTop = this.scrollTop + this.nodes.loadIndicator.offsetTop;
       const visibleBottom = this.scrollTop + this.clientHeight + this.nodes.loadIndicator.offsetTop;
       if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {

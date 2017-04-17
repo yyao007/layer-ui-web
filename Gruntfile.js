@@ -82,6 +82,7 @@ module.exports = function (grunt) {
       themes: {
         files: [
           {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'},
+          {src: ['themes/src/bubbles-basic/theme-compact.less'], dest: 'themes/build/bubbles-compact.css'},
           {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'},
           {src: ['themes/src/layerblue/theme.less'], dest: 'themes/build/layerblue.css'}
         ]
@@ -91,6 +92,7 @@ module.exports = function (grunt) {
       build: {
         files: [
           {src: ['themes/build/bubbles-basic.css'], dest: 'themes/build/bubbles-basic.min.css'},
+          {src: ['themes/build/bubbles-compact.css'], dest: 'themes/build/bubbles-compact.min.css'},
           {src: ['themes/build/groups-basic.css'], dest: 'themes/build/groups-basic.min.css'}
         ]
       }
@@ -132,6 +134,18 @@ module.exports = function (grunt) {
           'head-html': HTML_HEAD,
           'css': [CSS],
           'footer': 'Layer WebSDK v' + websdkVersion + '; Layer UI for Web v' + version
+        }
+      }
+    },
+
+    jsduckfixes: {
+      build: {
+        files: [
+          {
+            src: ['docs/output/*.js']
+          }
+        ],
+        options: {
         }
       }
     },
@@ -237,24 +251,6 @@ module.exports = function (grunt) {
         }, 1500);
       }, 1500);
     }, 1500);
-  });
-
-  /* There is some path of using expose and external that should allow us to do a require('layer-websdk')
-     without it being in this build, but I do not see it.  So, brute force:
-     1. Before browserify, we replace layer-websdk/index.js with `module.exports = global.layer`,
-     2. after browserify, we restore index.js
-  */
-  grunt.registerTask('before-browserify', 'Swap layer-websdk for global', function() {
-    var newcode = 'module.exports = global.layer;';
-    var contents = grunt.file.read('node_modules/layer-websdk/index.js');
-    if (contents != newcode) {
-      grunt.file.write('node_modules/layer-websdk/index-stashed.js', contents);
-    }
-    grunt.file.write('node_modules/layer-websdk/index.js', newcode);
-  });
-
-  grunt.registerTask('after-browserify', 'Swap layer-websdk back', function() {
-    grunt.file.copy('node_modules/layer-websdk/index-stashed.js', 'node_modules/layer-websdk/index.js');
   });
 
   grunt.registerMultiTask('webcomponents', 'Building Web Components', function() {
@@ -427,6 +423,27 @@ module.exports = function (grunt) {
       grunt.file.write('test/SpecRunner.html', specFile);
     });
 
+    grunt.registerMultiTask('jsduckfixes', 'Fixing Docs', function() {
+      var options = this.options();
+
+      this.files.forEach(function(fileGroup) {
+        fileGroup.src.forEach(function(file, index) {
+            var contents = grunt.file.read(file);
+            var startIndex = contents.indexOf('{');
+            var endIndex = contents.lastIndexOf('}') + 1;
+            var parsedContents = JSON.parse(contents.substring(startIndex, endIndex));
+
+            if (parsedContents.members) parsedContents.members.forEach(function(element) {
+              element.id = element.id.replace(/:/g, '_');
+            });
+            parsedContents.html = parsedContents.html.replace(/id='([^']*):([^']*)'/g, "id='" + "$1" + "_" + "$2'");
+            parsedContents.html = parsedContents.html.replace(/href='([^']*):([^']*)'/g, "href='" + "$1" + "_" + "$2'");
+            contents = contents.substring(0, startIndex) + JSON.stringify(parsedContents) + contents.substring(endIndex);
+            grunt.file.write(file, contents);
+        });
+      });
+    });
+
 
   // Building
   grunt.loadNpmTasks('grunt-browserify');
@@ -443,7 +460,7 @@ module.exports = function (grunt) {
   grunt.registerTask('coverage', ['webcomponents', 'browserify:coverage', "generate-tests"]);
   grunt.registerTask('theme', ['less', 'copy']),
 
-  grunt.registerTask('docs', ['debug', 'jsduck']);
+  grunt.registerTask('docs', ['debug', 'jsduck', 'jsduckfixes']);
   grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
   grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
 

@@ -159,8 +159,12 @@ function initReact(React, ReactDom) {
         return this.layerUIGeneratedNodes[propDef.propertyName];
       },
 
+
       render() {
-        return React.createElement(componentName, { ref: (node) => { this.node = node; } });
+        return React.createElement(componentName, {
+          ref: (node) => { this.node = node; },
+          id: this.props.id,
+        });
       },
     });
   });

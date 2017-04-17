@@ -46,8 +46,10 @@ registerComponent('layer-composer', {
     client: {
       set(value) {
         if (!this.nodes.input) console.error('NO INPUT FOR COMPOSER');
-        this.properties.typingListener = this.properties.client.createTypingListener(this.nodes.input);
-        this._setTypingListenerConversation();
+        if (value) {
+          this.properties.typingListener = this.properties.client.createTypingListener(this.nodes.input);
+          this._setTypingListenerConversation();
+        }
       },
     },
 
@@ -196,10 +198,7 @@ registerComponent('layer-composer', {
      * @param {layer.MessagePart[]} optionalParts
      */
     send(optionalParts) {
-      if (!this.conversation) {
-        console.error("Unable to send message without a conversationId");
-        return;
-      }
+
       let parts = [];
       if (optionalParts) {
         parts = optionalParts;
@@ -213,7 +212,7 @@ registerComponent('layer-composer', {
 
       if (parts.length === 0) return;
 
-      const message = this.conversation.createMessage({ parts });
+      const message = this.conversation ? this.conversation.createMessage({ parts }) : null;
 
       /**
        * This event is triggered before any Message is sent; used to control notifications and override sending.
@@ -239,6 +238,7 @@ registerComponent('layer-composer', {
        *
        * ```javascript
        * document.body.addEventListener('layer-send-message', function(evt) {
+       *   var message = evt.detail.item;
        *   evt.preventDefault();
        *   myAsyncLookup(function(result) {
        *     var part = new layer.MessagePart({
@@ -254,20 +254,29 @@ registerComponent('layer-composer', {
        * @event layer-send-message
        * @param {Event} evt
        * @param {Object} evt.detail
-       * @param {layer.Message} evt.detail.item
+       * @param {layer.MessagePart[]} evt.detail.parts   The array of message parts that will be sent
+       * @param {layer.Message} evt.detail.item          The message that was created from the parts; null if no Conversation property is set
+       * @param {layer.Conversation} evt.detail.conversation  The conversation that the message was created on; may be null if no conversation has been set.
        * @param {Object} evt.detail.notification
        * @param {String} evt.detail.notification.text
        * @param {String} evt.detail.notification.title
        * @param {String} evt.detail.notification.sound
        */
-      const textPart = message.parts.filter(part => part.mimeType === 'text/plain');
+      const textPart = parts.filter(part => part.mimeType === 'text/plain')[0];
       const notification = {
         text: textPart ? textPart.body : 'File received',
-        title: `New Message from ${message.sender.displayName}`,
+        title: `New Message from ${this.client.user.displayName}`,
       };
 
-      if (this.trigger('layer-send-message', { item: message, notification })) {
-        if (this.conversation instanceof Layer.Channel) {
+      if (this.trigger('layer-send-message', {
+        parts,
+        notification,
+        item: message,
+        conversation: this.conversation,
+      })) {
+        if (!this.conversation) {
+          console.error('Unable to send message without a conversationId');
+        } else if (this.conversation instanceof Layer.Channel) {
           this.onSend(message);
           message.send();
         } else {

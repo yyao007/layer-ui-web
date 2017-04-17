@@ -1,6 +1,6 @@
 {
   "name": "layer-ui-web",
-  "version": "0.10.1",
+  "version": "1.0.0",
   "description": "The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "remarkable-emoji": "^0.1.3",
     "twemoji": "^1.4.1",
     "webcomponents.js": "^0.7.22",
-    "layer-websdk": "3.1.1"
+    "layer-websdk": "3.2"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

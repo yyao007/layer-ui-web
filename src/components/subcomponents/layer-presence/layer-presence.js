@@ -31,6 +31,7 @@
  *
  * @class layerUI.components.subcomponents.Presence
  * @extends layerUI.components.Component
+ * @mixin layerUI.mixins.MainComponent
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';

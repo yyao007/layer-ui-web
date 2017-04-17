@@ -24,9 +24,11 @@
  */
 import Layer from 'layer-websdk';
 import layerUI from '../../../base';
+import MainComponent from '../../../mixins/main-component';
 import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-file-upload-button', {
+  mixins: [MainComponent],
   properties: {
 
   },
