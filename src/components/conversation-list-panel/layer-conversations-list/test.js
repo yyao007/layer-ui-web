@@ -77,11 +77,12 @@ describe('layer-conversations-list', function() {
 
   describe("The sortBy property", function() {
     it("Should setup a proper values", function() {
-      expect(query.sortBy).toEqual([{'lastMessage.sentAt': 'desc']});
-      query.sortBy = 'createdAt';
-      expect(query.update).toHaveBeenCalledWith({sortBy: [{'createdAt': 'desc'}]});
-      query.sortBy = 'lastMessage';
-      expect(query.sortBy).toEqual([{'lastMessage.sentAt': 'desc']});
+      expect(query.sortBy).toEqual([{'lastMessage.sentAt': 'desc'}]);
+      el.sortBy = 'createdAt';
+      expect(el.sortBy).toEqual([{'createdAt': 'desc'}]);
+
+      el.sortBy = 'lastMessage';
+      expect(el.sortBy).toEqual([{'lastMessage.sentAt': 'desc'}]);
     });
   });
 
