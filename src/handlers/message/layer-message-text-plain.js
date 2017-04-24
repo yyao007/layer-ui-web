@@ -8,6 +8,8 @@
  */
 import { registerMessageComponent } from '../../components/component';
 import MessageHandler from '../../mixins/message-handler';
+import Layer from 'layer-websdk'
+import LayerUI from '../../base';
 
 registerMessageComponent('layer-message-text-plain', {
   mixins: [MessageHandler],
@@ -15,6 +17,7 @@ registerMessageComponent('layer-message-text-plain', {
     label: {
       label: 'Text',
     },
+    textData: {},
   },
   methods: {
     /**
@@ -40,6 +43,15 @@ registerMessageComponent('layer-message-text-plain', {
     },
 
     /**
+     * Rerender any message that was rendered as a preview and is now no longer a preview.
+     *
+     * @method onSent
+     */
+    onSent() {
+      this.onRender();
+    },
+
+    /**
      * Format the text and render it.
      *
      * Iterates over all Text Handlers allowing each to modify the `text` property, as well as to append values to `afterText`
@@ -49,23 +61,70 @@ registerMessageComponent('layer-message-text-plain', {
      * @method
      */
     onRender() {
-      if (!layerUI.textHandlersOrdered) this._setupOrderedHandlers();
+      if (!LayerUI.textHandlersOrdered) this._setupOrderedHandlers();
 
       const text = this.message.parts[0].body;
       const textData = {
         text: this._fixHtml(text),
         afterText: [],
+        afterNodes: [],
       };
       let afterText = '';
 
-      layerUI.textHandlersOrdered.forEach(handler => handler(textData, this.message));
+      LayerUI.textHandlersOrdered.forEach((handler) => {
+        handler(textData, this.message, this.parentComponent.isMessageItem);
+      });
+      this.textData = textData;
 
-      if (textData.afterText.length) {
-        const startDiv = '<div class="layer-message-text-plain-after-text">';
-        afterText = startDiv + textData.afterText.join('</div>' + startDiv) + '</div>';
-        this.classList.add('layer-message-text-plain-has-after-text');
+      // It would be nice to enable a preview of afterNodes, but
+      // that would require handlers to keep track of afterText and afterNode they
+      // have previously created.  This is a reasonable feature to add to
+      // after-text-handler, but we don't actually mandate use of after-text-handler.
+      if (this.parentComponent.isMessageItem && !this.message.isNew()) {
+        if (textData.afterText.length || textData.afterNodes.length) {
+          this.classList.add('layer-message-text-plain-has-after-text');
+        }
+
+        if (textData.afterText.length) {
+          const startDiv = '<div class="layer-message-text-plain-after-text">';
+          afterText = startDiv + textData.afterText.join('</div>' + startDiv) + '</div>';
+        }
       }
       this.innerHTML = textData.text + afterText;
+
+      if (this.properties._internalState.onAttachCalled && this.parentComponent.isMessageItem) {
+        this.onRenderAfterNodes();
+      }
+    },
+
+    onAttach() {
+      if (this.parentComponent.isMessageItem) {
+        this.onRenderAfterNodes();
+      }
+    },
+
+    onRenderAfterNodes() {
+      this.textData.afterNodes.forEach((node) => {
+        if (node.parentNode) {
+          debugger;
+        } else if (!this.message.isNew()) {
+          const sibling = this.parentComponent.nodes.content;
+          node.message = this.message;
+          node.messageWidget = this;
+          node.parentComponent = this;
+          node.classList.add('layer-message-text-plain-after-node');
+          // const content = document.createElement('div');
+          // const classes = sibling.className;
+          // content.className = classes;
+          // content.appendChild(node);
+          node._onAfterCreate();
+          if (sibling.parentNode.childNodes.length === 1) {
+            sibling.parentNode.appendChild(node);
+          } else {
+            sibling.parentNode.insertBefore(node, sibling.nextSibling);
+          }
+        }
+      });
     },
 
     /**
@@ -77,9 +136,9 @@ registerMessageComponent('layer-message-text-plain', {
      * @private
      */
     _setupOrderedHandlers() {
-      layerUI.textHandlersOrdered = Object.keys(layerUI.textHandlers).filter(handlerName =>
-        layerUI.textHandlers[handlerName].enabled)
-      .map(handlerName => layerUI.textHandlers[handlerName])
+      LayerUI.textHandlersOrdered = Object.keys(LayerUI.textHandlers).filter(handlerName =>
+        LayerUI.textHandlers[handlerName].enabled)
+      .map(handlerName => LayerUI.textHandlers[handlerName])
       .sort((a, b) => {
         if (a.order > b.order) return 1;
         if (b.order > a.order) return -1;

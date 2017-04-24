@@ -76,7 +76,7 @@ module.exports = {
       mode: registerComponent.MODES.AFTER,
       set() {
         this.onRender();
-        this.message.on('messages:change', this.onRerender, this);
+        this.message.on('messages:change', this._onChange, this);
         if (this.message.isNew()) this.message.once('messages:sent', this.onSent, this);
       },
     },
@@ -113,6 +113,23 @@ module.exports = {
      * @method onRerender
      */
     onRerender() {},
+
+    /**
+     * Whenever the message changes, call onRerender().
+     *
+     * Unless of course, the message is new, and unsent, and we're actually
+     * rendering a Message Preview, in which case call onRender
+     *
+     * @method _onChange
+     * @private
+     */
+    _onChange() {
+      if (this.message.isNew()) {
+        this.onRender();
+      } else {
+        this.onRerender();
+      }
+    },
 
     /**
      * Your onSent method will be called if you rendered the message prior to sending it.

@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <script src='layer-ui-web-test.js'></script>
+    <link rel="stylesheet" href="../themes/build/bubbles-basic.css">
+    <script>
+    var APP_ID = "layer:///apps/staging/2f1707c0-fd2f-11e6-ae72-c27751092ce1";
+    var USER_ID = "michael@layer.com";
+    var PASSWORD = "mkantor1";
+    var PROVIDER_URL = "https://layer-quickstart-michael.herokuapp.com";
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var client = window.client = new layer.Client({
+          appId: APP_ID
+        });
+        client.connect();
+
+        client.on('challenge', function(evt) {
+          layer.xhr({
+            url: PROVIDER_URL + '/authenticate',
+            headers: {
+              'Content-type': 'application/json',
+              'Accept': 'application/json'
+            },
+            method: 'POST',
+            data: {
+              nonce: evt.nonce,
+              email: USER_ID,
+              password: PASSWORD
+            }
+          }, function(res) {
+            if (res.success && res.data.identity_token) {
+              console.log('challenge: ok');
+
+              evt.callback(res.data.identity_token);
+            } else {
+              alert('Login failed; please check your user id and password');
+            }
+          });
+        });
+
+        client.on('ready', function() {
+          var presenceWidget = document.querySelector('layer-presence');
+          presenceWidget.item = client.user;
+          presenceWidget.onPresenceClick = function(evt) {
+            if (client.user.status === layer.Identity.STATUS.AVAILABLE) {
+              client.user.setStatus(layer.Identity.STATUS.BUSY);
+            } else {
+              client.user.setStatus(layer.Identity.STATUS.AVAILABLE);
+            }
+          };
+
+          var userNameDiv = document.querySelector('.user-name');
+          userNameDiv.innerHTML = client.user.displayName || client.user.userId;
+        });
+    });
+
+    layerUI.init({
+      appId: APP_ID
+    });
+
+    /* Demo Async Message Handler called Ipsum Lorem Handler; creates an <ipsum-lorum-handler /> node for any message containing "ipsum lorum" */
+    layerUI.registerTextHandler({
+      name: 'ipsum',
+      handler: function(textData, message, isMessageListItemComponent) {
+        if (isMessageListItemComponent) {
+          var matches = textData.text.match(/ipsum lorem/);
+          if (matches) {
+            var handler = document.createElement('ipsum-lorem-handler');
+            textData.afterNodes.push(handler);
+          }
+        }
+      }
+    });
+
+    /* Define the ipsum-lorum-handler Component; comes with message and messageWidget properties
+     * refering to the layer.Message and the <layer-message-item-sent /> (or received) widget its associated with.
+     * Height MUST be locked no later than the `onAfterCreate` call.  Content of unknown height is tricky, and must
+     * allow for, or UI for expanding to full height.  We may build UI for expanding to full height in at some point.
+     */
+    layerUI.registerComponent('ipsum-lorem-handler', {
+      mixins: [layerUI.mixins.AfterTextHandler],
+      style: 'ipsum-lorem-handler {display: flex; flex-direction: column; justify-content: center; overflow-y: auto;}',
+      methods: {
+        onCreate() {
+          debugger;
+        },
+        onAfterCreate() {
+          layer.xhr({
+            url: "https://baconipsum.com/api/?type=meat-and-filler&paras=1&start-with-lorem=1&format=text",
+          }, this._processResult.bind(this));
+          this.style.height = (this.messageWidget.clientHeight + 80) +  'px';
+        },
+        _processResult(result) {
+          setTimeout(function() {
+            this.innerHTML = this.message.parts[0].body.replace(/ipsum lorem/, result.data);
+          }.bind(this), 1000);
+        },
+      }
+    });
+
+    var presendMessage;
+    document.addEventListener('layer-send-message', function(evt) {
+      presendMessage.send();
+      evt.preventDefault();
+    });
+
+    document.addEventListener('layer-composer-change-value', function(evt) {
+      var text = evt.detail.value;
+      if (!text && presendMessage) {
+        presendMessage = null;
+      } else {
+        if (!presendMessage) {
+          presendMessage = document.querySelector('layer-conversation-panel').conversation.createMessage();
+          presendMessage.addPart({mimeType: "text/plain", body: ""});
+          presendMessage.presend();
+        }
+        presendMessage.parts[0].body = text;
+        presendMessage.trigger('messages:change');
+      }
+    });
+
+    </script>
+    <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      height: 40px;
+    }
+    .content, .header {
+      display: flex;
+      flex-direction: row;
+    }
+    .header {
+      border-bottom: solid 1px black;
+    }
+    .content {
+      flex-grow: 1;
+    }
+    layer-conversations-list, .layer-conversations-list-header {
+      width: 250px;
+      border-right: solid 1px black;
+    }
+    layer-conversation-panel, .layer-conversation-header {
+      flex-grow: 1;
+      width: 500px; /* flexbox bug workaround */
+    }
+    </style>
+  </head>
+  <body>
+    <div class='header'>
+      <div class='layer-conversations-list-header'>
+        <layer-presence></layer-presence>
+        Logged in as User <span class='user-name'></span>
+      </div>
+      <div class='layer-conversation-header'>
+      </div>
+      <div class='layer-membership-list-header'>
+      </div>
+    </div>
+    <div class='content'>
+      <layer-notifier id="notifier"></layer-notifier>
+      <layer-conversations-list selected-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" id="list"></layer-conversations-list>
+      <layer-conversation-panel conversation-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" listen-to="notifier,list"></layer-conversation-panel>
+    </div>
+  </body>
+</html>

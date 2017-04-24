@@ -632,18 +632,20 @@ registerComponent('layer-messages-list', {
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful
       this._updateLastMessageSent();
 
-      if (this.properties.stuckToBottom) {
-        this.scrollTo(this.scrollHeight - this.clientHeight);
-      } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
-        this.scrollTo(firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - initialOffset);
-      }
-
-      this.isDataLoading = this.properties.query.isFiring;
-      this._checkVisibility();
-      if (!evt.inRender) this.onRerender();
-
       if (this.properties.insertEvents) this.properties.insertEvents.forEach(anEvt => this._renderInsertedData(anEvt));
       delete this.properties.insertEvents;
+
+      Layer.Util.defer(() => {
+        if (this.properties.stuckToBottom) {
+          this.scrollTo(this.scrollHeight - this.clientHeight);
+        } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
+          this.scrollTo(firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - initialOffset);
+        }
+        this._checkVisibility();
+        if (!evt.inRender) this.onRerender();
+      });
+
+      this.isDataLoading = this.properties.query.isFiring;
     },
   },
 });

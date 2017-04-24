@@ -86,6 +86,10 @@ import Layer from 'layer-websdk';
 module.exports = {
   properties: {
 
+    _isMessageItem: {
+      value: true
+    },
+
     // Every List Item has an item property, here it represents the Conversation to render
     item: {},
 

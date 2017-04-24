@@ -344,12 +344,15 @@ layerUI.getHandler = (message, container) => {
  * layerUI.registerTextHandler({
  *    name: 'youtube',
  *    order: 200,
- *    handler: function(textData, message) {
+ *    handler: function(textData, message, isMessageListItem) {
  *    textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
  *   });
  * });
  * ```
+ *
+ * Note that instead of modifying the `textData.text`, you can instead push dom nodes into `textData.nodes` which will
+ * let you render content separate from the message itself, such as pictures refered to by the message.
  *
  * @method registerTextHandler
  * @static
@@ -363,6 +366,7 @@ layerUI.getHandler = (message, container) => {
  * @param {String[]} options.handler.textData.afterText   Append elements to this array to add stuff to be rendered below the text.
  *      Anything that goes into `afterText` should NOT be parsed by any text handler.
  * @param {layer.Message} options.handler.message         If your text processor needs access to the original message, this is it, but should be treated as a read-only object in this context.
+ * @param {Boolean} options.handler.isMessageListItem     If rendering the results in a MessageList, returns true, else we may be rendering this in a Toast popup, Conversation List Last Message, or elsewhere.  Emojis you may want in all places, but `afterText` and `afterNodes` will be ignored if its not in a Message List
  * @param {Boolean} [requiresEnable=false]                If provided, this registers the handler but won't use the handler
  *       without a separate call to opt in.  Opt in later using with `layerUI.registerTextHandler({name: handlerName})`
  *       and no handler function.  (For Internal use only)
@@ -577,7 +581,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '1.0.0';
+layerUI.version = '1.0.2';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

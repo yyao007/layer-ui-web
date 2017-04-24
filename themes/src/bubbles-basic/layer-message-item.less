@@ -33,15 +33,19 @@ layer-messages-list layer-message-item-sent, layer-messages-list layer-message-i
     /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
       * between text and bubble borders.
       */
-    layer-message-text-plain {
+    layer-message-text-plain, .layer-message-text-plain-after-node {
       padding: 4px 12px;
       border: solid 1px rgba(0, 0, 0, 0.05);
     }
 
     /* Give all messages the basic bubble treatment */
-    layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+    layer-message-text-plain, .layer-message-text-plain-after-node, layer-message-image canvas, layer-message-video video {
       border-radius: @chatbubbleradius;
       .layer-text-plain();
+    }
+
+    .layer-message-text-plain-after-node {
+      margin-top: 4px;
     }
   }
 
@@ -49,6 +53,8 @@ layer-messages-list layer-message-item-sent, layer-messages-list layer-message-i
   .layer-parsed-image {
     height: 200px;
   }
+
+
 }
 
 /**
@@ -57,7 +63,7 @@ layer-messages-list layer-message-item-sent, layer-messages-list layer-message-i
 layer-messages-list layer-message-item-received {
 
   /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
-  layer-message-text-plain {
+  layer-message-text-plain, .layer-message-text-plain-after-node {
     background-color: @chatparticipantbubblebackground;
 
     a, a:visited, a:focus, a:active {
@@ -98,12 +104,14 @@ layer-messages-list layer-message-item-received {
   * Custom formatting for Messages sent by the session owner.
   */
 layer-messages-list layer-message-item-sent .layer-list-item {
-  layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+  layer-message-text-plain, .layer-message-text-plain-after-node, layer-message-image canvas, layer-message-video video {
     color: @chatownerbubbletextcolor;
-    margin: 0px;
+  }
+  layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+      margin: 0px;
   }
 
-  layer-message-text-plain {
+  layer-message-text-plain, .layer-message-text-plain-after-node {
     margin-left: 20px;
     background-color: @chatownerbubblebackground;
     color: @fontcolor-inverted;

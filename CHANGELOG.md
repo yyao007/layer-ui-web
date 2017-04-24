@@ -1,5 +1,11 @@
 # Layer UI for Web Change Log
 
+# 1.0.2
+
+* Adds support for managing DOM nodes within a textHandler,
+* Adds a mixin for defining components for use from a textHandler
+* Better support for `message.presend()` by calling `onRender` instead of `onRerender` when an unsent message changes
+
 # 1.0.0
 
 * Breaking Changes
