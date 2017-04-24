@@ -50,6 +50,7 @@ describe("Main Component Mixin", function() {
       jasmine.clock().uninstall();
       layerUI.settings.appId = null;
       document.body.removeChild(testRoot);
+      layer.Client.removeListenerForNewClient();
       if (el) el.onDestroy();
     } catch(e) {}
   });

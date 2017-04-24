@@ -58,6 +58,7 @@ describe("Empty List Mixin", function() {
     document.body.removeChild(testRoot);
     if (el) el.onDestroy();
     jasmine.clock().uninstall();
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The isEmptyList property", function() {

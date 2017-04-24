@@ -3125,7 +3125,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     /**
-     * Sort by takes as value `lastMessage` or `createdAt`
+     * Sort by takes as value `lastMessage` or `createdAt`; for initialization only.
+     *
+     * This will not resort your list after initialization; use `list.query.update()` for that.
      *
      * @property {String} [sortBy=lastMessage]
      */
@@ -3138,9 +3140,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             this.properties.sortBy = [{ 'lastMessage.sentAt': 'desc' }];
             break;
           default:
-            this.properties.sortBy = null;
+            this.properties.sortBy = [{ 'createdAt': 'desc' }];
         }
-        if (this.query) this.query.update({ sortBy: this.properties.sortBy });
       }
     },
 
@@ -7646,6 +7647,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /**
      * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
      *
+     * If using it outsdie of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
+     *
+     * ```
+     * document.getElementById('mypresencewidget').item = client.user;
+     * ```
+     *
      * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
      *
      * ```javascript
@@ -7693,6 +7700,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (0, _component.registerComponent)('layer-presence', {
   mixins: [_mainComponent2.default],
+
+  /**
+   * The user has clicked on the `<layer-presence />` widget
+   *
+   * @event layer-presence-click
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.item - The user rendered by this Presence Widget
+   */
+
+  /**
+   * The user has clicked on the `<layer-presence />` widget
+   *
+   * @property {Function} onPresenceClick
+   * @param {Event} onPresenceClick.evt
+   * @param {Object} onPresenceClick.evt.detail
+   * @param {layer.Identity} onPresenceClick.evt.detail.item - The user rendered by this Presence Widget
+   */
   events: ['layer-presence-click'],
   properties: {
 
@@ -7933,7 +7958,7 @@ var _component = require('../../../components/component');
      */
     onRerender: function onRerender(evt) {
       // We receive typing indicator events for ALL Conversations; ignore them if they don't apply to the current Conversation
-      if (evt.conversationId === this.conversation.id) {
+      if (this.conversation && evt.conversationId === this.conversation.id) {
 
         // Trigger an event so that the application can decide if it wants to handle the event itself.
         var customEvtResult = this.trigger('layer-typing-indicator-change', {
@@ -10076,10 +10101,20 @@ module.exports = {
     appId: {
       order: 1,
       set: function set(value) {
+        var _this = this;
+
         if (value && value.indexOf('layer:///') === 0) {
           var client = _layerWebsdk2.default.Client.getClient(value);
-          if (!client) throw new Error('You must create a layer.Client with your appId before creating this component');
-          this.client = client;
+          if (client) {
+            this.client = client;
+          } else if (_layerWebsdk2.default.Client.addListenerForNewClient) {
+            // Wait for the next client with this appId to be registered and then assign it.
+            _layerWebsdk2.default.Client.addListenerForNewClient(function (newClient) {
+              return _this.client = newClient;
+            }, value);
+          } else {
+            throw new Error('You must create a layer.Client with your appId before creating this component. Or upgrade to Layer WebSDK 3.2.2 or above.');
+          }
         }
       }
     },
@@ -10101,11 +10136,11 @@ module.exports = {
     client: {
       order: 2,
       set: function set(value) {
-        var _this = this;
+        var _this2 = this;
 
         if (value) {
           value.on('destroy', function (evt) {
-            if (evt.target === value) _this.properties.client = null;
+            if (evt.target === value) _this2.properties.client = null;
           }, this);
         }
       }
@@ -20270,56 +20305,22 @@ window.CustomElements.addModule(function(scope) {
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
   console.error('ERROR: It appears that you have multiple copies of the Layer WebSDK in your build!');
-  module.exports = global.layer;
 } else {
-  /* istanbul ignore next */
-  if (!global.layer) global.layer = {};
-
-  /* istanbul ignore next */
-  if (!global.layer.plugins) global.layer.plugins = {};
-
-  const layer = global.layer;
-  layer.Root = require('./lib/root');
-  layer.Client = require('./lib/client');
-  layer.ClientAuthenticator = require('./lib/client-authenticator');
-  layer.Syncable = require('./lib/models/syncable');
-  layer.Conversation = require('./lib/models/conversation');
-  layer.Channel = require('./lib/models/channel');
-  layer.Container = require('./lib/models/container');
-  layer.Message = require('./lib/models/message');
-  layer.Message.ConversationMessage = require('./lib/models/conversation-message');
-  layer.Message.ChannelMessage = require('./lib/models/channel-message');
-  layer.Announcement = require('./lib/models/announcement');
-  layer.MessagePart = require('./lib/models/message-part');
-  layer.Content = require('./lib/models/content');
-  layer.Query = require('./lib/queries/query');
-  layer.QueryBuilder = require('./lib/queries/query-builder');
-  layer.xhr = require('./lib/xhr');
-  layer.Identity = require('./lib/models/identity');
-  layer.Membership = require('./lib/models/membership');
-  layer.LayerError = require('./lib/layer-error');
-  layer.LayerEvent = require('./lib/layer-event');
-  layer.SyncManager = require('./lib/sync-manager');
-  layer.SyncEvent = require('./lib/sync-event').SyncEvent;
-  layer.XHRSyncEvent = require('./lib/sync-event').XHRSyncEvent;
-  layer.WebsocketSyncEvent = require('./lib/sync-event').WebsocketSyncEvent;
-  layer.Websockets = {
-    SocketManager: require('./lib/websockets/socket-manager'),
-    RequestManager: require('./lib/websockets/request-manager'),
-    ChangeManager: require('./lib/websockets/change-manager'),
+  // global.layer.native needs to be defined when the layer src tree is required
+  const layer = global.layer = {
+    native: {
+      atob: window.atob,
+      btoa: window.btoa
+    },
   };
-  layer.OnlineStateManager = require('./lib/online-state-manager');
-  layer.DbManager = require('./lib/db-manager');
-  layer.Constants = require('./lib/const');
-  layer.Util = require('./lib/client-utils');
-  layer.TypingIndicators = require('./lib/typing-indicators/typing-indicators');
-  layer.TypingIndicators.TypingListener = require('./lib/typing-indicators/typing-listener');
-  layer.TypingIndicators.TypingPublisher = require('./lib/typing-indicators/typing-publisher');
-
-  module.exports = layer;
+  global.layer = require('./lib/layer');
+  //now set native again because the global.layer object was overwritten
+  global.layer.native = layer.native;
 }
+module.exports = global.layer;
+
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/client":74,"./lib/client-authenticator":71,"./lib/client-utils":73,"./lib/const":75,"./lib/db-manager":76,"./lib/layer-error":77,"./lib/layer-event":78,"./lib/models/announcement":86,"./lib/models/channel":88,"./lib/models/channel-message":87,"./lib/models/container":89,"./lib/models/content":90,"./lib/models/conversation":92,"./lib/models/conversation-message":91,"./lib/models/identity":93,"./lib/models/membership":94,"./lib/models/message":96,"./lib/models/message-part":95,"./lib/models/syncable":97,"./lib/online-state-manager":98,"./lib/queries/query":106,"./lib/queries/query-builder":105,"./lib/root":107,"./lib/sync-event":108,"./lib/sync-manager":109,"./lib/typing-indicators/typing-indicators":111,"./lib/typing-indicators/typing-listener":112,"./lib/typing-indicators/typing-publisher":113,"./lib/websockets/change-manager":114,"./lib/websockets/request-manager":115,"./lib/websockets/socket-manager":116,"./lib/xhr":117}],71:[function(require,module,exports){
+},{"./lib/layer":79}],71:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -20458,6 +20459,7 @@ var ClientAuthenticator = function (_Root) {
 
       this.onlineManager = new OnlineManager({
         socketManager: this.socketManager,
+        testUrl: this.url + '/nonces?connection-test',
         connected: this._handleOnlineChange.bind(this),
         disconnected: this._handleOnlineChange.bind(this)
       });
@@ -20576,27 +20578,6 @@ var ClientAuthenticator = function (_Root) {
     }
 
     /**
-     * Get a nonce and start the authentication process
-     *
-     * @method
-     * @private
-     */
-
-  }, {
-    key: '_connect',
-    value: function _connect() {
-      var _this2 = this;
-
-      this.xhr({
-        url: '/nonces',
-        method: 'POST',
-        sync: false
-      }, function (result) {
-        return _this2._connectionResponse(result);
-      });
-    }
-
-    /**
      * Initiates the connection.
      *
      * Called by constructor().
@@ -20617,12 +20598,12 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: 'connect',
     value: function connect() {
+      var _this2 = this;
+
       var userId = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
 
       var user = void 0;
       this.isConnected = false;
-      this._lastChallengeTime = 0;
-      this._wantsToBeAuthenticated = true;
       this.user = null;
       this.onlineManager.start();
       if (!this.isTrustedDevice || !userId || this._isPersistedSessionsDisabled() || this._hasUserIdChanged(userId)) {
@@ -20647,7 +20628,13 @@ var ClientAuthenticator = function (_Root) {
       if (this.sessionToken && this.user.userId) {
         this._sessionTokenRestored();
       } else {
-        this._connect();
+        this.xhr({
+          url: '/nonces',
+          method: 'POST',
+          sync: false
+        }, function (result) {
+          return _this2._connectionResponse(result);
+        });
       }
       return this;
     }
@@ -20681,10 +20668,7 @@ var ClientAuthenticator = function (_Root) {
       var _this3 = this;
 
       var user = void 0;
-      this.isConnected = false;
       this.user = null;
-      this._lastChallengeTime = 0;
-      this._wantsToBeAuthenticated = true;
       if (!userId || !sessionToken) throw new Error(LayerError.dictionary.sessionAndUserRequired);
       if (!this.isTrustedDevice || this._isPersistedSessionsDisabled() || this._hasUserIdChanged(userId)) {
         this._clearStoredData();
@@ -20795,7 +20779,6 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: '_authenticate',
     value: function _authenticate(nonce) {
-      this._lastChallengeTime = Date.now();
       if (nonce) {
         this.trigger('challenge', {
           nonce: nonce,
@@ -20829,10 +20812,6 @@ var ClientAuthenticator = function (_Root) {
       } else {
         var userData = Util.decode(identityToken.split('.')[1]);
         var identityObj = JSON.parse(userData);
-
-        if (!identityObj.prn) {
-          throw new Error('Your identity token prn (user id) is empty');
-        }
 
         if (this.user.userId && this.user.userId !== identityObj.prn) {
           throw new Error(LayerError.dictionary.invalidUserIdChange);
@@ -21105,7 +21084,6 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: 'logout',
     value: function logout(callback) {
-      this._wantsToBeAuthenticated = false;
       var callbackCount = 1,
           counter = 0;
       if (this.isAuthenticated) {
@@ -21310,7 +21288,6 @@ var ClientAuthenticator = function (_Root) {
     key: 'sendSocketRequest',
     value: function sendSocketRequest(data, callback) {
       var isChangesArray = Boolean(data.isChangesArray);
-      if (this._wantsToBeAuthenticated && !this.isAuthenticated) this._connect();
 
       if (data.sync) {
         var target = data.sync.target;
@@ -21343,15 +21320,12 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: '_handleOnlineChange',
     value: function _handleOnlineChange(evt) {
-      if (!this._wantsToBeAuthenticated) return;
+      if (!this.isAuthenticated) return;
       var duration = evt.offlineDuration;
       var isOnline = evt.eventName === 'connected';
       var obj = { isOnline: isOnline };
       if (isOnline) {
         obj.reset = duration > ClientAuthenticator.ResetAfterOfflineDuration;
-
-        // TODO: Use a cached nonce if it hasn't expired
-        if (!this.isAuthenticated) this._connect();
       }
       this.trigger('online', obj);
     }
@@ -21412,8 +21386,6 @@ var ClientAuthenticator = function (_Root) {
       var _this7 = this;
 
       if (!options.sync) options.sync = {};
-      if (this._wantsToBeAuthenticated && !this.isAuthenticated) this._connect();
-
       var innerCallback = function innerCallback(result) {
         _this7._xhrResult(result, callback);
       };
@@ -21555,17 +21527,13 @@ var ClientAuthenticator = function (_Root) {
         // If its an authentication error, reauthenticate
         // don't call _resetSession as that wipes all data and screws with UIs, and the user
         // is still authenticated on the customer's app even if not on Layer.
-        if (result.status === 401 && this._wantsToBeAuthenticated) {
-          if (this.isAuthenticated) {
-            logger.warn('SESSION EXPIRED!');
-            this.isAuthenticated = false;
-            this.isReady = false;
-            if (global.localStorage) localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
-            this.trigger('deauthenticated');
-            this._authenticate(result.data.getNonce());
-          } else if (this._lastChallengeTime > Date.now() + ClientAuthenticator.TimeBetweenReauths) {
-            this._authenticate(result.data.getNonce());
-          }
+        if (result.status === 401 && this.isAuthenticated) {
+          logger.warn('SESSION EXPIRED!');
+          this.isAuthenticated = false;
+          this.isReady = false;
+          if (global.localStorage) localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
+          this.trigger('deauthenticated');
+          this._authenticate(result.data.getNonce());
         }
       }
       if (callback) callback(result);
@@ -21626,28 +21594,15 @@ ClientAuthenticator.prototype.isConnected = false;
  */
 ClientAuthenticator.prototype.isReady = false;
 
-/**
- * State variable; indicates if the WebSDK thinks that the app WANTS to be connected.
- *
- * An app wants to be connected if it has called `connect()` or `connectWithSession()`
- * and has not called `logout()`.  A client that is connected will receive reauthentication
- * events in the form of `challenge` events.
- *
- * @type {boolean}
- * @readonly
- */
-ClientAuthenticator.prototype._wantsToBeAuthenticated = false;
-
-/**
+/* JSDUCK
  * If presence is enabled, then your presence can be set/restored.
  *
- * @type {Boolean} [isPresenceEnabled=true]
+ * @type {Boolean} [presenceEnabled=true]
  */
-ClientAuthenticator.prototype.isPresenceEnabled = true;
+ClientAuthenticator.prototype.presenceEnabled = true;
 
 /**
- * Your Layer Application ID. Can not be changed once connected.
- *
+ * Your Layer Application ID. This value can not be changed once connected.
  * To find your Layer Application ID, see your Layer Developer Dashboard.
  *
  * @type {String}
@@ -21668,14 +21623,6 @@ ClientAuthenticator.prototype.user = null;
  * @readonly
  */
 ClientAuthenticator.prototype.sessionToken = '';
-
-/**
- * Time that the last challenge was issued
- *
- * @type {Number}
- * @private
- */
-ClientAuthenticator.prototype._lastChallengeTime = 0;
 
 /**
  * URL to Layer's Web API server.
@@ -21841,17 +21788,6 @@ Object.defineProperty(ClientAuthenticator.prototype, 'userId', {
 ClientAuthenticator.ResetAfterOfflineDuration = 1000 * 60 * 60 * 30;
 
 /**
- * Number of miliseconds delay must pass before a subsequent challenge is issued.
- *
- * This value is here to insure apps don't get challenge requests while they are
- * still processing the last challenge event.
- *
- * @property {Number}
- * @static
- */
-ClientAuthenticator.TimeBetweenReauths = 30 * 1000;
-
-/**
  * List of events supported by this class
  * @static
  * @protected
@@ -21975,7 +21911,7 @@ module.exports = ClientAuthenticator;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":73,"./const":75,"./db-manager":76,"./layer-error":77,"./logger":79,"./models/identity":93,"./online-state-manager":98,"./root":107,"./sync-event":108,"./sync-manager":109,"./websockets/change-manager":114,"./websockets/request-manager":115,"./websockets/socket-manager":116,"./xhr":117}],72:[function(require,module,exports){
+},{"./client-utils":73,"./const":75,"./db-manager":76,"./layer-error":77,"./logger":80,"./models/identity":94,"./online-state-manager":99,"./root":108,"./sync-event":109,"./sync-manager":110,"./websockets/change-manager":115,"./websockets/request-manager":116,"./websockets/socket-manager":117,"./xhr":118}],72:[function(require,module,exports){
 "use strict";
 
 /**
@@ -22040,6 +21976,7 @@ module.exports = {
 
 
 },{}],73:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -22052,7 +21989,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var LayerParser = require('layer-patch');
 var uuid = require('uuid');
-var atob = typeof window === 'undefined' ? require('atob') : window.atob;
+
+var atob = global.layer.native.atob;
+var btoa = global.layer.native.btoa;
 
 /* istanbul ignore next */
 var LocalFileReader = typeof window === 'undefined' ? require('filereader') : window.FileReader;
@@ -22205,6 +22144,12 @@ function setImmediateProcessor() {
 // Schedule the function to be called by adding it to the queue, and setting up scheduling if its needed.
 function defer(func) {
   if (typeof func !== 'function') throw new Error('Function expected in defer');
+
+  if (global.layer.native.setImmediate) {
+    global.layer.native.setImmediate(func);
+    return;
+  }
+
   setImmediateQueue.push(func);
 
   // If postMessage has not already been called, call it
@@ -22228,10 +22173,12 @@ defer.flush = function () {
   return setImmediateProcessor();
 };
 
-addEventListener('message', function (event) {
-  if (event.data.type !== 'layer-set-immediate') return;
-  setImmediateProcessor();
-});
+if (!global.layer.native.setImmediate) {
+  addEventListener('message', function (event) {
+    if (event.data.type !== 'layer-set-immediate') return;
+    setImmediateProcessor();
+  });
+}
 
 exports.defer = defer;
 
@@ -22458,11 +22405,6 @@ function createParser(request) {
           updateObject._handlePatchEvent(newValue, oldValue, paths);
         }
       },
-      Channel: {
-        all: function all(updateObject, newValue, oldValue, paths) {
-          updateObject._handlePatchEvent(newValue, oldValue, paths);
-        }
-      },
       Identity: {
         all: function all(updateObject, newValue, oldValue, paths) {
           updateObject._handlePatchEvent(newValue, oldValue, paths);
@@ -22567,11 +22509,12 @@ exports.asciiInit = function (version) {
   line1 += new Array(13 - line1.length).join(' ');
   line2 += new Array(14 - line2.length).join(' ');
 
-  return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
+  return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-        \'oo.\n  MMN                    oMMo        .MM/\n  MMN                    oMMo        .MM/              ....                       ....            ...\n  MMN       Web SDK      oMMo        .MM/           ohdddddddo\' +md.      smy  -sddddddho.   hmosddmm.\n  MMM-                   oMMo        .MM/           ::.\'  \'.mM+ \'hMd\'    +Mm. +Nm/\'   .+Nm-  mMNs-\'.\n  MMMy      v' + line1 + 'oMMo        .MM/             .-:/+yNMs  .mMs   /MN: .MMs///////dMh  mMy\n  MMMMo     ' + line2 + 'oMMo        .MM/          .ymhyso+:hMs   :MM/ -NM/  :MMsooooooooo+  mM+\n  MMMMMy.                oMMo        .MM/          dMy\'    \'dMs    +MN:mM+   \'NMo            mM+\n  MMMMMMNy:\'             oMMo        .MMy++++++++: sMm/---/dNMs     yMMMs     -dMd+:-:/smy\'  mM+\n  NMMMMMMMMmy+:-.\'      \'yMM/        \'yyyyyyyyyyyo  :shhhys:+y/     .MMh       \'-oyhhhys:\'   sy:\n  :dMMMMMMMMMMMMNNNNNNNNNMNs                                        hMd\'\n   -/+++++++++++++++++++:\'                                      sNmdo\'';
 };
 
 
-},{"atob":64,"filereader":64,"layer-patch":119,"uuid":121}],74:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"filereader":64,"layer-patch":120,"uuid":122}],74:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -23247,7 +23190,7 @@ Client.prototype._scheduleCheckAndPurgeCacheAt = 0;
  * @static
  * @type {String}
  */
-Client.version = '3.2.0';
+Client.version = '3.2.1';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -23291,7 +23234,7 @@ Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
 
 
-},{"./client-authenticator":71,"./client-registry":72,"./client-utils":73,"./layer-error":77,"./logger":79,"./mixins/client-channels":80,"./mixins/client-conversations":81,"./mixins/client-identities":82,"./mixins/client-members":83,"./mixins/client-messages":84,"./mixins/client-queries":85,"./models/announcement":86,"./models/channel":88,"./models/channel-message":87,"./models/conversation":92,"./models/conversation-message":91,"./models/identity":93,"./models/membership":94,"./root":107,"./typing-indicators/typing-indicator-listener":110,"./typing-indicators/typing-listener":112,"./typing-indicators/typing-publisher":113}],75:[function(require,module,exports){
+},{"./client-authenticator":71,"./client-registry":72,"./client-utils":73,"./layer-error":77,"./logger":80,"./mixins/client-channels":81,"./mixins/client-conversations":82,"./mixins/client-identities":83,"./mixins/client-members":84,"./mixins/client-messages":85,"./mixins/client-queries":86,"./models/announcement":87,"./models/channel":89,"./models/channel-message":88,"./models/conversation":93,"./models/conversation-message":92,"./models/identity":94,"./models/membership":95,"./root":108,"./typing-indicators/typing-indicator-listener":111,"./typing-indicators/typing-listener":113,"./typing-indicators/typing-publisher":114}],75:[function(require,module,exports){
 'use strict';
 
 /**
@@ -24272,7 +24215,6 @@ var DbManager = function (_Root) {
     value: function loadMessages(conversationId, fromId, pageSize, callback) {
       var _this14 = this;
 
-      if (!this['_permission_messages'] || this._isOpenError) return callback([]);
       try {
         var fromMessage = fromId ? this.client.getMessage(fromId) : null;
         var query = window.IDBKeyRange.bound([conversationId, 0], [conversationId, fromMessage ? fromMessage.position : MAX_SAFE_INTEGER]);
@@ -24299,7 +24241,6 @@ var DbManager = function (_Root) {
     value: function loadAnnouncements(fromId, pageSize, callback) {
       var _this15 = this;
 
-      if (!this['_permission_messages'] || this._isOpenError) return callback([]);
       try {
         var fromMessage = fromId ? this.client.getMessage(fromId) : null;
         var query = window.IDBKeyRange.bound(['announcement', 0], ['announcement', fromMessage ? fromMessage.position : MAX_SAFE_INTEGER]);
@@ -24996,7 +24937,7 @@ Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
 
 
-},{"./client-utils":73,"./const":75,"./logger":79,"./models/announcement":86,"./root":107,"./sync-event":108}],77:[function(require,module,exports){
+},{"./client-utils":73,"./const":75,"./logger":80,"./models/announcement":87,"./root":108,"./sync-event":109}],77:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -25206,7 +25147,7 @@ LayerError.dictionary = {
 module.exports = LayerError;
 
 
-},{"./logger":79}],78:[function(require,module,exports){
+},{"./logger":80}],78:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -25420,6 +25361,50 @@ module.exports = LayerEvent;
 },{}],79:[function(require,module,exports){
 'use strict';
 
+var layer = {};
+module.exports = layer;
+
+layer.Root = require('./root');
+layer.Client = require('./client');
+layer.ClientAuthenticator = require('./client-authenticator');
+layer.Syncable = require('./models/syncable');
+layer.Conversation = require('./models/conversation');
+layer.Channel = require('./models/channel');
+layer.Container = require('./models/container');
+layer.Message = require('./models/message');
+layer.Message.ConversationMessage = require('./models/conversation-message');
+layer.Message.ChannelMessage = require('./models/channel-message');
+layer.Announcement = require('./models/announcement');
+layer.MessagePart = require('./models/message-part');
+layer.Content = require('./models/content');
+layer.Query = require('./queries/query');
+layer.QueryBuilder = require('./queries/query-builder');
+layer.xhr = require('./xhr');
+layer.Identity = require('./models/identity');
+layer.Membership = require('./models/membership');
+layer.LayerError = require('./layer-error');
+layer.LayerEvent = require('./layer-event');
+layer.SyncManager = require('./sync-manager');
+layer.SyncEvent = require('./sync-event').SyncEvent;
+layer.XHRSyncEvent = require('./sync-event').XHRSyncEvent;
+layer.WebsocketSyncEvent = require('./sync-event').WebsocketSyncEvent;
+layer.Websockets = {
+  SocketManager: require('./websockets/socket-manager'),
+  RequestManager: require('./websockets/request-manager'),
+  ChangeManager: require('./websockets/change-manager')
+};
+layer.OnlineStateManager = require('./online-state-manager');
+layer.DbManager = require('./db-manager');
+layer.Constants = require('./const');
+layer.Util = require('./client-utils');
+layer.TypingIndicators = require('./typing-indicators/typing-indicators');
+layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-listener');
+layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
+
+
+},{"./client":74,"./client-authenticator":71,"./client-utils":73,"./const":75,"./db-manager":76,"./layer-error":77,"./layer-event":78,"./models/announcement":87,"./models/channel":89,"./models/channel-message":88,"./models/container":90,"./models/content":91,"./models/conversation":93,"./models/conversation-message":92,"./models/identity":94,"./models/membership":95,"./models/message":97,"./models/message-part":96,"./models/syncable":98,"./online-state-manager":99,"./queries/query":107,"./queries/query-builder":106,"./root":108,"./sync-event":109,"./sync-manager":110,"./typing-indicators/typing-indicators":112,"./typing-indicators/typing-listener":113,"./typing-indicators/typing-publisher":114,"./websockets/change-manager":115,"./websockets/request-manager":116,"./websockets/socket-manager":117,"./xhr":118}],80:[function(require,module,exports){
+'use strict';
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -25529,7 +25514,7 @@ var logger = new Logger();
 module.exports = logger;
 
 
-},{"./const":75}],80:[function(require,module,exports){
+},{"./const":75}],81:[function(require,module,exports){
 'use strict';
 
 /**
@@ -25730,9 +25715,6 @@ module.exports = {
      */
     getChannel: function getChannel(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
-      if (!Channel.isValidId(id)) {
-        id = Channel.prefixUUID + id;
-      }
       if (this._models.channels[id]) {
         return this._models.channels[id];
       } else if (canLoad) {
@@ -25943,7 +25925,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/channel":88}],81:[function(require,module,exports){
+},{"../layer-error":77,"../models/channel":89}],82:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26149,9 +26131,6 @@ module.exports = {
      */
     getConversation: function getConversation(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
-      if (!Conversation.isValidId(id)) {
-        id = Conversation.prefixUUID + id;
-      }
       if (this._models.conversations[id]) {
         return this._models.conversations[id];
       } else if (canLoad) {
@@ -26360,7 +26339,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/conversation":92}],82:[function(require,module,exports){
+},{"../layer-error":77,"../models/conversation":93}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26657,7 +26636,7 @@ module.exports = {
 };
 
 
-},{"../client-utils":73,"../layer-error":77,"../models/identity":93,"../sync-event":108}],83:[function(require,module,exports){
+},{"../client-utils":73,"../layer-error":77,"../models/identity":94,"../sync-event":109}],84:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26818,7 +26797,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/membership":94,"../models/syncable":97}],84:[function(require,module,exports){
+},{"../layer-error":77,"../models/membership":95,"../models/syncable":98}],85:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26828,7 +26807,6 @@ module.exports = {
  */
 
 var Syncable = require('../models/syncable');
-var Message = require('../models/message');
 var ErrorDictionary = require('../layer-error').dictionary;
 
 module.exports = {
@@ -27039,11 +27017,6 @@ module.exports = {
     getMessage: function getMessage(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
-      // NOTE: This could be an announcement
-      if (id.indexOf('layer:///') !== 0) {
-        id = Message.prefixUUID + id;
-      }
-
       if (this._models.messages[id]) {
         return this._models.messages[id];
       } else if (canLoad) {
@@ -27154,7 +27127,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/message":96,"../models/syncable":97}],85:[function(require,module,exports){
+},{"../layer-error":77,"../models/syncable":98}],86:[function(require,module,exports){
 'use strict';
 
 /**
@@ -27307,7 +27280,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../queries/announcements-query":99,"../queries/channels-query":100,"../queries/conversations-query":101,"../queries/identities-query":102,"../queries/members-query":103,"../queries/messages-query":104,"../queries/query":106}],86:[function(require,module,exports){
+},{"../layer-error":77,"../queries/announcements-query":100,"../queries/channels-query":101,"../queries/conversations-query":102,"../queries/identities-query":103,"../queries/members-query":104,"../queries/messages-query":105,"../queries/query":107}],87:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27395,9 +27368,7 @@ var Announcement = function (_ConversationMessage) {
         url: '',
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
-          Syncable.load(id, client);
-        }
+        if (!result.success && (!result.data || result.data.id !== 'not_found')) Syncable.load(id, client);
       });
 
       this._deleted();
@@ -27485,7 +27456,7 @@ Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
 
 
-},{"../layer-error":77,"../root":107,"./conversation-message":91,"./syncable":97}],87:[function(require,module,exports){
+},{"../layer-error":77,"../root":108,"./conversation-message":92,"./syncable":98}],88:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27584,9 +27555,7 @@ var ChannelMessage = function (_Message) {
         url: '',
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
-          Message.load(id, client);
-        }
+        if (!result.success && (!result.data || result.data.id !== 'not_found')) Message.load(id, client);
       });
 
       this._deleted();
@@ -27667,7 +27636,7 @@ Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
 
 
-},{"../client-registry":72,"../const":75,"../layer-error":77,"../logger":79,"../root":107,"./message":96}],88:[function(require,module,exports){
+},{"../client-registry":72,"../const":75,"../layer-error":77,"../logger":80,"../root":108,"./message":97}],89:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27727,10 +27696,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Finally, to access a list of Messages in a Channel, see layer.Query.
  *
  * @class  layer.Channel
- * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Container
  * @author  Michael Kantor
  */
+
+/**
+ * @method setMetadataProperties
+ * @hide
+ */
+
+/**
+ * @method deleteMetadataProperties
+ * @hide
+ */
+
 var Root = require('../root');
 var Syncable = require('./syncable');
 var Container = require('./container');
@@ -28101,7 +28080,9 @@ var Channel = function (_Container) {
       try {
         var events = this._disableEvents;
         this._disableEvents = false;
-        _get(Object.getPrototypeOf(Channel.prototype), '_handlePatchEvent', this).call(this, newValue, oldValue, paths);
+        if (paths[0].indexOf('metadata') === 0) {
+          this.__updateMetadata(newValue, oldValue, paths);
+        }
         this._disableEvents = events;
       } catch (err) {
         // do nothing
@@ -28126,9 +28107,7 @@ var Channel = function (_Container) {
     key: '_deleteResult',
     value: function _deleteResult(result, id) {
       var client = this.getClient();
-      if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
-        Channel.load(id, client);
-      }
+      if (!result.success && (!result.data || result.data.id !== 'not_found')) Channel.load(id, client);
     }
 
     /**
@@ -28357,7 +28336,7 @@ Syncable.subclasses.push(Channel);
 module.exports = Channel;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":107,"./channel-message":87,"./container":89,"./syncable":97}],89:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":108,"./channel-message":88,"./container":90,"./syncable":98}],90:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -28642,7 +28621,7 @@ var Container = function (_Syncable) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success && !_this3.isDestroyed && result.data.id !== 'authentication_required') _this3._load();
+        if (!result.success && !_this3.isDestroyed) _this3._load();
       });
 
       return this;
@@ -28709,7 +28688,7 @@ var Container = function (_Syncable) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success && result.data.id !== 'authentication_required') _this4._load();
+        if (!result.success) _this4._load();
       });
 
       return this;
@@ -28838,13 +28817,6 @@ var Container = function (_Syncable) {
           oldValue: oldValue,
           paths: paths
         });
-      }
-    }
-  }, {
-    key: '_handlePatchEvent',
-    value: function _handlePatchEvent(newValue, oldValue, paths) {
-      if (paths[0].indexOf('metadata') === 0) {
-        this.__updateMetadata(newValue, oldValue, paths);
       }
     }
 
@@ -28991,7 +28963,7 @@ Syncable.subclasses.push(Container);
 module.exports = Container;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":107,"./syncable":97}],90:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],91:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29192,7 +29164,7 @@ Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
 
 
-},{"../root":107,"../xhr":117}],91:[function(require,module,exports){
+},{"../root":108,"../xhr":118}],92:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29615,9 +29587,7 @@ var ConversationMessage = function (_Message) {
         url: '?' + queryStr,
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
-          Message.load(id, client);
-        }
+        if (!result.success && (!result.data || result.data.id !== 'not_found')) Message.load(id, client);
       });
 
       this._deleted();
@@ -29742,7 +29712,7 @@ Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMes
 module.exports = ConversationMessage;
 
 
-},{"../client-registry":72,"../client-utils":73,"../const":75,"../layer-error":77,"../root":107,"./message":96}],92:[function(require,module,exports){
+},{"../client-registry":72,"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./message":97}],93:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29923,14 +29893,13 @@ var Conversation = function (_Container) {
     value: function _setupMessage(message) {
       // Setting a position is required if its going to get sorted correctly by query.
       // The correct position will be written by _populateFromServer when the object
-      // is returned from the server.
-      // NOTE: We have a special case where messages are sent from multiple tabs, written to indexedDB, but not yet sent,
-      // they will have conflicting positions.
-      // Attempts to fix this by offsetting the position by time resulted in unexpected behaviors
-      // as multiple messages end up with positions greater than returned by the server.
+      // is returned from the server.  We increment the position by the time since the prior lastMessage was sent
+      // so that if multiple tabs are sending messages and writing them to indexedDB, they will have positions in correct chronological order.
+      // WARNING: The query will NOT be resorted using the server's position value.
       var position = void 0;
       if (this.lastMessage) {
-        position = this.lastMessage.position + 1;
+        position = this.lastMessage.position + Date.now() - this.lastMessage.sentAt.getTime();
+        if (position === this.lastMessage.position) position++;
       } else {
         position = 0;
       }
@@ -29987,6 +29956,12 @@ var Conversation = function (_Container) {
       // the server
       if (this.participants.indexOf(client.user) === -1) {
         this.participants.push(client.user);
+      }
+
+      // If there is only one participant, its client.user.userId.  Not enough
+      // for us to have a good Conversation on the server.  Abort.
+      if (this.participants.length === 1) {
+        throw new Error(LayerError.dictionary.moreParticipantsRequired);
       }
 
       return _get(Object.getPrototypeOf(Conversation.prototype), 'send', this).call(this, message);
@@ -30234,7 +30209,7 @@ var Conversation = function (_Container) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success && result.data.id !== 'authentication_required') _this3._load();
+        if (!result.success) _this3._load();
       });
     }
 
@@ -30351,7 +30326,9 @@ var Conversation = function (_Container) {
       try {
         var events = this._disableEvents;
         this._disableEvents = false;
-        if (paths[0] === 'participants') {
+        if (paths[0].indexOf('metadata') === 0) {
+          this.__updateMetadata(newValue, oldValue, paths);
+        } else if (paths[0] === 'participants') {
           (function () {
             var client = _this4.getClient();
             // oldValue/newValue come as a Basic Identity POJO; lets deliver events with actual instances
@@ -30363,8 +30340,6 @@ var Conversation = function (_Container) {
             });
             _this4.__updateParticipants(newValue, oldValue);
           })();
-        } else {
-          _get(Object.getPrototypeOf(Conversation.prototype), '_handlePatchEvent', this).call(this, newValue, oldValue, paths);
         }
         this._disableEvents = events;
       } catch (err) {
@@ -30400,9 +30375,7 @@ var Conversation = function (_Container) {
     key: '_deleteResult',
     value: function _deleteResult(result, id) {
       var client = this.getClient();
-      if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
-        Conversation.load(id, client);
-      }
+      if (!result.success && (!result.data || result.data.id !== 'not_found')) Conversation.load(id, client);
     }
   }, {
     key: '_register',
@@ -30791,7 +30764,7 @@ Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":107,"./container":89,"./conversation-message":91,"./syncable":97}],93:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":108,"./container":90,"./conversation-message":92,"./syncable":98}],94:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -30831,11 +30804,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var Syncable = require('./syncable');
 var Root = require('../root');
-
-var _require = require('../const');
-
-var SYNC_STATE = _require.SYNC_STATE;
-
+var Constants = require('../const');
 var LayerError = require('../layer-error');
 
 var Identity = function (_Syncable) {
@@ -30935,7 +30904,7 @@ var Identity = function (_Syncable) {
 
       // Disable events if creating a new Identity
       // We still want property change events for anything that DOES change
-      this._disableEvents = this.syncState === SYNC_STATE.NEW;
+      this._disableEvents = this.syncState === Constants.SYNC_STATE.NEW;
 
       this._setSynced();
 
@@ -31067,7 +31036,6 @@ var Identity = function (_Syncable) {
       }, function (result) {
         if (result.success) _this4._load();
       });
-      this.syncState = SYNC_STATE.LOADING;
     }
 
     /**
@@ -31121,7 +31089,7 @@ var Identity = function (_Syncable) {
           target: this.id
         }
       }, function (result) {
-        if (!result.success && result.data.id !== 'authentication_required') _this5._updateValue(['_presence', 'status'], oldValue);
+        if (!result.success) _this5._updateValue(['_presence', 'status'], oldValue);
       });
 
       // these are equivalent; only one is useful for understanding your state given that your still connected/online.
@@ -31450,7 +31418,7 @@ Syncable.subclasses.push(Identity);
 module.exports = Identity;
 
 
-},{"../const":75,"../layer-error":77,"../root":107,"./syncable":97}],94:[function(require,module,exports){
+},{"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],95:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31469,7 +31437,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Identities are created by the System, never directly by apps.
  *
  * @class layer.Membership
- * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Syncable
  */
 
@@ -31686,7 +31653,7 @@ Syncable.subclasses.push(Membership);
 module.exports = Membership;
 
 
-},{"../const":75,"../layer-error":77,"../root":107,"./syncable":97}],95:[function(require,module,exports){
+},{"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],96:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31915,7 +31882,7 @@ var MessagePart = function (_Root) {
         this.isFiring = true;
         var type = this.mimeType === 'image/jpeg+preview' ? 'image/jpeg' : this.mimeType;
         this._content.loadContent(type, function (err, result) {
-          if (!_this2.isDestroyed) _this2._fetchContentCallback(err, result, callback);
+          return _this2._fetchContentCallback(err, result, callback);
         });
       }
       return this;
@@ -32430,7 +32397,7 @@ Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 module.exports = MessagePart;
 
 
-},{"../client-registry":72,"../client-utils":73,"../layer-error":77,"../logger":79,"../root":107,"../xhr":117,"./content":90}],96:[function(require,module,exports){
+},{"../client-registry":72,"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108,"../xhr":118,"./content":91}],97:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -33477,7 +33444,7 @@ Syncable.subclasses.push(Message);
 module.exports = Message;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":107,"./identity":93,"./message-part":95,"./syncable":97}],97:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./identity":94,"./message-part":96,"./syncable":98}],98:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -33690,7 +33657,6 @@ var Syncable = function (_Root) {
     value: function _loadResult(result) {
       var _this4 = this;
 
-      if (this.isDestroyed) return;
       var prefix = this.constructor.eventPrefix;
       if (!result.success) {
         this.syncState = SYNC_STATE.NEW;
@@ -34008,7 +33974,8 @@ Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
 
 
-},{"../client-registry":72,"../const":75,"../layer-error":77,"../root":107}],98:[function(require,module,exports){
+},{"../client-registry":72,"../const":75,"../layer-error":77,"../root":108}],99:[function(require,module,exports){
+(function (global){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34064,12 +34031,14 @@ var OnlineStateManager = function (_Root) {
    * An Application is expected to only have one of these.
    *
    *      var onlineStateManager = new layer.OnlineStateManager({
-   *          socketManager: socketManager
+   *          socketManager: socketManager,
+   *          testUrl: 'https://api.layer.com/nonces'
    *      });
    *
    * @method constructor
    * @param  {Object} options
    * @param  {layer.Websockets.SocketManager} options.socketManager - A websocket manager to monitor for messages
+   * @param  {string} options.testUrl - A url to send requests to when testing if we are online
    */
   function OnlineStateManager(options) {
     _classCallCheck(this, OnlineStateManager);
@@ -34087,9 +34056,14 @@ var OnlineStateManager = function (_Root) {
     // Any change in online status reported by the browser should result in
     // an immediate update to our online/offline state
     /* istanbul ignore else */
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && window.addEventListener) {
       window.addEventListener('online', _this._handleOnlineEvent.bind(_this));
       window.addEventListener('offline', _this._handleOnlineEvent.bind(_this));
+    } else {
+      var NetInfo = global.layer.native.RN_NetInfo;
+      if (NetInfo) {
+        NetInfo.addEventListener('change', _this._handleOnlineEvent.bind(_this));
+      }
     }
     return _this;
   }
@@ -34327,6 +34301,12 @@ var OnlineStateManager = function (_Root) {
 OnlineStateManager.prototype.isClientReady = false;
 
 /**
+ * URL To fire when testing to see if we are online.
+ * @type {String}
+ */
+OnlineStateManager.prototype.testUrl = '';
+
+/**
  * A Websocket manager whose 'message' event we will listen to
  * in order to know that we are still online.
  * @type {layer.Websockets.SocketManager}
@@ -34334,7 +34314,7 @@ OnlineStateManager.prototype.isClientReady = false;
 OnlineStateManager.prototype.socketManager = null;
 
 /**
- * Number of test requests we've been offline for.
+ * Number of testUrl requests we've been offline for.
  *
  * Will stop growing once the number is suitably large (10-20).
  * @type {Number}
@@ -34410,7 +34390,8 @@ Root.initClass.apply(OnlineStateManager, [OnlineStateManager, 'OnlineStateManage
 module.exports = OnlineStateManager;
 
 
-},{"./client-utils":73,"./const":75,"./logger":79,"./root":107,"./xhr":117}],99:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./client-utils":73,"./const":75,"./logger":80,"./root":108,"./xhr":118}],100:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34502,7 +34483,7 @@ Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuer
 module.exports = AnnouncementsQuery;
 
 
-},{"../root":107,"./messages-query":104,"./query":106}],100:[function(require,module,exports){
+},{"../root":108,"./messages-query":105,"./query":107}],101:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34729,22 +34710,24 @@ var ChannelsQuery = function (_ConversationsQuery) {
       if (list.length) {
         (function () {
           var data = _this3.data;
-
-          // typically bulk inserts happen via _appendResults(); so this array typically iterates over an array of length 1
           list.forEach(function (channel) {
             var newIndex = _this3._getInsertIndex(channel, data);
             data.splice(newIndex, 0, _this3._getData(channel));
+          });
 
-            // Typically this loop only iterates once; but each iteration is gaurenteed a unique object if needed
-            if (_this3.dataType === Query.ObjectDataType) {
-              _this3.data = [].concat(data);
-            }
-            _this3.totalSize += 1;
+          // Whether sorting by last_message or created_at, new results go at the top of the list
+          if (_this3.dataType === Query.ObjectDataType) {
+            _this3.data = [].concat(data);
+          }
+          _this3.totalSize += list.length;
 
+          // Trigger an 'insert' event for each item added;
+          // typically bulk inserts happen via _appendResults().
+          list.forEach(function (channel) {
             var item = _this3._getData(channel);
             _this3._triggerChange({
               type: 'insert',
-              index: newIndex,
+              index: _this3.data.indexOf(item),
               target: item,
               query: _this3
             });
@@ -34801,7 +34784,7 @@ Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 module.exports = ChannelsQuery;
 
 
-},{"../const":75,"../root":107,"./conversations-query":101,"./query":106}],101:[function(require,module,exports){
+},{"../const":75,"../root":108,"./conversations-query":102,"./query":107}],102:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35062,21 +35045,24 @@ var ConversationsQuery = function (_Query) {
       if (list.length) {
         (function () {
           var data = _this3.data;
-
-          // typically bulk inserts happen via _appendResults(); so this array typically iterates over an array of length 1
           list.forEach(function (conversation) {
             var newIndex = _this3._getInsertIndex(conversation, data);
             data.splice(newIndex, 0, _this3._getData(conversation));
+          });
 
-            if (_this3.dataType === Query.ObjectDataType) {
-              _this3.data = [].concat(data);
-            }
-            _this3.totalSize += 1;
+          // Whether sorting by last_message or created_at, new results go at the top of the list
+          if (_this3.dataType === Query.ObjectDataType) {
+            _this3.data = [].concat(data);
+          }
+          _this3.totalSize += list.length;
 
+          // Trigger an 'insert' event for each item added;
+          // typically bulk inserts happen via _appendResults().
+          list.forEach(function (conversation) {
             var item = _this3._getData(conversation);
             _this3._triggerChange({
               type: 'insert',
-              index: newIndex,
+              index: _this3.data.indexOf(item),
               target: item,
               query: _this3
             });
@@ -35133,7 +35119,7 @@ Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuer
 module.exports = ConversationsQuery;
 
 
-},{"../client-utils":73,"../const":75,"../root":107,"./query":106}],102:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../root":108,"./query":107}],103:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35251,7 +35237,7 @@ Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 module.exports = IdentitiesQuery;
 
 
-},{"../root":107,"./query":106}],103:[function(require,module,exports){
+},{"../root":108,"./query":107}],104:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35425,7 +35411,7 @@ Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 module.exports = MembersQuery;
 
 
-},{"../layer-error":77,"../logger":79,"../root":107,"./query":106}],104:[function(require,module,exports){
+},{"../layer-error":77,"../logger":80,"../root":108,"./query":107}],105:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35789,23 +35775,6 @@ var MessagesQuery = function (_Query) {
         });
       }
     }
-
-    /*
-     * Note: Earlier versions of this iterated over each item, inserted it and when all items were inserted,
-     * triggered events indicating the index at which they were inserted.
-     *
-     * This caused the following problem:
-     *
-     * 1. Insert messages newest message at position 0 and second newest message at position 1
-     * 2. Trigger events in the order they arrive: second newest gets inserted at index 1, newest gets inserted at index 0
-     * 3. UI on receiving the second newest event does yet have the newest event, and on inserting it at position 1
-     *    is actually inserting it at the wrong place because position 0 is occupied by an older message at this time.
-     *
-     * Solution: We must iterate over all items, and process them entirely one at a time.
-     * Drawback: After an Event.replay we may get a lot of add events, we may need a way to do an event that inserts a set of messages
-     * instead of triggering lots of individual rendering-causing events
-     */
-
   }, {
     key: '_handleAddEvent',
     value: function _handleAddEvent(name, evt) {
@@ -35838,15 +35807,18 @@ var MessagesQuery = function (_Query) {
           list.forEach(function (item) {
             var index = _this4._getInsertIndex(item, data);
             data.splice(index, 0, item);
-            if (index !== 0) Logger.warn('Index of ' + item.id + ' is ' + index + '; position is ' + item.position + '; compared to ' + data[0].position);
+          });
 
-            _this4.totalSize += 1;
+          _this4.totalSize += list.length;
 
+          // Index calculated above may shift after additional insertions.  This has
+          // to be done after the above insertions have completed.
+          list.forEach(function (item) {
             _this4._triggerChange({
               type: 'insert',
+              index: _this4.data.indexOf(item),
               target: item,
-              query: _this4,
-              index: index
+              query: _this4
             });
           });
         })();
@@ -35901,7 +35873,7 @@ Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 module.exports = MessagesQuery;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":79,"../root":107,"./query":106}],105:[function(require,module,exports){
+},{"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108,"./query":107}],106:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36589,7 +36561,7 @@ var QueryBuilder = {
 module.exports = QueryBuilder;
 
 
-},{"./query":106}],106:[function(require,module,exports){
+},{"./query":107}],107:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36872,8 +36844,11 @@ var Query = function (_Root) {
     value: function destroy() {
       this.data = [];
       this._triggerChange({
-        data: [],
-        type: 'reset'
+        type: 'data',
+        target: this.client,
+        query: this,
+        isChange: false,
+        data: []
       });
       this.client.off(null, null, this);
       this.client._removeQuery(this);
@@ -37329,12 +37304,17 @@ var Query = function (_Root) {
         (function () {
           var data = _this4.data = _this4.dataType === Query.ObjectDataType ? [].concat(_this4.data) : _this4.data;
           list.forEach(function (item) {
-            data.push(item);
-            _this4.totalSize += 1;
+            return data.push(item);
+          });
 
+          _this4.totalSize += list.length;
+
+          // Index calculated above may shift after additional insertions.  This has
+          // to be done after the above insertions have completed.
+          list.forEach(function (item) {
             _this4._triggerChange({
               type: 'insert',
-              index: data.length - 1,
+              index: _this4.data.indexOf(item),
               target: item,
               query: _this4
             });
@@ -37797,7 +37777,7 @@ Root.initClass.apply(Query, [Query, 'Query']);
 module.exports = Query;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":79,"../root":107}],107:[function(require,module,exports){
+},{"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108}],108:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -38633,7 +38613,7 @@ module.exports = Root;
 module.exports.initClass = initClass;
 
 
-},{"./client-utils":73,"./layer-error":77,"./layer-event":78,"./logger":79,"backbone-events-standalone/backbone-events-standalone":118}],108:[function(require,module,exports){
+},{"./client-utils":73,"./layer-error":77,"./layer-event":78,"./logger":80,"backbone-events-standalone/backbone-events-standalone":119}],109:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39029,7 +39009,7 @@ WebsocketSyncEvent.prototype.returnChangesArray = false;
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
 
 
-},{"./client-utils":73}],109:[function(require,module,exports){
+},{"./client-utils":73}],110:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40011,7 +39991,7 @@ Root.initClass(SyncManager);
 module.exports = SyncManager;
 
 
-},{"./client-utils":73,"./logger":79,"./root":107,"./sync-event":108,"./xhr":117}],110:[function(require,module,exports){
+},{"./client-utils":73,"./logger":80,"./root":108,"./sync-event":109,"./xhr":118}],111:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40341,7 +40321,7 @@ Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingI
 module.exports = TypingIndicatorListener;
 
 
-},{"../client-registry":72,"../root":107,"./typing-indicators":111}],111:[function(require,module,exports){
+},{"../client-registry":72,"../root":108,"./typing-indicators":112}],112:[function(require,module,exports){
 'use strict';
 
 /**
@@ -40378,7 +40358,7 @@ module.exports = {
 };
 
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40532,6 +40512,9 @@ var TypingListener = function () {
     /**
      * Whenever the key is pressed, send a "started" or "finished" event.
      *
+     * If its a "start" event, schedule a pause-test that will send
+     * a "pause" event if typing stops.
+     *
      * @method _handleKeyPress
      * @private
      * @param  {KeyboardEvent} evt
@@ -40600,7 +40583,7 @@ var TypingListener = function () {
 module.exports = TypingListener;
 
 
-},{"./typing-indicators":111,"./typing-publisher":113}],113:[function(require,module,exports){
+},{"./typing-indicators":112,"./typing-publisher":114}],114:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40868,7 +40851,7 @@ var TypingPublisher = function () {
 module.exports = TypingPublisher;
 
 
-},{"../client-registry":72,"./typing-indicators":111}],114:[function(require,module,exports){
+},{"../client-registry":72,"./typing-indicators":112}],115:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41080,7 +41063,7 @@ WebsocketChangeManager.prototype.client = null;
 module.exports = WebsocketChangeManager;
 
 
-},{"../client-utils":73,"../logger":79,"../models/channel":88,"../models/conversation":92,"../models/message":96}],115:[function(require,module,exports){
+},{"../client-utils":73,"../logger":80,"../models/channel":89,"../models/conversation":93,"../models/message":97}],116:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41408,7 +41391,7 @@ WebsocketRequestManager.prototype.socketManager = null;
 module.exports = WebsocketRequestManager;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":79}],116:[function(require,module,exports){
+},{"../client-utils":73,"../layer-error":77,"../logger":80}],117:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41926,7 +41909,7 @@ var SocketManager = function (_Root) {
         isChangesArray: false
       });
 
-      if (this.client.isPresenceEnabled) {
+      if (this.client.presenceEnabled) {
         this.client.socketRequestManager.sendRequest({
           data: {
             method: 'Presence.update',
@@ -42151,7 +42134,7 @@ var SocketManager = function (_Root) {
     value: function _scheduleReconnect() {
       var _this6 = this;
 
-      if (this.isDestroyed || !this.client.isOnline || !this.client.isAuthenticated) return;
+      if (this.isDestroyed || !this.client.isOnline) return;
 
       var maxDelay = (this.client.onlineManager.pingFrequency - 1000) / 1000;
       var delay = Utils.getExponentialBackoffSeconds(maxDelay, Math.min(15, this._lostConnectionCount));
@@ -42177,7 +42160,7 @@ var SocketManager = function (_Root) {
     value: function _validateSessionBeforeReconnect() {
       var _this7 = this;
 
-      if (this.isDestroyed || !this.client.isOnline || !this.client.isAuthenticated) return;
+      if (this.isDestroyed || !this.client.isOnline) return;
 
       var maxDelay = 30 * 1000; // maximum delay of 30 seconds per ping
       var diff = Date.now() - this._lastValidateSessionRequest - maxDelay;
@@ -42316,7 +42299,7 @@ Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../logger":79,"../root":107,"websocket":64}],117:[function(require,module,exports){
+},{"../client-utils":73,"../const":75,"../layer-error":77,"../logger":80,"../root":108,"websocket":64}],118:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -42548,7 +42531,7 @@ module.exports.trigger = function (evt) {
 };
 
 
-},{"xhr2":64}],118:[function(require,module,exports){
+},{"xhr2":64}],119:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -42826,7 +42809,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],119:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -43061,7 +43044,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -43096,7 +43079,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -43281,5 +43264,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":120}]},{},[41])(41)
+},{"./rng":121}]},{},[41])(41)
 });

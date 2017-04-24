@@ -33,6 +33,7 @@ describe('layer-message-status', function() {
   });
   afterEach(function() {
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   it('Should call rerender on any message change events', function() {

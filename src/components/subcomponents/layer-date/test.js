@@ -12,6 +12,10 @@ describe('layer-date', function() {
     layer.Util.defer.flush();
   });
 
+  afterEach(function() {
+    layer.Client.removeListenerForNewClient();
+  });
+
   it('Should accept a date parameter', function() {
     var d = new Date();
     el.date = d;

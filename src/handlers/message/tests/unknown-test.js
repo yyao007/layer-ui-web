@@ -35,6 +35,7 @@ describe("Unknown Handler", function() {
     jasmine.clock().uninstall();
     el.onDestroy();
     client.destroy();
+    layer.Client.removeListenerForNewClient();
   });
 
   it("Should select unknown", function() {

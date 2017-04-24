@@ -27,6 +27,7 @@ describe('layer-avatar', function() {
     layer.Util.defer.flush();
   });
   afterEach(function() {
+    layer.Client.removeListenerForNewClient();
     //document.body.removeChild(testRoot);
   });
 

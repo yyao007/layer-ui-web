@@ -42,6 +42,7 @@ describe("Focus On Keydown Mixin", function() {
     jasmine.clock().uninstall();
     client.destroy();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   beforeEach(function() {

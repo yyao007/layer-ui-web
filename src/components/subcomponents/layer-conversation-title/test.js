@@ -8,6 +8,7 @@ describe('layer-conversation-title', function() {
 
   afterEach(function() {
     jasmine.clock().uninstall();
+    layer.Client.removeListenerForNewClient();
   });
 
   beforeEach(function() {

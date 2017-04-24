@@ -66,6 +66,7 @@ describe("Image Handler", function() {
     jasmine.clock().uninstall();
     el.onDestroy();
     client.destroy();
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The handlesMessage() method", function() {

@@ -49,6 +49,7 @@ describe("List Selection Mixin", function() {
     try {
       jasmine.clock().uninstall();
       document.body.removeChild(testRoot);
+      layer.Client.removeListenerForNewClient();
       if (el) el.onDestroy();
     } catch(e) {}
   });

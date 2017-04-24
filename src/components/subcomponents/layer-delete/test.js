@@ -20,8 +20,10 @@ describe('layer-delete', function() {
     el.enabled = true;
     layer.Util.defer.flush();
   });
+
   afterEach(function() {
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   describe('The enabled property', function() {

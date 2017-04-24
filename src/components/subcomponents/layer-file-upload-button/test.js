@@ -15,6 +15,10 @@ describe('layer-file-upload-button', function() {
     layer.Util.defer.flush();
   });
 
+  afterEach(function() {
+    layer.Client.removeListenerForNewClient();
+  });
+
   it("Should setup a label pointing to a file input", function() {
     expect(el.nodes.label.getAttribute("for")).toEqual(el.nodes.input.id);
     expect(el.nodes.input.id.length > 0).toBe(true);

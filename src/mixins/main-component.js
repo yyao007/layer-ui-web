@@ -39,8 +39,14 @@ module.exports = {
       set(value) {
         if (value && value.indexOf('layer:///') === 0) {
           const client = Layer.Client.getClient(value);
-          if (!client) throw new Error('You must create a layer.Client with your appId before creating this component');
-          this.client = client;
+          if (client) {
+            this.client = client;
+          } else if (Layer.Client.addListenerForNewClient) {
+            // Wait for the next client with this appId to be registered and then assign it.
+            Layer.Client.addListenerForNewClient(newClient => (this.client = newClient), value);
+          } else {
+            throw new Error('You must create a layer.Client with your appId before creating this component. Or upgrade to Layer WebSDK 3.2.2 or above.');
+          }
         }
       },
     },

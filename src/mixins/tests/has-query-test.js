@@ -61,6 +61,7 @@ describe("Has Query Mixin", function() {
     jasmine.clock().uninstall();
     client.destroy();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
 

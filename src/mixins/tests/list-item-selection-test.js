@@ -29,6 +29,7 @@ describe("List Item Selection Mixin", function() {
   afterEach(function() {
     jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
 

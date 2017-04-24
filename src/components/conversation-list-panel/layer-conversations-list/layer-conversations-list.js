@@ -206,7 +206,9 @@ registerComponent('layer-conversations-list', {
     },
 
     /**
-     * Sort by takes as value `lastMessage` or `createdAt`
+     * Sort by takes as value `lastMessage` or `createdAt`; for initialization only.
+     *
+     * This will not resort your list after initialization; use `list.query.update()` for that.
      *
      * @property {String} [sortBy=lastMessage]
      */
@@ -219,9 +221,8 @@ registerComponent('layer-conversations-list', {
             this.properties.sortBy = [{ 'lastMessage.sentAt': 'desc' }];
             break;
           default:
-            this.properties.sortBy = null;
+            this.properties.sortBy = [{ 'createdAt': 'desc' }];
         }
-        if (this.query) this.query.update({ sortBy: this.properties.sortBy });
       },
     },
 

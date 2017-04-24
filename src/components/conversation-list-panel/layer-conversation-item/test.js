@@ -46,6 +46,7 @@ describe('layer-conversation-item', function() {
   afterEach(function() {
     jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   describe('The item property', function() {

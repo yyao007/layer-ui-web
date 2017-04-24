@@ -31,9 +31,11 @@ describe('layer-identity-item', function() {
     layer.Util.defer.flush();
     jasmine.clock().tick(10);
   });
+
   afterEach(function() {
     jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The selected property", function() {

@@ -47,6 +47,7 @@ describe('layer-channel-item', function() {
     jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
     client.destroy();
+    layer.Client.removeListenerForNewClient();
   });
 
   describe('The item property', function() {

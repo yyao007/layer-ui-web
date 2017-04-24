@@ -1,6 +1,12 @@
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
+ * If using it outsdie of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
+ *
+ * ```
+ * document.getElementById('mypresencewidget').item = client.user;
+ * ```
+ *
  * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
  *
  * ```javascript
@@ -39,6 +45,24 @@ import MainComponent from '../../../mixins/main-component';
 
 registerComponent('layer-presence', {
   mixins: [MainComponent],
+
+  /**
+   * The user has clicked on the `<layer-presence />` widget
+   *
+   * @event layer-presence-click
+   * @param {Event} evt
+   * @param {Object} evt.detail
+   * @param {layer.Identity} evt.detail.item - The user rendered by this Presence Widget
+   */
+
+  /**
+   * The user has clicked on the `<layer-presence />` widget
+   *
+   * @property {Function} onPresenceClick
+   * @param {Event} onPresenceClick.evt
+   * @param {Object} onPresenceClick.evt.detail
+   * @param {layer.Identity} onPresenceClick.evt.detail.item - The user rendered by this Presence Widget
+   */
   events: ['layer-presence-click'],
   properties: {
 

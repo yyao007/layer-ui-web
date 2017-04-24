@@ -61,6 +61,7 @@ describe('layer-messages-list', function() {
     document.body.removeChild(testRoot);
     if (el) el.onDestroy();
     jasmine.clock().uninstall();
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The disable property", function() {

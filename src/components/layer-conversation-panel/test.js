@@ -58,6 +58,7 @@ describe('layer-conversation-panel', function() {
 
   afterEach(function() {
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
     if (el) el.onDestroy();
   });
 

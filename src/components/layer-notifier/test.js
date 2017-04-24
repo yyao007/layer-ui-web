@@ -33,6 +33,7 @@ if (window.Notification) {
     });
     afterEach(function() {
       document.body.removeChild(testRoot);
+      layer.Client.removeListenerForNewClient();
     });
 
     describe('Event Handling', function() {

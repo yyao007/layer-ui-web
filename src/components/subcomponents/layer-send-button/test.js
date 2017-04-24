@@ -9,6 +9,10 @@ describe('layer-send-button', function() {
     layer.Util.defer.flush();
   });
 
+  afterEach(function() {
+    layer.Client.removeListenerForNewClient();
+  });
+
   it("Should use the text property", function() {
     el.text = "hey ho";
     expect(el.firstChild.innerHTML).toEqual("hey ho");

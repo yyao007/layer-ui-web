@@ -8,6 +8,7 @@ describe('layer-compose-button-panel', function() {
 
   afterEach(function() {
     jasmine.clock().uninstall();
+    layer.Client.removeListenerForNewClient();
   });
 
   beforeEach(function() {

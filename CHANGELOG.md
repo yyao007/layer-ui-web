@@ -1,5 +1,11 @@
 # Layer UI for Web Change Log
 
+# 1.0.1
+
+* No longer requires client to be available on `layerUI.init()`; now waits for client to be available
+* Adds safety check to `layer-typing-indicator`
+* Conversation List `sortBy` is now used for initialization only and does not update the query
+
 # 1.0.0
 
 * Breaking Changes

@@ -27,7 +27,8 @@ describe('layer-conversations-list', function() {
     el = document.createElement('layer-conversations-list');
     testRoot.appendChild(el);
     query = client.createQuery({
-      model: layer.Query.Conversation
+      model: layer.Query.Conversation,
+      sortBy: [{ 'lastMessage.sentAt': 'desc' }]
     });
     query.isFiring = false;
     for (i = 0; i < 100; i++) {
@@ -53,6 +54,7 @@ describe('layer-conversations-list', function() {
     try {
       jasmine.clock().uninstall();
       document.body.removeChild(testRoot);
+      layer.Client.removeListenerForNewClient();
       if (el) el.onDestroy();
     } catch(e) {}
   });
@@ -70,6 +72,16 @@ describe('layer-conversations-list', function() {
       el.onConversationDeleted = spy;
       el.trigger('layer-conversation-deleted', {conversation: query.data[1]});
       expect(spy).toHaveBeenCalledWith(jasmine.any(CustomEvent));
+    });
+  });
+
+  describe("The sortBy property", function() {
+    it("Should setup a proper values", function() {
+      expect(query.sortBy).toEqual([{'lastMessage.sentAt': 'desc']});
+      query.sortBy = 'createdAt';
+      expect(query.update).toHaveBeenCalledWith({sortBy: [{'createdAt': 'desc'}]});
+      query.sortBy = 'lastMessage';
+      expect(query.sortBy).toEqual([{'lastMessage.sentAt': 'desc']});
     });
   });
 

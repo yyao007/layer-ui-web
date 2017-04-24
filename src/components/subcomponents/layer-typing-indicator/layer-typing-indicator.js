@@ -119,7 +119,7 @@ registerComponent('layer-typing-indicator', {
      */
     onRerender(evt) {
       // We receive typing indicator events for ALL Conversations; ignore them if they don't apply to the current Conversation
-      if (evt.conversationId === this.conversation.id) {
+      if (this.conversation && evt.conversationId === this.conversation.id) {
 
         // Trigger an event so that the application can decide if it wants to handle the event itself.
         const customEvtResult = this.trigger('layer-typing-indicator-change', {

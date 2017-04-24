@@ -29,6 +29,7 @@ describe('layer-presence', function() {
   });
   afterEach(function() {
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The item property", function() {

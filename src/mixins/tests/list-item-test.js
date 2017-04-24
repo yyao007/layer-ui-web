@@ -30,6 +30,7 @@ describe("List Item Mixin", function() {
   afterEach(function() {
     jasmine.clock().uninstall();
     document.body.removeChild(testRoot);
+    layer.Client.removeListenerForNewClient();
   });
 
   describe("The customNodeAbove property", function() {
