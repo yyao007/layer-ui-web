@@ -1,4 +1,12 @@
-/* Styles for Conversation Items that appear within the Conversation List widget */
+/**
+ * Styles for Conversation Items that appear within the Conversation List widget
+ *
+ * From left-to-right we have roughly:
+ * 1. Avatar or Presence
+ * 2. Title
+ * 3. Date
+ * 4. Last Message
+ */
 layer-conversation-item {
 
   /* Style a basic Conversation Item.  Note that it may be better to put
@@ -6,12 +14,12 @@ layer-conversation-item {
    */
   .layer-list-item {
     cursor: pointer;
-    padding: 20px 5px;
     border-left: 3px solid transparent;
     border-bottom: @border-list-item;
     &:not(:first-child) {
       border-top: @border-list-item;
     }
+    padding-right: 12px;
   }
 
   /* Style the selected Conversation Item */
@@ -19,61 +27,136 @@ layer-conversation-item {
     border-left: 3px solid #19A5E4;
   }
 
+  &.layer-size-large .layer-list-item {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-height: 72px;
+
+    layer-conversation-title {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    layer-date {
+      font-size: 12px;
+    }
+
+    layer-conversation-last-message {
+      display: block;
+    }
+  }
+
+  &.layer-size-medium .layer-list-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    min-height: 60px;
+
+    layer-conversation-title {
+      font-size: 16px;
+    }
+
+    layer-date {
+      font-size: 12px;
+    }
+  }
+
+  &.layer-size-small .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 48px;
+
+    layer-conversation-title {
+      font-size: 14px;
+    }
+
+    layer-date {
+      font-size: 10px;
+    }
+  }
+  &.layer-size-tiny .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 32px;
+
+    layer-conversation-title {
+      font-size: 14px;
+    }
+
+    layer-date {
+      display: none;
+    }
+  }
+
+
+   /**
+    * 1. Avatar or Presence
+    */
+   layer-avatar {
+     margin: 0px 12px;
+   }
+
+   layer-presence.presence-without-avatar {
+     margin: 0px 8px 0px 12px;
+   }
+
+
+
   /**
    * Conversation Titles have 3 states:
-   * 1. Normal
-   * 2. Unread
-   * 3. Selected
+   * A. Normal
+   * B. Unread
+   * C. Selected
    */
   layer-conversation-title {
-    .layer-text-list-heading();
-    margin-right: 15px;
+    color: rgb(27, 28, 29);
+    font-weight: normal;
+
+    margin-right: 10px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   }
 
   &.layer-conversation-unread-messages layer-conversation-title {
-    .layer-text-list-heading-emphasized();
+    font-weight: bold;
   }
 
-  &.layer-selected-item layer-conversation-title {
-
-  }
 
   /**
-   * Conversation Avatars have 3 states:
-   * 1. Normal
-   * 2. Unread
-   * 3. Selected
+   * Dates have 3 states:
+   * A. Normal
+   * B. Unread
+   * C. Selected
    */
-   layer-avatar img, layer-avatar span {
-      color: @fontcolor-lightest;
-      border: @border-lightest;
-      border: 1px solid rgba(0,0,0,0.1);
-   }
+  layer-date {
+    // TODO: Define read date color
+    color: rgb(163, 168, 178);
+  }
 
-   &.layer-selected-item layer-avatar {
+  &.layer-conversation-unread-messages layer-date {
+    // TODO: Define unread date color
+    color: rgb(27, 28, 29);
+  }
 
-   }
+  layer-conversation-last-message {
+    display: none;
+  }
 
   /**
    * Conversation Last Messages have 3 states:
-   * 1. Normal
-   * 2. Unread
-   * 3. Selected
+   * A. Normal
+   * B. Unread
+   * C. Selected
    */
    layer-conversation-last-message {
-      .layer-text-plain-deemphasized();
-
-      /* Prevent videos, images and line breaks from messing with a concise one line last-message */
-      iframe, img:not(.emoji), br {
-        display: none;
-      }
+      font-size: 14px;
+      color: rgb(163, 168, 178);
+      overflow-y: hidden;
    }
 
+
    &.layer-conversation-unread-messages layer-conversation-last-message {
-      .layer-text-plain-emphasized();
+      color: rgb(27, 28, 29);
    }
 
    &.layer-selected-item  layer-conversation-last-message {
@@ -83,8 +166,9 @@ layer-conversation-item {
 
   /**
    * Conversation Delete button has 2 states:
-   * 1. Normal
-   * 2. Selected
+   * A. Normal
+   * B. Selected
+   * C. Selected
    */
    layer-delete {
       visibility: hidden;
@@ -99,4 +183,5 @@ layer-conversation-item {
       }
     }
 }
+
 

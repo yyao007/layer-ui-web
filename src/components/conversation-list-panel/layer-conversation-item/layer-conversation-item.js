@@ -16,13 +16,14 @@
 import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import ListItemSelection from '../../../mixins/list-item-selection';
+import SizeProperty from '../../../mixins/size-property';
 import '../../subcomponents/layer-conversation-last-message/layer-conversation-last-message';
 import '../../subcomponents/layer-delete/layer-delete';
 import '../../subcomponents/layer-avatar/layer-avatar';
 import '../../subcomponents/layer-conversation-title/layer-conversation-title';
 
 registerComponent('layer-conversation-item', {
-  mixins: [ListItem, ListItemSelection],
+  mixins: [ListItem, ListItemSelection, SizeProperty],
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
@@ -67,6 +68,21 @@ registerComponent('layer-conversation-item', {
      * @property {Function} [canFullyRenderLastMessage=null]
      */
     canFullyRenderLastMessage: {},
+
+    size: {
+      value: 'medium',
+      set(size) {
+        Object.keys(this.nodes).forEach((nodeName) => {
+          const node = this.nodes[nodeName];
+          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
+            node.size = size;
+          }
+        });
+      },
+    },
+    supportedSizes: {
+      value: ['tiny', 'small', 'medium', 'large'],
+    },
   },
   methods: {
 
@@ -78,7 +94,9 @@ registerComponent('layer-conversation-item', {
       const users = this.item.participants.filter(user => !user.sessionOwner);
       const isRead = !this.item.lastMessage || this.item.lastMessage.isRead;
 
+      this.nodes.timestamp.date = this.item.lastMessage ? this.item.lastMessage.sentAt : null;
       this.nodes.avatar.users = users;
+      this.nodes.presence.item = users.length === 1 ? users[0] : null;
       this.classList[isRead ? 'remove' : 'add']('layer-conversation-unread-messages');
     },
 

@@ -54,11 +54,12 @@ import List from '../../../mixins/list';
 import ListLoadIndicator from '../../../mixins/list-load-indicator';
 import ListSelection from '../../../mixins/list-selection';
 import MainComponent from '../../../mixins/main-component';
+import SizeProperty from '../../../mixins/size-property';
 import '../layer-conversation-item/layer-conversation-item';
 import '../layer-channel-item/layer-channel-item';
 
 registerComponent('layer-conversations-list', {
-  mixins: [List, ListSelection, MainComponent, ListLoadIndicator],
+  mixins: [List, ListSelection, MainComponent, ListLoadIndicator, SizeProperty],
 
   /**
    * Configure a custom action when a Conversation is selected;
@@ -267,6 +268,18 @@ registerComponent('layer-conversations-list', {
         return message.parts[0].mimeType === 'text/plain';
       },
     },
+
+    size: {
+      value: 'medium',
+      set(size) {
+        for (var i = 0; i < this.childNodes.length; i++) {
+          this.childNodes[i].size = size;
+        }
+      },
+    },
+    supportedSizes: {
+      value: ['tiny', 'small', 'medium', 'large'],
+    },
   },
   methods: {
     /**
@@ -284,6 +297,7 @@ registerComponent('layer-conversations-list', {
         this.deleteConversationEnabled(conversation) : true;
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
+      conversationWidget.size = this.size;
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
     },

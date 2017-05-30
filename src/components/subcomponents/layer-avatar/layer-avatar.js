@@ -45,8 +45,10 @@
  */
 import { registerComponent } from '../../../components/component';
 import '../layer-presence/layer-presence';
+import SizeProperty from '../../../mixins/size-property';
 
 registerComponent('layer-avatar', {
+  mixins: [SizeProperty],
   properties: {
 
     /**
@@ -73,6 +75,16 @@ registerComponent('layer-avatar', {
     showPresence: {
       value: true,
       type: Boolean,
+    },
+
+    size: {
+      value: 'medium',
+      set(value) {
+        if (this.nodes.presence) this.nodes.presence.size = value === 'larger' ? 'large' : value;
+      },
+    },
+    supportedSizes: {
+      value: ['small', 'medium', 'large', 'larger'],
     },
   },
   methods: {
@@ -107,6 +119,7 @@ registerComponent('layer-avatar', {
       if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
         this.nodes.presence = document.createElement('layer-presence');
         this.nodes.presence.item = this.users[0];
+        this.nodes.presence.size = this.size === 'larger' ? 'large' : this.size;
         this.appendChild(this.nodes.presence);
       }
     },
@@ -117,33 +130,41 @@ registerComponent('layer-avatar', {
      * @method
      * @private
      */
-    _renderUser(user) {
-      if (user.avatarUrl) {
+    _renderUser(user, users) {
+      const span = document.createElement('span');
+      if (user.avatarUrl && !this.properties.failedToLoadImage) {
+        span.classList.remove('layer-text-avatar');
         const img = document.createElement('img');
-        img.onerror = () => { img.style.display = 'none'; };
+        span.appendChild(img);
+        img.onerror = () => {
+          img.parentNode.removeChild(img);
+          span.innerHTML = this._getUserText(user);
+          span.classList.add('layer-text-avatar');
+        };
         img.src = user.avatarUrl;
-        this.appendChild(img);
       } else {
-        const span = document.createElement('span');
-
-        // Use first and last name if provided
-        if (user.firstName && user.lastName) {
-          span.innerHTML = user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
-        }
-
-        // Use displayName to try and find a first and last name
-        else if (user.displayName.indexOf(' ') !== -1) {
-          span.innerHTML = user.displayName.substr(0, 1).toUpperCase() +
-            user.displayName.substr(user.displayName.indexOf(' ') + 1, 1).toUpperCase();
-        }
-
-        // If all else fails, use the first two letters
-        else {
-          span.innerHTML = user.displayName.substring(0, 2).toUpperCase();
-        }
-        this.appendChild(span);
+        span.classList.add('layer-text-avatar');
+        span.innerHTML = this._getUserText(user);
       }
+      this.appendChild(span);
     },
+    _getUserText(user) {
+      // Use first and last name if provided
+      if (user.firstName && user.lastName) {
+        return user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
+      }
+
+      // Use displayName to try and find a first and last name
+      else if (user.displayName.indexOf(' ') !== -1) {
+        return user.displayName.substr(0, 1).toUpperCase() +
+          user.displayName.substr(user.displayName.lastIndexOf(' ') + 1, 1).toUpperCase();
+      }
+
+      // If all else fails, use the first two letters
+      else {
+        return user.displayName.substring(0, 2).toUpperCase();
+      }
+    }
   },
 });
 

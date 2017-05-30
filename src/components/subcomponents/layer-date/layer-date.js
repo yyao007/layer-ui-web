@@ -46,7 +46,11 @@ registerComponent('layer-date', {
           } else {
             const dateStr = value.toLocaleDateString();
             const timeStr = value.toLocaleTimeString();
-            this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr + ' ' + timeStr;
+            if (this.dateOrTime) {
+              this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr;
+            } else {
+              this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr + ' ' + timeStr;
+            }
           }
         } else {
           this.value = '';
@@ -79,6 +83,10 @@ registerComponent('layer-date', {
      * @property {Function} [dateRender=null]
      */
     dateRenderer: {},
+
+    dateOrTime: {
+      type: Boolean,
+    },
   },
 });
 

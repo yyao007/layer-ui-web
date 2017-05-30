@@ -1,0 +1,149 @@
+
+layer-avatar {
+  span:not(.layer-text-avatar) {
+    border: solid 1px rgb(219, 222, 228)
+  }
+  span.layer-text-avatar {
+    border: solid 1px white;
+    background-color: rgb(219, 222, 228);
+    color: #ffffff;
+  }
+
+  &.layer-has-user {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  layer-presence {
+    margin-left: 0px;
+    margin-right: 0px;
+    &:before {
+      content: " ";
+      border: solid 2px white;
+      position: absolute;
+      border-radius: 16px;
+      top: -2px;
+      bottom: -2px;
+      left: -2px;
+      right: -2px;
+    }
+    &.layer-presence-invisible:before {
+      content: " ";
+      border: solid 2px white;
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      left: -4px;
+      right: -4px;
+    }
+  }
+
+  span {
+    display: block;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    &.layer-text-avatar {
+      display: flex;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &.layer-avatar-cluster > span {
+      position: absolute;
+  }
+
+  &.layer-avatar-cluster > span:not(.layer-text-avatar) {
+      box-shadow: 0 0 1px 1px white
+  }
+
+  &.layer-size-small {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+
+    span {
+      height: 30px;
+      width: 30px;
+    }
+  }
+
+  &.layer-size-medium {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 16px;
+
+    span {
+      height: 38px;
+      width: 38px;
+    }
+  }
+
+  &.layer-size-large {
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 18px;
+
+    span {
+      height: 46px;
+      width: 46px;
+    }
+  }
+
+  &.layer-size-larger {
+    width: 72px;
+    height: 72px;
+    line-height: 72px;
+    font-size: 20px;
+
+    span {
+      height: 70px;
+      width: 70px;
+    }
+  }
+
+  /* Clustered Avatars for Group Chats */
+  &.layer-avatar-cluster {
+    &.layer-size-small, &.layer-size-medium, &.layer-size-large, &.layer-size-larger {
+      & > *:nth-child(1) {
+        display: block;
+      }
+      & > *:nth-child(2) {
+        margin-left: 25%;
+        margin-top: 25%;
+        z-index: 2;
+        display: block;
+      }
+      & > * {
+        height: 70%;
+        width: 70%;
+        font-size: 0.7em;
+        display: none;
+      }
+    }
+
+    &.layer-size-small > span {
+      line-height: 22px;
+    }
+
+    &.layer-size-medium > span {
+      line-height: 28px;
+    }
+
+    &.layer-size-large > span {
+      line-height: 33px;
+    }
+
+    &.layer-size-larger > span {
+      line-height: 50px;
+    }
+  }
+}

@@ -1,18 +1,18 @@
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
- * If using it outsdie of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
+ * If using it outside of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
  *
  * ```
  * document.getElementById('mypresencewidget').item = client.user;
  * ```
  *
- * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
+ * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-presence />` tag.
  *
  * ```javascript
  * layerUI.registerComponent('layer-presence', {
  *    properties: {
- *      user: {
+ *      item: {
  *        set: function(value) {
  *           this.onRender();
  *           if (value) value.on('identity:changes', this.onRerender, this);
@@ -24,7 +24,7 @@
  *        this.onRerender();
  *      },
  *      onRerender: function() {
- *        this.className = 'my-presence-' + this.user.status;
+ *        this.className = 'my-presence-' + this.item.status;
  *      },
  *    }
  * });
@@ -42,9 +42,10 @@
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import MainComponent from '../../../mixins/main-component';
+import SizeProperty from '../../../mixins/size-property';
 
 registerComponent('layer-presence', {
-  mixins: [MainComponent],
+  mixins: [MainComponent, SizeProperty],
 
   /**
    * The user has clicked on the `<layer-presence />` widget
@@ -87,6 +88,13 @@ registerComponent('layer-presence', {
         this.onRender();
       },
     },
+
+    size: {
+      value: 'small',
+    },
+    supportedSizes: {
+      value: ['small', 'medium', 'large']
+    },
   },
   methods: {
     onCreate() {
@@ -99,7 +107,7 @@ registerComponent('layer-presence', {
      * @method
      */
     onRender() {
-      this.onRerender();
+      if (this.item) this.onRerender();
     },
 
     /**
@@ -108,7 +116,13 @@ registerComponent('layer-presence', {
      * @method
      */
     onRerender(user) {
-      this.className = `layer-presence-${this.item ? this.item.status : 'unknown'}`;
+      const status = this.item.status;
+      this.classList[status === 'available' ? 'add' : 'remove']('layer-presence-available');
+      this.classList[status === 'busy' ? 'add' : 'remove']('layer-presence-busy');
+      this.classList[status === 'away' ? 'add' : 'remove']('layer-presence-away');
+      this.classList[status === 'offline' ? 'add' : 'remove']('layer-presence-offline');
+      this.classList[status === 'invisible' ? 'add' : 'remove']('layer-presence-invisible');
+      this.classList[!status ? 'add' : 'remove']('layer-presence-unknown');
     },
 
     /**
