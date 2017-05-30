@@ -28,6 +28,7 @@ require('./components/identities-list-panel/layer-identities-list/layer-identiti
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
 require('./components/layer-conversation-panel/layer-conversation-panel');
 require('./components/layer-notifier/layer-notifier');
+require('./components/subcomponents/layer-presence/layer-presence');
 
 
 // Load standard utilities
