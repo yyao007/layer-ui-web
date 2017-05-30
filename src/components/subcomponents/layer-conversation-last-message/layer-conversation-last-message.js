@@ -90,8 +90,8 @@ registerComponent('layer-conversation-last-message', {
       if (!evt || evt.hasProperty('lastMessage')) {
         const conversation = this.item;
         const message = conversation ? conversation.lastMessage : null;
+        if (this.firstChild && this.firstChild.onDestroy) this.firstChild.onDestroy();
         this.innerHTML = '';
-        if (message && message.id == "layer:///messages/66320b84-ad65-4c73-8dc8-4df4566e2137") debugger;
         if (message) {
           const handler = layerUI.getHandler(message, this);
           if (handler) {

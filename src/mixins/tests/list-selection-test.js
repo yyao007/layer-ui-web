@@ -64,6 +64,7 @@ describe("List Selection Mixin", function() {
     it("Should clear isSelected for the last selected item", function() {
       el.selectedId = el.childNodes[5].item.id;
       expect(el.childNodes[5].isSelected).toBe(true);
+      expect(el.selectedId).toEqual(el.childNodes[5].item.id);
       el.selectedId = el.childNodes[6].item.id;
       expect(el.childNodes[5].isSelected).toBe(false);
     });
@@ -77,6 +78,25 @@ describe("List Selection Mixin", function() {
       el.selectedId = query.data[5].id;
       el.query = query;
       expect(el.childNodes[5].isSelected).toBe(true);
+    });
+
+    it("Should trigger change events", function() {
+      var calledWith;
+      document.addEventListener('layer-conversation-selected', function(evt) {calledWith = evt;});
+      el.selectedId = el.childNodes[5].item.id;
+      expect(el.childNodes[5].isSelected).toBe(true);
+      expect(calledWith.detail).toEqual({
+        item: el.childNodes[5].item
+      });
+    });
+
+    it("Should be cancelable trigger", function() {
+      var f = function(evt) {evt.preventDefault();};
+      document.addEventListener('layer-conversation-selected', f);
+      el.selectedId = el.childNodes[5].item.id;
+      expect(el.childNodes[5].isSelected).toBe(false);
+      expect(el.selectedId).not.toEqual(el.childNodes[5].item.id);
+      document.removeEventListener('layer-conversation-selected', f);
     });
   });
 
@@ -92,7 +112,6 @@ describe("List Selection Mixin", function() {
         evt.preventDefault();
         expect(evt.detail).toEqual({
           item: el.childNodes[5].item,
-          originalEvent: jasmine.any(Event),
         });
       });
       el.childNodes[5].click();

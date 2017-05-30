@@ -49,6 +49,7 @@
  * @class layerUI.components.ConversationPanel
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
+ * @mixin layerUI.mixins.HasQuery
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../components/component';
@@ -459,6 +460,36 @@ registerComponent('layer-conversation-panel', {
       },
       get(value) {
         return this.nodes.list.emptyNode;
+      },
+    },
+
+    /**
+     * A dom node to render when there are no more messages in the Message List.
+     *
+     * Could just be a message "Top of Conversation".
+     *
+     * ```
+     * var div = document.createElement('div');
+     * div.innerHTML = 'Top of Conversation';
+     * widget.endOfMessagesNode = div;
+     * ```
+     *
+     * Note that this node is *not* rendered when the list has no messages; see
+     * emptyMessageListNode instead.
+     *
+     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
+     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
+     * style height to be at least as tall as your custom node.
+     *
+     * @property {HTMLElement} [emptyMessageListNode=null]
+     */
+    endOfMessagesNode: {
+      type: HTMLElement,
+      set(value) {
+        this.nodes.list.endOfResultsNode = value;
+      },
+      get(value) {
+        return this.nodes.list.endOfResultsNode;
       },
     },
 

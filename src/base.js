@@ -345,8 +345,23 @@ layerUI.getHandler = (message, container) => {
  *    name: 'youtube',
  *    order: 200,
  *    handler: function(textData, message) {
- *    textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
+ *       textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+ *   });
+ * });
+ * ```
+ *
+ * You can append data after your message using `afterText`:
+ *
+ * ```
+ * layerUI.registerTextHandler({
+ *    name: 'youtube',
+ *    order: 200,
+ *    handler: function(textData, message) {
+ *       var matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g);
+ *       if (matches[3) {
+ *           textData.afterText.push('<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>');
+ *       }
  *   });
  * });
  * ```
@@ -366,6 +381,8 @@ layerUI.getHandler = (message, container) => {
  * @param {Boolean} [requiresEnable=false]                If provided, this registers the handler but won't use the handler
  *       without a separate call to opt in.  Opt in later using with `layerUI.registerTextHandler({name: handlerName})`
  *       and no handler function.  (For Internal use only)
+ * @param {Boolean} options.handler.isMessageListItem     If rendering the results in a MessageList, returns true, else we may be rendering this in a Toast popup, Conversation List Last Message, or elsewhere.  Emojis you may want in all places, but `afterText` will be ignored if its not in a Message List
+
  */
 layerUI.registerTextHandler = function registerTextHandler(options) {
   if (layerUI.textHandlers[options.name]) {
@@ -577,7 +594,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '1.0.1';
+layerUI.version = '1.0.2';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

@@ -382,6 +382,15 @@ describe('layer-conversation-panel', function() {
     });
   });
 
+  describe("The endOfMessagesNode property", function() {
+    it("Should set the list endOfResultsNode property", function() {
+      var div = document.createElement('div');
+      el.endOfMessagesNode = div;
+      layer.Util.defer.flush();
+      expect(el.nodes.list.endOfResultsNode).toBe(div);
+    });
+  });
+
   describe("The composeButtons property", function() {
     it("Should set the list composeButtons property", function() {
       var buttons = [document.createElement("button"), document.createElement("button")];

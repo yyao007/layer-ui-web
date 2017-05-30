@@ -279,7 +279,7 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
       body: `{"orientation":0, "width":${originalSize.width}, "height":${originalSize.height}}`,
     }));
 
-    callback(parts);
+    if (callback) callback(parts);
   });
 
   video.src = URL.createObjectURL(part.body);

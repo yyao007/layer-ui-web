@@ -7,6 +7,7 @@ describe('layer-conversation-last-message', function() {
   });
 
   afterEach(function() {
+    layer.Util.defer.reset();
     jasmine.clock().uninstall();
     layer.Client.removeListenerForNewClient();
   });

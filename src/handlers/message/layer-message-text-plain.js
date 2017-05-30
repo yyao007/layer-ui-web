@@ -8,12 +8,27 @@
  */
 import { registerMessageComponent } from '../../components/component';
 import MessageHandler from '../../mixins/message-handler';
+import LayerUI from '../../base';
 
 registerMessageComponent('layer-message-text-plain', {
+  // Note: This template is for use within a MessageItem in a MessageList, else its blown away by the message text
+  // which if burried so deeply in the dom, becomes problematic to render inline with other elements such as `conversation.lastMessage` to the right of
+  // conversation name.  Use of this template in a Message Item allows us to have afterText nodes that contain additional content
+  // but which is not inside of the text bubble
+  template: '<div class="layer-message-text" layer-id="text"></div>',
   mixins: [MessageHandler],
   properties: {
     label: {
       label: 'Text',
+    },
+    html: {
+      set(html) {
+        if (this.parentComponent.isMessageListItem) {
+          this.nodes.text.innerHTML = html;
+        } else {
+          this.innerHTML = html;
+        }
+      },
     },
   },
   methods: {
@@ -49,23 +64,40 @@ registerMessageComponent('layer-message-text-plain', {
      * @method
      */
     onRender() {
-      if (!layerUI.textHandlersOrdered) this._setupOrderedHandlers();
+      if (!LayerUI.textHandlersOrdered) this._setupOrderedHandlers();
 
       const text = this.message.parts[0].body;
       const textData = {
         text: this._fixHtml(text),
         afterText: [],
+        afterClasses: [],
       };
-      let afterText = '';
 
-      layerUI.textHandlersOrdered.forEach(handler => handler(textData, this.message));
+      // Iterate over each handler, calling each handler.
+      // Perform a cheap trick until we can update our API so that
+      // css classes can be associated with each item.
+      // This is a cheap trick because a TextHandler could arbitrarily edit the `afterText` array,
+      // removing previously added elements.  And this code would then break.
+      LayerUI.textHandlersOrdered.forEach((handlerDef) => {
+        const afterText = textData.afterText.concat([]);
+        handlerDef.handler(textData, this.message, Boolean(this.parentComponent && this.parentComponent.isMessageListItem));
+        const last = textData.afterText[textData.afterText.length - 1];
+        if (afterText.indexOf(last) === -1) {
+          textData.afterClasses[textData.afterText.length - 1] = 'layer-message-text-plain-' + handlerDef.name;
+        }
+      });
+      this.html = textData.text;
 
-      if (textData.afterText.length) {
-        const startDiv = '<div class="layer-message-text-plain-after-text">';
-        afterText = startDiv + textData.afterText.join('</div>' + startDiv) + '</div>';
-        this.classList.add('layer-message-text-plain-has-after-text');
+      if (textData.afterText.length && this.parentComponent && this.parentComponent.isMessageListItem) {
+        textData.afterText.forEach((textItem, i) => {
+          const div = document.createElement('div');
+          div.classList.add('layer-message-text-plain-after-text');
+          div.classList.add(textData.afterClasses[i]);
+          div.innerHTML = textItem;
+          if (div.firstChild.properties) div.firstChild.properties.parentComponent = this;
+          this.appendChild(div);
+        });
       }
-      this.innerHTML = textData.text + afterText;
     },
 
     /**
@@ -77,16 +109,23 @@ registerMessageComponent('layer-message-text-plain', {
      * @private
      */
     _setupOrderedHandlers() {
-      layerUI.textHandlersOrdered = Object.keys(layerUI.textHandlers).filter(handlerName =>
-        layerUI.textHandlers[handlerName].enabled)
-      .map(handlerName => layerUI.textHandlers[handlerName])
+      LayerUI.textHandlersOrdered = Object.keys(LayerUI.textHandlers).filter(handlerName =>
+        LayerUI.textHandlers[handlerName].enabled)
+      .map(handlerName => LayerUI.textHandlers[handlerName])
       .sort((a, b) => {
         if (a.order > b.order) return 1;
         if (b.order > a.order) return -1;
         return 0;
-      })
-      .map(handlerObj => handlerObj.handler);
+      });
+    },
+
+    /**
+     * Rerender any message that was rendered as a preview and is now no longer a preview.
+     *
+     * @method onSent
+     */
+    onSent() {
+      this.onRender();
     },
   },
 });
-

@@ -84,14 +84,17 @@
  *
  * @mixin layerUI.mixins.EmptyList
  * @mixin layerUI.mixins.List
+ * @mixin layerUI.mixins.ListLoadIndicator
+ * @mixin layerUI.mixins.QueryEndIndicator
  */
-import animatedScrollTo from 'animated-scrollto';
 import Layer from 'layer-websdk';
 import LayerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import HasQuery from '../../../mixins/has-query'
 import EmptyList from '../../../mixins/empty-list';
+import ListLoadIndicator from '../../../mixins/list-load-indicator';
+import QueryEndIndicator from '../../../mixins/query-end-indicator';
 import '../layer-message-item-sent/layer-message-item-sent';
 import '../layer-message-item-received/layer-message-item-received';
 
@@ -99,7 +102,7 @@ import '../layer-message-item-received/layer-message-item-received';
 const PAGING_DELAY = 2000;
 
 registerComponent('layer-messages-list', {
-  mixins: [List, HasQuery, EmptyList],
+  mixins: [List, HasQuery, EmptyList, ListLoadIndicator, QueryEndIndicator],
   properties: {
 
     /**
@@ -297,26 +300,31 @@ registerComponent('layer-messages-list', {
      * Will call _checkVisibility() when done.
      *
      * ```
-     * widget.animateScrollTo(500);
+     * widget.animatedScrollTo(500);
      * ```
      *
-     * @method animateScrollTo
-     * @param {Number} position
+     * @method animatedScrollTo
+     * @param {Number} [animateSpeed=200]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
      */
-    animateScrollTo(position) {
-      if (position === this.scrollTop) return;
-      this.properties.isSelfScrolling = true;
-      if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
-      const cancel = this.properties.cancelAnimatedScroll = animatedScrollTo(this, position, 200, () => {
-        // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
-        setTimeout(() => {
-          if (cancel !== this.properties.cancelAnimatedScroll) return;
-          this.properties.cancelAnimatedScroll = null;
+    animatedScrollTo: {
+      mode: registerComponent.MODES.OVERWRITE,
+      value(position, animateSpeed = 200, animateCallback) {
+        if (position === this.scrollTop) return;
+        this.properties.isSelfScrolling = true;
+        if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+        const cancel = this.properties.cancelAnimatedScroll = LayerUI.animatedScrollTo(this, position, animateSpeed, () => {
+          // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
+          setTimeout(() => {
+            if (cancel !== this.properties.cancelAnimatedScroll) return;
+            this.properties.cancelAnimatedScroll = null;
 
-          this.properties.isSelfScrolling = false;
-          this._checkVisibility();
-        }, 100);
-      });
+            this.properties.isSelfScrolling = false;
+            this._checkVisibility();
+            if (animateCallback) animateCallback();
+          }, 100);
+        });
+      },
     },
 
     /**
@@ -338,15 +346,14 @@ registerComponent('layer-messages-list', {
       if (LayerUI.isInBackground() || this.disable) return;
 
       // The top that we can see is marked by how far we have scrolled.
-      // However, all offsetTop values of the child nodes will be skewed by the value of this.nodes.loadIndicator.offsetTop, so add that in.
-      const visibleTop = this.scrollTop + this.nodes.loadIndicator.offsetTop;
+      const visibleTop = this.scrollTop;
 
       // The bottom that we can see is marked by how far we have scrolled plus the height of the panel.
-      // However, all offsetTop values of the child nodes will be skewed by the value of this.nodes.loadIndicator.offsetTop, so add that in.
-      const visibleBottom = this.scrollTop + this.clientHeight + this.nodes.loadIndicator.offsetTop;
+      const visibleBottom = this.scrollTop + this.clientHeight;
       const children = Array.prototype.slice.call(this.childNodes);
       children.forEach((child) => {
-        if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+        const childOffset = child.offsetTop - this.offsetTop;
+        if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
           if (child.properties && child.properties.item && !child.properties.item.isRead) {
             // TODO: Use a scheduler rather than many setTimeout calls
             setTimeout(() => this._markAsRead(child), LayerUI.settings.markReadDelay);
@@ -368,9 +375,10 @@ registerComponent('layer-messages-list', {
     _markAsRead(child) {
       if (LayerUI.isInBackground() || this.disable) return;
 
-      const visibleTop = this.scrollTop + this.nodes.loadIndicator.offsetTop;
-      const visibleBottom = this.scrollTop + this.clientHeight + this.nodes.loadIndicator.offsetTop;
-      if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+      const visibleTop = this.scrollTop;
+      const visibleBottom = this.scrollTop + this.clientHeight;
+      const childOffset = child.offsetTop - this.offsetTop;
+      if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
         child.properties.item.isRead = true;
       }
     },
@@ -482,14 +490,13 @@ registerComponent('layer-messages-list', {
         this._gatherAndProcessAffectedItems(affectedItems, isTopItemNew);
         this._updateLastMessageSent();
         if (this.properties.stuckToBottom) {
-          setTimeout(() => this.animateScrollTo(this.scrollHeight - this.clientHeight), 0);
+          setTimeout(() => this.animatedScrollTo(this.scrollHeight - this.clientHeight), 0);
         } else {
           this._checkVisibility();
         }
         if (!evt.inRender) this.onRerender();
       },
     },
-
 
     /**
      * The last message sent by the session owner should show some pending/read-by/etc... status.
@@ -533,7 +540,8 @@ registerComponent('layer-messages-list', {
       const children = Array.prototype.slice.call(this.childNodes);
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+        const childOffset = child.offsetTop - this.offsetTop;
+        if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
           if (child.properties && child.properties.item) {
             return child;
           }
@@ -578,7 +586,7 @@ registerComponent('layer-messages-list', {
         const appendMore = function appendMore() {
           if (!this.query || this.query.isDestroyed) return;
           this.properties.appendingMore = true;
-          const processItems = newData.splice(0, 20);
+          const processItems = newData.splice(0, 20).filter(item => !item.isDestroyed);
           fragment = this._generateFragment(processItems, fragment);
           if (newData.length) {
             setTimeout(() => appendMore.call(this), 20);
@@ -622,21 +630,15 @@ registerComponent('layer-messages-list', {
 
       const firstVisibleItem = this._findFirstVisibleItem();
       const initialOffset = firstVisibleItem ?
-        firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - this.scrollTop : 0;
+        firstVisibleItem.offsetTop - this.offsetTop - this.scrollTop : 0;
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
-      const nextItem = this.nodes.loadIndicator.nextSibling;
+      const nextItem = this.nodes.listHeader.nextSibling;
       this.insertBefore(fragment, nextItem);
 
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful
       this._updateLastMessageSent();
-
-      if (this.properties.stuckToBottom) {
-        this.scrollTo(this.scrollHeight - this.clientHeight);
-      } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
-        this.scrollTo(firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - initialOffset);
-      }
 
       this.isDataLoading = this.properties.query.isFiring;
       this._checkVisibility();
@@ -644,6 +646,14 @@ registerComponent('layer-messages-list', {
 
       if (this.properties.insertEvents) this.properties.insertEvents.forEach(anEvt => this._renderInsertedData(anEvt));
       delete this.properties.insertEvents;
+
+      Layer.Util.defer(() => {
+        if (this.properties.stuckToBottom) {
+          this.scrollTo(this.scrollHeight - this.clientHeight);
+        } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
+          this.scrollTo(firstVisibleItem.offsetTop - this.offsetTop - initialOffset);
+        }
+      });
     },
   },
 });

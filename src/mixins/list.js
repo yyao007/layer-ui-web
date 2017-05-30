@@ -5,6 +5,7 @@
  * @mixin layerUI.mixins.HasQuery
  */
 import Layer from 'layer-websdk';
+import { animatedScrollTo } from '../base';
 import { registerComponent } from '../components/component';
 import HasQuery from './has-query';
 
@@ -35,11 +36,7 @@ module.exports = {
      *
      * @property {Boolean} [isDataLoading=false]
      */
-    isDataLoading: {
-      set(value) {
-        this.classList[value ? 'add' : 'remove']('layer-loading-data');
-      },
-    },
+    isDataLoading: {},
 
     /**
      * Any time we are about to render an object, call any provided onRenderListItem function to see if there
@@ -183,6 +180,52 @@ module.exports = {
     scrollTo(position) {
       if (position === this.scrollTop) return;
       this.scrollTop = position;
+    },
+
+    /**
+     * Animated scroll to the specified Y position.
+     *
+     * @method animatedScrollTo
+     * @param {Number} position
+     * @param {Number} [animateSpeed=200]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
+     */
+    animatedScrollTo(position, animateSpeed = 200, animateCallback) {
+      if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+
+      const cancel = this.properties.cancelAnimatedScroll = animatedScrollTo(this, position, animateSpeed, () => {
+        if (cancel !== this.properties.cancelAnimatedScroll) return;
+        this.properties.cancelAnimatedScroll = null;
+        if (animateCallback) animateCallback();
+      });
+    },
+
+    /**
+     * Scroll to the specified item.
+     *
+     * Item is assumed to be a layer.Message, layer.Conversation, or whatever the core
+     * data set is that is in your list.  Note that this does not load the item from the server;
+     * scrolling to an item not in the list will return `false`.
+     *
+     * @method scrollToItem
+     * @param {layer.Root} item
+     * @param {Number} [animateSpeed=0]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
+     * @return {Boolean}                  Returns true if operation was successful,
+     *                                    returns false if the item was not found in the list.
+     */
+    scrollToItem(item, animateSpeed = 0, animateCallback) {
+      const widget = document.getElementById(this._getItemId(item.id));
+      if (!widget) return false;
+
+      const position = widget.offsetTop - this.offsetTop;
+      if (!animateSpeed) {
+        this.scrollTop = position;
+      } else {
+        this.animatedScrollTo(position, animateSpeed, animateCallback);
+      }
+
+      return true;
     },
 
     onRender() {

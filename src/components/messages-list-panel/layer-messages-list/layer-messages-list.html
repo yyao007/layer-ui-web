@@ -8,19 +8,26 @@
       overflow-y: scroll; /* has to be scroll, not auto */
       -webkit-overflow-scrolling: touch;
     }
-    layer-messages-list .layer-load-indicator {
+    layer-messages-list .layer-header-toggle {
+      min-height: 20px;
+      margin-bottom: 2px;
+    }
+    layer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {
       text-align: center;
-      border-bottom: solid 1px #ccc;
-      font-style: italic;
-      opacity: 0;
+      display: none;
     }
-    layer-messages-list.layer-loading-data .layer-load-indicator {
-      opacity: 1;
+    layer-messages-list.layer-loading-data .layer-load-indicator,
+    layer-messages-list.layer-end-of-results .layer-end-of-results-indicator {
+      display: block;
     }
-
   </style>
-  <div class='layer-empty-list' layer-id='emptyNode'></div>
-  <div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div>
+  <div class='layer-list-header' layer-id='listHeader'>
+    <div class='layer-empty-list' layer-id='emptyNode'></div>
+    <div class='layer-header-toggle'>
+      <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'>This is the beginning of your conversation</div>
+      <div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div>
+    </div>
+  </div>
 </template>
 <script>
   window.layerUI.registerTemplate('layer-messages-list');

@@ -46,17 +46,19 @@
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  * @mixin layerUI.mixins.ListSelection
+ * @mixin layerUI.mixins.ListLoadIndicator
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
+import ListLoadIndicator from '../../../mixins/list-load-indicator';
 import ListSelection from '../../../mixins/list-selection';
 import MainComponent from '../../../mixins/main-component';
 import '../layer-conversation-item/layer-conversation-item';
 import '../layer-channel-item/layer-channel-item';
 
 registerComponent('layer-conversations-list', {
-  mixins: [List, ListSelection, MainComponent],
+  mixins: [List, ListSelection, MainComponent, ListLoadIndicator],
 
   /**
    * Configure a custom action when a Conversation is selected;

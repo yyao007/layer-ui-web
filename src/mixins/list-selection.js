@@ -22,19 +22,26 @@ module.exports = {
      * ```
      *
      * The above code will set the selected Conversation and render the conversation as selected.
+     * Note that setting the selectedId triggers a selection event; if `evt.preventDefault()` is called,
+     * this property change will be prevented.
      *
      * @property {String} [selectedId='']
      */
     selectedId: {
       set(newId, oldId) {
-        if (oldId) {
-          const node = this.querySelector('#' + this._getItemId(oldId));
-          if (node) node.isSelected = false;
-        }
+        const newItem = this.client.getObject(newId);
+        if ((newItem || oldId) && !this.trigger(this._selectedItemEventName, { item: newItem })) {
+          this.properties.selectedId = oldId;
+        } else {
+          if (oldId) {
+            const node = this.querySelector('#' + this._getItemId(oldId));
+            if (node) node.isSelected = false;
+          }
 
-        if (newId) {
-          const node = this.querySelector('#' + this._getItemId(newId));
-          if (node) node.isSelected = true;
+          if (newId) {
+            const node = this.querySelector('#' + this._getItemId(newId));
+            if (node) node.isSelected = true;
+          }
         }
       },
     },
@@ -72,9 +79,7 @@ module.exports = {
       if (target.item && target._isListItem) {
         evt.preventDefault();
         evt.stopPropagation();
-        if (this.trigger(this._selectedItemEventName, { item: target.item, originalEvent: evt })) {
-          this.selectedId = target.item.id;
-        }
+        this.selectedId = target.item.id;
       }
       this.onClick(evt);
     },

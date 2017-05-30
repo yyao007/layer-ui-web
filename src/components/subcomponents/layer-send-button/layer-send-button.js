@@ -1,5 +1,5 @@
 /**
- * The Layer file upload button widget allows users to select a File to send.
+ * The Layer Send button widget provides an alternative to hitting a keyboard `ENTER` key for sending a message.
  *
  * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel.
  * If using it elsewhere, note that it triggers a `layer-send-click` event that you would listen for to do your own processing.

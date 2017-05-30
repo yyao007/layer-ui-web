@@ -42,6 +42,11 @@ describe('layer-file-upload-button', function() {
     layerUI.files.processAttachments = tmp;
   });
 
+  it("Should set the accept attribute", function() {
+    el.accept = "application/pdf";
+    expect(el.nodes.input.getAttribute('accept')).toEqual("application/pdf");
+  });
+
   it("Should trigger layer-file-selected onChange", function() {
     var part = new layer.MessagePart({body: "Frodo is a Dodo", mimeType: "text/plain"});
     var spy = jasmine.createSpy('processAttachments').and.callFake(function(a, callback) {

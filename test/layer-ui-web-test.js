@@ -26,7 +26,8 @@
  * @class layerUI.adapters.angular
  * @singleton
  * @param {Object} angular     Pass in the AngularJS library
- */'use strict';
+ */
+'use strict';
 
 var _base = require('../base');
 
@@ -139,7 +140,7 @@ _base2.default.addAdapter('angular', initAngular);
  * var fileUploadButton = new LayerUIViews.FileUploadButton(client);
  * ```
  *
-* Calling this will expose the following React Components:
+ * Calling this will expose the following React Components:
  *
  * * ConversationPanelView: A wrapper around a layerUI.components.ConversationPanel
  * * ConversationsListView: A wrapper around a layerUI.components.ConversationsListPanel
@@ -164,7 +165,8 @@ _base2.default.addAdapter('angular', initAngular);
  * @class layerUI.adapters.backbone
  * @singleton
  * @param {Object} backbone     Pass in the backbone library
- */'use strict';
+ */
+'use strict';
 
 var _base = require('../base');
 
@@ -279,7 +281,8 @@ _base2.default.addAdapter('backbone', initBackbone);
  * @singleton
  * @param {Object} React - Pass in the reactJS library
  * @param {Object} ReactDom - Pass in the ReactDom library
- */'use strict';
+ */
+'use strict';
 
 var _base = require('../base');
 
@@ -414,7 +417,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":70}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":72}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -442,7 +445,8 @@ _base2.default.addAdapter('react', initReact);
  * It is not required to use an adapter, but it solves many inconsistencies in how these frameworks handle webcomponents built using this framework.
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -767,8 +771,23 @@ layerUI.getHandler = function (message, container) {
  *    name: 'youtube',
  *    order: 200,
  *    handler: function(textData, message) {
- *    textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
+ *       textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+ *   });
+ * });
+ * ```
+ *
+ * You can append data after your message using `afterText`:
+ *
+ * ```
+ * layerUI.registerTextHandler({
+ *    name: 'youtube',
+ *    order: 200,
+ *    handler: function(textData, message) {
+ *       var matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g);
+ *       if (matches[3) {
+ *           textData.afterText.push('<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>');
+ *       }
  *   });
  * });
  * ```
@@ -788,6 +807,8 @@ layerUI.getHandler = function (message, container) {
  * @param {Boolean} [requiresEnable=false]                If provided, this registers the handler but won't use the handler
  *       without a separate call to opt in.  Opt in later using with `layerUI.registerTextHandler({name: handlerName})`
  *       and no handler function.  (For Internal use only)
+ * @param {Boolean} options.handler.isMessageListItem     If rendering the results in a MessageList, returns true, else we may be rendering this in a Toast popup, Conversation List Last Message, or elsewhere.  Emojis you may want in all places, but `afterText` will be ignored if its not in a Message List
+
  */
 layerUI.registerTextHandler = function registerTextHandler(options) {
   if (layerUI.textHandlers[options.name]) {
@@ -1007,7 +1028,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '1.0.0';
+layerUI.version = '1.0.2';
 
 var clientVersions = _layerWebsdk2.default.Client.version.split('.').map(function (value) {
   return Number(value);
@@ -1027,461 +1048,461 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":70}],5:[function(require,module,exports){
+},{"layer-websdk":72}],5:[function(require,module,exports){
 /**
-                                                                                                                                                                                                     * This is the base class for all UI classes in the Layer UI Framework.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * It works with the webcomponent API/polyfill to define components that:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * Provides getters/setters/defaults for all defined properties
-                                                                                                                                                                                                     * * Read the widget's attributes on being initialized, copying them into properties and triggering property setters
-                                                                                                                                                                                                     * * Provides created and destroyed callbacks
-                                                                                                                                                                                                     * * Provides onReady and onAttach hooks for custom Mixins
-                                                                                                                                                                                                     * * Automate standard template-related tasks
-                                                                                                                                                                                                     * * Automate standard event-related tasks
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Methods and properties defined here should only be needed by developers wishing to build new widgets or evolve existing widgets.
-                                                                                                                                                                                                     * Note that widgets can be created using other frameworks based on the webcomponent polyfill and still work here.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * A new component is created using:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var componentDefinition = {
-                                                                                                                                                                                                     *   events: ['event-one', 'event-two', 'event-three', 'event-four'],
-                                                                                                                                                                                                     *   mixins: [mixinObj1, mixinObj2, mixinObj3],
-                                                                                                                                                                                                     *   properties: {
-                                                                                                                                                                                                     *      prop1: {
-                                                                                                                                                                                                     *          set: function(value) {
-                                                                                                                                                                                                     *              this.myRenderer();
-                                                                                                                                                                                                     *          }
-                                                                                                                                                                                                     *      },
-                                                                                                                                                                                                     *      prop2: {
-                                                                                                                                                                                                     *          get: function() {
-                                                                                                                                                                                                     *              return this.scrollTop;
-                                                                                                                                                                                                     *          }
-                                                                                                                                                                                                     *      },
-                                                                                                                                                                                                     *      prop3: {
-                                                                                                                                                                                                     *          value: "Frodo is a Dodo"
-                                                                                                                                                                                                     *      },
-                                                                                                                                                                                                     *      prop4: {
-                                                                                                                                                                                                     *          type: Function
-                                                                                                                                                                                                     *      }
-                                                                                                                                                                                                     *   },
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     onCreate: function() {
-                                                                                                                                                                                                     *        alert("The widget has been created");
-                                                                                                                                                                                                     *     },
-                                                                                                                                                                                                     *     myRenderer: function() {
-                                                                                                                                                                                                     *        this.innerHTML = this.properties.prop1;
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   },
-                                                                                                                                                                                                     *   listeners: {
-                                                                                                                                                                                                     *     'layer-notification-click': function notificationClick(evt) {
-                                                                                                                                                                                                     *          const message = evt.detail.item;
-                                                                                                                                                                                                     *          const conversation = message.getConversation();
-                                                                                                                                                                                                     *          if (conversation) this.selectedId = conversation.id;
-                                                                                                                                                                                                     *       },
-                                                                                                                                                                                                     *    }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * };
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * A component defined this way can be registered as follows:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var layerUI = require('layer-ui-web');
-                                                                                                                                                                                                     * layerUI.registerComponent(tagName, componentDefinition);
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ### Properties
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * A property definition can be as simple as:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * layerUI.registerComponent(tagName, {
-                                                                                                                                                                                                     *    properties: {
-                                                                                                                                                                                                     *       prop1: {}
-                                                                                                                                                                                                     *    }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The above code declares `prop1` to be a property, sets up a setter that writes `widget.properties.prop1` any time `widget.prop1` is set,
-                                                                                                                                                                                                     * and sets up a getter to read the value from `widget.properties.prop1`.  It also insures that at initialization time, if a `prop1` attribute
-                                                                                                                                                                                                     * is found, it will be used as the `prop1` property.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Property Definitions support the following keys:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * *  set: A setter function whose input is the new value.  Note that your setter function is called AFTER this.properties.propName
-                                                                                                                                                                                                     *    has been set with the new value; your setter is for any side effects, rendering updates, or additional processing and NOT
-                                                                                                                                                                                                     *    for writing the value itself.
-                                                                                                                                                                                                     * *  get: A getter is needed if getting the property value from `this.properties.propName` is not getting the latest value.
-                                                                                                                                                                                                     *    Perhaps you want to return `this.nodes.input.value` to get text typed in by a user.
-                                                                                                                                                                                                     * *  value: If a `value` key is provided, then this will be the default value of your property, to be used if a value is
-                                                                                                                                                                                                     *    not provided by the component creator.
-                                                                                                                                                                                                     * *  type: Currently accepts `Boolean`, `Number`, `Function`.  Using a type makes the system
-                                                                                                                                                                                                     *    more forgiving when processing strings.  This exists because attributes frequently arrive as strings due to the way HTML attributes work.
-                                                                                                                                                                                                     *    For example:
-                                                                                                                                                                                                     *    * if type is Boolean, and "false", "null", "undefined", "" and "0" are evaluated as `false`; all other values are `true`
-                                                                                                                                                                                                     *    * Using this with functions will cause your function string to be evaled, but will lose your function scope and `this` pointer.
-                                                                                                                                                                                                     *    * Using this with a number will turn "1234" into `1234`
-                                                                                                                                                                                                     * *  noGetterFromSetter: Do **not** use the getter function from within the setter.  Used for special cases where
-                                                                                                                                                                                                     *    you have a getter that calculates the values, but where your setter should just make do with the last known value
-                                                                                                                                                                                                     *    when determining if the value has changed.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Example
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *  isEnabled: {
-                                                                                                                                                                                                     *    type: Boolean,
-                                                                                                                                                                                                     *    value: true,
-                                                                                                                                                                                                     *    set: function(inValue) {
-                                                                                                                                                                                                     *       this.classList.toggle('widget-enabled', inValue);
-                                                                                                                                                                                                     *    },
-                                                                                                                                                                                                     *    get: function() {
-                                                                                                                                                                                                     *       return this.classList.contains('widget-enabled');
-                                                                                                                                                                                                     *    }
-                                                                                                                                                                                                     * }
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ### Events
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * As part of your layerUI.components.Component.registerComponents call you can pass in an `events` array; this is an array of strings representing events to listen for,
-                                                                                                                                                                                                     * and provide as property-based event listeners.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Example:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * layerUI.registerComponent(tagName, {
-                                                                                                                                                                                                     *    events: ['layer-something-happening', 'layer-nothing-happening', 'your-custom-event']
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The above component definition will result in:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * 1. The component will listen for the 3 events listed, regardless of whether this component triggered the event,
-                                                                                                                                                                                                     *    or its child components triggered the event.
-                                                                                                                                                                                                     * 2. The component will define the following properties: `onSomethingHappening`, `onNothingHappening` and `onYourCustomEvent`. These properties
-                                                                                                                                                                                                     *    are defined for you, you do not need to do anything more than list the events in the events array.
-                                                                                                                                                                                                     * 3. Your app can now use either event listeners or property callbacks as illustrated below:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Event Listeners:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * document.body.addEventListener('layer-something-happening', myFunc);
-                                                                                                                                                                                                     * document.body.addEventListener('layer-nothing-happening', myFunc);
-                                                                                                                                                                                                     * document.body.addEventListener('your-custom-event', myFunc);
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Property callbacks:
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * widget.onSomethingHappening = myFunc;
-                                                                                                                                                                                                     * widget.onNothingHappening = myFunc;
-                                                                                                                                                                                                     * widget.onYourCustomEvent = myFunc;
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ### Methods
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * You may provide any methods you want within the `methods` hash; be aware though that some methods names
-                                                                                                                                                                                                     * are reserved for use by the framework, and some have specific life-cycle implications for the widget.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * #### Reserved
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The following method names are reserved:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * `createdCallback`
-                                                                                                                                                                                                     * * `attachedCallback`
-                                                                                                                                                                                                     * * `detachedCallback`
-                                                                                                                                                                                                     * * `attributeChangedCallback`
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ### Mixins
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Mixins can be added to a widget in two ways:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * A Component may add a `mixins` array to its definition
-                                                                                                                                                                                                     * * An Application, initializing the framework via `layerUI.init()` may pass in mixins into the `init` call.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * #### Using Mixins from the Component
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * A component can include any number of Mixins by adding them to the `mixins` Array:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * // Define a Mixin that can contains `properties`, `methods` and `events`:
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   properties: {
-                                                                                                                                                                                                     *     prop2: {}
-                                                                                                                                                                                                     *   },
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     method2: function() {
-                                                                                                                                                                                                     *       alert("I two Met Hed; he was a little nerdy");
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * // Add mixinObj to our Component
-                                                                                                                                                                                                     * var componentDefinition = {
-                                                                                                                                                                                                     *   mixins: [mixinObj],
-                                                                                                                                                                                                     *   properties: {
-                                                                                                                                                                                                     *      prop1: {
-                                                                                                                                                                                                     *          set: function(value) {
-                                                                                                                                                                                                     *              this.myRenderer();
-                                                                                                                                                                                                     *          }
-                                                                                                                                                                                                     *      }
-                                                                                                                                                                                                     *   },
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     method1: function() {
-                                                                                                                                                                                                     *       alert("I Met Hed; he was nice");
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * // Create a Component with prop1, prop2, method1 and method2
-                                                                                                                                                                                                     * registerComponent(tagName, componentDefinition);
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * An app can modify an existing component by adding custom mixins to it using `layerUI.init()`.  The `mixins` parameter
-                                                                                                                                                                                                     * takes as keys, the tag-name for any widget you want to customize;
-                                                                                                                                                                                                     * (e.g `layer-messages-item`, `layer-messages-list`, `layer-conversation-panel`, etc...)
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The following example adds a search bar to the Message List:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * // Define a Mixin that can contains `properties`, `methods` and `events`:
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   properties: {
-                                                                                                                                                                                                     *     prop2: {}
-                                                                                                                                                                                                     *   },
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     method2: function() {
-                                                                                                                                                                                                     *       alert("I two Met Hed; he was a little nerdy");
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * layerUI.init({
-                                                                                                                                                                                                     *   appId: 'my-app-id',
-                                                                                                                                                                                                     *   mixins: {
-                                                                                                                                                                                                     *     'layer-messages-item': mixinObj
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * #### Mixin Behaviors
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Your mixin can be used to:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * Add new Events to the widget's `events` array (presumably one of your new methods will call `this.trigger('my-event-name')`)
-                                                                                                                                                                                                     * * Add new properties
-                                                                                                                                                                                                     * * Add new methods
-                                                                                                                                                                                                     * * Add new behaviors to existing properties
-                                                                                                                                                                                                     * * Add new behaviors to existing methods
-                                                                                                                                                                                                     * * Overwrite existing methods
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ##### Adding an Event
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   events: ['mycompany-button-click'],
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     onCreate: function() {
-                                                                                                                                                                                                     *       this.nodes.button = document.createElement('button');
-                                                                                                                                                                                                     *       this.appendChild(this.nodes.button);
-                                                                                                                                                                                                     *       this.nodes.button.addEventListener('click', this._onMyCompanyButtonClick.bind(this));
-                                                                                                                                                                                                     *     },
-                                                                                                                                                                                                     *     _onMyCompanyButtonClick: function(evt) {
-                                                                                                                                                                                                     *       this.trigger('mycompany-button-click', { message: this.item.message });
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * When the user clicks on the `this.nodes.button`, it will trigger the `mycompany-button-click` event.  By listing
-                                                                                                                                                                                                     * `mycompany-button-click` event in the `events` array, this will automatically add the `onMycompanyButtonClick` property
-                                                                                                                                                                                                     * which you can set to your event handler (or you may just use `document.addEventListener('mycompany-button-click', callback)`).
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ##### Add new behaviors to existing properties
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * If you are modifying a widget that has an existing property, and you want additional side effects to
-                                                                                                                                                                                                     * trigger whenever that property is set, you can add your own `set` method to the property.
-                                                                                                                                                                                                     * Other modifications to the property will be ignored (`value` and `get` from mixin will be ignored).
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   properties: {
-                                                                                                                                                                                                     *     client: {
-                                                                                                                                                                                                     *       set: function(client) {
-                                                                                                                                                                                                     *         this.properties.user = client.user;
-                                                                                                                                                                                                     *       }
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * };
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The above mixin can be added to any widget;
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * If the widget already has a `client` property, both the widget's setter and your setter will be called; order of call is not predetermined.
-                                                                                                                                                                                                     * * If the widget does *not* already have a `client`, your `client` setter will be called if/when the `client` is set.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * You can use the Mixin to add any method your widget needs.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * You can also use the Mixin to enhance methods already provided by your widget:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     onCreate: function() {
-                                                                                                                                                                                                     *         var div = document.createElement('div');
-                                                                                                                                                                                                     *         this.appendChild(div);
-                                                                                                                                                                                                     *       }
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * };
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * The above mixin can be added to any widget; the widget's `onCreate` method will be called, AND your `onCreate` method will be called, in no
-                                                                                                                                                                                                     * particular order.  You an also use the following `mode` values to change ordering:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * * `layerUI.registerComponent.MODES.BEFORE`: Call your mixin's method before the widget's method
-                                                                                                                                                                                                     * * `layerUI.registerComponent.MODES.AFTER`: Call your mixin's method after the widget's method
-                                                                                                                                                                                                     * * `layerUI.registerComponent.MODES.OVERWRITE`: Call only your mixin's method, *not* the widget's method
-                                                                                                                                                                                                     * * `layerUI.registerComponent.MODES.DEFAULT`: Call your mixin's method in no particular order with regards to the widget's methods
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     onCreate: {
-                                                                                                                                                                                                     *       mode: layerUI.registerComponent.MODES.BEFORE,
-                                                                                                                                                                                                     *       value: function() {
-                                                                                                                                                                                                     *         var div = document.createElement('div');
-                                                                                                                                                                                                     *         this.appendChild(div);
-                                                                                                                                                                                                     *       }
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * You can also define a `conditional` on your methods; if any `conditional` function returns `false`, then none of the `BEFORE`, `AFTER`, `DEFAULT` or `OVERWRITE` methods are called:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var mixinObj = {
-                                                                                                                                                                                                     *   methods: {
-                                                                                                                                                                                                     *     onRender: {
-                                                                                                                                                                                                     *       conditional: function() {
-                                                                                                                                                                                                     *         return Boolean(this.item);
-                                                                                                                                                                                                     *       },
-                                                                                                                                                                                                     *       mode: layerUI.registerComponent.MODES.BEFORE,
-                                                                                                                                                                                                     *       value: function() {
-                                                                                                                                                                                                     *         var div = document.createElement('div');
-                                                                                                                                                                                                     *         this.appendChild(div);
-                                                                                                                                                                                                     *       }
-                                                                                                                                                                                                     *     }
-                                                                                                                                                                                                     *   }
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * For details on what methods to modify via mixins, see the Life Cycle methods
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * #### Life Cycle Methods
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * All widgets should execute the following life cycle methods:
-                                                                                                                                                                                                     *
+ * This is the base class for all UI classes in the Layer UI Framework.
+ *
+ * It works with the webcomponent API/polyfill to define components that:
+ *
+ * * Provides getters/setters/defaults for all defined properties
+ * * Read the widget's attributes on being initialized, copying them into properties and triggering property setters
+ * * Provides created and destroyed callbacks
+ * * Provides onReady and onAttach hooks for custom Mixins
+ * * Automate standard template-related tasks
+ * * Automate standard event-related tasks
+ *
+ * Methods and properties defined here should only be needed by developers wishing to build new widgets or evolve existing widgets.
+ * Note that widgets can be created using other frameworks based on the webcomponent polyfill and still work here.
+ *
+ * A new component is created using:
+ *
+ * ```
+ * var componentDefinition = {
+ *   events: ['event-one', 'event-two', 'event-three', 'event-four'],
+ *   mixins: [mixinObj1, mixinObj2, mixinObj3],
+ *   properties: {
+ *      prop1: {
+ *          set: function(value) {
+ *              this.myRenderer();
+ *          }
+ *      },
+ *      prop2: {
+ *          get: function() {
+ *              return this.scrollTop;
+ *          }
+ *      },
+ *      prop3: {
+ *          value: "Frodo is a Dodo"
+ *      },
+ *      prop4: {
+ *          type: Function
+ *      }
+ *   },
+ *   methods: {
+ *     onCreate: function() {
+ *        alert("The widget has been created");
+ *     },
+ *     myRenderer: function() {
+ *        this.innerHTML = this.properties.prop1;
+ *     }
+ *   },
+ *   listeners: {
+ *     'layer-notification-click': function notificationClick(evt) {
+ *          const message = evt.detail.item;
+ *          const conversation = message.getConversation();
+ *          if (conversation) this.selectedId = conversation.id;
+ *       },
+ *    }
+ *   }
+ * };
+ * ```
+ *
+ * A component defined this way can be registered as follows:
+ *
+ * ```
+ * var layerUI = require('layer-ui-web');
+ * layerUI.registerComponent(tagName, componentDefinition);
+ * ```
+ *
+ * ### Properties
+ *
+ * A property definition can be as simple as:
+ *
+ * ```
+ * layerUI.registerComponent(tagName, {
+ *    properties: {
+ *       prop1: {}
+ *    }
+ * });
+ * ```
+ *
+ * The above code declares `prop1` to be a property, sets up a setter that writes `widget.properties.prop1` any time `widget.prop1` is set,
+ * and sets up a getter to read the value from `widget.properties.prop1`.  It also insures that at initialization time, if a `prop1` attribute
+ * is found, it will be used as the `prop1` property.
+ *
+ * Property Definitions support the following keys:
+ *
+ * *  set: A setter function whose input is the new value.  Note that your setter function is called AFTER this.properties.propName
+ *    has been set with the new value; your setter is for any side effects, rendering updates, or additional processing and NOT
+ *    for writing the value itself.
+ * *  get: A getter is needed if getting the property value from `this.properties.propName` is not getting the latest value.
+ *    Perhaps you want to return `this.nodes.input.value` to get text typed in by a user.
+ * *  value: If a `value` key is provided, then this will be the default value of your property, to be used if a value is
+ *    not provided by the component creator.
+ * *  type: Currently accepts `Boolean`, `Number`, `Function`.  Using a type makes the system
+ *    more forgiving when processing strings.  This exists because attributes frequently arrive as strings due to the way HTML attributes work.
+ *    For example:
+ *    * if type is Boolean, and "false", "null", "undefined", "" and "0" are evaluated as `false`; all other values are `true`
+ *    * Using this with functions will cause your function string to be evaled, but will lose your function scope and `this` pointer.
+ *    * Using this with a number will turn "1234" into `1234`
+ * *  noGetterFromSetter: Do **not** use the getter function from within the setter.  Used for special cases where
+ *    you have a getter that calculates the values, but where your setter should just make do with the last known value
+ *    when determining if the value has changed.
+ *
+ * Example
+ *
+ * ```
+ *  isEnabled: {
+ *    type: Boolean,
+ *    value: true,
+ *    set: function(inValue) {
+ *       this.classList.toggle('widget-enabled', inValue);
+ *    },
+ *    get: function() {
+ *       return this.classList.contains('widget-enabled');
+ *    }
+ * }
+ * ```
+ *
+ * ### Events
+ *
+ * As part of your layerUI.components.Component.registerComponents call you can pass in an `events` array; this is an array of strings representing events to listen for,
+ * and provide as property-based event listeners.
+ *
+ * Example:
+ *
+ * ```
+ * layerUI.registerComponent(tagName, {
+ *    events: ['layer-something-happening', 'layer-nothing-happening', 'your-custom-event']
+ * });
+ * ```
+ *
+ * The above component definition will result in:
+ *
+ * 1. The component will listen for the 3 events listed, regardless of whether this component triggered the event,
+ *    or its child components triggered the event.
+ * 2. The component will define the following properties: `onSomethingHappening`, `onNothingHappening` and `onYourCustomEvent`. These properties
+ *    are defined for you, you do not need to do anything more than list the events in the events array.
+ * 3. Your app can now use either event listeners or property callbacks as illustrated below:
+ *
+ * Event Listeners:
+ *
+ * ```
+ * document.body.addEventListener('layer-something-happening', myFunc);
+ * document.body.addEventListener('layer-nothing-happening', myFunc);
+ * document.body.addEventListener('your-custom-event', myFunc);
+ * ```
+ *
+ * Property callbacks:
+ * ```
+ * widget.onSomethingHappening = myFunc;
+ * widget.onNothingHappening = myFunc;
+ * widget.onYourCustomEvent = myFunc;
+ * ```
+ *
+ * ### Methods
+ *
+ * You may provide any methods you want within the `methods` hash; be aware though that some methods names
+ * are reserved for use by the framework, and some have specific life-cycle implications for the widget.
+ *
+ * #### Reserved
+ *
+ * The following method names are reserved:
+ *
+ * * `createdCallback`
+ * * `attachedCallback`
+ * * `detachedCallback`
+ * * `attributeChangedCallback`
+ *
+ * ### Mixins
+ *
+ * Mixins can be added to a widget in two ways:
+ *
+ * * A Component may add a `mixins` array to its definition
+ * * An Application, initializing the framework via `layerUI.init()` may pass in mixins into the `init` call.
+ *
+ * #### Using Mixins from the Component
+ *
+ * A component can include any number of Mixins by adding them to the `mixins` Array:
+ *
+ * ```
+ * // Define a Mixin that can contains `properties`, `methods` and `events`:
+ * var mixinObj = {
+ *   properties: {
+ *     prop2: {}
+ *   },
+ *   methods: {
+ *     method2: function() {
+ *       alert("I two Met Hed; he was a little nerdy");
+ *     }
+ *   }
+ * });
+ *
+ * // Add mixinObj to our Component
+ * var componentDefinition = {
+ *   mixins: [mixinObj],
+ *   properties: {
+ *      prop1: {
+ *          set: function(value) {
+ *              this.myRenderer();
+ *          }
+ *      }
+ *   },
+ *   methods: {
+ *     method1: function() {
+ *       alert("I Met Hed; he was nice");
+ *     }
+ *   }
+ * });
+ *
+ * // Create a Component with prop1, prop2, method1 and method2
+ * registerComponent(tagName, componentDefinition);
+ * ```
+ *
+ * An app can modify an existing component by adding custom mixins to it using `layerUI.init()`.  The `mixins` parameter
+ * takes as keys, the tag-name for any widget you want to customize;
+ * (e.g `layer-messages-item`, `layer-messages-list`, `layer-conversation-panel`, etc...)
+ *
+ * The following example adds a search bar to the Message List:
+ *
+ * ```
+ * // Define a Mixin that can contains `properties`, `methods` and `events`:
+ * var mixinObj = {
+ *   properties: {
+ *     prop2: {}
+ *   },
+ *   methods: {
+ *     method2: function() {
+ *       alert("I two Met Hed; he was a little nerdy");
+ *     }
+ * });
+ *
+ * layerUI.init({
+ *   appId: 'my-app-id',
+ *   mixins: {
+ *     'layer-messages-item': mixinObj
+ *   }
+ * });
+ * ```
+ *
+ * #### Mixin Behaviors
+ *
+ * Your mixin can be used to:
+ *
+ * * Add new Events to the widget's `events` array (presumably one of your new methods will call `this.trigger('my-event-name')`)
+ * * Add new properties
+ * * Add new methods
+ * * Add new behaviors to existing properties
+ * * Add new behaviors to existing methods
+ * * Overwrite existing methods
+ *
+ * ##### Adding an Event
+ *
+ * ```
+ * var mixinObj = {
+ *   events: ['mycompany-button-click'],
+ *   methods: {
+ *     onCreate: function() {
+ *       this.nodes.button = document.createElement('button');
+ *       this.appendChild(this.nodes.button);
+ *       this.nodes.button.addEventListener('click', this._onMyCompanyButtonClick.bind(this));
+ *     },
+ *     _onMyCompanyButtonClick: function(evt) {
+ *       this.trigger('mycompany-button-click', { message: this.item.message });
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * When the user clicks on the `this.nodes.button`, it will trigger the `mycompany-button-click` event.  By listing
+ * `mycompany-button-click` event in the `events` array, this will automatically add the `onMycompanyButtonClick` property
+ * which you can set to your event handler (or you may just use `document.addEventListener('mycompany-button-click', callback)`).
+ *
+ * ##### Add new behaviors to existing properties
+ *
+ * If you are modifying a widget that has an existing property, and you want additional side effects to
+ * trigger whenever that property is set, you can add your own `set` method to the property.
+ * Other modifications to the property will be ignored (`value` and `get` from mixin will be ignored).
+ *
+ * ```
+ * var mixinObj = {
+ *   properties: {
+ *     client: {
+ *       set: function(client) {
+ *         this.properties.user = client.user;
+ *       }
+ *     }
+ *   }
+ * };
+ * ```
+ *
+ * The above mixin can be added to any widget;
+ *
+ * * If the widget already has a `client` property, both the widget's setter and your setter will be called; order of call is not predetermined.
+ * * If the widget does *not* already have a `client`, your `client` setter will be called if/when the `client` is set.
+ *
+ * You can use the Mixin to add any method your widget needs.
+ *
+ * You can also use the Mixin to enhance methods already provided by your widget:
+ *
+ * ```
+ * var mixinObj = {
+ *   methods: {
+ *     onCreate: function() {
+ *         var div = document.createElement('div');
+ *         this.appendChild(div);
+ *       }
+ *     }
+ *   }
+ * };
+ * ```
+ *
+ * The above mixin can be added to any widget; the widget's `onCreate` method will be called, AND your `onCreate` method will be called, in no
+ * particular order.  You an also use the following `mode` values to change ordering:
+ *
+ * * `layerUI.registerComponent.MODES.BEFORE`: Call your mixin's method before the widget's method
+ * * `layerUI.registerComponent.MODES.AFTER`: Call your mixin's method after the widget's method
+ * * `layerUI.registerComponent.MODES.OVERWRITE`: Call only your mixin's method, *not* the widget's method
+ * * `layerUI.registerComponent.MODES.DEFAULT`: Call your mixin's method in no particular order with regards to the widget's methods
+ *
+ * ```
+ * var mixinObj = {
+ *   methods: {
+ *     onCreate: {
+ *       mode: layerUI.registerComponent.MODES.BEFORE,
+ *       value: function() {
+ *         var div = document.createElement('div');
+ *         this.appendChild(div);
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * You can also define a `conditional` on your methods; if any `conditional` function returns `false`, then none of the `BEFORE`, `AFTER`, `DEFAULT` or `OVERWRITE` methods are called:
+ *
+ * ```
+ * var mixinObj = {
+ *   methods: {
+ *     onRender: {
+ *       conditional: function() {
+ *         return Boolean(this.item);
+ *       },
+ *       mode: layerUI.registerComponent.MODES.BEFORE,
+ *       value: function() {
+ *         var div = document.createElement('div');
+ *         this.appendChild(div);
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * For details on what methods to modify via mixins, see the Life Cycle methods
+ *
+ * #### Life Cycle Methods
+ *
+ * All widgets should execute the following life cycle methods:
+ *
                                                                                                                                                                                                     
                                                                                                                                                                                                     1. `onCreate()`: Your widget has been created.
-                                                                                                                                                                                                        * Uses for `onCreate`:
-                                                                                                                                                                                                          * Setup event handlers
-                                                                                                                                                                                                          * Add custom nodes and properties that do not depend upon property values
-                                                                                                                                                                                                          * Setup local variables/state variables.
-                                                                                                                                                                                                        * Widget State when `onCreate` is called:
-                                                                                                                                                                                                          * If you have a template, it will have been loaded into your widget before `onCreate`, adding any neccessary child nodes
-                                                                                                                                                                                                          * `this.nodes` will be setup and point to any nodes in your template that specify a `layer-id`.
-                                                                                                                                                                                                          * If your widget was created with any attributes, they _may_ be available in `this.properties` but you should not depend upon them being set yet.
-                                                                                                                                                                                                          * No property setters will have been called yet
-                                                                                                                                                                                                          * Your widget will not have a `parentNode`
+ * Uses for `onCreate`:
+ * Setup event handlers
+ * Add custom nodes and properties that do not depend upon property values
+ * Setup local variables/state variables.
+ * Widget State when `onCreate` is called:
+ * If you have a template, it will have been loaded into your widget before `onCreate`, adding any neccessary child nodes
+ * `this.nodes` will be setup and point to any nodes in your template that specify a `layer-id`.
+ * If your widget was created with any attributes, they _may_ be available in `this.properties` but you should not depend upon them being set yet.
+ * No property setters will have been called yet
+ * Your widget will not have a `parentNode`
                                                                                                                                                                                                     1. Property Setters: Your property setters will be called with any attributes and/or properties that your widget was initialized with.
-                                                                                                                                                                                                       * The following widget `<my-widget prop1='frodo' prop2='dodo'></my-widget>` will call your setter for `prop1`
+ * The following widget `<my-widget prop1='frodo' prop2='dodo'></my-widget>` will call your setter for `prop1`
                                                                                                                                                                                                          with `frodo`, and `prop2` with `dodo`
-                                                                                                                                                                                                       * Default property values will be set; a property defined like this: `properties: { prop1: { value: 55, set: function(newValue) {alert('Set!');} } }` will cause the `prop1` setter will be called with `55`
-                                                                                                                                                                                                       * Any properties set via `var element = document.createElement('widget'); element.prop1 = 'frodo';` will fire at this point as well.
-                                                                                                                                                                                                       * If no attribute value is passed in and no default value is set the `prop1` setter will *not* be called, and the value will be `null`
+ * Default property values will be set; a property defined like this: `properties: { prop1: { value: 55, set: function(newValue) {alert('Set!');} } }` will cause the `prop1` setter will be called with `55`
+ * Any properties set via `var element = document.createElement('widget'); element.prop1 = 'frodo';` will fire at this point as well.
+ * If no attribute value is passed in and no default value is set the `prop1` setter will *not* be called, and the value will be `null`
                                                                                                                                                                                                     1. `onAfterCreate()`: Your widget has been initialized.
-                                                                                                                                                                                                        * Uses for `onAfterCreate`:
-                                                                                                                                                                                                          * Setup and DOM manipulation that depends upon property values (else it would go in `onCreate`)
-                                                                                                                                                                                                          * One time DOM manipulation based on property values that never change.  Any DOM manipulation based on values that change
+ * Uses for `onAfterCreate`:
+ * Setup and DOM manipulation that depends upon property values (else it would go in `onCreate`)
+ * One time DOM manipulation based on property values that never change.  Any DOM manipulation based on values that change
                                                                                                                                                                                                             would typically go in `onRender` which can be called repeatedly.
-                                                                                                                                                                                                        * Widget state when `onAfterCreate` is called:
-                                                                                                                                                                                                          * `onCreate` has been called
-                                                                                                                                                                                                          * Property setters have all fired
-                                                                                                                                                                                                          * `onRender` has **not**  been called
+ * Widget state when `onAfterCreate` is called:
+ * `onCreate` has been called
+ * Property setters have all fired
+ * `onRender` has **not**  been called
                                                                                                                                                                                                     1. `onRender()`: DOM manipulation based on current property values.
-                                                                                                                                                                                                        * Uses for `onRender`:
-                                                                                                                                                                                                          * Typically called after a property value changes that would force the widget to rerender.  Note that for very specific and simple DOM changes,
+ * Uses for `onRender`:
+ * Typically called after a property value changes that would force the widget to rerender.  Note that for very specific and simple DOM changes,
                                                                                                                                                                                                             the property setter may directly update the DOM rather than call `onRender`.
-                                                                                                                                                                                                          * Unlike `onAfterCreate`, `onRender` may be called multiple times
-                                                                                                                                                                                                          * Note that this is called immediately after `onAfterCreate`,
-                                                                                                                                                                                                          * Note that calls to `onRender` from your property setters will beo ignored until `onAfterCreate` has been called.
-                                                                                                                                                                                                        * Widget state when `onRender` is called:
-                                                                                                                                                                                                          * The first call will be before `onAttach`; subsequent calls may happen before or after this widget has a `parentNode`
-                                                                                                                                                                                                          * `onCreate`, all property setters, and `onAfterCreate` have been called.
+ * Unlike `onAfterCreate`, `onRender` may be called multiple times
+ * Note that this is called immediately after `onAfterCreate`,
+ * Note that calls to `onRender` from your property setters will beo ignored until `onAfterCreate` has been called.
+ * Widget state when `onRender` is called:
+ * The first call will be before `onAttach`; subsequent calls may happen before or after this widget has a `parentNode`
+ * `onCreate`, all property setters, and `onAfterCreate` have been called.
                                                                                                                                                                                                     1. `onRerender()`: Widgets that render a Layer Web SDK Object listen for changes to the object and call `onRerender` to update rendering
                                                                                                                                                                                                        of things that can change within those objects.  Unlike `onRender` which would let you render an entirely new Message or Conversation,
                                                                                                                                                                                                        `onRerender` would handle changes within the existing Message or Conversation.  `onRerender` is also used when listening for events
                                                                                                                                                                                                        rather than changes to properties.
                                                                                                                                                                                                     1. `onAttach()`: Your widget has been added to a document.
-                                                                                                                                                                                                        * Uses for `onAttach`:
-                                                                                                                                                                                                          * Your widget needs to know its `parentNode` to modify its rendering.
-                                                                                                                                                                                                          * Your widget needs some sizing information to modify its rendering.
-                                                                                                                                                                                                        * Widget state when `onAttach` is called:
-                                                                                                                                                                                                          * `onRender` will always be called before `onAttach`.
-                                                                                                                                                                                                          * `parentNode` should now have a value.
-                                                                                                                                                                                                          * Removing this widget from the DOM and then reinserting it _may_ refire this call.  It will Not refire `onRender`.
+ * Uses for `onAttach`:
+ * Your widget needs to know its `parentNode` to modify its rendering.
+ * Your widget needs some sizing information to modify its rendering.
+ * Widget state when `onAttach` is called:
+ * `onRender` will always be called before `onAttach`.
+ * `parentNode` should now have a value.
+ * Removing this widget from the DOM and then reinserting it _may_ refire this call.  It will Not refire `onRender`.
                                                                                                                                                                                                     1. `onDetach()`: Your widget has been removed from the html document.
                                                                                                                                                                                                     1. `onDestroy()`: Your widget was has been flagged as destroyed.  This happens if it was removed from the HTML Document, and remained out of
                                                                                                                                                                                                        the document for more than a few moments. Use this function to unsubscribe from any custom event listeners you setup for your widget.
-                                                                                                                                                                                                    
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * #### Templates
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * There are a number of ways that a template can be registered to your component.
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * _Define a full Template while registering Component_:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * var template = document.querySelector('template');
-                                                                                                                                                                                                     * layerUI.registerComponent('my-widget', {
-                                                                                                                                                                                                     *     template: template
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * _Define a template string while registering Component_:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * Note that unless the `<template/>` node, the template string is assumed to be DOM nodes only, and no `<style/>` blocks.
-                                                                                                                                                                                                     * If using a template string, you may separately provide a style string:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * layerUI.registerComponent('my-widget', {
-                                                                                                                                                                                                     *     template: '<div><button />Click me</div>',
-                                                                                                                                                                                                     *     styles: 'my-widget {display: block}'
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * _Define a template after defining your component_:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * layerUI.registerComponent('my-widget', {
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * layerUI.registerTemplate('my-widget', document.querySelector('template'));
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * _Define a template string after defining your component_:
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     * layerUI.registerComponent('my-widget', {
-                                                                                                                                                                                                     * });
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * layerUI.buildAndRegisterTemplate('my-widget', '<div><button />Click me</div>');
-                                                                                                                                                                                                     * ```
-                                                                                                                                                                                                     *
-                                                                                                                                                                                                     * @class layerUI.components.Component
-                                                                                                                                                                                                     */'use strict';
+ *
+ * #### Templates
+ *
+ * There are a number of ways that a template can be registered to your component.
+ *
+ * _Define a full Template while registering Component_:
+ *
+ * ```
+ * var template = document.querySelector('template');
+ * layerUI.registerComponent('my-widget', {
+ *     template: template
+ * });
+ * ```
+ *
+ * _Define a template string while registering Component_:
+ *
+ * Note that unless the `<template/>` node, the template string is assumed to be DOM nodes only, and no `<style/>` blocks.
+ * If using a template string, you may separately provide a style string:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ *     template: '<div><button />Click me</div>',
+ *     styles: 'my-widget {display: block}'
+ * });
+ * ```
+ *
+ * _Define a template after defining your component_:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ * });
+ *
+ * layerUI.registerTemplate('my-widget', document.querySelector('template'));
+ * ```
+ *
+ * _Define a template string after defining your component_:
+ *
+ * ```
+ * layerUI.registerComponent('my-widget', {
+ * });
+ *
+ * layerUI.buildAndRegisterTemplate('my-widget', '<div><button />Click me</div>');
+ * ```
+ *
+ * @class layerUI.components.Component
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -2033,6 +2054,9 @@ function _registerComponent(tagName) {
   classDef._onAfterCreate = {
     value: function _onAfterCreate() {
       var _this5 = this;
+
+      // Happens during unit tests
+      if (this.properties._internalState.onDestroyCalled) return;
 
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
@@ -2604,8 +2628,13 @@ var standardClassMethods = {
   onDetach: {
     mode: registerComponent.MODES.AFTER,
     value: function onDetach() {
-      this.properties.mainComponent = null;
-      this.properties.parentComponent = null;
+      if (this.properties.mainComponent && !this.properties.mainComponent.contains(this)) {
+        this.properties.mainComponent = null;
+      }
+
+      if (this.properties.parentComponent && !this.properties.parentComponent.contains(this)) {
+        this.properties.parentComponent = null;
+      }
       this.properties._internalState.onDetachCalled = true;
     }
   },
@@ -2626,6 +2655,8 @@ var standardClassMethods = {
   onDestroy: function onDestroy() {
     var _this9 = this;
 
+    this.properties._internalState.onDestroyCalled = true;
+    this.properties._internalState.disableSetters = true;
     this.properties._internalState.layerEventSubscriptions.forEach(function (subscribedObject) {
       return subscribedObject.off(null, null, _this9);
     });
@@ -2653,7 +2684,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":52,"layer-websdk":70}],6:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":54,"layer-websdk":72}],6:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -2669,7 +2700,8 @@ module.exports = {
  * @class layerUI.components.ConversationsListPanel.Item.Channel
  * @experimental
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -2754,20 +2786,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../../mixins/list-item-selection":46,"../../subcomponents/layer-delete/layer-delete":25}],7:[function(require,module,exports){
 /**
-     * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
-     * conversation within a list of conversations.
-     *
-     * This is designed to go inside of the layerUI.components.ConversationsListPanel.List widget, and be a
-     * concise enough summary that it can be scrolled through along
-     * with hundreds of other Conversations Item widgets.
-     *
-     * Future Work:
-     *
-     * * Badges for unread messages (currently just adds a css class so styling can change if there are any unread messages)
-     *
-     * @class layerUI.components.ConversationsListPanel.Item.Conversation
-     * @extends layerUI.components.Component
-     */'use strict';
+ * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
+ * conversation within a list of conversations.
+ *
+ * This is designed to go inside of the layerUI.components.ConversationsListPanel.List widget, and be a
+ * concise enough summary that it can be scrolled through along
+ * with hundreds of other Conversations Item widgets.
+ *
+ * Future Work:
+ *
+ * * Badges for unread messages (currently just adds a css class so styling can change if there are any unread messages)
+ *
+ * @class layerUI.components.ConversationsListPanel.Item.Conversation
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -2901,54 +2934,56 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../../mixins/list-item-selection":46,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-delete/layer-delete":25}],8:[function(require,module,exports){
 /**
-     * The Layer Conversation List widget renders a scrollable, pagable list of Conversations.
-     *
-     * This Component can be added to your project directly in the HTML file:
-     *
-     * ```
-     * <layer-conversations-list></layer-conversations-list>
-     * ```
-     *
-     * Or via DOM Manipulation:
-     *
-     * ```javascript
-     * var conversation = document.createElement('layer-conversations-list');
-     * ```
-     *
-     * And then its properties can be set as:
-     *
-     * ```javascript
-     * var list = document.querySelector('layer-conversations-list');
-     * list.onConversationSelected = function(evt) {
-     *    alert(evt.detail.item.id + ' has been selected');
-     * }
-     * ```
-     *
-     * ## Common Properties
-     *
-     * The most common property of this widget is layerUI.components.ConversationsListPanel.onConversationSelected, as typical use
-     * of this widget is to prompt the user to select a Conversation, and use that selection elsewhere.
-     *
-     * Note that you can also listen for `layer-conversation-selected` to achieve the same result:
-     *
-     * ```
-     * document.body.addEventListener('layer-conversation-selected', function(evt) {
-     *    alert(evt.detail.item.id + ' has been selected');
-     * });
-     * ```
-     *
-     * You may also sometimes want to set which Conversation to mark as selected:
-     *
-     * ```javascript
-     * conversationList.selectedConversationId = myConversation.id;
-     * ```
-     *
-     * @class layerUI.components.ConversationsListPanel.List
-     * @extends layerUI.components.Component
-     * @mixin layerUI.mixins.List
-     * @mixin layerUI.mixins.MainComponent
-     * @mixin layerUI.mixins.ListSelection
-     */'use strict';
+ * The Layer Conversation List widget renders a scrollable, pagable list of Conversations.
+ *
+ * This Component can be added to your project directly in the HTML file:
+ *
+ * ```
+ * <layer-conversations-list></layer-conversations-list>
+ * ```
+ *
+ * Or via DOM Manipulation:
+ *
+ * ```javascript
+ * var conversation = document.createElement('layer-conversations-list');
+ * ```
+ *
+ * And then its properties can be set as:
+ *
+ * ```javascript
+ * var list = document.querySelector('layer-conversations-list');
+ * list.onConversationSelected = function(evt) {
+ *    alert(evt.detail.item.id + ' has been selected');
+ * }
+ * ```
+ *
+ * ## Common Properties
+ *
+ * The most common property of this widget is layerUI.components.ConversationsListPanel.onConversationSelected, as typical use
+ * of this widget is to prompt the user to select a Conversation, and use that selection elsewhere.
+ *
+ * Note that you can also listen for `layer-conversation-selected` to achieve the same result:
+ *
+ * ```
+ * document.body.addEventListener('layer-conversation-selected', function(evt) {
+ *    alert(evt.detail.item.id + ' has been selected');
+ * });
+ * ```
+ *
+ * You may also sometimes want to set which Conversation to mark as selected:
+ *
+ * ```javascript
+ * conversationList.selectedConversationId = myConversation.id;
+ * ```
+ *
+ * @class layerUI.components.ConversationsListPanel.List
+ * @extends layerUI.components.Component
+ * @mixin layerUI.mixins.List
+ * @mixin layerUI.mixins.MainComponent
+ * @mixin layerUI.mixins.ListSelection
+ * @mixin layerUI.mixins.ListLoadIndicator
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -2959,6 +2994,10 @@ var _component = require('../../../components/component');
 var _list = require('../../../mixins/list');
 
 var _list2 = _interopRequireDefault(_list);
+
+var _listLoadIndicator = require('../../../mixins/list-load-indicator');
+
+var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
 
 var _listSelection = require('../../../mixins/list-selection');
 
@@ -2974,8 +3013,9 @@ require('../layer-channel-item/layer-channel-item');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-conversations-list', {
-  mixins: [_list2.default, _listSelection2.default, _mainComponent2.default],
+  mixins: [_list2.default, _listSelection2.default, _mainComponent2.default, _listLoadIndicator2.default],
 
   /**
    * Configure a custom action when a Conversation is selected;
@@ -3211,15 +3251,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       if (conversation) this.selectedId = conversation.id;
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div>", "");
   layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list":49,"../../../mixins/list-selection":48,"../../../mixins/main-component":50,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":70}],9:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list":50,"../../../mixins/list-load-indicator":48,"../../../mixins/list-selection":49,"../../../mixins/main-component":51,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":72}],9:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -3258,7 +3297,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
- */'use strict';
+ * @mixin layerUI.mixins.ListLoadIndicator
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3278,13 +3319,16 @@ var _hasQuery = require('../../../mixins/has-query');
 
 var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
+var _listLoadIndicator = require('../../../mixins/list-load-indicator');
+
+var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
+
 require('../layer-identity-item/layer-identity-item');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-identities-list', {
-  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default],
+  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default],
 
   /**
    * The user has clicked to select an Identity in the Identities List.
@@ -3389,6 +3433,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * var newList = list.selectedIdentities.concat([]);
      * newList.push(identity1);
      * list.selectedIdentities = newList;
+     * ```
+     *
+     * You can clear the list with
+     *
+     * ```javascript
+     * list.selectedIdentities = [];
      * ```
      *
      * @property {layer.Identity[]} [selectedIdentities=[]]
@@ -3558,14 +3608,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":45,"../../../mixins/list":49,"../../../mixins/main-component":50,"../layer-identity-item/layer-identity-item":10,"layer-websdk":70}],10:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":45,"../../../mixins/list":50,"../../../mixins/list-load-indicator":48,"../../../mixins/main-component":51,"../layer-identity-item/layer-identity-item":10,"layer-websdk":72}],10:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -3576,7 +3627,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @class layerUI.components.IdentitiesListPanel.Item
  * @mixin layerUI.mixins.ListItem
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3607,6 +3659,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     selected: {
       type: Boolean,
+      noGetterFromSetter: true,
       set: function set(value) {
         if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
         this.innerNode.classList[value ? 'add' : 'remove']('layer-identity-item-selected');
@@ -3625,7 +3678,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onCreate: function onCreate() {
       if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
-      this.nodes.checkbox.addEventListener('change', this._onChange.bind(this));
+      this.nodes.checkbox.addEventListener('click', this.onClick.bind(this));
       this.nodes.checkbox.id = this.id + '-checkbox';
       this.nodes.title.setAttribute('for', this.nodes.checkbox.id);
     },
@@ -3636,11 +3689,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      *
      * If the custom event is canceled, roll back the change.
      *
-     * @method _onChange
+     * @method onClick
      * @param {Event} evt
      * @private
      */
-    _onChange: function _onChange(evt) {
+    onClick: function onClick(evt) {
       evt.stopPropagation();
       var checked = this.selected;
       var identity = this.item;
@@ -3649,9 +3702,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       var customEventResult = this.trigger('layer-identity-item-' + (checked ? 'selected' : 'deselected'), { item: identity });
 
       if (customEventResult) {
-        this.innerNode.classList[checked ? 'add' : 'remove']('layer-identity-item-selected');
+        this.selected = !this.properties.selected;
       } else {
-        this.selected = !checked;
+        evt.preventDefault();
       }
       this.onSelection(evt);
     },
@@ -3720,7 +3773,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-identity-name' layer-id='title'></label><input type='checkbox' layer-id='checkbox'></input></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":70}],11:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":72}],11:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -3772,7 +3825,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @class layerUI.components.ConversationPanel
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
- */'use strict';
+ * @mixin layerUI.mixins.HasQuery
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4206,6 +4261,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     /**
+     * A dom node to render when there are no more messages in the Message List.
+     *
+     * Could just be a message "Top of Conversation".
+     *
+     * ```
+     * var div = document.createElement('div');
+     * div.innerHTML = 'Top of Conversation';
+     * widget.endOfMessagesNode = div;
+     * ```
+     *
+     * Note that this node is *not* rendered when the list has no messages; see
+     * emptyMessageListNode instead.
+     *
+     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
+     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
+     * style height to be at least as tall as your custom node.
+     *
+     * @property {HTMLElement} [emptyMessageListNode=null]
+     */
+    endOfMessagesNode: {
+      type: HTMLElement,
+      set: function set(value) {
+        this.nodes.list.endOfResultsNode = value;
+      },
+      get: function get(value) {
+        return this.nodes.list.endOfResultsNode;
+      }
+    },
+
+    /**
      * Deletion of this Message is enabled.
      *
      * ```
@@ -4461,37 +4546,38 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-panel", "<layer-messages-list layer-id='list'></layer-messages-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-composer layer-id='composer'></layer-composer>", "");
   layerUI.buildStyle("layer-conversation-panel", "layer-conversation-panel {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-messages-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-composer {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":44,"../../mixins/has-query":45,"../../mixins/main-component":50,"../messages-list-panel/layer-messages-list/layer-messages-list":18,"../subcomponents/layer-composer/layer-composer":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":30,"layer-websdk":70}],12:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":44,"../../mixins/has-query":45,"../../mixins/main-component":51,"../messages-list-panel/layer-messages-list/layer-messages-list":18,"../subcomponents/layer-composer/layer-composer":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":30,"layer-websdk":72}],12:[function(require,module,exports){
 /**
-                                  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
-                                  * and Toast notifications when your app is in the foreground.
-                                  *
-                                  * You can customize the toast styling and layout by providing a custom Template.
-                                  *
-                                  * Add this to your page as:
-                                  *
-                                  * ```
-                                  * <layer-notifier notify-in-foreground="toast" icon-url="https://myco.com/myimage.png"></layer-notifier>
-                                  * ```
-                                  *
-                                  * Or via DOM Manipulation:
-                                  *
-                                  * ```javascript
-                                  * var notifier = document.createElement('layer-notifier');
-                                  * notifier.notifyInForeground = 'toast';
-                                  * notifier.iconUrl = 'https://myco.com/myimage.png';
-                                  * ```
-                                  *
-                                  * Note that you typically would not want to have a notification if your app is in the foreground,
-                                  * and the new message is already visible to the user.  However,
-                                  * this widget does not know what conversation is currently visible, so its up to you to manage this.
-                                  *
-                                  * Provide a layerUI.components.misc.Notifier.onMessageNotification handler to perform tests to see
-                                  * if notifications are required, and then call `evt.preventDefault()` to prevent the notification from showing.
-                                  *
-                                  * @class layerUI.components.Notifier
-                                  * @extends layerUI.components.Component
-                                  */'use strict';
+ * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
+ * and Toast notifications when your app is in the foreground.
+ *
+ * You can customize the toast styling and layout by providing a custom Template.
+ *
+ * Add this to your page as:
+ *
+ * ```
+ * <layer-notifier notify-in-foreground="toast" icon-url="https://myco.com/myimage.png"></layer-notifier>
+ * ```
+ *
+ * Or via DOM Manipulation:
+ *
+ * ```javascript
+ * var notifier = document.createElement('layer-notifier');
+ * notifier.notifyInForeground = 'toast';
+ * notifier.iconUrl = 'https://myco.com/myimage.png';
+ * ```
+ *
+ * Note that you typically would not want to have a notification if your app is in the foreground,
+ * and the new message is already visible to the user.  However,
+ * this widget does not know what conversation is currently visible, so its up to you to manage this.
+ *
+ * Provide a layerUI.components.misc.Notifier.onMessageNotification handler to perform tests to see
+ * if notifications are required, and then call `evt.preventDefault()` to prevent the notification from showing.
+ *
+ * @class layerUI.components.Notifier
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _notifyjs = require('notifyjs');
 
@@ -5005,7 +5091,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
   layerUI.buildAndRegisterTemplate("layer-notifier", "<layer-avatar layer-id='avatar'></layer-avatar><div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title' layer-id='title'></div><div class='layer-message-item-placeholder'></div></div>", "");
   layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\nmax-height: 250px;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":5,"../../mixins/main-component":50,"../subcomponents/layer-avatar/layer-avatar":19,"notifyjs":65}],13:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/main-component":51,"../subcomponents/layer-avatar/layer-avatar":19,"notifyjs":67}],13:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -5014,7 +5100,8 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
  * @experimental
  * @mixin layerUI.mixins.ListItem
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _listItem = require('../../../mixins/list-item');
 
@@ -5116,7 +5203,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
  * @mixin layerUI.mixins.ListSelection
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -5297,90 +5385,107 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":49,"../../../mixins/list-selection":48,"../../../mixins/main-component":50,"../../component":5,"../layer-membership-item/layer-membership-item":13,"layer-websdk":70}],15:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":50,"../../../mixins/list-selection":49,"../../../mixins/main-component":51,"../../component":5,"../layer-membership-item/layer-membership-item":13,"layer-websdk":72}],15:[function(require,module,exports){
 /**
-    * The Layer Message Item widget renders a single Message synopsis.
-    *
-    * This is designed to go inside of the layerUI.MessageList widget.  This widget renders the framework of information that goes around a Message,
-    * but leaves it up to custom handlers to render the contents and assorted MIME Types of the messages.
-    *
-    * This Component has two named templates:
-    *
-    * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
-    * * `layer-message-item-received`: Rendering for Messages sent by other users
-    *
-    * ## Advanced Customization
-    *
-    * The simple way to customize the widget is to modify its template.
-    * For more advanced customizations where the Message Item widget needs new properties, methods and capabilities, you have two options:
-    *
-    * 1. Define a custom `<layer-message-item/>` widget; this works but your now entirely responsible for all of its
-    *    behaviors, and can not easily integrate fixes and enhancements added to this repo. This is discussed in more
-    *    detail at [docs.layer.com](https://docs.layer.com).
-    * 2. Enhance the provided widget with Mixins.  Below illustrates an example of a mixin.
-    *
-    * A Custom Mixin can be used to add Properties and Methods to this class.
-    * Any method of this class can be enhanced using a Custom Mixin, however the following methods are recommended
-    * as sufficient for most solutions:
-    *
-    * * layerUI.components.MessagesListPanel.List.onCreate: Your widget has just been created; it has a DOM node, it has child
-    *   nodes, *it has no properties*, nor does not yet have a `parentNode`.
-    *   Provide an `onCreate` if there is any DOM manipulation you want to do any initialization.  (DOM Manipulation here should NOT depend
-    *   upon property values).
-    * * layerUI.components.MessagesListPanel.List.onAttach: Your widget now has a `parentNode`.  This is solely for initialization
-    *   code that depends upon looking at the `parentNode`, and is not commonly used.
-    * * layerUI.components.MessagesListPanel.List.onRender: Your Message Item widget has just been rendered for the first time.
-    *   Your widget should have an `item` at this point and any property-based dom manipulation can be done at this time.
-    *
-    * The following example adds a search bar to the Message List
-    * ```
-    * layerUI.init({
-    *   appId: 'my-app-id',
-    *   mixins: {
-    *     'layer-messages-item': {
-    *       properties: {
-    *         selected: {
-    *           value: false,
-    *           set: function(value) {
-    *             if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
-    *           },
-    *           get: function() {
-    *             return this.nodes.checkbox ? this.nodes.checkbox.checked : this.properties.selected;
-    *           }
-    *         }
-    *       },
-    *       methods: {
-    *         onCreate: function() {
-    *           this.nodes.checkbox = document.createElement('input');
-    *           this.nodes.checkbox.type = 'checkbox';
-    *           this.nodes.checkbox.classList.add('custom-checkbox');
-    *           this.nodes.checkbox.addEventListener('click', this._handleCustomCheckboxEvent.bind(this));
-    *           this.appendChild(this.nodes.checkbox);
-    *         },
-    *
-    *         // When the widget has been rendered is a good time to do any property based dom manipulation
-    *         onRender: function() {
-    *          this.nodes.checkbox.checked = this.selected;
-    *         },
-    *
-    *         // Search is run whenver the user changes the search text, app changes the search text,
-    *         // or new messages arrive that need to be searched
-    *         _handleCustomCheckboxEvent(evt) {
-    *           this.trigger('custom-message-checkbox-change', {
-    *             isChecked: this.selected,
-    *             item: this.item
-    *           });
-    *         }
-    *       }
-    *     }
-    *   }
-    * });
-    * ```
-    *
-    * @class layerUI.components.MessagesListPanel.Item
-    * @mixins layerUI.mixins.ListItem
-    * @extends layerUI.components.Component
-    */'use strict';
+ * The Layer Message Item widget renders a single Message synopsis.
+ *
+ * This is designed to go inside of the layerUI.MessageList widget.  This widget renders the framework of information that goes around a Message,
+ * but leaves it up to custom handlers to render the contents and assorted MIME Types of the messages.
+ *
+ * This Component has two named templates:
+ *
+ * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
+ * * `layer-message-item-received`: Rendering for Messages sent by other users
+ *
+ * ## CSS Classes
+ *
+ * * When sending a message, if using `presend()` the message item will have the CSS class `layer-message-preview` until its sent
+ * * The tagName used to render the content within the message item will be used as a class name of the parent item.
+ *   If using a `<layer-message-text-plain />` widget within the item, the item itself will receive the `layer-message-text-plain` CSS class
+ * * `layer-unread-message` will be applied to any message that the user has received but which hasn't been marked as read
+ * * `layer-message-status-read-by-all`: All receipients of your user's message have read the message
+ * * `layer-message-status-read-by-some`: Some receipients of your user's message have read the message
+ * * `layer-message-status-read-by-none`: No receipients of your user's message have read the message
+ * * `layer-message-status-delivered-to-all`: All receipients of your user's message have received the message on their device
+ * * `layer-message-status-delivered-to-some`: Some receipients of your user's message have received the message on their device
+ * * `layer-message-status-delivered-to-none`: No receipients of your user's message have received the message on their device
+ * * `layer-message-status-pending`: The Message is trying to reach the server and has not yet completed sending
+ * * `layer-list-item-last`: The message is the last in a series of messages from the same sender and within the same block of time
+ * * `layer-list-item-first`: The message is the first in a series of messages from the same sender and within the same block of time
+ *
+ * ## Advanced Customization
+ *
+ * The simple way to customize the widget is to modify its template.
+ * For more advanced customizations where the Message Item widget needs new properties, methods and capabilities, you have two options:
+ *
+ * 1. Define a custom `<layer-message-item/>` widget; this works but your now entirely responsible for all of its
+ *    behaviors, and can not easily integrate fixes and enhancements added to this repo. This is discussed in more
+ *    detail at [docs.layer.com](https://docs.layer.com).
+ * 2. Enhance the provided widget with Mixins.  Below illustrates an example of a mixin.
+ *
+ * A Custom Mixin can be used to add Properties and Methods to this class.
+ * Any method of this class can be enhanced using a Custom Mixin, however the following methods are recommended
+ * as sufficient for most solutions:
+ *
+ * * layerUI.components.MessagesListPanel.List.onCreate: Your widget has just been created; it has a DOM node, it has child
+ *   nodes, *it has no properties*, nor does not yet have a `parentNode`.
+ *   Provide an `onCreate` if there is any DOM manipulation you want to do any initialization.  (DOM Manipulation here should NOT depend
+ *   upon property values).
+ * * layerUI.components.MessagesListPanel.List.onAttach: Your widget now has a `parentNode`.  This is solely for initialization
+ *   code that depends upon looking at the `parentNode`, and is not commonly used.
+ * * layerUI.components.MessagesListPanel.List.onRender: Your Message Item widget has just been rendered for the first time.
+ *   Your widget should have an `item` at this point and any property-based dom manipulation can be done at this time.
+ *
+ * The following example adds a search bar to the Message List
+ * ```
+ * layerUI.init({
+ *   appId: 'my-app-id',
+ *   mixins: {
+ *     'layer-messages-item': {
+ *       properties: {
+ *         selected: {
+ *           value: false,
+ *           set: function(value) {
+ *             if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
+ *           },
+ *           get: function() {
+ *             return this.nodes.checkbox ? this.nodes.checkbox.checked : this.properties.selected;
+ *           }
+ *         }
+ *       },
+ *       methods: {
+ *         onCreate: function() {
+ *           this.nodes.checkbox = document.createElement('input');
+ *           this.nodes.checkbox.type = 'checkbox';
+ *           this.nodes.checkbox.classList.add('custom-checkbox');
+ *           this.nodes.checkbox.addEventListener('click', this._handleCustomCheckboxEvent.bind(this));
+ *           this.appendChild(this.nodes.checkbox);
+ *         },
+ *
+ *         // When the widget has been rendered is a good time to do any property based dom manipulation
+ *         onRender: function() {
+ *          this.nodes.checkbox.checked = this.selected;
+ *         },
+ *
+ *         // Search is run whenver the user changes the search text, app changes the search text,
+ *         // or new messages arrive that need to be searched
+ *         _handleCustomCheckboxEvent(evt) {
+ *           this.trigger('custom-message-checkbox-change', {
+ *             isChecked: this.selected,
+ *             item: this.item
+ *           });
+ *         }
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * @class layerUI.components.MessagesListPanel.Item
+ * @mixins layerUI.mixins.ListItem
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -5390,6 +5495,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 module.exports = {
   properties: {
+
+    /**
+     * Rather than sort out `instanceof` operations, you can use `isMessageListItem` to test to see if a widget represents a Message Item.
+     *
+     * A Message Item only shows up in a MessageList; other places where Messages are rendered (layer-notifier, layer-conversation-last-message, etc...) are
+     * NOT Message Items, and may need to keep its content more compact.
+     */
+    isMessageListItem: {
+      value: true
+    },
 
     // Every List Item has an item property, here it represents the Conversation to render
     item: {},
@@ -5503,6 +5618,7 @@ module.exports = {
       this.toggleClass(statusPrefix + '-delivered-to-none', deliveryStatus === _layerWebsdk2.default.Constants.RECIPIENT_STATE.NONE);
 
       this.toggleClass(statusPrefix + '-pending', this.properties.item.isSaving());
+      this.toggleClass('layer-message-preview', this.properties.item.isNew());
     },
 
 
@@ -5531,7 +5647,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":70}],16:[function(require,module,exports){
+},{"layer-websdk":72}],16:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -5593,96 +5709,95 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../../subcomponents/layer-delete/layer-delete":25,"../../subcomponents/layer-message-status/layer-message-status":27,"../layer-message-item-mixin":15}],18:[function(require,module,exports){
 /**
-                          * The Layer Message List widget renders a scrollable, pagable list of layerUI.components.MessagesListPanel.Item widgets.
-                          *
-                          * This is designed to go inside of the layerUI.Conversation widget.
-                          *
-                          * This Component has two named templates:
-                          *
-                          * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
-                          * * `layer-message-item-received`: Rendering for Messages sent by other users
-                          *
-                          * Messages are organized into sets where a set starts with the first message from a given user, and ends when either
-                          * a different user sends a Message, or a long enough pause occurs.  Each Message will have firstInSeries/lastInSeries properties,
-                          * and these need to be maintained as new Messages are loaded, deleted, etc...
-                          *
-                          * ## Advanced Customization
-                          *
-                          * To enhance the Message List widget with new properties, methods and capabilities, you have two options:
-                          *
-                          * 1. Define a custom `<layer-message-list/>` widget; this works but your now entirely responsible for all of its
-                          *    behaviors, and can not easily integrate fixes and enhancements added to this repo. Defining components is discussed in
-                          *    layerUI.components.Component.
-                          * 2. Enhance the provided widget with Mixins.  Details of Mixins are described in layerUI.components.Component.
-                          *    Below illustrates an example of a mixin for modifying this widget.
-                          *
-                          *
-                          * The following example adds a search bar to the Message List
-                          *
-                          * ```
-                          * layerUI.init({
-                          *   appId: 'my-app-id',
-                          *   layer: window.layer,
-                          *   mixins: {
-                          *     'layer-messages-list': {
-                          *       properties: {
-                          *         searchText: {
-                          *           value: '',
-                          *           set: function(value) {
-                          *             this.nodes.searchBar.value = value;
-                          *             this._runSearch();
-                          *           },
-                          *           get: function() {
-                          *             return this.nodes.searchBar.value;
-                          *           }
-                          *         }
-                          *       },
-                          *       methods: {
-                          *         // When the widget is created, setup/initialize our custom behaviors
-                          *         onCreate: function() {
-                          *           this.nodes.searchBar = document.createElement('input');
-                          *           this.nodes.searchBar.classList.add('custom-search-bar');
-                          *           this.nodes.searchBar.addEventListener('change', this._runSearch.bind(this));
-                          *           this.insertBefore(this.nodes.searchBar, this.firstChild);
-                          *         },
-                          *
-                          *
-                          *         // Whenver any messages are added/removed/changed, rerun our search
-                          *         onRerender: function() {
-                          *           if (this.searchText) this._runSearch();
-                          *         },
-                          *
-                          *         // Search is run whenver the user changes the search text, app changes the search text,
-                          *         // or new messages arrive that need to be searched
-                          *         _runSearch() {
-                          *           var searchText = this.searchText;
-                          *           Array.prototype.slice.call(this.childNodes).forEach(function(messageItem) {
-                          *             if (messageItem._isListItem) {
-                          *               var message = messageItem.item;
-                          *               if (message.parts[0].body.indexOf(searchText) === -1) {
-                          *                 messageItem.classList.remove('search-matches');
-                          *               } else {
-                          *                 messageItem.classList.add('search-matches');
-                          *               }
-                          *             }
-                          *           });
-                          *         }
-                          *       }
-                          *     }
-                          *   }
-                          * });
-                          * ```
-                          *
-                          * @class layerUI.components.MessagesListPanel.List
-                          * @extends layerUI.components.Component
-                          *
-                          * @mixin layerUI.mixins.EmptyList
-                          * @mixin layerUI.mixins.List
-                          */'use strict';
-
-var _animatedScrollto = require('animated-scrollto');
-
-var _animatedScrollto2 = _interopRequireDefault(_animatedScrollto);
+ * The Layer Message List widget renders a scrollable, pagable list of layerUI.components.MessagesListPanel.Item widgets.
+ *
+ * This is designed to go inside of the layerUI.Conversation widget.
+ *
+ * This Component has two named templates:
+ *
+ * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
+ * * `layer-message-item-received`: Rendering for Messages sent by other users
+ *
+ * Messages are organized into sets where a set starts with the first message from a given user, and ends when either
+ * a different user sends a Message, or a long enough pause occurs.  Each Message will have firstInSeries/lastInSeries properties,
+ * and these need to be maintained as new Messages are loaded, deleted, etc...
+ *
+ * ## Advanced Customization
+ *
+ * To enhance the Message List widget with new properties, methods and capabilities, you have two options:
+ *
+ * 1. Define a custom `<layer-message-list/>` widget; this works but your now entirely responsible for all of its
+ *    behaviors, and can not easily integrate fixes and enhancements added to this repo. Defining components is discussed in
+ *    layerUI.components.Component.
+ * 2. Enhance the provided widget with Mixins.  Details of Mixins are described in layerUI.components.Component.
+ *    Below illustrates an example of a mixin for modifying this widget.
+ *
+ *
+ * The following example adds a search bar to the Message List
+ *
+ * ```
+ * layerUI.init({
+ *   appId: 'my-app-id',
+ *   layer: window.layer,
+ *   mixins: {
+ *     'layer-messages-list': {
+ *       properties: {
+ *         searchText: {
+ *           value: '',
+ *           set: function(value) {
+ *             this.nodes.searchBar.value = value;
+ *             this._runSearch();
+ *           },
+ *           get: function() {
+ *             return this.nodes.searchBar.value;
+ *           }
+ *         }
+ *       },
+ *       methods: {
+ *         // When the widget is created, setup/initialize our custom behaviors
+ *         onCreate: function() {
+ *           this.nodes.searchBar = document.createElement('input');
+ *           this.nodes.searchBar.classList.add('custom-search-bar');
+ *           this.nodes.searchBar.addEventListener('change', this._runSearch.bind(this));
+ *           this.insertBefore(this.nodes.searchBar, this.firstChild);
+ *         },
+ *
+ *
+ *         // Whenver any messages are added/removed/changed, rerun our search
+ *         onRerender: function() {
+ *           if (this.searchText) this._runSearch();
+ *         },
+ *
+ *         // Search is run whenver the user changes the search text, app changes the search text,
+ *         // or new messages arrive that need to be searched
+ *         _runSearch() {
+ *           var searchText = this.searchText;
+ *           Array.prototype.slice.call(this.childNodes).forEach(function(messageItem) {
+ *             if (messageItem._isListItem) {
+ *               var message = messageItem.item;
+ *               if (message.parts[0].body.indexOf(searchText) === -1) {
+ *                 messageItem.classList.remove('search-matches');
+ *               } else {
+ *                 messageItem.classList.add('search-matches');
+ *               }
+ *             }
+ *           });
+ *         }
+ *       }
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * @class layerUI.components.MessagesListPanel.List
+ * @extends layerUI.components.Component
+ *
+ * @mixin layerUI.mixins.EmptyList
+ * @mixin layerUI.mixins.List
+ * @mixin layerUI.mixins.ListLoadIndicator
+ * @mixin layerUI.mixins.QueryEndIndicator
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -5706,6 +5821,14 @@ var _emptyList = require('../../../mixins/empty-list');
 
 var _emptyList2 = _interopRequireDefault(_emptyList);
 
+var _listLoadIndicator = require('../../../mixins/list-load-indicator');
+
+var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
+
+var _queryEndIndicator = require('../../../mixins/query-end-indicator');
+
+var _queryEndIndicator2 = _interopRequireDefault(_queryEndIndicator);
+
 require('../layer-message-item-sent/layer-message-item-sent');
 
 require('../layer-message-item-received/layer-message-item-received');
@@ -5713,11 +5836,11 @@ require('../layer-message-item-received/layer-message-item-received');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
-var PAGING_DELAY = 2000; 
 
+var PAGING_DELAY = 2000;
 
 (0, _component.registerComponent)('layer-messages-list', {
-  mixins: [_list2.default, _hasQuery2.default, _emptyList2.default],
+  mixins: [_list2.default, _hasQuery2.default, _emptyList2.default, _listLoadIndicator2.default, _queryEndIndicator2.default],
   properties: {
 
     /**
@@ -5922,30 +6045,37 @@ var PAGING_DELAY = 2000;
      * Will call _checkVisibility() when done.
      *
      * ```
-     * widget.animateScrollTo(500);
+     * widget.animatedScrollTo(500);
      * ```
      *
-     * @method animateScrollTo
-     * @param {Number} position
+     * @method animatedScrollTo
+     * @param {Number} [animateSpeed=200]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
      */
-    animateScrollTo: function animateScrollTo(position) {
-      var _this3 = this;
+    animatedScrollTo: {
+      mode: _component.registerComponent.MODES.OVERWRITE,
+      value: function value(position) {
+        var _this3 = this;
 
-      if (position === this.scrollTop) return;
-      this.properties.isSelfScrolling = true;
-      if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
-      var cancel = this.properties.cancelAnimatedScroll = (0, _animatedScrollto2.default)(this, position, 200, function () {
-        // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
-        setTimeout(function () {
-          if (cancel !== _this3.properties.cancelAnimatedScroll) return;
-          _this3.properties.cancelAnimatedScroll = null;
+        var animateSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
+        var animateCallback = arguments[2];
 
-          _this3.properties.isSelfScrolling = false;
-          _this3._checkVisibility();
-        }, 100);
-      });
+        if (position === this.scrollTop) return;
+        this.properties.isSelfScrolling = true;
+        if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+        var cancel = this.properties.cancelAnimatedScroll = _base2.default.animatedScrollTo(this, position, animateSpeed, function () {
+          // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
+          setTimeout(function () {
+            if (cancel !== _this3.properties.cancelAnimatedScroll) return;
+            _this3.properties.cancelAnimatedScroll = null;
+
+            _this3.properties.isSelfScrolling = false;
+            _this3._checkVisibility();
+            if (animateCallback) animateCallback();
+          }, 100);
+        });
+      }
     },
-
 
     /**
      * Check which Messages are fully visible, and mark them as Read.
@@ -5968,15 +6098,14 @@ var PAGING_DELAY = 2000;
       if (_base2.default.isInBackground() || this.disable) return;
 
       // The top that we can see is marked by how far we have scrolled.
-      // However, all offsetTop values of the child nodes will be skewed by the value of this.nodes.loadIndicator.offsetTop, so add that in.
-      var visibleTop = this.scrollTop + this.nodes.loadIndicator.offsetTop;
+      var visibleTop = this.scrollTop;
 
       // The bottom that we can see is marked by how far we have scrolled plus the height of the panel.
-      // However, all offsetTop values of the child nodes will be skewed by the value of this.nodes.loadIndicator.offsetTop, so add that in.
-      var visibleBottom = this.scrollTop + this.clientHeight + this.nodes.loadIndicator.offsetTop;
+      var visibleBottom = this.scrollTop + this.clientHeight;
       var children = Array.prototype.slice.call(this.childNodes);
       children.forEach(function (child) {
-        if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+        var childOffset = child.offsetTop - _this4.offsetTop;
+        if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
           if (child.properties && child.properties.item && !child.properties.item.isRead) {
             // TODO: Use a scheduler rather than many setTimeout calls
             setTimeout(function () {
@@ -6001,9 +6130,10 @@ var PAGING_DELAY = 2000;
     _markAsRead: function _markAsRead(child) {
       if (_base2.default.isInBackground() || this.disable) return;
 
-      var visibleTop = this.scrollTop + this.nodes.loadIndicator.offsetTop;
-      var visibleBottom = this.scrollTop + this.clientHeight + this.nodes.loadIndicator.offsetTop;
-      if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+      var visibleTop = this.scrollTop;
+      var visibleBottom = this.scrollTop + this.clientHeight;
+      var childOffset = child.offsetTop - this.offsetTop;
+      if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
         child.properties.item.isRead = true;
       }
     },
@@ -6120,7 +6250,7 @@ var PAGING_DELAY = 2000;
         this._updateLastMessageSent();
         if (this.properties.stuckToBottom) {
           setTimeout(function () {
-            return _this5.animateScrollTo(_this5.scrollHeight - _this5.clientHeight);
+            return _this5.animatedScrollTo(_this5.scrollHeight - _this5.clientHeight);
           }, 0);
         } else {
           this._checkVisibility();
@@ -6172,7 +6302,8 @@ var PAGING_DELAY = 2000;
       var children = Array.prototype.slice.call(this.childNodes);
       for (var i = 0; i < children.length; i++) {
         var child = children[i];
-        if (child.offsetTop >= visibleTop && child.offsetTop + child.clientHeight <= visibleBottom) {
+        var childOffset = child.offsetTop - this.offsetTop;
+        if (childOffset >= visibleTop && childOffset + child.clientHeight <= visibleBottom) {
           if (child.properties && child.properties.item) {
             return child;
           }
@@ -6219,7 +6350,9 @@ var PAGING_DELAY = 2000;
 
           if (!this.query || this.query.isDestroyed) return;
           this.properties.appendingMore = true;
-          var processItems = newData.splice(0, 20);
+          var processItems = newData.splice(0, 20).filter(function (item) {
+            return !item.isDestroyed;
+          });
           fragment = this._generateFragment(processItems, fragment);
           if (newData.length) {
             setTimeout(function () {
@@ -6270,21 +6403,15 @@ var PAGING_DELAY = 2000;
       }
 
       var firstVisibleItem = this._findFirstVisibleItem();
-      var initialOffset = firstVisibleItem ? firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - this.scrollTop : 0;
+      var initialOffset = firstVisibleItem ? firstVisibleItem.offsetTop - this.offsetTop - this.scrollTop : 0;
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
-      var nextItem = this.nodes.loadIndicator.nextSibling;
+      var nextItem = this.nodes.listHeader.nextSibling;
       this.insertBefore(fragment, nextItem);
 
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful
       this._updateLastMessageSent();
-
-      if (this.properties.stuckToBottom) {
-        this.scrollTo(this.scrollHeight - this.clientHeight);
-      } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
-        this.scrollTo(firstVisibleItem.offsetTop - this.nodes.loadIndicator.offsetTop - initialOffset);
-      }
 
       this.isDataLoading = this.properties.query.isFiring;
       this._checkVisibility();
@@ -6294,16 +6421,24 @@ var PAGING_DELAY = 2000;
         return _this7._renderInsertedData(anEvt);
       });
       delete this.properties.insertEvents;
+
+      _layerWebsdk2.default.Util.defer(function () {
+        if (_this7.properties.stuckToBottom) {
+          _this7.scrollTo(_this7.scrollHeight - _this7.clientHeight);
+        } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
+          _this7.scrollTo(firstVisibleItem.offsetTop - _this7.offsetTop - initialOffset);
+        }
+      });
     }
   }
 });
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-messages-list", "<div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div>", "");
-  layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-load-indicator {\ntext-align: center;\nborder-bottom: solid 1px #ccc;\nfont-style: italic;\nopacity: 0;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator {\nopacity: 1;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-messages-list", "<div class='layer-list-header' layer-id='listHeader'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'>This is the beginning of your conversation</div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div></div></div>", "");
+  layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-header-toggle {\nmin-height: 20px;\nmargin-bottom: 2px;\n}\nlayer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {\ntext-align: center;\ndisplay: none;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator,\nlayer-messages-list.layer-end-of-results .layer-end-of-results-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":43,"../../../mixins/has-query":45,"../../../mixins/list":49,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"animated-scrollto":57,"layer-websdk":70}],19:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":43,"../../../mixins/has-query":45,"../../../mixins/list":50,"../../../mixins/list-load-indicator":48,"../../../mixins/query-end-indicator":53,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":72}],19:[function(require,module,exports){
 /**
  * The Layer Avatar widget renders an icon representing a user or users.
  *
@@ -6348,7 +6483,8 @@ var PAGING_DELAY = 2000;
  *
  * @class layerUI.components.subcomponents.Avatar
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -6468,32 +6604,33 @@ require('../layer-presence/layer-presence');
 })();
 },{"../../../base":4,"../../../components/component":5,"../layer-presence/layer-presence":28}],20:[function(require,module,exports){
 /**
-     * Provides a Button Panel for adding custom actions to the layerUI.Composer panel.
-     *
-     * You can populate this button panel using the layerUI.components.ConversationPanel.composeButtons property.
-     *
-     * Alternatively, you can replace this by defining a custom `layer-compose-button-panel` to make the resulting component entirely yours:
-     *
-     * ```
-     * document.registerElement('layer-compose-button-panel', {
-     *   prototype: Object.create(HTMLElement.prototype, {
-     *     createdCallback: {
-     *       value: function() {
-     *         this.innerHTML = "<button>Click me!</button>";
-     *       }
-     *     }
-     *   })
-     * });
-     *
-     * // Call init after custom components are defined
-     * layerUI.init({
-     *   appId:  'layer:///apps/staging/UUID'
-     * });
-     * ```
-     *
-     * @class layerUI.components.subcomponents.ComposeButtonPanel
-     * @extends layerUI.components.Component
-     */'use strict';
+ * Provides a Button Panel for adding custom actions to the layerUI.Composer panel.
+ *
+ * You can populate this button panel using the layerUI.components.ConversationPanel.composeButtons property.
+ *
+ * Alternatively, you can replace this by defining a custom `layer-compose-button-panel` to make the resulting component entirely yours:
+ *
+ * ```
+ * document.registerElement('layer-compose-button-panel', {
+ *   prototype: Object.create(HTMLElement.prototype, {
+ *     createdCallback: {
+ *       value: function() {
+ *         this.innerHTML = "<button>Click me!</button>";
+ *       }
+ *     }
+ *   })
+ * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
+ * ```
+ *
+ * @class layerUI.components.subcomponents.ComposeButtonPanel
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -6555,7 +6692,8 @@ var _component = require('../../../components/component');
  *
  * @class layerUI.components.subcomponents.Composer
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -6929,7 +7067,7 @@ var TAB = 9;
   layerUI.buildAndRegisterTemplate("layer-composer", "<layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>", "");
   layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nline-height: 1.2em;\nmin-height: 20px;\noverflow :hidden;\nborder-width: 0px;\nfont-size: 1em;\npadding: 4px 8px;\nbox-sizing: border-box;\nfont-family: \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;\nmargin: 0px;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\ncolor: rgba(0,0,0,0.87);\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nwidth: 100%;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../layer-compose-button-panel/layer-compose-button-panel":20,"layer-websdk":70}],22:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../layer-compose-button-panel/layer-compose-button-panel":20,"layer-websdk":72}],22:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -6956,7 +7094,8 @@ var TAB = 9;
  *
  * @class layerUI.components.subcomponents.ConversationLastMessage
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _base = require('../../../base');
 
@@ -7028,8 +7167,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       if (!evt || evt.hasProperty('lastMessage')) {
         var conversation = this.item;
         var message = conversation ? conversation.lastMessage : null;
+        if (this.firstChild && this.firstChild.onDestroy) this.firstChild.onDestroy();
         this.innerHTML = '';
-        if (message && message.id == "layer:///messages/66320b84-ad65-4c73-8dc8-4df4566e2137") debugger;
         if (message) {
           var handler = _base2.default.getHandler(message, this);
           if (handler) {
@@ -7057,31 +7196,32 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 },{"../../../base":4,"../../../components/component":5}],23:[function(require,module,exports){
 /**
-     * The Layer widget renders a title for a layer.Conversation.
-     *
-     * This is provided as a specialized component so that it can be easily redefined by your app to
-     * provide your own Conversation titles:
-     *
-     * ```
-     * layerUI.registerComponent('layer-conversation-title', {
-     *    properties: {
-     *      item: {
-     *        set: function(value) {
-     *           this.innerHTML = this.item.metadata.myCustomTitle;
-     *        }
-     *      }
-     *    }
-     * });
-     *
-     * // Call init after custom components are defined
-     * layerUI.init({
-     *   appId:  'layer:///apps/staging/UUID'
-     * });
-     * ```
-     *
-     * @class layerUI.components.subcomponents.ConversationTitle
-     * @extends layerUI.components.Component
-     */'use strict';
+ * The Layer widget renders a title for a layer.Conversation.
+ *
+ * This is provided as a specialized component so that it can be easily redefined by your app to
+ * provide your own Conversation titles:
+ *
+ * ```
+ * layerUI.registerComponent('layer-conversation-title', {
+ *    properties: {
+ *      item: {
+ *        set: function(value) {
+ *           this.innerHTML = this.item.metadata.myCustomTitle;
+ *        }
+ *      }
+ *    }
+ * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
+ * ```
+ *
+ * @class layerUI.components.subcomponents.ConversationTitle
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -7163,35 +7303,36 @@ var _component = require('../../../components/component');
 })();
 },{"../../../base":4,"../../../components/component":5}],24:[function(require,module,exports){
 /**
-     * The Layer Date widget renders a date.
-     *
-     * This is provided as a specialized component so that it can be easily redefined by your app to
-     * provide your own date formatting.  Note that most customization of date rendering can be accomplished instead
-     * using layerUI.components.ConversationPanel.dateRenderer.
-     *
-     * ```
-     * layerUI.registerComponent('layer-date', {
-     *    properties: {
-     *      date: {
-     *        set: function(value) {
-     *           // Render a random date value that is related to but not exactly the provided value
-     *           var newDate = new Date(value);
-     *           newDate.setHours(newDate.getHours() + Math.random() * 10);
-     *           this.innerHTML = newDate.toISOString();
-     *        }
-     *      }
-     *    }
-     * });
-     *
-     * // Call init after custom components are defined
-     * layerUI.init({
-     *   appId:  'layer:///apps/staging/UUID'
-     * });
-     * ```
-     *
-     * @class layerUI.components.subcomponents.Date
-     * @extends layerUI.components.Component
-     */'use strict';
+ * The Layer Date widget renders a date.
+ *
+ * This is provided as a specialized component so that it can be easily redefined by your app to
+ * provide your own date formatting.  Note that most customization of date rendering can be accomplished instead
+ * using layerUI.components.ConversationPanel.dateRenderer.
+ *
+ * ```
+ * layerUI.registerComponent('layer-date', {
+ *    properties: {
+ *      date: {
+ *        set: function(value) {
+ *           // Render a random date value that is related to but not exactly the provided value
+ *           var newDate = new Date(value);
+ *           newDate.setHours(newDate.getHours() + Math.random() * 10);
+ *           this.innerHTML = newDate.toISOString();
+ *        }
+ *      }
+ *    }
+ * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
+ * ```
+ *
+ * @class layerUI.components.subcomponents.Date
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -7285,7 +7426,8 @@ var _component = require('../../../components/component');
  *
  * @class layerUI.components.subcomponents.Delete
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -7397,7 +7539,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"layer-websdk":70}],26:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":72}],26:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -7421,7 +7563,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @class layerUI.components.subcomponents.FileUploadButton
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -7442,7 +7585,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (0, _component.registerComponent)('layer-file-upload-button', {
   mixins: [_mainComponent2.default],
-  properties: {},
+  properties: {
+    /**
+     * Set the `accept` attribute of the file upload widget.
+     *
+     * For more info, see https://www.w3schools.com/tags/att_input_accept.asp
+     *
+     * Possible value: `image/*,video/*`
+     *
+     * @property {String} [accept=*\/*]
+     */
+    accept: {
+      set: function set(newValue) {
+        this.nodes.input.accept = newValue;
+      }
+    }
+  },
   methods: {
 
     /**
@@ -7507,7 +7665,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":50,"layer-websdk":70}],27:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":51,"layer-websdk":72}],27:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -7541,7 +7699,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @class layerUI.components.subcomponents.MessageStatus
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -7643,48 +7802,49 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"layer-websdk":70}],28:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":72}],28:[function(require,module,exports){
 /**
-     * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
-     *
-     * If using it outsdie of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
-     *
-     * ```
-     * document.getElementById('mypresencewidget').item = client.user;
-     * ```
-     *
-     * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
-     *
-     * ```javascript
-     * layerUI.registerComponent('layer-presence', {
-     *    properties: {
-     *      user: {
-     *        set: function(value) {
-     *           this.onRender();
-     *           if (value) value.on('identity:changes', this.onRerender, this);
-     *        }
-     *      }
-     *    },
-     *    methods: {
-     *      onRender: function() {
-     *        this.onRerender();
-     *      },
-     *      onRerender: function() {
-     *        this.className = 'my-presence-' + this.user.status;
-     *      },
-     *    }
-     * });
-     *
-     * // Call init after custom components are defined
-     * layerUI.init({
-     *   appId:  'layer:///apps/staging/UUID'
-     * });
-     * ```
-     *
-     * @class layerUI.components.subcomponents.Presence
-     * @extends layerUI.components.Component
-     * @mixin layerUI.mixins.MainComponent
-     */'use strict';
+ * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
+ *
+ * If using it outsdie of the Avatar widget, make sure you set `layerPresenceWidget.item = identity`.  Most common usage is:
+ *
+ * ```
+ * document.getElementById('mypresencewidget').item = client.user;
+ * ```
+ *
+ * The simplest way to customize this widget is to replace it with your own implementation of the `<layer-avatar />` tag.
+ *
+ * ```javascript
+ * layerUI.registerComponent('layer-presence', {
+ *    properties: {
+ *      user: {
+ *        set: function(value) {
+ *           this.onRender();
+ *           if (value) value.on('identity:changes', this.onRerender, this);
+ *        }
+ *      }
+ *    },
+ *    methods: {
+ *      onRender: function() {
+ *        this.onRerender();
+ *      },
+ *      onRerender: function() {
+ *        this.className = 'my-presence-' + this.user.status;
+ *      },
+ *    }
+ * });
+ *
+ * // Call init after custom components are defined
+ * layerUI.init({
+ *   appId:  'layer:///apps/staging/UUID'
+ * });
+ * ```
+ *
+ * @class layerUI.components.subcomponents.Presence
+ * @extends layerUI.components.Component
+ * @mixin layerUI.mixins.MainComponent
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -7791,9 +7951,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":50,"layer-websdk":70}],29:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":51,"layer-websdk":72}],29:[function(require,module,exports){
 /**
- * The Layer file upload button widget allows users to select a File to send.
+ * The Layer Send button widget provides an alternative to hitting a keyboard `ENTER` key for sending a message.
  *
  * Its assumed that this button will be used within the layerUI.components.subcomponents.ComposeButtonPanel.
  * If using it elsewhere, note that it triggers a `layer-send-click` event that you would listen for to do your own processing.
@@ -7816,7 +7976,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @class layerUI.components.subcomponents.SendButton
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -7866,19 +8027,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-send-button", "<div></div>", "");
   layerUI.buildStyle("layer-send-button", "layer-send-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-send-button div {\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":50}],30:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":51}],30:[function(require,module,exports){
 /**
-     * The Layer Typing Indicator widget renders a short description of who is currently typing into the current Conversation.
-     *
-     * This is designed to go inside of the layerUI.Conversation widget.
-     *
-     * The simplest way to customize the behavior of this widget is using the `layer-typing-indicator-change` event.
-     *
-     * TODO: Provide a layerUI.components.ConversationPanel.typingIndicatorRenderer property
-     *
-     * @class layerUI.components.subcomponents.TypingIndicator
-     * @extends layerUI.components.Component
-     */'use strict';
+ * The Layer Typing Indicator widget renders a short description of who is currently typing into the current Conversation.
+ *
+ * This is designed to go inside of the layerUI.Conversation widget.
+ *
+ * The simplest way to customize the behavior of this widget is using the `layer-typing-indicator-change` event.
+ *
+ * TODO: Provide a layerUI.components.ConversationPanel.typingIndicatorRenderer property
+ *
+ * @class layerUI.components.subcomponents.TypingIndicator
+ * @extends layerUI.components.Component
+ */
+'use strict';
 
 var _component = require('../../../components/component');
 
@@ -8039,7 +8201,8 @@ var _component = require('../../../components/component');
  *
  * @class layerUI.handlers.message.Image
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _loadImage = require('blueimp-load-image/js/load-image');
 
@@ -8255,7 +8418,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/message-handler":51,"../../../utils/sizing":56,"blueimp-load-image/js/load-image":63,"blueimp-load-image/js/load-image-exif":59,"blueimp-load-image/js/load-image-meta":60,"blueimp-load-image/js/load-image-orientation":61}],32:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/message-handler":52,"../../../utils/sizing":58,"blueimp-load-image/js/load-image":65,"blueimp-load-image/js/load-image-exif":61,"blueimp-load-image/js/load-image-meta":62,"blueimp-load-image/js/load-image-orientation":63}],32:[function(require,module,exports){
 /**
  * The Layer Plain Text MessageHandler renders a single text/plain message part.
  *
@@ -8263,7 +8426,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @class layerUI.handlers.message.TextPlain
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../components/component');
 
@@ -8271,14 +8435,31 @@ var _messageHandler = require('../../mixins/message-handler');
 
 var _messageHandler2 = _interopRequireDefault(_messageHandler);
 
+var _base = require('../../base');
+
+var _base2 = _interopRequireDefault(_base);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerMessageComponent)('layer-message-text-plain', {
+  // Note: This template is for use within a MessageItem in a MessageList, else its blown away by the message text
+  // which if burried so deeply in the dom, becomes problematic to render inline with other elements such as `conversation.lastMessage` to the right of
+  // conversation name.  Use of this template in a Message Item allows us to have afterText nodes that contain additional content
+  // but which is not inside of the text bubble
+  template: '<div class="layer-message-text" layer-id="text"></div>',
   mixins: [_messageHandler2.default],
   properties: {
     label: {
       label: 'Text'
+    },
+    html: {
+      set: function set(html) {
+        if (this.parentComponent.isMessageListItem) {
+          this.nodes.text.innerHTML = html;
+        } else {
+          this.innerHTML = html;
+        }
+      }
     }
   },
   methods: {
@@ -8318,25 +8499,40 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRender: function onRender() {
       var _this = this;
 
-      if (!layerUI.textHandlersOrdered) this._setupOrderedHandlers();
+      if (!_base2.default.textHandlersOrdered) this._setupOrderedHandlers();
 
       var text = this.message.parts[0].body;
       var textData = {
         text: this._fixHtml(text),
-        afterText: []
+        afterText: [],
+        afterClasses: []
       };
-      var afterText = '';
 
-      layerUI.textHandlersOrdered.forEach(function (handler) {
-        return handler(textData, _this.message);
+      // Iterate over each handler, calling each handler.
+      // Perform a cheap trick until we can update our API so that
+      // css classes can be associated with each item.
+      // This is a cheap trick because a TextHandler could arbitrarily edit the `afterText` array,
+      // removing previously added elements.  And this code would then break.
+      _base2.default.textHandlersOrdered.forEach(function (handlerDef) {
+        var afterText = textData.afterText.concat([]);
+        handlerDef.handler(textData, _this.message, Boolean(_this.parentComponent && _this.parentComponent.isMessageListItem));
+        var last = textData.afterText[textData.afterText.length - 1];
+        if (afterText.indexOf(last) === -1) {
+          textData.afterClasses[textData.afterText.length - 1] = 'layer-message-text-plain-' + handlerDef.name;
+        }
       });
+      this.html = textData.text;
 
-      if (textData.afterText.length) {
-        var startDiv = '<div class="layer-message-text-plain-after-text">';
-        afterText = startDiv + textData.afterText.join('</div>' + startDiv) + '</div>';
-        this.classList.add('layer-message-text-plain-has-after-text');
+      if (textData.afterText.length && this.parentComponent && this.parentComponent.isMessageListItem) {
+        textData.afterText.forEach(function (textItem, i) {
+          var div = document.createElement('div');
+          div.classList.add('layer-message-text-plain-after-text');
+          div.classList.add(textData.afterClasses[i]);
+          div.innerHTML = textItem;
+          if (div.firstChild.properties) div.firstChild.properties.parentComponent = _this;
+          _this.appendChild(div);
+        });
       }
-      this.innerHTML = textData.text + afterText;
     },
 
 
@@ -8349,28 +8545,37 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     _setupOrderedHandlers: function _setupOrderedHandlers() {
-      layerUI.textHandlersOrdered = Object.keys(layerUI.textHandlers).filter(function (handlerName) {
-        return layerUI.textHandlers[handlerName].enabled;
+      _base2.default.textHandlersOrdered = Object.keys(_base2.default.textHandlers).filter(function (handlerName) {
+        return _base2.default.textHandlers[handlerName].enabled;
       }).map(function (handlerName) {
-        return layerUI.textHandlers[handlerName];
+        return _base2.default.textHandlers[handlerName];
       }).sort(function (a, b) {
         if (a.order > b.order) return 1;
         if (b.order > a.order) return -1;
         return 0;
-      }).map(function (handlerObj) {
-        return handlerObj.handler;
       });
+    },
+
+
+    /**
+     * Rerender any message that was rendered as a preview and is now no longer a preview.
+     *
+     * @method onSent
+     */
+    onSent: function onSent() {
+      this.onRender();
     }
   }
-});
-},{"../../components/component":5,"../../mixins/message-handler":51}],33:[function(require,module,exports){
+}); 
+},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":52}],33:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
  *
  * @class layerUI.handlers.message.Unknown
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../components/component');
 
@@ -8400,7 +8605,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 });
 
 // Do not register this handler
-},{"../../components/component":5,"../../mixins/message-handler":51}],34:[function(require,module,exports){
+},{"../../components/component":5,"../../mixins/message-handler":52}],34:[function(require,module,exports){
 /**
  * The Layer Video MessageHandler renders a single MessagePart Video, or an Atlas 3-message-part Video.
  *
@@ -8410,7 +8615,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * @class layerUI.handlers.message.Video
  * @extends layerUI.components.Component
- */'use strict';
+ */
+'use strict';
 
 var _component = require('../../components/component');
 
@@ -8504,12 +8710,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":51,"../../utils/sizing":56}],35:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":52,"../../utils/sizing":58}],35:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
  * @class layerUI.handlers.text.Autolinker
- */'use strict';
+ */
+'use strict';
 
 var _autolinker = require('autolinker');
 
@@ -8537,12 +8744,13 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":58}],36:[function(require,module,exports){
+},{"../../base":4,"autolinker":60}],36:[function(require,module,exports){
 /**
-     * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
-     *
-     * @class layerUI.handlers.text.CodeBlocks
-     */'use strict';
+ * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
+ *
+ * @class layerUI.handlers.text.CodeBlocks
+ */
+'use strict';
 
 var _base = require('../../base');
 
@@ -8568,10 +8776,11 @@ _base2.default.registerTextHandler({
 }); 
 },{"../../base":4}],37:[function(require,module,exports){
 /**
-     * The Layer Emoji TextHandler replaces all :smile: and :-) with emoji images
-     *
-     * @class layerUI.handlers.text.Emoji
-     */'use strict';
+ * The Layer Emoji TextHandler replaces all :smile: and :-) with emoji images
+ *
+ * @class layerUI.handlers.text.Emoji
+ */
+'use strict';
 
 var _twemoji = require('twemoji');
 
@@ -8616,12 +8825,13 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":67,"twemoji":68}],38:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":69,"twemoji":70}],38:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
  * @class layerUI.handlers.text.Images
- */'use strict';
+ */
+'use strict';
 
 var _base = require('../../base');
 
@@ -8647,16 +8857,17 @@ _base2.default.registerTextHandler({
     }
   }
 });
-},{"../../base":4,"../../utils/is-url":55}],39:[function(require,module,exports){
+},{"../../base":4,"../../utils/is-url":57}],39:[function(require,module,exports){
 /**
-     * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
-     *
-     * Any newline character that appears within a code block should
-     * NOT be replaced with a <br/> tag as the code block will render that as a visible
-     * <br/> rather than go to the next line.
-     *
-     * @class layerUI.handlers.text.NewLine
-     */'use strict';
+ * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
+ *
+ * Any newline character that appears within a code block should
+ * NOT be replaced with a <br/> tag as the code block will render that as a visible
+ * <br/> rather than go to the next line.
+ *
+ * @class layerUI.handlers.text.NewLine
+ */
+'use strict';
 
 var _base = require('../../base');
 
@@ -8703,10 +8914,11 @@ _base2.default.registerTextHandler({
 }); 
 },{"../../base":4}],40:[function(require,module,exports){
 /**
-     * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
-     *
-     * @class layerUI.handlers.text.Youtube
-     */'use strict';
+ * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
+ *
+ * @class layerUI.handlers.text.Youtube
+ */
+'use strict';
 
 var _base = require('../../base');
 
@@ -8755,7 +8967,8 @@ _base2.default.registerTextHandler({
  *
  * NOTE: JSDuck is picking up on LayerUI and defining it to be a class
  * which we don't want; do not let JSDuck parse this file.
- */'use strict';
+ */
+'use strict';
 
 /*
  * This file is used to create a browserified build with the following properties:
@@ -8803,6 +9016,8 @@ require('./handlers/text/youtube');
 require('./utils/date-separator');
 
 LayerUI.files = require('./utils/files');
+LayerUI.animatedScrollTo = require('animated-scrollto');
+
 LayerUI.mixins = {
   MessageHandler: require('./mixins/message-handler'),
   HasQuery: require('./mixins/has-query'),
@@ -8846,6 +9061,8 @@ require('./handlers/text/youtube');
 require('./utils/date-separator');
 
 LayerUI.files = require('./utils/files');
+LayerUI.animatedScrollTo = require('animated-scrollto');
+
 LayerUI.mixins = {
   MessageHandler: require('./mixins/message-handler'),
   HasQuery: require('./mixins/has-query'),
@@ -8860,7 +9077,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-send-button/layer-send-button":29,"./handlers/message/layer-message-image/layer-message-image":31,"./handlers/message/layer-message-text-plain":32,"./handlers/message/layer-message-video":34,"./handlers/text/autolinker":35,"./handlers/text/code-blocks":36,"./handlers/text/emoji":37,"./handlers/text/images":38,"./handlers/text/newline":39,"./handlers/text/youtube":40,"./layer-ui":42,"./mixins/focus-on-keydown":44,"./mixins/has-query":45,"./mixins/list":49,"./mixins/list-item":47,"./mixins/list-item-selection":46,"./mixins/list-selection":48,"./mixins/main-component":50,"./mixins/message-handler":51,"./utils/date-separator":53,"./utils/files":54}],42:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-send-button/layer-send-button":29,"./handlers/message/layer-message-image/layer-message-image":31,"./handlers/message/layer-message-text-plain":32,"./handlers/message/layer-message-video":34,"./handlers/text/autolinker":35,"./handlers/text/code-blocks":36,"./handlers/text/emoji":37,"./handlers/text/images":38,"./handlers/text/newline":39,"./handlers/text/youtube":40,"./layer-ui":42,"./mixins/focus-on-keydown":44,"./mixins/has-query":45,"./mixins/list":50,"./mixins/list-item":47,"./mixins/list-item-selection":46,"./mixins/list-selection":49,"./mixins/main-component":51,"./mixins/message-handler":52,"./utils/date-separator":55,"./utils/files":56,"animated-scrollto":59}],42:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -8879,7 +9096,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * Import this if you want just a basic setup without any built-in widgets.
  *
  * Import index.js instead of you want a standard setup with standard widgets installed.
- */'use strict';
+ */
+'use strict';
 
 require('webcomponents.js/webcomponents-lite');
 
@@ -8900,6 +9118,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 _base2.default.registerComponent = _component.registerComponent;
+_base2.default.registerMessageComponent = _component.registerMessageComponent;
 
 /**
  * Unregister a component.  Must be called before layerUI.init().
@@ -8935,6 +9154,7 @@ _base2.default.init = function init() {
 module.exports = _base2.default;
 
 _base2.default.registerComponent = _component.registerComponent;
+_base2.default.registerMessageComponent = _component.registerMessageComponent;
 
 /**
  * Unregister a component.  Must be called before layerUI.init().
@@ -8968,22 +9188,23 @@ _base2.default.init = function init() {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":5,"./handlers/message/layer-message-unknown":33,"webcomponents.js/webcomponents-lite":69}],43:[function(require,module,exports){
+},{"./base":4,"./components/component":5,"./handlers/message/layer-message-unknown":33,"webcomponents.js/webcomponents-lite":71}],43:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
  * @class layerUI.mixins.EmptyList
- */'use strict';
+ */
+'use strict';
 
 
 module.exports = {
   properties: {
     /**
-         * If the query has no data and is not loading data, this should be true.
-         *
-         * @property {Boolean} [isEmptyList=false]
-         * @readonly
-         */
+     * If the query has no data and is not loading data, this should be true.
+     *
+     * @property {Boolean} [isEmptyList=false]
+     * @readonly
+     */
     isEmptyList: {
       value: false,
       set: function set(value) {
@@ -9037,7 +9258,8 @@ module.exports = {
  * Any class using this mixin must provide an `onKeyDown` method.
  *
  * @class layerUI.mixins.FocusOnKeydown
- */'use strict';
+ */
+'use strict';
 
 
 module.exports = {
@@ -9089,7 +9311,8 @@ module.exports = {
  * A Mixin for main components that can receive or generate a Query
  *
  * @class layerUI.mixins.HasQuery
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -9234,7 +9457,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":70}],46:[function(require,module,exports){
+},{"layer-websdk":72}],46:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -9242,7 +9465,8 @@ module.exports = {
  * and triggers a selection events.
  *
  * @class layerUI.mixins.ListSelection
- */'use strict';
+ */
+'use strict';
 
 
 
@@ -9275,7 +9499,8 @@ module.exports = {
  * This Mixin requires a template that provides a `layer-list-item` class
  *
  * @class layerUI.mixins.ListItem
- */'use strict';
+ */
+'use strict';
 
 
 
@@ -9447,13 +9672,59 @@ module.exports = {
 };
 },{}],48:[function(require,module,exports){
 /**
+ * A helper mixin for Lists that want an indicator to render when paging through data, that data is currently loading.
+ *
+ * This is not a necessary feature, but is nicer than just reaching the end of the list and waiting.
+ *
+ *
+ * This mixin requires "layer-id=loadIndicator" to exist in the template for any component using this mixin.
+ *
+ * @class layerUI.mixins.ListLoadIndicator
+ */
+'use strict';
+
+
+module.exports = {
+  properties: {
+    isDataLoading: {
+      set: function set(value) {
+        this.classList[value ? 'add' : 'remove']('layer-loading-data');
+      }
+    },
+
+    /**
+     * A dom node to render when data is loading for the list.
+     *
+     * Could just be a message "Messages Loading...".  Or you can add interactive widgets.
+     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
+     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
+     * style height to be at least as tall as your custom node.
+     *
+     * @property {HTMLElement} [dataLoadingNode=null]
+     */
+    dataLoadingNode: {
+      set: function set(value) {
+        this.nodes.loadIndicator.innerHTML = '';
+        if (value) this.nodes.loadIndicator.appendChild(value);
+      }
+    }
+  },
+  methods: {
+    onRender: function onRender() {
+      if (this.dataLoadingNode) this.nodes.loadIndicator.appendChild(this.dataLoadingNode);
+    }
+  }
+};
+},{}],49:[function(require,module,exports){
+/**
  * A List Mixin that add a `selectedId` property to a List.
  *
  * Also listens for `click` events to update the `selectedId` property,
  * and triggers selection events.
  *
  * @class layerUI.mixins.ListSelection
- */'use strict';
+ */
+'use strict';
 
 
 module.exports = {
@@ -9472,19 +9743,26 @@ module.exports = {
      * ```
      *
      * The above code will set the selected Conversation and render the conversation as selected.
+     * Note that setting the selectedId triggers a selection event; if `evt.preventDefault()` is called,
+     * this property change will be prevented.
      *
      * @property {String} [selectedId='']
      */
     selectedId: {
       set: function set(newId, oldId) {
-        if (oldId) {
-          var node = this.querySelector('#' + this._getItemId(oldId));
-          if (node) node.isSelected = false;
-        }
+        var newItem = this.client.getObject(newId);
+        if ((newItem || oldId) && !this.trigger(this._selectedItemEventName, { item: newItem })) {
+          this.properties.selectedId = oldId;
+        } else {
+          if (oldId) {
+            var node = this.querySelector('#' + this._getItemId(oldId));
+            if (node) node.isSelected = false;
+          }
 
-        if (newId) {
-          var _node = this.querySelector('#' + this._getItemId(newId));
-          if (_node) _node.isSelected = true;
+          if (newId) {
+            var _node = this.querySelector('#' + this._getItemId(newId));
+            if (_node) _node.isSelected = true;
+          }
         }
       }
     }
@@ -9523,9 +9801,7 @@ module.exports = {
       if (target.item && target._isListItem) {
         evt.preventDefault();
         evt.stopPropagation();
-        if (this.trigger(this._selectedItemEventName, { item: target.item, originalEvent: evt })) {
-          this.selectedId = target.item.id;
-        }
+        this.selectedId = target.item.id;
       }
       this.onClick(evt);
     },
@@ -9552,17 +9828,20 @@ module.exports = {
     }
   }
 };
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /**
-    * A List Mixin that provides common list patterns
-    *
-    * @class layerUI.mixins.List
-    * @mixin layerUI.mixins.HasQuery
-    */'use strict';
+ * A List Mixin that provides common list patterns
+ *
+ * @class layerUI.mixins.List
+ * @mixin layerUI.mixins.HasQuery
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
 var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
+
+var _base = require('../base');
 
 var _component = require('../components/component');
 
@@ -9571,6 +9850,7 @@ var _hasQuery = require('./has-query');
 var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 
 module.exports = {
   mixins: [_hasQuery2.default],
@@ -9599,11 +9879,7 @@ module.exports = {
      *
      * @property {Boolean} [isDataLoading=false]
      */
-    isDataLoading: {
-      set: function set(value) {
-        this.classList[value ? 'add' : 'remove']('layer-loading-data');
-      }
-    },
+    isDataLoading: {},
 
     /**
      * Any time we are about to render an object, call any provided onRenderListItem function to see if there
@@ -9755,12 +10031,68 @@ module.exports = {
       if (position === this.scrollTop) return;
       this.scrollTop = position;
     },
-    onRender: function onRender() {
+
+
+    /**
+     * Animated scroll to the specified Y position.
+     *
+     * @method animatedScrollTo
+     * @param {Number} position
+     * @param {Number} [animateSpeed=200]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
+     */
+    animatedScrollTo: function animatedScrollTo(position) {
       var _this2 = this;
+
+      var animateSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
+      var animateCallback = arguments[2];
+
+      if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+
+      var cancel = this.properties.cancelAnimatedScroll = (0, _base.animatedScrollTo)(this, position, animateSpeed, function () {
+        if (cancel !== _this2.properties.cancelAnimatedScroll) return;
+        _this2.properties.cancelAnimatedScroll = null;
+        if (animateCallback) animateCallback();
+      });
+    },
+
+
+    /**
+     * Scroll to the specified item.
+     *
+     * Item is assumed to be a layer.Message, layer.Conversation, or whatever the core
+     * data set is that is in your list.  Note that this does not load the item from the server;
+     * scrolling to an item not in the list will return `false`.
+     *
+     * @method scrollToItem
+     * @param {layer.Root} item
+     * @param {Number} [animateSpeed=0]   Number of miliseconds of animated scrolling; 0 for no animation
+     * @param {Function} [animateCallback] Function to call when animation completes
+     * @return {Boolean}                  Returns true if operation was successful,
+     *                                    returns false if the item was not found in the list.
+     */
+    scrollToItem: function scrollToItem(item) {
+      var animateSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var animateCallback = arguments[2];
+
+      var widget = document.getElementById(this._getItemId(item.id));
+      if (!widget) return false;
+
+      var position = widget.offsetTop - this.offsetTop;
+      if (!animateSpeed) {
+        this.scrollTop = position;
+      } else {
+        this.animatedScrollTo(position, animateSpeed, animateCallback);
+      }
+
+      return true;
+    },
+    onRender: function onRender() {
+      var _this3 = this;
 
       // Reset the query to initial state by cloning the template
       Array.prototype.slice.call(this.childNodes).forEach(function (node) {
-        if (node._isListItem) _this2.removeChild(node);
+        if (node._isListItem) _this3.removeChild(node);
       });
 
       // Render any data in the query
@@ -9790,11 +10122,11 @@ module.exports = {
      * @private
      */
     _generateFragment: function _generateFragment(data, fragment) {
-      var _this3 = this;
+      var _this4 = this;
 
       if (!fragment) fragment = document.createDocumentFragment();
       data.forEach(function (item, index) {
-        _this3._generateFragmentItem(item, fragment);
+        _this4._generateFragmentItem(item, fragment);
       }, this);
       return fragment;
     },
@@ -9853,11 +10185,11 @@ module.exports = {
      * @private
      */
     _gatherAndProcessAffectedItems: function _gatherAndProcessAffectedItems(affectedItems, isTopItemNew) {
-      var _this4 = this;
+      var _this5 = this;
 
       if (affectedItems.length) {
         var itemIds = affectedItems.map(function (item) {
-          return _this4._getItemId(item.id);
+          return _this5._getItemId(item.id);
         });
         var affectedWidgets = this.querySelectorAllArray('#' + itemIds.join(', #'));
         this._processAffectedWidgets(affectedWidgets, isTopItemNew);
@@ -9876,7 +10208,7 @@ module.exports = {
      * @private
      */
     _processAffectedWidgets: function _processAffectedWidgets(widgets, isTopItemNew) {
-      var _this5 = this;
+      var _this6 = this;
 
       // Get the index of our first widget within listData
       var firstIndex = void 0;
@@ -9892,9 +10224,9 @@ module.exports = {
 
       // Allow external processing of the widgets
       widgets.forEach(function (widget, index) {
-        if (_this5.properties.onRenderListItem) {
+        if (_this6.properties.onRenderListItem) {
           try {
-            _this5.properties.onRenderListItem(widget, _this5.properties.listData, firstIndex + index, isTopItemNew);
+            _this6.properties.onRenderListItem(widget, _this6.properties.listData, firstIndex + index, isTopItemNew);
           } catch (err) {
             console.error('Error in onRenderListItem for ' + widget.item.id + '; ' + err);
           }
@@ -10053,13 +10385,14 @@ module.exports = {
       }
     }
   }
-}; 
-},{"../components/component":5,"./has-query":45,"layer-websdk":70}],50:[function(require,module,exports){
+};
+},{"../base":4,"../components/component":5,"./has-query":45,"layer-websdk":72}],51:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
  * @class layerUI.mixins.MainComponent
- */'use strict';
+ */
+'use strict';
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -10139,6 +10472,11 @@ module.exports = {
         var _this2 = this;
 
         if (value) {
+          if (value.telemetryMonitor) {
+            value.telemetryMonitor.on('telemetry-environment', function (evt) {
+              evt.environment.layer_ui_sdk_version = _base.version;
+            });
+          }
           value.on('destroy', function (evt) {
             if (evt.target === value) _this2.properties.client = null;
           }, this);
@@ -10154,72 +10492,73 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"layer-websdk":70}],51:[function(require,module,exports){
+},{"../base":4,"layer-websdk":72}],52:[function(require,module,exports){
 /**
-    * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
-    *
-    * ```
-    * import MessageHandler from 'layer-ui-web/lib/mixins/message-handler';
-    * layerUI.registerComponent('sample-message-handler', {
-    *     mixins: [MessageHandler],
-    *     methods: {
-    *         onCreate() {
-    *            // If using a template, your dom nodes will already be setup,
-    *            // and you can wire up UI event handlers here.
-    *            // Do any DOM creation/manipulation that does not depend upon the message here.
-    *         },
-    *
-    *         onSent() {
-    *           // If you are rendering messages before they are sent, and need special processing of them once they ARE sent,
-    *           // put your special processing in here
-    *         },
-    *
-    *         // Your onRender method is called once the message property is set.
-    *         onRender() {
-    *            // DOM Manipulation Here
-    *         },
-    *
-    *         // Your onRerender method is called by onRender, and called any time the Message
-    *         // changes; all dynamic rendering goes in onRerender.
-    *         onRerender() {
-    *             // DOM Manipulation Here
-    *         }
-    *     }
-    * });
-    *
-    * // If a template is needed, register a template for your component using a String;
-    * // Note that layer-id will allow you to access these nodes directly as this.nodes.description
-    * // or this.nodes.checkox
-    * layerUI.buildAndRegisterTemplate('sample-message-handler', '<label layer-id="label">Approve Purchase</label>' +
-    *    '<input type="checkbox" layer-id="checkbox" /><div layer-id="description"></div>');
-    *
-    * // OR Register a template for your component using a <template /> DOM node:
-    * layerUI.registerTemplate('sample-message-handler', myTemplateNode);
-    * ```
-    *
-    * If you need to add side effects to setting the `message` property, you can add a message setter; it will be
-    * called before the MessageHandlerMixin's message setter:
-    *
-    * ```
-    * layerUI.registerComponent('sample-message-handler', {
-    *   mixins: [MessageHandler],
-    *   properties: {
-    *     message: {
-    *       setter: function(value) {
-    *         this.properties.data = value.parts[0].body;
-    *       }
-    *     }
-    *   },
-    *   methods: {
-    *     onRender: function() {
-    *       this.innerHTML = this.properties.data;
-    *     }
-    *   }
-    * });
-    * ```
-    *
-    * @class layerUI.mixins.MessageHandler
-    */'use strict';
+ * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
+ *
+ * ```
+ * import MessageHandler from 'layer-ui-web/lib/mixins/message-handler';
+ * layerUI.registerComponent('sample-message-handler', {
+ *     mixins: [MessageHandler],
+ *     methods: {
+ *         onCreate() {
+ *            // If using a template, your dom nodes will already be setup,
+ *            // and you can wire up UI event handlers here.
+ *            // Do any DOM creation/manipulation that does not depend upon the message here.
+ *         },
+ *
+ *         onSent() {
+ *           // If you are rendering messages before they are sent, and need special processing of them once they ARE sent,
+ *           // put your special processing in here
+ *         },
+ *
+ *         // Your onRender method is called once the message property is set.
+ *         onRender() {
+ *            // DOM Manipulation Here
+ *         },
+ *
+ *         // Your onRerender method is called by onRender, and called any time the Message
+ *         // changes; all dynamic rendering goes in onRerender.
+ *         onRerender() {
+ *             // DOM Manipulation Here
+ *         }
+ *     }
+ * });
+ *
+ * // If a template is needed, register a template for your component using a String;
+ * // Note that layer-id will allow you to access these nodes directly as this.nodes.description
+ * // or this.nodes.checkox
+ * layerUI.buildAndRegisterTemplate('sample-message-handler', '<label layer-id="label">Approve Purchase</label>' +
+ *    '<input type="checkbox" layer-id="checkbox" /><div layer-id="description"></div>');
+ *
+ * // OR Register a template for your component using a <template /> DOM node:
+ * layerUI.registerTemplate('sample-message-handler', myTemplateNode);
+ * ```
+ *
+ * If you need to add side effects to setting the `message` property, you can add a message setter; it will be
+ * called before the MessageHandlerMixin's message setter:
+ *
+ * ```
+ * layerUI.registerComponent('sample-message-handler', {
+ *   mixins: [MessageHandler],
+ *   properties: {
+ *     message: {
+ *       setter: function(value) {
+ *         this.properties.data = value.parts[0].body;
+ *       }
+ *     }
+ *   },
+ *   methods: {
+ *     onRender: function() {
+ *       this.innerHTML = this.properties.data;
+ *     }
+ *   }
+ * });
+ * ```
+ *
+ * @class layerUI.mixins.MessageHandler
+ */
+'use strict';
 
 var _component = require('../components/component');
 
@@ -10234,7 +10573,7 @@ module.exports = {
       mode: _component.registerComponent.MODES.AFTER,
       set: function set() {
         this.onRender();
-        this.message.on('messages:change', this.onRerender, this);
+        this.message.on('messages:change', this._onChange, this);
         if (this.message.isNew()) this.message.once('messages:sent', this.onSent, this);
       }
     }
@@ -10274,6 +10613,27 @@ module.exports = {
 
 
     /**
+     * Whenever the message changes, call onRerender().
+     *
+     * Unless of course, the message is new, and unsent, and we're actually
+     * rendering a Message Preview, in which case call onRender.
+     *
+     * Rationale: When the message is new, anything/everything can change, requiring a full rerendering.
+     * Once sent, only specific things can change, such as read receipts.
+     *
+     * @method _onChange
+     * @private
+     */
+    _onChange: function _onChange() {
+      if (this.message.isNew()) {
+        this.onRender();
+      } else {
+        this.onRerender();
+      }
+    },
+
+
+    /**
      * Your onSent method will be called if you rendered the message prior to sending it.
      *
      * Use this if there is any change to your message that need to be made after its been sent.
@@ -10283,12 +10643,85 @@ module.exports = {
     onSent: function onSent() {}
   }
 }; 
-},{"../components/component":5}],52:[function(require,module,exports){
+},{"../components/component":5}],53:[function(require,module,exports){
+/**
+ * A helper mixin for Lists that want an indicator to render when paging through data, that there is no more data to page in.
+ *
+ * This is not a necessary feature, but is nicer than just failing to show a "Loading messages" message and assuming that they can
+ * take a hint.
+ *
+ * Note that `isEndOfResults` is always `false` if a query has no results.
+ *
+ * This mixin requires "layer-id=endOfResultsNode" to exist in the template for any component using this mixin.
+ *
+ * @class layerUI.mixins.QueryEndIndicator
+ */
+'use strict';
+
+
+module.exports = {
+  properties: {
+    /**
+     * If the query has no more data to load but is not empty, this should be true.
+     *
+     * @property {Boolean} [isEndOfResults=false]
+     * @readonly
+     */
+    isEndOfResults: {
+      value: false,
+      set: function set(value) {
+        this.classList[value && !this.isEmptyList ? 'add' : 'remove']('layer-end-of-results');
+      }
+    },
+
+    /**
+     * A dom node to render when there are no messages in the list.
+     *
+     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
+     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
+     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
+     * style height to be at least as tall as your custom node.
+     *
+     * @property {HTMLElement} [endOfResultsNode=null]
+     */
+    endOfResultsNode: {
+      set: function set(value) {
+        this.nodes.endOfResultsNode.innerHTML = '';
+        if (value) this.nodes.endOfResultsNode.appendChild(value);
+      }
+    }
+  },
+  methods: {
+    onRender: function onRender() {
+      if (this.endOfResultsNode) this.nodes.endOfResultsNode.appendChild(this.endOfResultsNode);
+    },
+
+
+    /**
+     * Call this after rendering any query-paged data.
+     *
+     * @method _renderPagedDataDone
+     * @private
+     * @param {Event} evt
+     */
+    _renderPagedDataDone: function _renderPagedDataDone() {
+      var evt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (this.query.isDestroyed) {
+        this.isEndOfResults = false;
+      } else {
+        this.isEndOfResults = this.query.pagedToEnd;
+      }
+    }
+  }
+};
+},{}],54:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
  * @class layerUI.mixins.StateManager
- */"use strict";
+ */
+"use strict";
 
 
 module.exports = {
@@ -10333,28 +10766,29 @@ module.exports = {
     }
   }
 };
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
-                                                       * Use this module to put a date separator between Messages from different dates in your Messages List.
-                                                       *
-                                                       * ```
-                                                       * conversationPanel.onRenderListItem = layerUI.utils.dateSeparator;
-                                                       * ```
-                                                       *
-                                                       * Or if you have multiple `onRenderListItem` handlers:
-                                                       *
-                                                       * ```
-                                                       * conversationPanel.onRenderListItem = function(widget, messages, index, isTopItem) {
-                                                       *     layerUI.utils.dateSeparator(widget, messages, index);
-                                                       *     handler2(widget, messages, index, isTopItem);
-                                                       *     handler3(widget, messages, index, isTopItem);
-                                                       * }
-                                                       * ```
-                                                       *
-                                                       * Date separators come as `<div class='layer-list-item-separator-date'><span>DATE</span></div>`
-                                                       *
-                                                       * @class layerUI.utils.DateSeparator
-                                                       */'use strict';
+ * Use this module to put a date separator between Messages from different dates in your Messages List.
+ *
+ * ```
+ * conversationPanel.onRenderListItem = layerUI.utils.dateSeparator;
+ * ```
+ *
+ * Or if you have multiple `onRenderListItem` handlers:
+ *
+ * ```
+ * conversationPanel.onRenderListItem = function(widget, messages, index, isTopItem) {
+ *     layerUI.utils.dateSeparator(widget, messages, index);
+ *     handler2(widget, messages, index, isTopItem);
+ *     handler3(widget, messages, index, isTopItem);
+ * }
+ * ```
+ *
+ * Date separators come as `<div class='layer-list-item-separator-date'><span>DATE</span></div>`
+ *
+ * @class layerUI.utils.DateSeparator
+ */
+'use strict';
 
 var _base = require('../base');
 
@@ -10378,7 +10812,7 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
     _base2.default.addListItemSeparator(widget, '', dateClassName, true);
   }
 };
-},{"../base":4}],54:[function(require,module,exports){
+},{"../base":4}],56:[function(require,module,exports){
 /**
  * This is a utility class which you can use to watch for user dragging and dropping
  * files from their file system into your app as part of a "Send Attached Message" action.
@@ -10404,7 +10838,8 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
  * @param {layer.MessagePart[]} options.callback.parts - The MessageParts representing the dropped files, which you can modify and send.
  * @param {Boolean} [options.allowDocumentDrop=false] - By default, this utility adds an event handler to prevent the browser from navigating away from your
  *         app to view a file dropped in some other part of your app. If you need to handle this event yourself, set this to true.
- */'use strict';
+ */
+'use strict';
 
 var _loadImage = require('blueimp-load-image/js/load-image');
 
@@ -10677,12 +11112,12 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
       body: '{"orientation":0, "width":' + originalSize.width + ', "height":' + originalSize.height + '}'
     }));
 
-    callback(parts);
+    if (callback) callback(parts);
   });
 
   video.src = URL.createObjectURL(part.body);
 };
-},{"../base":4,"./sizing":56,"blueimp-load-image/js/load-image":63,"blueimp-load-image/js/load-image-exif":59,"blueimp-load-image/js/load-image-meta":60,"blueimp-load-image/js/load-image-orientation":61,"layer-websdk":70}],55:[function(require,module,exports){
+},{"../base":4,"./sizing":58,"blueimp-load-image/js/load-image":65,"blueimp-load-image/js/load-image-exif":61,"blueimp-load-image/js/load-image-meta":62,"blueimp-load-image/js/load-image-orientation":63,"layer-websdk":72}],57:[function(require,module,exports){
 'use strict';
 
 /*
@@ -10726,7 +11161,7 @@ module.exports = function isURL(extensions) {
   // resource path
   '(?:[/?#]\\S*)' + resource, 'igm');
 };
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -10757,7 +11192,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 (function (window) {
     var requestAnimFrame = (function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||function(callback){window.setTimeout(callback,1000/60);};})();
 
@@ -10812,7 +11247,7 @@ module.exports = function (dimensions, maxSizes) {
     }
 })(window);
 
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -14990,7 +15425,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],59:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -15292,7 +15727,7 @@ return Autolinker;
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":63,"./load-image-meta":60}],60:[function(require,module,exports){
+},{"./load-image":65,"./load-image-meta":62}],62:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -15453,7 +15888,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":63}],61:[function(require,module,exports){
+},{"./load-image":65}],63:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -15640,7 +16075,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":63,"./load-image-meta":60,"./load-image-scale":62}],62:[function(require,module,exports){
+},{"./load-image":65,"./load-image-meta":62,"./load-image-scale":64}],64:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -15924,7 +16359,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":63}],63:[function(require,module,exports){
+},{"./load-image":65}],65:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -16064,9 +16499,9 @@ return Autolinker;
   }
 }(window))
 
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 
-},{}],65:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -16272,7 +16707,7 @@ return Autolinker;
   exports['default'] = Notify;
 
 }));
-},{}],66:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -17179,7 +17614,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],67:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -17197,7 +17632,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":66}],68:[function(require,module,exports){
+},{"./emoji-map.js":68}],70:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -17794,7 +18229,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],69:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -20300,27 +20735,18 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],70:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
   console.error('ERROR: It appears that you have multiple copies of the Layer WebSDK in your build!');
 } else {
-  // global.layer.native needs to be defined when the layer src tree is required
-  const layer = global.layer = {
-    native: {
-      atob: window.atob,
-      btoa: window.btoa
-    },
-  };
   global.layer = require('./lib/layer');
-  //now set native again because the global.layer object was overwritten
-  global.layer.native = layer.native;
 }
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":79}],71:[function(require,module,exports){
+},{"./lib/layer":81}],73:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -20458,11 +20884,11 @@ var ClientAuthenticator = function (_Root) {
       });
 
       this.onlineManager = new OnlineManager({
-        socketManager: this.socketManager,
-        testUrl: this.url + '/nonces?connection-test',
-        connected: this._handleOnlineChange.bind(this),
-        disconnected: this._handleOnlineChange.bind(this)
+        socketManager: this.socketManager
       });
+
+      this.onlineManager.on('connected', this._handleOnlineChange, this);
+      this.onlineManager.on('disconnected', this._handleOnlineChange, this);
 
       this.syncManager = new SyncManager({
         onlineManager: this.onlineManager,
@@ -20578,6 +21004,33 @@ var ClientAuthenticator = function (_Root) {
     }
 
     /**
+     * Get a nonce and start the authentication process
+     *
+     * @method
+     * @private
+     */
+
+  }, {
+    key: '_connect',
+    value: function _connect() {
+      var _this2 = this;
+
+      this._triggerAsync('state-change', {
+        started: true,
+        type: 'authentication',
+        telemetryId: 'auth_time',
+        id: null
+      });
+      this.xhr({
+        url: '/nonces',
+        method: 'POST',
+        sync: false
+      }, function (result) {
+        return _this2._connectionResponse(result);
+      });
+    }
+
+    /**
      * Initiates the connection.
      *
      * Called by constructor().
@@ -20598,12 +21051,12 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: 'connect',
     value: function connect() {
-      var _this2 = this;
-
       var userId = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
 
       var user = void 0;
       this.isConnected = false;
+      this._lastChallengeTime = 0;
+      this._wantsToBeAuthenticated = true;
       this.user = null;
       this.onlineManager.start();
       if (!this.isTrustedDevice || !userId || this._isPersistedSessionsDisabled() || this._hasUserIdChanged(userId)) {
@@ -20628,13 +21081,7 @@ var ClientAuthenticator = function (_Root) {
       if (this.sessionToken && this.user.userId) {
         this._sessionTokenRestored();
       } else {
-        this.xhr({
-          url: '/nonces',
-          method: 'POST',
-          sync: false
-        }, function (result) {
-          return _this2._connectionResponse(result);
-        });
+        this._connect();
       }
       return this;
     }
@@ -20668,7 +21115,10 @@ var ClientAuthenticator = function (_Root) {
       var _this3 = this;
 
       var user = void 0;
+      this.isConnected = false;
       this.user = null;
+      this._lastChallengeTime = 0;
+      this._wantsToBeAuthenticated = true;
       if (!userId || !sessionToken) throw new Error(LayerError.dictionary.sessionAndUserRequired);
       if (!this.isTrustedDevice || this._isPersistedSessionsDisabled() || this._hasUserIdChanged(userId)) {
         this._clearStoredData();
@@ -20779,6 +21229,7 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: '_authenticate',
     value: function _authenticate(nonce) {
+      this._lastChallengeTime = Date.now();
       if (nonce) {
         this.trigger('challenge', {
           nonce: nonce,
@@ -20812,6 +21263,10 @@ var ClientAuthenticator = function (_Root) {
       } else {
         var userData = Util.decode(identityToken.split('.')[1]);
         var identityObj = JSON.parse(userData);
+
+        if (!identityObj.prn) {
+          throw new Error('Your identity token prn (user id) is empty');
+        }
 
         if (this.user.userId && this.user.userId !== identityObj.prn) {
           throw new Error(LayerError.dictionary.invalidUserIdChange);
@@ -20848,6 +21303,12 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: '_authResponse',
     value: function _authResponse(result, identityToken) {
+      this._triggerAsync('state-change', {
+        ended: true,
+        type: 'authentication',
+        telemetryId: 'auth_time',
+        result: result.success
+      });
       if (!result.success) {
         this._authError(result.data, identityToken);
       } else {
@@ -21084,6 +21545,7 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: 'logout',
     value: function logout(callback) {
+      this._wantsToBeAuthenticated = false;
       var callbackCount = 1,
           counter = 0;
       if (this.isAuthenticated) {
@@ -21288,6 +21750,7 @@ var ClientAuthenticator = function (_Root) {
     key: 'sendSocketRequest',
     value: function sendSocketRequest(data, callback) {
       var isChangesArray = Boolean(data.isChangesArray);
+      if (this._wantsToBeAuthenticated && !this.isAuthenticated) this._connect();
 
       if (data.sync) {
         var target = data.sync.target;
@@ -21320,12 +21783,15 @@ var ClientAuthenticator = function (_Root) {
   }, {
     key: '_handleOnlineChange',
     value: function _handleOnlineChange(evt) {
-      if (!this.isAuthenticated) return;
+      if (!this._wantsToBeAuthenticated) return;
       var duration = evt.offlineDuration;
       var isOnline = evt.eventName === 'connected';
       var obj = { isOnline: isOnline };
       if (isOnline) {
         obj.reset = duration > ClientAuthenticator.ResetAfterOfflineDuration;
+
+        // TODO: Use a cached nonce if it hasn't expired
+        if (!this.isAuthenticated) this._connect();
       }
       this.trigger('online', obj);
     }
@@ -21386,6 +21852,8 @@ var ClientAuthenticator = function (_Root) {
       var _this7 = this;
 
       if (!options.sync) options.sync = {};
+      if (this._wantsToBeAuthenticated && !this.isAuthenticated) this._connect();
+
       var innerCallback = function innerCallback(result) {
         _this7._xhrResult(result, callback);
       };
@@ -21396,6 +21864,7 @@ var ClientAuthenticator = function (_Root) {
       this.syncManager.request(new XHRSyncEvent({
         url: options.url,
         data: options.data,
+        telemetry: options.telemetry,
         method: options.method,
         operation: options.sync.operation || options.method,
         headers: options.headers,
@@ -21527,13 +21996,17 @@ var ClientAuthenticator = function (_Root) {
         // If its an authentication error, reauthenticate
         // don't call _resetSession as that wipes all data and screws with UIs, and the user
         // is still authenticated on the customer's app even if not on Layer.
-        if (result.status === 401 && this.isAuthenticated) {
-          logger.warn('SESSION EXPIRED!');
-          this.isAuthenticated = false;
-          this.isReady = false;
-          if (global.localStorage) localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
-          this.trigger('deauthenticated');
-          this._authenticate(result.data.getNonce());
+        if (result.status === 401 && this._wantsToBeAuthenticated) {
+          if (this.isAuthenticated) {
+            logger.warn('SESSION EXPIRED!');
+            this.isAuthenticated = false;
+            this.isReady = false;
+            if (global.localStorage) localStorage.removeItem(LOCALSTORAGE_KEYS.SESSIONDATA + this.appId);
+            this.trigger('deauthenticated');
+            this._authenticate(result.data.getNonce());
+          } else if (this._lastChallengeTime > Date.now() + ClientAuthenticator.TimeBetweenReauths) {
+            this._authenticate(result.data.getNonce());
+          }
         }
       }
       if (callback) callback(result);
@@ -21594,15 +22067,28 @@ ClientAuthenticator.prototype.isConnected = false;
  */
 ClientAuthenticator.prototype.isReady = false;
 
-/* JSDUCK
- * If presence is enabled, then your presence can be set/restored.
+/**
+ * State variable; indicates if the WebSDK thinks that the app WANTS to be connected.
  *
- * @type {Boolean} [presenceEnabled=true]
+ * An app wants to be connected if it has called `connect()` or `connectWithSession()`
+ * and has not called `logout()`.  A client that is connected will receive reauthentication
+ * events in the form of `challenge` events.
+ *
+ * @type {boolean}
+ * @readonly
  */
-ClientAuthenticator.prototype.presenceEnabled = true;
+ClientAuthenticator.prototype._wantsToBeAuthenticated = false;
 
 /**
- * Your Layer Application ID. This value can not be changed once connected.
+ * If presence is enabled, then your presence can be set/restored.
+ *
+ * @type {Boolean} [isPresenceEnabled=true]
+ */
+ClientAuthenticator.prototype.isPresenceEnabled = true;
+
+/**
+ * Your Layer Application ID. Can not be changed once connected.
+ *
  * To find your Layer Application ID, see your Layer Developer Dashboard.
  *
  * @type {String}
@@ -21623,6 +22109,14 @@ ClientAuthenticator.prototype.user = null;
  * @readonly
  */
 ClientAuthenticator.prototype.sessionToken = '';
+
+/**
+ * Time that the last challenge was issued
+ *
+ * @type {Number}
+ * @private
+ */
+ClientAuthenticator.prototype._lastChallengeTime = 0;
 
 /**
  * URL to Layer's Web API server.
@@ -21788,6 +22282,17 @@ Object.defineProperty(ClientAuthenticator.prototype, 'userId', {
 ClientAuthenticator.ResetAfterOfflineDuration = 1000 * 60 * 60 * 30;
 
 /**
+ * Number of miliseconds delay must pass before a subsequent challenge is issued.
+ *
+ * This value is here to insure apps don't get challenge requests while they are
+ * still processing the last challenge event.
+ *
+ * @property {Number}
+ * @static
+ */
+ClientAuthenticator.TimeBetweenReauths = 30 * 1000;
+
+/**
  * List of events supported by this class
  * @static
  * @protected
@@ -21903,7 +22408,18 @@ ClientAuthenticator._supportedEvents = [
  * @param {Object} event
  * @param {boolean} event.isOnline
  */
-'online'].concat(Root._supportedEvents);
+'online',
+
+/**
+ * State change events are used for internal communications.
+ *
+ * Primarily used so that the Telemetry component can monitor and report on
+ * system activity.
+ *
+ * @event
+ * @private
+ */
+'state-change'].concat(Root._supportedEvents);
 
 Root.initClass.apply(ClientAuthenticator, [ClientAuthenticator, 'ClientAuthenticator']);
 
@@ -21911,8 +22427,10 @@ module.exports = ClientAuthenticator;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":73,"./const":75,"./db-manager":76,"./layer-error":77,"./logger":80,"./models/identity":94,"./online-state-manager":99,"./root":108,"./sync-event":109,"./sync-manager":110,"./websockets/change-manager":115,"./websockets/request-manager":116,"./websockets/socket-manager":117,"./xhr":118}],72:[function(require,module,exports){
-"use strict";
+},{"./client-utils":75,"./const":77,"./db-manager":78,"./layer-error":79,"./logger":82,"./models/identity":96,"./online-state-manager":101,"./root":110,"./sync-event":111,"./sync-manager":112,"./websockets/change-manager":120,"./websockets/request-manager":121,"./websockets/socket-manager":122,"./xhr":123}],74:[function(require,module,exports){
+'use strict';
+
+var _clientUtils = require('./client-utils');
 
 /**
  * Allows all components to have a clientId instead of a client pointer.
@@ -21925,6 +22443,7 @@ module.exports = ClientAuthenticator;
  */
 
 var registry = {};
+var listeners = [];
 
 /**
  * Register a new Client; will destroy any previous client with the same appId.
@@ -21938,6 +22457,12 @@ function register(client) {
     registry[appId].destroy();
   }
   registry[appId] = client;
+
+  (0, _clientUtils.defer)(function () {
+    return listeners.forEach(function (listener) {
+      return listener(client);
+    });
+  });
 }
 
 /**
@@ -21967,15 +22492,44 @@ function getAll() {
   });
 }
 
+/**
+ * Register a listener to be called whenever a new client is registered.
+ *
+ * @method addListener
+ * @param {Function} listener
+ * @param {layer.Client} listener.client
+ */
+function addListener(listener) {
+  listeners.push(listener);
+}
+
+/**
+ * Remove a registered listener or all listeners.
+ *
+ * If called with no arguments or null arguments, removes all listeners.
+ * @method removeListener
+ * @param {Function}
+ */
+function removeListener(listener) {
+  if (listener) {
+    var index = listeners.indexOf(listener);
+    if (index >= 0) listeners.splice(index, 1);
+  } else {
+    listeners.splice(0, listeners.length);
+  }
+}
+
 module.exports = {
   get: get,
   getAll: getAll,
   register: register,
-  unregister: unregister
+  unregister: unregister,
+  addListener: addListener,
+  removeListener: removeListener
 };
 
 
-},{}],73:[function(require,module,exports){
+},{"./client-utils":75}],75:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -21987,14 +22541,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * @class layer.ClientUtils
  */
 
-var LayerParser = require('layer-patch');
 var uuid = require('uuid');
 
-var atob = global.layer.native.atob;
-var btoa = global.layer.native.btoa;
-
-/* istanbul ignore next */
-var LocalFileReader = typeof window === 'undefined' ? require('filereader') : window.FileReader;
+exports.atob = typeof atob === 'undefined' ? global.getNativeSupport('atob') : atob.bind(window);
+exports.btoa = typeof btoa === 'undefined' ? global.getNativeSupport('btoa') : btoa.bind(window);
+var LocalFileReader = typeof FileReader === 'undefined' ? global.getNativeSupport('FileReader') : FileReader;
 
 /**
  * Generate a random UUID
@@ -22088,101 +22639,6 @@ exports.clone = function (obj) {
 };
 
 /**
- * Execute this function immediately after current processing is complete.
- *
- * A depth of up to 10 is allowed.  That means that functions you schedule using defer
- * can in turn schedule further actions.  The original actions are depth = 0; the actions scheduled
- * by your actions are depth = 1.  These new actions may in turn schedule further actions, which happen at depth = 3.
- * But to avoid infinite loops, if depth reaches 10, it clears the queue and ignores them.
- *
- * @method defer
- * @param {Function} f
- */
-var setImmediateId = 0,
-    setImmediateDepth = 0,
-
-
-// Have we scheduled the queue to be processed? If not, this is false
-setImmediateIsPending = false,
-
-
-// Queue of functions to call and depth integers
-setImmediateQueue = [];
-
-// If a setImmediate callback itself calls setImmediate which in turn calls setImmediate, at what point do we suspect we have an infinite loop?
-// A depth of 10 is currently considered OK, but this may need to be increased.
-var setImmediateMaxDepth = 10;
-
-// Process all callbacks in the setImmediateQueue
-function setImmediateProcessor() {
-  // Processing the queue is no longer scheduled; clear any scheduling info.
-  setImmediateIsPending = false;
-  clearTimeout(setImmediateId);
-  setImmediateId = 0;
-
-  // Our initial depth is depth 0
-  setImmediateDepth = 0;
-  setImmediateQueue.push(setImmediateDepth);
-
-  // Process all functions and depths in the queue starting always with the item at index 0,
-  // and removing them from the queue before processing them.
-  while (setImmediateQueue.length) {
-    var item = setImmediateQueue.shift();
-    if (typeof item === 'function') {
-      try {
-        item();
-      } catch (err) {
-        console.error(err);
-      }
-    } else if (item >= setImmediateMaxDepth) {
-      setImmediateQueue = [];
-      console.error('Layer Error: setImmediate Max Queue Depth Exceded');
-    }
-  }
-}
-
-// Schedule the function to be called by adding it to the queue, and setting up scheduling if its needed.
-function defer(func) {
-  if (typeof func !== 'function') throw new Error('Function expected in defer');
-
-  if (global.layer.native.setImmediate) {
-    global.layer.native.setImmediate(func);
-    return;
-  }
-
-  setImmediateQueue.push(func);
-
-  // If postMessage has not already been called, call it
-  if (!setImmediateIsPending) {
-    setImmediateIsPending = true;
-    if (typeof document !== 'undefined') {
-      window.postMessage({ type: 'layer-set-immediate' }, '*');
-    } else {
-      // React Native reportedly lacks a document, and throws errors on the second parameter
-      window.postMessage({ type: 'layer-set-immediate' });
-    }
-
-    // Having seen scenarios where postMessage failed to trigger, set a backup using setTimeout that will be canceled
-    // if postMessage is succesfully called.
-    setImmediateId = setTimeout(setImmediateProcessor, 0);
-  }
-}
-
-// For Unit Testing
-defer.flush = function () {
-  return setImmediateProcessor();
-};
-
-if (!global.layer.native.setImmediate) {
-  addEventListener('message', function (event) {
-    if (event.data.type !== 'layer-set-immediate') return;
-    setImmediateProcessor();
-  });
-}
-
-exports.defer = defer;
-
-/**
  * URL Decode a URL Encoded base64 string
  *
  * Copied from https://github.com/auth0-blog/angular-token-auth, but
@@ -22207,7 +22663,7 @@ exports.decode = function (str) {
     default:
       throw new Error('Illegal base64url string!');
   }
-  return atob(output);
+  return exports.atob(output);
 };
 
 /**
@@ -22294,7 +22750,7 @@ exports.blobToBase64 = function (blob, callback) {
 exports.base64ToBlob = function (b64Data, contentType) {
   try {
     var sliceSize = 512;
-    var byteCharacters = atob(b64Data);
+    var byteCharacters = exports.atob(b64Data);
     var byteArrays = [];
     var offset = void 0;
 
@@ -22329,7 +22785,7 @@ exports.base64ToBlob = function (b64Data, contentType) {
  * @return {String}
  */
 exports.utoa = function (str) {
-  return btoa(unescape(encodeURIComponent(str)));
+  return exports.btoa(unescape(encodeURIComponent(str)));
 };
 
 /**
@@ -22342,7 +22798,7 @@ exports.utoa = function (str) {
  * @return {String}
  */
 exports.atou = function (str) {
-  return decodeURIComponent(escape(atob(str)));
+  return decodeURIComponent(escape(exports.atob(str)));
 };
 
 /**
@@ -22364,55 +22820,18 @@ exports.fetchTextFromFile = function (file, callback) {
   reader.readAsText(file);
 };
 
-var parser = void 0;
-
 /**
- * Creates a LayerParser
+ * Execute this function immediately after current processing is complete (setImmediate replacement).
  *
- * @method
- * @private
- * @param {Object} request - see layer.ClientUtils.layerParse
+ * A depth of up to 10 is allowed.  That means that functions you schedule using defer
+ * can in turn schedule further actions.  The original actions are depth = 0; the actions scheduled
+ * by your actions are depth = 1.  These new actions may in turn schedule further actions, which happen at depth = 3.
+ * But to avoid infinite loops, if depth reaches 10, it clears the queue and ignores them.
+ *
+ * @method defer
+ * @param {Function} f
  */
-function createParser(request) {
-  request.client.once('destroy', function () {
-    return parser = null;
-  });
-
-  parser = new LayerParser({
-    camelCase: true,
-    getObjectCallback: function getObjectCallback(id) {
-      return request.client.getObject(id);
-    },
-    createObjectCallback: function createObjectCallback(id, obj) {
-      return request.client._createObject(obj);
-    },
-    propertyNameMap: {
-      Conversation: {
-        unreadMessageCount: 'unreadCount'
-      },
-      Identity: {
-        presence: '_presence'
-      }
-    },
-    changeCallbacks: {
-      Message: {
-        all: function all(updateObject, newValue, oldValue, paths) {
-          updateObject._handlePatchEvent(newValue, oldValue, paths);
-        }
-      },
-      Conversation: {
-        all: function all(updateObject, newValue, oldValue, paths) {
-          updateObject._handlePatchEvent(newValue, oldValue, paths);
-        }
-      },
-      Identity: {
-        all: function all(updateObject, newValue, oldValue, paths) {
-          updateObject._handlePatchEvent(newValue, oldValue, paths);
-        }
-      }
-    }
-  });
-}
+exports.defer = require('./utils/defer');
 
 /**
  * Run the Layer Parser on the request.
@@ -22429,16 +22848,14 @@ function createParser(request) {
  *      });
  *
  * @method
+ * @deprecated Use 'utils/layer-parser' instead
  * @param {Object} request - layer-patch parameters
  * @param {Object} request.object - Object being updated  by the operations
  * @param {string} request.type - Type of object being updated
  * @param {Object[]} request.operations - Array of change operations to perform upon the object
  * @param {layer.Client} request.client
  */
-exports.layerParse = function (request) {
-  if (!parser) createParser(request);
-  parser.parse(request);
-};
+exports.layerParse = require('./utils/layer-parser');
 
 /**
  * Object comparison.
@@ -22509,12 +22926,12 @@ exports.asciiInit = function (version) {
   line1 += new Array(13 - line1.length).join(' ');
   line2 += new Array(14 - line2.length).join(' ');
 
-  return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-        \'oo.\n  MMN                    oMMo        .MM/\n  MMN                    oMMo        .MM/              ....                       ....            ...\n  MMN       Web SDK      oMMo        .MM/           ohdddddddo\' +md.      smy  -sddddddho.   hmosddmm.\n  MMM-                   oMMo        .MM/           ::.\'  \'.mM+ \'hMd\'    +Mm. +Nm/\'   .+Nm-  mMNs-\'.\n  MMMy      v' + line1 + 'oMMo        .MM/             .-:/+yNMs  .mMs   /MN: .MMs///////dMh  mMy\n  MMMMo     ' + line2 + 'oMMo        .MM/          .ymhyso+:hMs   :MM/ -NM/  :MMsooooooooo+  mM+\n  MMMMMy.                oMMo        .MM/          dMy\'    \'dMs    +MN:mM+   \'NMo            mM+\n  MMMMMMNy:\'             oMMo        .MMy++++++++: sMm/---/dNMs     yMMMs     -dMd+:-:/smy\'  mM+\n  NMMMMMMMMmy+:-.\'      \'yMM/        \'yyyyyyyyyyyo  :shhhys:+y/     .MMh       \'-oyhhhys:\'   sy:\n  :dMMMMMMMMMMMMNNNNNNNNNMNs                                        hMd\'\n   -/+++++++++++++++++++:\'                                      sNmdo\'';
+  return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
 };
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"filereader":64,"layer-patch":120,"uuid":122}],74:[function(require,module,exports){
+},{"./utils/defer":118,"./utils/layer-parser":119,"uuid":127}],76:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -22629,6 +23046,7 @@ var ClientRegistry = require('./client-registry');
 var logger = require('./logger');
 var TypingListener = require('./typing-indicators/typing-listener');
 var TypingPublisher = require('./typing-indicators/typing-publisher');
+var TelemetryMonitor = require('./telemetry-monitor');
 
 var Client = function (_ClientAuth) {
   _inherits(Client, _ClientAuth);
@@ -22667,6 +23085,10 @@ var Client = function (_ClientAuth) {
 
       this._typingIndicators = new TypingIndicatorListener({
         clientId: this.appId
+      });
+      this.telemetryMonitor = new TelemetryMonitor({
+        client: this,
+        enabled: this.telemetryEnabled
       });
     }
 
@@ -22960,12 +23382,14 @@ var Client = function (_ClientAuth) {
     value: function _checkAndPurgeCache(objects) {
       var _this3 = this;
 
+      this._inCheckAndPurgeCache = true;
       objects.forEach(function (obj) {
         if (!obj.isDestroyed && !_this3._isCachedObject(obj)) {
           if (obj instanceof Root === false) obj = _this3.getObject(obj.id);
           if (obj) obj.destroy();
         }
       });
+      this._inCheckAndPurgeCache = false;
     }
 
     /**
@@ -23161,6 +23585,56 @@ var Client = function (_ClientAuth) {
         return client.destroy();
       });
     }
+
+    /**
+     * Listen for a new Client to be registered.
+     *
+     * If your code needs a client, and it doesn't yet exist, you
+     * can use this to get called when the client exists.
+     *
+     * ```
+     * layer.Client.addListenerForNewClient(function(client) {
+     *    mycomponent.setClient(client);
+     * });
+     * ```
+     *
+     * @method addListenerForNewClient
+     * @static
+     * @param {Function} listener
+     * @param {layer.Client} listener.client
+     */
+
+  }, {
+    key: 'addListenerForNewClient',
+    value: function addListenerForNewClient(listener) {
+      ClientRegistry.addListener(listener);
+    }
+
+    /**
+     * Remove listener for a new Client.
+     *
+     *
+     * ```
+     * var f = function(client) {
+     *    mycomponent.setClient(client);
+     *    layer.Client.removeListenerForNewClient(f);
+     * };
+     *
+     * layer.Client.addListenerForNewClient(f);
+     * ```
+     *
+     * Calling with null will remove all listeners.
+     *
+     * @method removeListenerForNewClient
+     * @static
+     * @param {Function} listener
+     */
+
+  }, {
+    key: 'removeListenerForNewClient',
+    value: function removeListenerForNewClient(listener) {
+      ClientRegistry.removeListener(listener);
+    }
   }]);
 
   return Client;
@@ -23185,12 +23659,29 @@ Client.prototype._scheduleCheckAndPurgeCacheItems = null;
 Client.prototype._scheduleCheckAndPurgeCacheAt = 0;
 
 /**
+ * Set to false to disable telemetry gathering.
+ *
+ * No content nor identifiable information is gathered, only
+ * usage and performance metrics.
+ *
+ * @type {Boolean}
+ */
+Client.prototype.telemetryEnabled = true;
+
+/**
+ * Gather usage and responsiveness statistics
+ *
+ * @private
+ */
+Client.prototype.telemetryMonitor = null;
+
+/**
  * Get the version of the Client library.
  *
  * @static
  * @type {String}
  */
-Client.version = '3.2.1';
+Client.version = '3.3.2';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -23234,7 +23725,7 @@ Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
 
 
-},{"./client-authenticator":71,"./client-registry":72,"./client-utils":73,"./layer-error":77,"./logger":80,"./mixins/client-channels":81,"./mixins/client-conversations":82,"./mixins/client-identities":83,"./mixins/client-members":84,"./mixins/client-messages":85,"./mixins/client-queries":86,"./models/announcement":87,"./models/channel":89,"./models/channel-message":88,"./models/conversation":93,"./models/conversation-message":92,"./models/identity":94,"./models/membership":95,"./root":108,"./typing-indicators/typing-indicator-listener":111,"./typing-indicators/typing-listener":113,"./typing-indicators/typing-publisher":114}],75:[function(require,module,exports){
+},{"./client-authenticator":73,"./client-registry":74,"./client-utils":75,"./layer-error":79,"./logger":82,"./mixins/client-channels":83,"./mixins/client-conversations":84,"./mixins/client-identities":85,"./mixins/client-members":86,"./mixins/client-messages":87,"./mixins/client-queries":88,"./models/announcement":89,"./models/channel":91,"./models/channel-message":90,"./models/conversation":95,"./models/conversation-message":94,"./models/identity":96,"./models/membership":97,"./root":110,"./telemetry-monitor":113,"./typing-indicators/typing-indicator-listener":114,"./typing-indicators/typing-listener":116,"./typing-indicators/typing-publisher":117}],77:[function(require,module,exports){
 'use strict';
 
 /**
@@ -23332,7 +23823,7 @@ module.exports = {
 };
 
 
-},{}],76:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -24215,6 +24706,7 @@ var DbManager = function (_Root) {
     value: function loadMessages(conversationId, fromId, pageSize, callback) {
       var _this14 = this;
 
+      if (!this['_permission_messages'] || this._isOpenError) return callback([]);
       try {
         var fromMessage = fromId ? this.client.getMessage(fromId) : null;
         var query = window.IDBKeyRange.bound([conversationId, 0], [conversationId, fromMessage ? fromMessage.position : MAX_SAFE_INTEGER]);
@@ -24241,6 +24733,7 @@ var DbManager = function (_Root) {
     value: function loadAnnouncements(fromId, pageSize, callback) {
       var _this15 = this;
 
+      if (!this['_permission_messages'] || this._isOpenError) return callback([]);
       try {
         var fromMessage = fromId ? this.client.getMessage(fromId) : null;
         var query = window.IDBKeyRange.bound(['announcement', 0], ['announcement', fromMessage ? fromMessage.position : MAX_SAFE_INTEGER]);
@@ -24937,7 +25430,7 @@ Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
 
 
-},{"./client-utils":73,"./const":75,"./logger":80,"./models/announcement":87,"./root":108,"./sync-event":109}],77:[function(require,module,exports){
+},{"./client-utils":75,"./const":77,"./logger":82,"./models/announcement":89,"./root":110,"./sync-event":111}],79:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -25147,7 +25640,7 @@ LayerError.dictionary = {
 module.exports = LayerError;
 
 
-},{"./logger":80}],78:[function(require,module,exports){
+},{"./logger":82}],80:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -25358,7 +25851,7 @@ LayerEvent.prototype.eventName = '';
 module.exports = LayerEvent;
 
 
-},{}],79:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -25402,7 +25895,7 @@ layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-list
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
 
 
-},{"./client":74,"./client-authenticator":71,"./client-utils":73,"./const":75,"./db-manager":76,"./layer-error":77,"./layer-event":78,"./models/announcement":87,"./models/channel":89,"./models/channel-message":88,"./models/container":90,"./models/content":91,"./models/conversation":93,"./models/conversation-message":92,"./models/identity":94,"./models/membership":95,"./models/message":97,"./models/message-part":96,"./models/syncable":98,"./online-state-manager":99,"./queries/query":107,"./queries/query-builder":106,"./root":108,"./sync-event":109,"./sync-manager":110,"./typing-indicators/typing-indicators":112,"./typing-indicators/typing-listener":113,"./typing-indicators/typing-publisher":114,"./websockets/change-manager":115,"./websockets/request-manager":116,"./websockets/socket-manager":117,"./xhr":118}],80:[function(require,module,exports){
+},{"./client":76,"./client-authenticator":73,"./client-utils":75,"./const":77,"./db-manager":78,"./layer-error":79,"./layer-event":80,"./models/announcement":89,"./models/channel":91,"./models/channel-message":90,"./models/container":92,"./models/content":93,"./models/conversation":95,"./models/conversation-message":94,"./models/identity":96,"./models/membership":97,"./models/message":99,"./models/message-part":98,"./models/syncable":100,"./online-state-manager":101,"./queries/query":109,"./queries/query-builder":108,"./root":110,"./sync-event":111,"./sync-manager":112,"./typing-indicators/typing-indicators":115,"./typing-indicators/typing-listener":116,"./typing-indicators/typing-publisher":117,"./websockets/change-manager":120,"./websockets/request-manager":121,"./websockets/socket-manager":122,"./xhr":123}],82:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -25426,8 +25919,10 @@ var NONE = _require$LOG.NONE;
 
 // Pretty arbitrary test that IE/edge fails and others don't.  Yes I could do a more direct
 // test for IE/edge but its hoped that MS will fix this around the time they cleanup their internal console object.
+// Note that uglifyjs with drop_console=true will throw an error on console.assert.toString().match; so we instead do (console.assert.toString() || "") which drop_console
+// on replacing console.assert.toString() with (void 0) will still work
 
-var supportsConsoleFormatting = Boolean(console.assert && console.assert.toString().match(/assert/));
+var supportsConsoleFormatting = Boolean(console.assert && (console.assert.toString() || "").match(/assert/));
 var LayerCss = 'color: #888; font-weight: bold;';
 var Black = 'color: black';
 /* istanbulify ignore next */
@@ -25514,7 +26009,7 @@ var logger = new Logger();
 module.exports = logger;
 
 
-},{"./const":75}],81:[function(require,module,exports){
+},{"./const":77}],83:[function(require,module,exports){
 'use strict';
 
 /**
@@ -25715,6 +26210,9 @@ module.exports = {
      */
     getChannel: function getChannel(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
+      if (!Channel.isValidId(id)) {
+        id = Channel.prefixUUID + id;
+      }
       if (this._models.channels[id]) {
         return this._models.channels[id];
       } else if (canLoad) {
@@ -25925,7 +26423,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/channel":89}],82:[function(require,module,exports){
+},{"../layer-error":79,"../models/channel":91}],84:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26131,6 +26629,9 @@ module.exports = {
      */
     getConversation: function getConversation(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
+      if (!Conversation.isValidId(id)) {
+        id = Conversation.prefixUUID + id;
+      }
       if (this._models.conversations[id]) {
         return this._models.conversations[id];
       } else if (canLoad) {
@@ -26339,7 +26840,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/conversation":93}],83:[function(require,module,exports){
+},{"../layer-error":79,"../models/conversation":95}],85:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26367,6 +26868,16 @@ module.exports = {
    * @param {layer.Identity} evt.target
    */
   'identities:loaded',
+
+  /**
+   * A call to layer.Identity.load has failed
+   *
+   * @event
+   * @event
+   * @param {layer.LayerEvent} evt
+   * @param {layer.LayerError} evt.error
+   */
+  'identities:loaded-error',
 
   /**
    * An Identity has had a change in its properties.
@@ -26636,7 +27147,7 @@ module.exports = {
 };
 
 
-},{"../client-utils":73,"../layer-error":77,"../models/identity":94,"../sync-event":109}],84:[function(require,module,exports){
+},{"../client-utils":75,"../layer-error":79,"../models/identity":96,"../sync-event":111}],86:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26797,7 +27308,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/membership":95,"../models/syncable":98}],85:[function(require,module,exports){
+},{"../layer-error":79,"../models/membership":97,"../models/syncable":100}],87:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26807,6 +27318,7 @@ module.exports = {
  */
 
 var Syncable = require('../models/syncable');
+var Message = require('../models/message');
 var ErrorDictionary = require('../layer-error').dictionary;
 
 module.exports = {
@@ -27017,6 +27529,11 @@ module.exports = {
     getMessage: function getMessage(id, canLoad) {
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
+      // NOTE: This could be an announcement
+      if (id.indexOf('layer:///') !== 0) {
+        id = Message.prefixUUID + id;
+      }
+
       if (this._models.messages[id]) {
         return this._models.messages[id];
       } else if (canLoad) {
@@ -27095,7 +27612,13 @@ module.exports = {
         if (!this._inCleanup) {
           this._triggerAsync('messages:remove', { messages: [message] });
           var conv = message.getConversation(false);
-          if (conv && conv.lastMessage === message) conv.lastMessage = null;
+
+          // Websocket will eventually deliver an update to the latest lastMessage;
+          // until then, use the old lastMessage's position as a placeholder
+          if (!this._inCheckAndPurgeCache && conv && conv.lastMessage === message) {
+            conv.lastMessage = null;
+            conv._lastMessagePosition = message.position;
+          }
         }
       }
     },
@@ -27127,7 +27650,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../models/syncable":98}],86:[function(require,module,exports){
+},{"../layer-error":79,"../models/message":99,"../models/syncable":100}],88:[function(require,module,exports){
 'use strict';
 
 /**
@@ -27280,7 +27803,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":77,"../queries/announcements-query":100,"../queries/channels-query":101,"../queries/conversations-query":102,"../queries/identities-query":103,"../queries/members-query":104,"../queries/messages-query":105,"../queries/query":107}],87:[function(require,module,exports){
+},{"../layer-error":79,"../queries/announcements-query":102,"../queries/channels-query":103,"../queries/conversations-query":104,"../queries/identities-query":105,"../queries/members-query":106,"../queries/messages-query":107,"../queries/query":109}],89:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27368,7 +27891,9 @@ var Announcement = function (_ConversationMessage) {
         url: '',
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found')) Syncable.load(id, client);
+        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
+          Syncable.load(id, client);
+        }
       });
 
       this._deleted();
@@ -27456,7 +27981,7 @@ Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
 
 
-},{"../layer-error":77,"../root":108,"./conversation-message":92,"./syncable":98}],88:[function(require,module,exports){
+},{"../layer-error":79,"../root":110,"./conversation-message":94,"./syncable":100}],90:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27555,7 +28080,9 @@ var ChannelMessage = function (_Message) {
         url: '',
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found')) Message.load(id, client);
+        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
+          Message.load(id, client);
+        }
       });
 
       this._deleted();
@@ -27636,7 +28163,7 @@ Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
 
 
-},{"../client-registry":72,"../const":75,"../layer-error":77,"../logger":80,"../root":108,"./message":97}],89:[function(require,module,exports){
+},{"../client-registry":74,"../const":77,"../layer-error":79,"../logger":82,"../root":110,"./message":99}],91:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27696,20 +28223,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Finally, to access a list of Messages in a Channel, see layer.Query.
  *
  * @class  layer.Channel
+ * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Container
  * @author  Michael Kantor
  */
-
-/**
- * @method setMetadataProperties
- * @hide
- */
-
-/**
- * @method deleteMetadataProperties
- * @hide
- */
-
 var Root = require('../root');
 var Syncable = require('./syncable');
 var Container = require('./container');
@@ -28080,9 +28597,7 @@ var Channel = function (_Container) {
       try {
         var events = this._disableEvents;
         this._disableEvents = false;
-        if (paths[0].indexOf('metadata') === 0) {
-          this.__updateMetadata(newValue, oldValue, paths);
-        }
+        _get(Object.getPrototypeOf(Channel.prototype), '_handlePatchEvent', this).call(this, newValue, oldValue, paths);
         this._disableEvents = events;
       } catch (err) {
         // do nothing
@@ -28107,7 +28622,9 @@ var Channel = function (_Container) {
     key: '_deleteResult',
     value: function _deleteResult(result, id) {
       var client = this.getClient();
-      if (!result.success && (!result.data || result.data.id !== 'not_found')) Channel.load(id, client);
+      if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
+        Channel.load(id, client);
+      }
     }
 
     /**
@@ -28336,7 +28853,7 @@ Syncable.subclasses.push(Channel);
 module.exports = Channel;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":108,"./channel-message":88,"./container":90,"./syncable":98}],90:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../layer-error":79,"../layer-event":80,"../root":110,"./channel-message":90,"./container":92,"./syncable":100}],92:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -28429,6 +28946,12 @@ var Container = function (_Syncable) {
         // Update the syncState
         this._setSyncing();
 
+        this.getClient()._triggerAsync('state-change', {
+          started: true,
+          type: 'send_' + Util.typeFromID(this.id),
+          telemetryId: 'send_' + Util.typeFromID(this.id) + '_time',
+          id: this.id
+        });
         this.getClient().sendSocketRequest({
           method: 'POST',
           body: {}, // see _getSendData
@@ -28500,6 +29023,12 @@ var Container = function (_Syncable) {
       var success = _ref.success;
       var data = _ref.data;
 
+      this.getClient()._triggerAsync('state-change', {
+        ended: true,
+        type: 'send_' + Util.typeFromID(this.id),
+        telemetryId: 'send_' + Util.typeFromID(this.id) + '_time',
+        id: this.id
+      });
       if (this.isDestroyed) return;
       if (success) {
         this._createSuccess(data);
@@ -28621,7 +29150,7 @@ var Container = function (_Syncable) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success && !_this3.isDestroyed) _this3._load();
+        if (!result.success && !_this3.isDestroyed && result.data.id !== 'authentication_required') _this3._load();
       });
 
       return this;
@@ -28688,7 +29217,7 @@ var Container = function (_Syncable) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success) _this4._load();
+        if (!result.success && result.data.id !== 'authentication_required') _this4._load();
       });
 
       return this;
@@ -28817,6 +29346,13 @@ var Container = function (_Syncable) {
           oldValue: oldValue,
           paths: paths
         });
+      }
+    }
+  }, {
+    key: '_handlePatchEvent',
+    value: function _handlePatchEvent(newValue, oldValue, paths) {
+      if (paths[0].indexOf('metadata') === 0) {
+        this.__updateMetadata(newValue, oldValue, paths);
       }
     }
 
@@ -28963,7 +29499,7 @@ Syncable.subclasses.push(Container);
 module.exports = Container;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],91:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../layer-error":79,"../root":110,"./syncable":100}],93:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29164,7 +29700,7 @@ Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
 
 
-},{"../root":108,"../xhr":118}],92:[function(require,module,exports){
+},{"../root":110,"../xhr":123}],94:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29587,7 +30123,9 @@ var ConversationMessage = function (_Message) {
         url: '?' + queryStr,
         method: 'DELETE'
       }, function (result) {
-        if (!result.success && (!result.data || result.data.id !== 'not_found')) Message.load(id, client);
+        if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
+          Message.load(id, client);
+        }
       });
 
       this._deleted();
@@ -29712,7 +30250,7 @@ Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMes
 module.exports = ConversationMessage;
 
 
-},{"../client-registry":72,"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./message":97}],93:[function(require,module,exports){
+},{"../client-registry":74,"../client-utils":75,"../const":77,"../layer-error":79,"../root":110,"./message":99}],95:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -29893,13 +30431,17 @@ var Conversation = function (_Container) {
     value: function _setupMessage(message) {
       // Setting a position is required if its going to get sorted correctly by query.
       // The correct position will be written by _populateFromServer when the object
-      // is returned from the server.  We increment the position by the time since the prior lastMessage was sent
-      // so that if multiple tabs are sending messages and writing them to indexedDB, they will have positions in correct chronological order.
-      // WARNING: The query will NOT be resorted using the server's position value.
+      // is returned from the server.
+      // NOTE: We have a special case where messages are sent from multiple tabs, written to indexedDB, but not yet sent,
+      // they will have conflicting positions.
+      // Attempts to fix this by offsetting the position by time resulted in unexpected behaviors
+      // as multiple messages end up with positions greater than returned by the server.
       var position = void 0;
       if (this.lastMessage) {
-        position = this.lastMessage.position + Date.now() - this.lastMessage.sentAt.getTime();
-        if (position === this.lastMessage.position) position++;
+        position = this.lastMessage.position + 1;
+      } else if (this._lastMessagePosition) {
+        position = this._lastMessagePosition + 1;
+        this._lastMessagePosition = 0;
       } else {
         position = 0;
       }
@@ -29956,12 +30498,6 @@ var Conversation = function (_Container) {
       // the server
       if (this.participants.indexOf(client.user) === -1) {
         this.participants.push(client.user);
-      }
-
-      // If there is only one participant, its client.user.userId.  Not enough
-      // for us to have a good Conversation on the server.  Abort.
-      if (this.participants.length === 1) {
-        throw new Error(LayerError.dictionary.moreParticipantsRequired);
       }
 
       return _get(Object.getPrototypeOf(Conversation.prototype), 'send', this).call(this, message);
@@ -30031,6 +30567,8 @@ var Conversation = function (_Container) {
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(conversation) {
+      var _this2 = this;
+
       var client = this.getClient();
 
       // Disable events if creating a new Conversation
@@ -30038,6 +30576,9 @@ var Conversation = function (_Container) {
       this._disableEvents = this.syncState === Constants.SYNC_STATE.NEW;
 
       this.participants = client._fixIdentities(conversation.participants);
+      this.participants.forEach(function (identity) {
+        return identity.on('identities:change', _this2._handleParticipantChangeEvent, _this2);
+      });
       this.distinct = conversation.distinct;
       this.unreadCount = conversation.unread_message_count;
       this.isCurrentParticipant = this.participants.indexOf(client.user) !== -1;
@@ -30079,13 +30620,13 @@ var Conversation = function (_Container) {
   }, {
     key: 'addParticipants',
     value: function addParticipants(participants) {
-      var _this2 = this;
+      var _this3 = this;
 
       // Only add those that aren't already in the list.
       var client = this.getClient();
       var identities = client._fixIdentities(participants);
       var adding = identities.filter(function (identity) {
-        return _this2.participants.indexOf(identity) === -1;
+        return _this3.participants.indexOf(identity) === -1;
       });
       this._patchParticipants({ add: adding, remove: [] });
       return this;
@@ -30179,7 +30720,7 @@ var Conversation = function (_Container) {
   }, {
     key: '_patchParticipants',
     value: function _patchParticipants(change) {
-      var _this3 = this;
+      var _this4 = this;
 
       this._applyParticipantChange(change);
       this.isCurrentParticipant = this.participants.indexOf(this.getClient().user) !== -1;
@@ -30209,7 +30750,7 @@ var Conversation = function (_Container) {
           'content-type': 'application/vnd.layer-patch+json'
         }
       }, function (result) {
-        if (!result.success) _this3._load();
+        if (!result.success && result.data.id !== 'authentication_required') _this4._load();
       });
     }
 
@@ -30316,7 +30857,7 @@ var Conversation = function (_Container) {
   }, {
     key: '_handlePatchEvent',
     value: function _handlePatchEvent(newValue, oldValue, paths) {
-      var _this4 = this;
+      var _this5 = this;
 
       // Certain types of __update handlers are disabled while values are being set by
       // layer patch parser because the difference between setting a value (triggers an event)
@@ -30326,11 +30867,9 @@ var Conversation = function (_Container) {
       try {
         var events = this._disableEvents;
         this._disableEvents = false;
-        if (paths[0].indexOf('metadata') === 0) {
-          this.__updateMetadata(newValue, oldValue, paths);
-        } else if (paths[0] === 'participants') {
+        if (paths[0] === 'participants') {
           (function () {
-            var client = _this4.getClient();
+            var client = _this5.getClient();
             // oldValue/newValue come as a Basic Identity POJO; lets deliver events with actual instances
             oldValue = oldValue.map(function (identity) {
               return client.getIdentity(identity.id);
@@ -30338,8 +30877,10 @@ var Conversation = function (_Container) {
             newValue = newValue.map(function (identity) {
               return client.getIdentity(identity.id);
             });
-            _this4.__updateParticipants(newValue, oldValue);
+            _this5.__updateParticipants(newValue, oldValue);
           })();
+        } else {
+          _get(Object.getPrototypeOf(Conversation.prototype), '_handlePatchEvent', this).call(this, newValue, oldValue, paths);
         }
         this._disableEvents = events;
       } catch (err) {
@@ -30375,7 +30916,9 @@ var Conversation = function (_Container) {
     key: '_deleteResult',
     value: function _deleteResult(result, id) {
       var client = this.getClient();
-      if (!result.success && (!result.data || result.data.id !== 'not_found')) Conversation.load(id, client);
+      if (!result.success && (!result.data || result.data.id !== 'not_found' && result.data.id !== 'authentication_required')) {
+        Conversation.load(id, client);
+      }
     }
   }, {
     key: '_register',
@@ -30415,13 +30958,13 @@ var Conversation = function (_Container) {
   }, {
     key: '__updateUnreadCount',
     value: function __updateUnreadCount(newValue, oldValue) {
-      var _this5 = this;
+      var _this6 = this;
 
       if (this._inLayerParser) {
         if (this._oldUnreadCount === undefined) this._oldUnreadCount = oldValue;
         if (this._updateUnreadCountTimeout) clearTimeout(this._updateUnreadCountTimeout);
         this._updateUnreadCountTimeout = setTimeout(function () {
-          return _this5._updateUnreadCountEvent();
+          return _this6._updateUnreadCountEvent();
         }, 1000);
       } else {
         this._updateUnreadCountEvent();
@@ -30491,14 +31034,36 @@ var Conversation = function (_Container) {
   }, {
     key: '__updateParticipants',
     value: function __updateParticipants(newValue, oldValue) {
+      var _this7 = this;
+
       if (this._inLayerParser) return;
       var change = this._getParticipantChange(newValue, oldValue);
+      change.add.forEach(function (identity) {
+        return identity.on('identities:change', _this7._handleParticipantChangeEvent, _this7);
+      });
+      change.remove.forEach(function (identity) {
+        return identity.off('identities:change', _this7._handleParticipantChangeEvent, _this7);
+      });
       if (change.add.length || change.remove.length) {
         change.property = 'participants';
         change.oldValue = oldValue;
         change.newValue = newValue;
         this._triggerAsync('conversations:change', change);
       }
+    }
+  }, {
+    key: '_handleParticipantChangeEvent',
+    value: function _handleParticipantChangeEvent(evt) {
+      var _this8 = this;
+
+      evt.changes.forEach(function (change) {
+        _this8._triggerAsync('conversations:change', {
+          property: 'participants.' + change.property,
+          identity: evt.target,
+          oldValue: change.oldValue,
+          newValue: change.newValue
+        });
+      });
     }
 
     /**
@@ -30663,6 +31228,16 @@ Conversation.prototype.distinct = true;
  */
 Conversation.prototype.lastMessage = null;
 
+/**
+ * The position of the last known message.
+ *
+ * Used in the event that lastMessage has been deleted.
+ *
+ * @private
+ * @property {Number}
+ */
+Conversation.prototype._lastMessagePosition = 0;
+
 Conversation.eventPrefix = 'conversations';
 
 /**
@@ -30764,7 +31339,7 @@ Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../layer-event":78,"../root":108,"./container":90,"./conversation-message":92,"./syncable":98}],94:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../layer-error":79,"../layer-event":80,"../root":110,"./container":92,"./conversation-message":94,"./syncable":100}],96:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -30804,7 +31379,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var Syncable = require('./syncable');
 var Root = require('../root');
-var Constants = require('../const');
+
+var _require = require('../const');
+
+var SYNC_STATE = _require.SYNC_STATE;
+
 var LayerError = require('../layer-error');
 
 var Identity = function (_Syncable) {
@@ -30904,7 +31483,7 @@ var Identity = function (_Syncable) {
 
       // Disable events if creating a new Identity
       // We still want property change events for anything that DOES change
-      this._disableEvents = this.syncState === Constants.SYNC_STATE.NEW;
+      this._disableEvents = this.syncState === SYNC_STATE.NEW;
 
       this._setSynced();
 
@@ -31036,6 +31615,7 @@ var Identity = function (_Syncable) {
       }, function (result) {
         if (result.success) _this4._load();
       });
+      this.syncState = SYNC_STATE.LOADING;
     }
 
     /**
@@ -31089,7 +31669,7 @@ var Identity = function (_Syncable) {
           target: this.id
         }
       }, function (result) {
-        if (!result.success) _this5._updateValue(['_presence', 'status'], oldValue);
+        if (!result.success && result.data.id !== 'authentication_required') _this5._updateValue(['_presence', 'status'], oldValue);
       });
 
       // these are equivalent; only one is useful for understanding your state given that your still connected/online.
@@ -31418,7 +31998,7 @@ Syncable.subclasses.push(Identity);
 module.exports = Identity;
 
 
-},{"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],95:[function(require,module,exports){
+},{"../const":77,"../layer-error":79,"../root":110,"./syncable":100}],97:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31437,6 +32017,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * Identities are created by the System, never directly by apps.
  *
  * @class layer.Membership
+ * @experimental This feature is incomplete, and available as Preview only.
  * @extends layer.Syncable
  */
 
@@ -31653,7 +32234,7 @@ Syncable.subclasses.push(Membership);
 module.exports = Membership;
 
 
-},{"../const":75,"../layer-error":77,"../root":108,"./syncable":98}],96:[function(require,module,exports){
+},{"../const":77,"../layer-error":79,"../root":110,"./syncable":100}],98:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31882,7 +32463,7 @@ var MessagePart = function (_Root) {
         this.isFiring = true;
         var type = this.mimeType === 'image/jpeg+preview' ? 'image/jpeg' : this.mimeType;
         this._content.loadContent(type, function (err, result) {
-          return _this2._fetchContentCallback(err, result, callback);
+          if (!_this2.isDestroyed) _this2._fetchContentCallback(err, result, callback);
         });
       }
       return this;
@@ -31932,14 +32513,19 @@ var MessagePart = function (_Root) {
     value: function _fetchContentComplete(body, callback) {
       var message = this._getMessage();
       if (!message) return;
+
+      // NOTE: This will trigger a messageparts:change event, and therefore a messages:change event
       this.body = body;
 
       this.trigger('content-loaded');
+
+      // TODO: This event is now deprecated, and should be removed for WebSDK 4.0
       message._triggerAsync('messages:change', {
         oldValue: message.parts,
         newValue: message.parts,
         property: 'parts'
       });
+
       if (callback) callback(this.body);
     }
 
@@ -31998,6 +32584,14 @@ var MessagePart = function (_Root) {
       var message = this._getMessage();
 
       this.trigger('url-loaded');
+
+      this._triggerAsync('messageparts:change', {
+        oldValue: '',
+        newValue: url,
+        property: 'url'
+      });
+
+      // TODO: This event is now deprecated, and should be removed for WebSDK 4.0
       message._triggerAsync('messages:change', {
         oldValue: message.parts,
         newValue: message.parts,
@@ -32254,6 +32848,60 @@ var MessagePart = function (_Root) {
     }
 
     /**
+     * This method is automatically called any time the body is changed.
+     *
+     * Note that it is not called during initialization.  Any developer who does:
+     *
+     * ```
+     * part.body = "Hi";
+     * ```
+     *
+     * can expect this to trigger a change event, which will in turn trigger a `messages:change` event on the layer.Message.
+     *
+     * @method __updateBody
+     * @private
+     * @param {String} newValue
+     * @param {String} oldValue
+     */
+
+  }, {
+    key: '__updateBody',
+    value: function __updateBody(newValue, oldValue) {
+      this._triggerAsync('messageparts:change', {
+        property: 'body',
+        newValue: newValue,
+        oldValue: oldValue
+      });
+    }
+
+    /**
+     * This method is automatically called any time the mimeType is changed.
+     *
+     * Note that it is not called during initialization.  Any developer who does:
+     *
+     * ```
+     * part.mimeType = "text/mountain";
+     * ```
+     *
+     * can expect this to trigger a change event, which will in turn trigger a `messages:change` event on the layer.Message.
+     *
+     * @method __updateMimeType
+     * @private
+     * @param {String} newValue
+     * @param {String} oldValue
+     */
+
+  }, {
+    key: '__updateMimeType',
+    value: function __updateMimeType(newValue, oldValue) {
+      this._triggerAsync('messageparts:change', {
+        property: 'mimeType',
+        newValue: newValue,
+        oldValue: oldValue
+      });
+    }
+
+    /**
      * Creates a MessagePart from a server representation of the part
      *
      * @method _createFromServer
@@ -32391,13 +33039,13 @@ MessagePart.prototype.size = 0;
  */
 MessagePart.TextualMimeTypes = [/^text\/.+$/, /^application\/json(\+.+)?$/];
 
-MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'content-loaded-error'].concat(Root._supportedEvents);
+MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'content-loaded-error', 'messageparts:change'].concat(Root._supportedEvents);
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
 module.exports = MessagePart;
 
 
-},{"../client-registry":72,"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108,"../xhr":118,"./content":91}],97:[function(require,module,exports){
+},{"../client-registry":74,"../client-utils":75,"../layer-error":79,"../logger":82,"../root":110,"../xhr":123,"./content":93}],99:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -32610,14 +33258,15 @@ var Message = function (_Syncable) {
     value: function __adjustParts(parts) {
       var _this2 = this;
 
+      var adjustedParts = void 0;
       if (typeof parts === 'string') {
-        return [new MessagePart({
+        adjustedParts = [new MessagePart({
           body: parts,
           mimeType: 'text/plain',
           clientId: this.clientId
         })];
       } else if (Array.isArray(parts)) {
-        return parts.map(function (part) {
+        adjustedParts = parts.map(function (part) {
           var result = void 0;
           if (part instanceof MessagePart) {
             result = part;
@@ -32629,8 +33278,15 @@ var Message = function (_Syncable) {
         });
       } else if (parts && (typeof parts === 'undefined' ? 'undefined' : _typeof(parts)) === 'object') {
         parts.clientId = this.clientId;
-        return [new MessagePart(parts)];
+        adjustedParts = [new MessagePart(parts)];
       }
+      if (adjustedParts) {
+        adjustedParts.forEach(function (part) {
+          part.off('messageparts:change', _this2._onMessagePartChange, _this2); // if we already subscribed, don't create a redundant subscription
+          part.on('messageparts:change', _this2._onMessagePartChange, _this2);
+        });
+      }
+      return adjustedParts;
     }
 
     /**
@@ -32660,8 +33316,36 @@ var Message = function (_Syncable) {
         } else if ((typeof part === 'undefined' ? 'undefined' : _typeof(part)) === 'object') {
           this.parts.push(new MessagePart(part));
         }
+        var thePart = this.parts[this.parts.length - 1];
+        thePart.off('messageparts:change', this._onMessagePartChange, this); // if we already subscribed, don't create a redundant subscription
+        thePart.on('messageparts:change', this._onMessagePartChange, this);
       }
       return this;
+    }
+
+    /**
+     * Any time a Part changes, the Message has changed; trigger the `messages:change` event.
+     *
+     * Currently, this only looks at changes to body or mimeType, and does not handle changes to url/rich content.
+     *
+     * @method _onMessagePartChange
+     * @private
+     * @param {layer.LayerEvent} evt
+     */
+
+  }, {
+    key: '_onMessagePartChange',
+    value: function _onMessagePartChange(evt) {
+      var _this3 = this;
+
+      evt.changes.forEach(function (change) {
+        _this3._triggerAsync('messages:change', {
+          property: 'parts.' + change.property,
+          oldValue: change.oldValue,
+          newValue: change.newValue,
+          part: evt.target
+        });
+      });
     }
 
     /**
@@ -32695,7 +33379,7 @@ var Message = function (_Syncable) {
   }, {
     key: 'presend',
     value: function presend() {
-      var _this3 = this;
+      var _this4 = this;
 
       var client = this.getClient();
       if (!client) {
@@ -32715,7 +33399,7 @@ var Message = function (_Syncable) {
 
       // Make sure all data is in the right format for being rendered
       this._readAllBlobs(function () {
-        client._addMessage(_this3);
+        client._addMessage(_this4);
       });
     }
 
@@ -32750,7 +33434,7 @@ var Message = function (_Syncable) {
   }, {
     key: 'send',
     value: function send(notification) {
-      var _this4 = this;
+      var _this5 = this;
 
       var client = this.getClient();
       if (!client) {
@@ -32769,8 +33453,9 @@ var Message = function (_Syncable) {
 
       if (conversation.isLoading) {
         conversation.once(conversation.constructor.eventPrefix + ':loaded', function () {
-          return _this4.send(notification);
+          return _this5.send(notification);
         });
+        conversation._setupMessage(this);
         return this;
       }
 
@@ -32791,18 +33476,18 @@ var Message = function (_Syncable) {
       this._readAllBlobs(function () {
         // Calling this will add this to any listening Queries... so position needs to have been set first;
         // handled in conversation.send(this)
-        client._addMessage(_this4);
+        client._addMessage(_this5);
 
         // allow for modification of message before sending
-        _this4.trigger('messages:sending');
+        _this5.trigger('messages:sending');
 
         var data = {
-          parts: new Array(_this4.parts.length),
-          id: _this4.id
+          parts: new Array(_this5.parts.length),
+          id: _this5.id
         };
-        if (notification && _this4.conversationId) data.notification = notification;
+        if (notification && _this5.conversationId) data.notification = notification;
 
-        _this4._preparePartsForSending(data);
+        _this5._preparePartsForSending(data);
       });
       return this;
     }
@@ -32849,7 +33534,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_preparePartsForSending',
     value: function _preparePartsForSending(data) {
-      var _this5 = this;
+      var _this6 = this;
 
       var client = this.getClient();
       var count = 0;
@@ -32863,10 +33548,10 @@ var Message = function (_Syncable) {
           if (evt.encoding) data.parts[index].encoding = evt.encoding;
 
           count++;
-          if (count === _this5.parts.length) {
-            _this5._send(data);
+          if (count === _this6.parts.length) {
+            _this6._send(data);
           }
-        }, _this5);
+        }, _this6);
         part._send(client);
       });
     }
@@ -32885,11 +33570,17 @@ var Message = function (_Syncable) {
   }, {
     key: '_send',
     value: function _send(data) {
-      var _this6 = this;
+      var _this7 = this;
 
       var client = this.getClient();
       var conversation = this.getConversation(false);
 
+      this.getClient()._triggerAsync('state-change', {
+        started: true,
+        type: 'send_' + Util.typeFromID(this.id),
+        telemetryId: 'send_' + Util.typeFromID(this.id) + '_time',
+        id: this.id
+      });
       this.sentAt = new Date();
       client.sendSocketRequest({
         method: 'POST',
@@ -32903,7 +33594,7 @@ var Message = function (_Syncable) {
           target: this.id
         }
       }, function (success, socketData) {
-        return _this6._sendResult(success, socketData);
+        return _this7._sendResult(success, socketData);
       });
     }
   }, {
@@ -32930,6 +33621,13 @@ var Message = function (_Syncable) {
       var success = _ref.success;
       var data = _ref.data;
 
+      this.getClient()._triggerAsync('state-change', {
+        ended: true,
+        type: 'send_' + Util.typeFromID(this.id),
+        telemetryId: 'send_' + Util.typeFromID(this.id) + '_time',
+        result: success,
+        id: this.id
+      });
       if (this.isDestroyed) return;
 
       if (success) {
@@ -33020,7 +33718,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(message) {
-      var _this7 = this;
+      var _this8 = this;
 
       this._inPopulateFromServer = true;
       var client = this.getClient();
@@ -33033,12 +33731,12 @@ var Message = function (_Syncable) {
       // Assign IDs to preexisting Parts so that we can call getPartById()
       if (this.parts) {
         this.parts.forEach(function (part, index) {
-          if (!part.id) part.id = _this7.id + '/parts/' + index;
+          if (!part.id) part.id = _this8.id + '/parts/' + index;
         });
       }
 
       this.parts = message.parts.map(function (part) {
-        var existingPart = _this7.getPartById(part.id);
+        var existingPart = _this8.getPartById(part.id);
         if (existingPart) {
           existingPart._populateFromServer(part);
           return existingPart;
@@ -33444,7 +34142,7 @@ Syncable.subclasses.push(Message);
 module.exports = Message;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../root":108,"./identity":94,"./message-part":96,"./syncable":98}],98:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../layer-error":79,"../root":110,"./identity":96,"./message-part":98,"./syncable":100}],100:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -33657,6 +34355,7 @@ var Syncable = function (_Root) {
     value: function _loadResult(result) {
       var _this4 = this;
 
+      if (this.isDestroyed) return;
       var prefix = this.constructor.eventPrefix;
       if (!result.success) {
         this.syncState = SYNC_STATE.NEW;
@@ -33820,7 +34519,6 @@ var Syncable = function (_Root) {
     key: 'load',
     value: function load(id, client) {
       if (!client || !(client instanceof Root)) throw new Error(LayerError.dictionary.clientMissing);
-      if (!client.isReady) throw new Error(LayerError.dictionary.clientMustBeReady);
 
       var obj = {
         id: id,
@@ -33847,15 +34545,27 @@ var Syncable = function (_Root) {
       var typeName = ConstructorClass.eventPrefix;
 
       if (typeName) {
-        client.dbManager.getObject(typeName, id, function (item) {
-          if (syncItem.isDestroyed) return;
-          if (item) {
-            syncItem._populateFromServer(item);
-            syncItem.trigger(typeName + ':loaded');
-          } else {
-            syncItem._load();
-          }
-        });
+        if (!client.dbManager) {
+          syncItem.syncState = SYNC_STATE.LOADING;
+          client.once('ready', function () {
+            return syncItem._load();
+          });
+        } else {
+          client.dbManager.getObject(typeName, id, function (item) {
+            if (syncItem.isDestroyed) return;
+            if (item) {
+              syncItem._populateFromServer(item);
+              syncItem.trigger(typeName + ':loaded');
+            } else if (!client.isReady) {
+              syncItem.syncState = SYNC_STATE.LOADING;
+              client.once('ready', function () {
+                return syncItem._load();
+              });
+            } else {
+              syncItem._load();
+            }
+          });
+        }
       } else {
         syncItem._load();
       }
@@ -33974,7 +34684,7 @@ Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
 
 
-},{"../client-registry":72,"../const":75,"../layer-error":77,"../root":108}],99:[function(require,module,exports){
+},{"../client-registry":74,"../const":77,"../layer-error":79,"../root":110}],101:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -34032,13 +34742,11 @@ var OnlineStateManager = function (_Root) {
    *
    *      var onlineStateManager = new layer.OnlineStateManager({
    *          socketManager: socketManager,
-   *          testUrl: 'https://api.layer.com/nonces'
    *      });
    *
    * @method constructor
    * @param  {Object} options
    * @param  {layer.Websockets.SocketManager} options.socketManager - A websocket manager to monitor for messages
-   * @param  {string} options.testUrl - A url to send requests to when testing if we are online
    */
   function OnlineStateManager(options) {
     _classCallCheck(this, OnlineStateManager);
@@ -34060,9 +34768,9 @@ var OnlineStateManager = function (_Root) {
       window.addEventListener('online', _this._handleOnlineEvent.bind(_this));
       window.addEventListener('offline', _this._handleOnlineEvent.bind(_this));
     } else {
-      var NetInfo = global.layer.native.RN_NetInfo;
-      if (NetInfo) {
-        NetInfo.addEventListener('change', _this._handleOnlineEvent.bind(_this));
+      var OnlineEvents = global.getNativeSupport('OnlineEvents');
+      if (OnlineEvents) {
+        OnlineEvents.addEventListener('change', _this._handleOnlineEvent.bind(_this));
       }
     }
     return _this;
@@ -34122,7 +34830,7 @@ var OnlineStateManager = function (_Root) {
 
       // If this is called while we are online, then we are using this to detect when we've gone without data for more than pingFrequency.
       // Call this._onlineExpired after pingFrequency of no server responses.
-      if (!connectionFailure) {
+      if (!connectionFailure && this.isOnline) {
         logger.debug('OnlineStateManager: Scheduled onlineExpired');
         this.onlineCheckId = setTimeout(this._onlineExpired.bind(this), this.pingFrequency);
       }
@@ -34301,12 +35009,6 @@ var OnlineStateManager = function (_Root) {
 OnlineStateManager.prototype.isClientReady = false;
 
 /**
- * URL To fire when testing to see if we are online.
- * @type {String}
- */
-OnlineStateManager.prototype.testUrl = '';
-
-/**
  * A Websocket manager whose 'message' event we will listen to
  * in order to know that we are still online.
  * @type {layer.Websockets.SocketManager}
@@ -34314,7 +35016,7 @@ OnlineStateManager.prototype.testUrl = '';
 OnlineStateManager.prototype.socketManager = null;
 
 /**
- * Number of testUrl requests we've been offline for.
+ * Number of test requests we've been offline for.
  *
  * Will stop growing once the number is suitably large (10-20).
  * @type {Number}
@@ -34330,7 +35032,7 @@ OnlineStateManager.prototype.offlineCounter = 0;
  * Value is measured in seconds.
  * @type {Number}
  */
-OnlineStateManager.prototype.maxOfflineWait = 5 * 60;
+OnlineStateManager.prototype.maxOfflineWait = 60;
 
 /**
  * Minimum wait between tries in ms.
@@ -34391,7 +35093,7 @@ module.exports = OnlineStateManager;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":73,"./const":75,"./logger":80,"./root":108,"./xhr":118}],100:[function(require,module,exports){
+},{"./client-utils":75,"./const":77,"./logger":82,"./root":110,"./xhr":123}],102:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34459,6 +35161,9 @@ var AnnouncementsQuery = function (_MessagesQuery) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'announcement_query_time'
+          },
           url: newRequest,
           method: 'GET',
           sync: false
@@ -34483,7 +35188,7 @@ Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuer
 module.exports = AnnouncementsQuery;
 
 
-},{"../root":108,"./messages-query":105,"./query":107}],101:[function(require,module,exports){
+},{"../root":110,"./messages-query":107,"./query":109}],103:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34551,6 +35256,9 @@ var ChannelsQuery = function (_ConversationsQuery) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'channel_query_time'
+          },
           url: this._firingRequest,
           method: 'GET',
           sync: false
@@ -34710,24 +35418,22 @@ var ChannelsQuery = function (_ConversationsQuery) {
       if (list.length) {
         (function () {
           var data = _this3.data;
+
+          // typically bulk inserts happen via _appendResults(); so this array typically iterates over an array of length 1
           list.forEach(function (channel) {
             var newIndex = _this3._getInsertIndex(channel, data);
             data.splice(newIndex, 0, _this3._getData(channel));
-          });
 
-          // Whether sorting by last_message or created_at, new results go at the top of the list
-          if (_this3.dataType === Query.ObjectDataType) {
-            _this3.data = [].concat(data);
-          }
-          _this3.totalSize += list.length;
+            // Typically this loop only iterates once; but each iteration is gaurenteed a unique object if needed
+            if (_this3.dataType === Query.ObjectDataType) {
+              _this3.data = [].concat(data);
+            }
+            _this3.totalSize += 1;
 
-          // Trigger an 'insert' event for each item added;
-          // typically bulk inserts happen via _appendResults().
-          list.forEach(function (channel) {
             var item = _this3._getData(channel);
             _this3._triggerChange({
               type: 'insert',
-              index: _this3.data.indexOf(item),
+              index: newIndex,
               target: item,
               query: _this3
             });
@@ -34784,7 +35490,7 @@ Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 module.exports = ChannelsQuery;
 
 
-},{"../const":75,"../root":108,"./conversations-query":102,"./query":107}],102:[function(require,module,exports){
+},{"../const":77,"../root":110,"./conversations-query":104,"./query":109}],104:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34868,6 +35574,9 @@ var ConversationsQuery = function (_Query) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'conversation_query_time'
+          },
           url: this._firingRequest,
           method: 'GET',
           sync: false
@@ -35045,24 +35754,21 @@ var ConversationsQuery = function (_Query) {
       if (list.length) {
         (function () {
           var data = _this3.data;
+
+          // typically bulk inserts happen via _appendResults(); so this array typically iterates over an array of length 1
           list.forEach(function (conversation) {
             var newIndex = _this3._getInsertIndex(conversation, data);
             data.splice(newIndex, 0, _this3._getData(conversation));
-          });
 
-          // Whether sorting by last_message or created_at, new results go at the top of the list
-          if (_this3.dataType === Query.ObjectDataType) {
-            _this3.data = [].concat(data);
-          }
-          _this3.totalSize += list.length;
+            if (_this3.dataType === Query.ObjectDataType) {
+              _this3.data = [].concat(data);
+            }
+            _this3.totalSize += 1;
 
-          // Trigger an 'insert' event for each item added;
-          // typically bulk inserts happen via _appendResults().
-          list.forEach(function (conversation) {
             var item = _this3._getData(conversation);
             _this3._triggerChange({
               type: 'insert',
-              index: _this3.data.indexOf(item),
+              index: newIndex,
               target: item,
               query: _this3
             });
@@ -35119,7 +35825,7 @@ Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuer
 module.exports = ConversationsQuery;
 
 
-},{"../client-utils":73,"../const":75,"../root":108,"./query":107}],103:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../root":110,"./query":109}],105:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35184,6 +35890,9 @@ var IdentitiesQuery = function (_Query) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'identity_query_time'
+          },
           url: newRequest,
           method: 'GET',
           sync: false
@@ -35237,7 +35946,7 @@ Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 module.exports = IdentitiesQuery;
 
 
-},{"../root":108,"./query":107}],104:[function(require,module,exports){
+},{"../root":110,"./query":109}],106:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35358,6 +36067,9 @@ var MembersQuery = function (_Query) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'member_query_time'
+          },
           url: newRequest,
           method: 'GET',
           sync: false
@@ -35411,7 +36123,7 @@ Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 module.exports = MembersQuery;
 
 
-},{"../layer-error":77,"../logger":80,"../root":108,"./query":107}],105:[function(require,module,exports){
+},{"../layer-error":79,"../logger":82,"../root":110,"./query":109}],107:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35583,6 +36295,9 @@ var MessagesQuery = function (_Query) {
         this.isFiring = true;
         this._firingRequest = newRequest;
         this.client.xhr({
+          telemetry: {
+            name: 'message_query_time'
+          },
           url: newRequest,
           method: 'GET',
           sync: false
@@ -35775,6 +36490,23 @@ var MessagesQuery = function (_Query) {
         });
       }
     }
+
+    /*
+     * Note: Earlier versions of this iterated over each item, inserted it and when all items were inserted,
+     * triggered events indicating the index at which they were inserted.
+     *
+     * This caused the following problem:
+     *
+     * 1. Insert messages newest message at position 0 and second newest message at position 1
+     * 2. Trigger events in the order they arrive: second newest gets inserted at index 1, newest gets inserted at index 0
+     * 3. UI on receiving the second newest event does yet have the newest event, and on inserting it at position 1
+     *    is actually inserting it at the wrong place because position 0 is occupied by an older message at this time.
+     *
+     * Solution: We must iterate over all items, and process them entirely one at a time.
+     * Drawback: After an Event.replay we may get a lot of add events, we may need a way to do an event that inserts a set of messages
+     * instead of triggering lots of individual rendering-causing events
+     */
+
   }, {
     key: '_handleAddEvent',
     value: function _handleAddEvent(name, evt) {
@@ -35807,18 +36539,15 @@ var MessagesQuery = function (_Query) {
           list.forEach(function (item) {
             var index = _this4._getInsertIndex(item, data);
             data.splice(index, 0, item);
-          });
+            if (index !== 0) Logger.warn('Index of ' + item.id + ' is ' + index + '; position is ' + item.position + '; compared to ' + data[0].position);
 
-          _this4.totalSize += list.length;
+            _this4.totalSize += 1;
 
-          // Index calculated above may shift after additional insertions.  This has
-          // to be done after the above insertions have completed.
-          list.forEach(function (item) {
             _this4._triggerChange({
               type: 'insert',
-              index: _this4.data.indexOf(item),
               target: item,
-              query: _this4
+              query: _this4,
+              index: index
             });
           });
         })();
@@ -35873,7 +36602,7 @@ Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 module.exports = MessagesQuery;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108,"./query":107}],106:[function(require,module,exports){
+},{"../client-utils":75,"../layer-error":79,"../logger":82,"../root":110,"./query":109}],108:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36561,7 +37290,7 @@ var QueryBuilder = {
 module.exports = QueryBuilder;
 
 
-},{"./query":107}],107:[function(require,module,exports){
+},{"./query":109}],109:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36844,11 +37573,8 @@ var Query = function (_Root) {
     value: function destroy() {
       this.data = [];
       this._triggerChange({
-        type: 'data',
-        target: this.client,
-        query: this,
-        isChange: false,
-        data: []
+        data: [],
+        type: 'reset'
       });
       this.client.off(null, null, this);
       this.client._removeQuery(this);
@@ -37304,17 +38030,12 @@ var Query = function (_Root) {
         (function () {
           var data = _this4.data = _this4.dataType === Query.ObjectDataType ? [].concat(_this4.data) : _this4.data;
           list.forEach(function (item) {
-            return data.push(item);
-          });
+            data.push(item);
+            _this4.totalSize += 1;
 
-          _this4.totalSize += list.length;
-
-          // Index calculated above may shift after additional insertions.  This has
-          // to be done after the above insertions have completed.
-          list.forEach(function (item) {
             _this4._triggerChange({
               type: 'insert',
-              index: _this4.data.indexOf(item),
+              index: data.length - 1,
               target: item,
               query: _this4
             });
@@ -37777,7 +38498,7 @@ Root.initClass.apply(Query, [Query, 'Query']);
 module.exports = Query;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":80,"../root":108}],108:[function(require,module,exports){
+},{"../client-utils":75,"../layer-error":79,"../logger":82,"../root":110}],110:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -38613,7 +39334,7 @@ module.exports = Root;
 module.exports.initClass = initClass;
 
 
-},{"./client-utils":73,"./layer-error":77,"./layer-event":78,"./logger":80,"backbone-events-standalone/backbone-events-standalone":119}],109:[function(require,module,exports){
+},{"./client-utils":75,"./layer-error":79,"./layer-event":80,"./logger":82,"backbone-events-standalone/backbone-events-standalone":124}],111:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38879,7 +39600,8 @@ var XHRSyncEvent = function (_SyncEvent) {
         url: this.url,
         method: this.method,
         headers: this.headers,
-        data: this.data
+        data: this.data,
+        telemetry: this.telemetry
       };
     }
 
@@ -38953,6 +39675,11 @@ XHRSyncEvent.prototype.headers = null;
 XHRSyncEvent.prototype.method = 'GET';
 
 /**
+ * Telemetry data to go with the request.
+ */
+XHRSyncEvent.prototype.telemetry = null;
+
+/**
  * A layer.SyncEvent intended to be fired as a websocket request.
  *
  * @class layer.SyncEvent.WebsocketSyncEvent
@@ -39009,7 +39736,7 @@ WebsocketSyncEvent.prototype.returnChangesArray = false;
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
 
 
-},{"./client-utils":73}],110:[function(require,module,exports){
+},{"./client-utils":75}],112:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39516,12 +40243,12 @@ var SyncManager = function (_Root) {
           // Server appears to be hung but will eventually recover.
           // Retry a few times and then error out.
           // this._xhrValidateIsOnline(requestEvt);
-          this._xhrHandleServerUnavailableError(requestEvt);
+          this._xhrHandleServerUnavailableError(result);
           break;
         case 'serverUnavailable':
           // Server is in a bad state but will eventually recover;
           // keep retrying.
-          this._xhrHandleServerUnavailableError(requestEvt);
+          this._xhrHandleServerUnavailableError(result);
           break;
         case 'reauthorize':
           // sessionToken appears to no longer be valid; forward response
@@ -39564,12 +40291,19 @@ var SyncManager = function (_Root) {
      *
      * @method  _xhrHandleServerUnavailableError
      * @private
-     * @param {layer.SyncEvent} request
+     * @param  {Object} result             Response object returned by xhr call
      */
 
   }, {
     key: '_xhrHandleServerUnavailableError',
-    value: function _xhrHandleServerUnavailableError(request) {
+    value: function _xhrHandleServerUnavailableError(result) {
+      var request = result.request;
+      this.trigger('sync:error-will-retry', {
+        target: request.target,
+        request: request,
+        error: result.data,
+        retryCount: request.retryCount
+      });
       var maxDelay = SyncManager.MAX_UNAVAILABLE_RETRY_WAIT;
       var delay = Utils.getExponentialBackoffSeconds(maxDelay, Math.min(15, request.retryCount++));
       logger.warn('Sync Manager Server Unavailable; retry count ' + request.retryCount + '; retrying in ' + delay + ' seconds');
@@ -39888,11 +40622,11 @@ SyncManager.prototype.client = null;
  * Maximum exponential backoff wait.
  *
  * If the server is returning 502, 503 or 504 errors, exponential backoff
- * should never wait longer than this number of seconds (15 minutes)
+ * should never wait longer than this number of seconds (60 seconds)
  * @type {Number}
  * @static
  */
-SyncManager.MAX_UNAVAILABLE_RETRY_WAIT = 60 * 15;
+SyncManager.MAX_UNAVAILABLE_RETRY_WAIT = 60;
 
 /**
  * Retries before suspect CORS error.
@@ -39923,37 +40657,55 @@ SyncManager._supportedEvents = [
  *
  * ```
  * client.syncManager.on('sync:error', function(evt) {
- *    console.error(evt.target.id + ' failed to send changes to server: ', result.data.message);
- *    console.log('Request Event:', requestEvt);
- *    console.log('Server Response:', result.data);
+ *    console.error(evt.target + ' failed to send changes to server: ', evt.error.message);
+ *    console.log('Request Event:', evt.request);
  * });
  * ```
  *
  * @event
- * @param {layer.SyncEvent} evt - The request object
- * @param {Object} result
- * @param {string} result.target - ID of the message/conversation/etc. being operated upon
- * @param {layer.SyncEvent} result.request - The original request
- * @param {Object} result.error - The error object {id, code, message, url}
+ * @param {layer.LayerEvent} evt          Standard Layer Event object generated by all calls to `trigger`
+ * @param {layer.LayerError} evt.error    An error object representing the server's response
+ * @param {String} evt.target             ID of the message/conversation/etc. being operated upon
+ * @param {layer.SyncEvent} evt.request  The original request object
  */
 'sync:error',
+
+/**
+ * A sync request has but will be retried soon.
+ *
+ * ```
+ * client.syncManager.on('sync:error-will-retry', function(evt) {
+ *    console.error(evt.target + ' failed to send changes to server: ', evt.error.message);
+ *    console.log('Request Event:', evt.request);
+ *    console.log('Number of retries:', evt.retryCount);
+ * });
+ * ```
+ *
+ * @event
+ * @param {layer.LayerEvent} evt          Standard Layer Event object generated by all calls to `trigger`
+ * @param {layer.LayerError} evt.error    An error object representing the server's response
+ * @param {String} evt.target             ID of the message/conversation/etc. being operated upon
+ * @param {layer.SyncEvent} evt.request   The original request object
+ * @param {Number} evt.retryCount         Number of retries performed on this request; for the first event this will be 0
+ */
+'sync:error-will-retry',
 
 /**
  * A sync layer request has completed successfully.
  *
  * ```
  * client.syncManager.on('sync:success', function(evt) {
- *    console.log(evt.target.id + ' changes sent to server successfully');
- *    console.log('Request Event:', requestEvt);
- *    console.log('Server Response:', result.data);
+ *    console.log(evt.target + ' changes sent to server successfully');
+ *    console.log('Request Event:', evt.request);
+ *    console.log('Server Response:', evt.response);
  * });
  * ```
  *
  * @event
- * @param {Object} result
- * @param {string} result.target - ID of the message/conversation/etc. being operated upon
- * @param {layer.SyncEvent} result.request - The original request
- * @param {Object} result.data - null or any data returned by the call
+ * @param {layer.LayerEvent} evt          Standard Layer Event object generated by all calls to `trigger`
+ * @param {String} evt.target             ID of the message/conversation/etc. being operated upon
+ * @param {layer.SyncEvent} evt.request   The original request
+ * @param {Object} evt.response           null or any data returned by the call
  */
 'sync:success',
 
@@ -39962,15 +40714,15 @@ SyncManager._supportedEvents = [
  *
  * ```
  * client.syncManager.on('sync:add', function(evt) {
- *    console.log(evt.target.id + ' has changes queued for the server');
- *    console.log('Request Event:', requestEvt);
+ *    console.log(evt.target + ' has changes queued for the server');
+ *    console.log('Request Event:', evt.request);
  * });
  * ```
  *
  * @event
- * @param {Object} result
- * @param {string} result.target - ID of the message/conversation/etc. being operated upon
- * @param {layer.SyncEvent} evt - The request object
+ * @param {layer.LayerEvent} evt          Standard Layer Event object generated by all calls to `trigger`
+ * @param {String} evt.target             ID of the message/conversation/etc. being operated upon
+ * @param {layer.SyncEvent} evt.request   The original request
  */
 'sync:add',
 
@@ -39980,10 +40732,9 @@ SyncManager._supportedEvents = [
  * Typically caused by a new SyncEvent that deletes the target of this SyncEvent
  *
  * @event
- * @param {layer.SyncEvent} evt - The request object
- * @param {Object} result
- * @param {string} result.target - ID of the message/conversation/etc. being operated upon
- * @param {layer.SyncEvent} result.request - The original request
+ * @param {layer.LayerEvent} evt          Standard Layer Event object generated by all calls to `trigger`
+ * @param {String} evt.target             ID of the message/conversation/etc. being operated upon
+ * @param {layer.SyncEvent} evt.request   The original request
  */
 'sync:abort'].concat(Root._supportedEvents);
 
@@ -39991,7 +40742,520 @@ Root.initClass(SyncManager);
 module.exports = SyncManager;
 
 
-},{"./client-utils":73,"./logger":80,"./root":108,"./sync-event":109,"./xhr":118}],111:[function(require,module,exports){
+},{"./client-utils":75,"./logger":82,"./root":110,"./sync-event":111,"./xhr":123}],113:[function(require,module,exports){
+(function (global){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Metrics gathering component.
+ *
+ * 1. Should never broadcast any personally identifiable information
+ * 2. Should never broadcast any values actually sent/received by users
+ * 3. It can send how long any type of operation took to perform
+ * 4. It can send how many times an operation was performed
+ *
+ * This is currently setup to run once per hour, sending hourly updates to the server.
+ *
+ * @class layer.TelemetryMonitor
+ * @extends layer.Root
+ * @private
+ */
+
+var Root = require('./root');
+var Xhr = require('./xhr');
+var Util = require('./client-utils');
+
+var TelemetryMonitor = function (_Root) {
+  _inherits(TelemetryMonitor, _Root);
+
+  /**
+   * Creates a new Monitor.
+   *
+   * An Application is expected to only have one Monitor.
+   *
+   * @method constructor
+   * @param {Object} options
+   * @param {layer.Client} options.client
+   * @param {Boolean} [options.enabled=true]   Set to false to disable telemetry reporting
+   * @param {Number} [options.reportingInterval=1000 * 3600]   Defaults to 1 hour, but can be set to other intervals
+   */
+  function TelemetryMonitor(options) {
+    _classCallCheck(this, TelemetryMonitor);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TelemetryMonitor).call(this, options));
+
+    _this.client = options.client;
+    _this.state = {
+      id: _this.id,
+      records: []
+    };
+    _this.tempState = {};
+    _this.storageKey = 'layer-telemetry-' + _this.client.appId;
+
+    if (!global.localStorage) {
+      _this.enabled = false;
+    } else {
+      try {
+        var oldState = localStorage[_this.storageKey];
+        if (!oldState) {
+          localStorage.setItem(_this.storageKey, JSON.stringify(_this.state));
+        } else {
+          _this.state = JSON.parse(oldState);
+        }
+      } catch (e) {
+        _this.enabled = false;
+      }
+    }
+
+    _this.client.on('state-change', _this.trackEvent, _this);
+    Xhr.addConnectionListener(_this.trackRestPerformance.bind(_this));
+    _this.setupReportingInterval();
+    return _this;
+  }
+
+  /**
+   * Given a `telemetryId` and an optional `id`, and a `started` or `ended` key,
+   * track performance of the given telemetry statistic.
+   *
+   * @method
+   */
+
+
+  _createClass(TelemetryMonitor, [{
+    key: 'trackEvent',
+    value: function trackEvent(evt) {
+      if (!this.enabled) return;
+      var eventId = evt.telemetryId + '-' + (evt.id || 'noid');
+
+      if (evt.started) {
+        this.tempState[eventId] = Date.now();
+      } else if (evt.ended) {
+        var started = this.tempState[eventId];
+        if (started) {
+          delete this.tempState[eventId];
+          var duration = Date.now() - started;
+          this.writePerformance(evt.telemetryId, duration);
+        }
+      }
+    }
+
+    /**
+     * Clear out any requests that were never completed.
+     *
+     * Currently we only track an id and a start time, so we don't know much about these events.
+     *
+     * @method clearEvents
+     */
+
+  }, {
+    key: 'clearEvents',
+    value: function clearEvents() {
+      var _this2 = this;
+
+      var now = Date.now();
+      Object.keys(this.tempState).forEach(function (key) {
+        if (_this2.tempState[key] + _this2.reportingInterval < now) delete _this2.tempState[key];
+      });
+    }
+
+    /**
+     * Any xhr request that was called with a `telemetry` key contains metrics to be logged.
+     *
+     * The `telemetry` object should contain `name` and `duration` keys
+     *
+     * @method
+     */
+
+  }, {
+    key: 'trackRestPerformance',
+    value: function trackRestPerformance(evt) {
+      if (this.enabled && evt.request.telemetry) {
+        this.writePerformance(evt.request.telemetry.name, evt.duration);
+      }
+    }
+
+    /**
+     * When writing performance, there are three inputs used:
+     *
+     * 1. The name of the metric being tracked
+     * 2. The duration it took for the operation
+     * 3. The current time (this is not a function input, but is still a dependency)
+     *
+     * Results of writing performance are to increment count, and total time for the operation.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'writePerformance',
+    value: function writePerformance(name, timing) {
+      var performance = this.getCurrentStateObject().performance;
+      if (!performance[name]) {
+        performance[name] = {
+          count: 0,
+          time: 0,
+          max: 0
+        };
+      }
+      performance[name].count++;
+      performance[name].time += timing;
+      if (timing > performance[name].max) performance[name].max = timing;
+      this.writeState();
+    }
+
+    /**
+     * When writing usage, we are simply incrementing the usage counter for the metric.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'writeUsage',
+    value: function writeUsage(name) {
+      var usage = this.getCurrentStateObject().usage;
+      if (!usage[name]) usage[name] = 0;
+      usage[name]++;
+      this.writeState();
+    }
+
+    /**
+     * Grab some environmental data to attach to the report.
+     *
+     * note that environmental data may change from hour to hour,
+     * so we regather this information for each record we send to the server.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'getEnvironment',
+    value: function getEnvironment() {
+      var environment = {
+        platform: 'web',
+        locale: (navigator.language || '').replace(/-/g, '_'), // should match the en_us format that mobile devices are using rather than the much nicer en-us
+        layer_sdk_version: this.client.constructor.version,
+        domain: location.hostname
+      };
+
+      // This event allows other libraries to add information to the environment object; specifically: Layer UI
+      this.trigger('telemetry-environment', {
+        environment: environment
+      });
+      return environment;
+    }
+
+    /**
+     * Grab some device data to attach to the report.
+     *
+     * note that device data may change from hour to hour,
+     * so we regather this information for each record we send to the server.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'getDevice',
+    value: function getDevice() {
+      return {
+        user_agent: navigator.userAgent,
+        screen: {
+          width: (typeof screen === 'undefined' ? 'undefined' : _typeof(screen)) === undefined ? 0 : screen.width,
+          height: (typeof screen === 'undefined' ? 'undefined' : _typeof(screen)) === undefined ? 0 : screen.height
+        },
+        window: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      };
+    }
+
+    /**
+     * Return the state object used to track performance for the current time slot
+     *
+     * @method
+     */
+
+  }, {
+    key: 'getCurrentStateObject',
+    value: function getCurrentStateObject(doNotCreate) {
+      var today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      var currentDate = new Date(today);
+
+      var now = Date.now();
+
+      // If the reporting interval is less than 24 hours, iterate until we find the current time slice within our day
+      if (this.reportingInterval < 60 * 60 * 1000 * 24) {
+        while (currentDate.getTime() < now) {
+          currentDate.setMilliseconds(currentDate.getMilliseconds() + this.reportingInterval);
+        }
+      }
+
+      var currentStart = currentDate.toISOString();
+      var currentEndDate = new Date(currentDate);
+      currentEndDate.setMilliseconds(currentEndDate.getMilliseconds() + this.reportingInterval);
+      var todayObj = this.state.records.filter(function (set) {
+        return set.period.start === currentStart;
+      })[0];
+
+      if (!todayObj && !doNotCreate) {
+        todayObj = {
+          period: {
+            start: currentStart,
+            end: currentEndDate.toISOString()
+          },
+          environment: this.getEnvironment(),
+          device: this.getDevice(),
+          usage: {},
+          performance: {},
+          errors: {}
+        };
+        this.state.records.push(todayObj);
+      }
+
+      return todayObj;
+    }
+
+    /**
+     * Write state to localStorage.
+     *
+     * Writing the state is an expensive operation that should be done less often,
+     * and containing more changes rather than done immediatley and repeated with each change.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'writeState',
+    value: function writeState() {
+      var _this3 = this;
+
+      if (this.enabled && !this._writeTimeoutId) {
+        this._writeTimeoutId = setTimeout(function () {
+          localStorage.setItem(_this3.storageKey, JSON.stringify(_this3.state));
+          _this3._writeTimeoutId = 0;
+        }, 1000);
+      }
+    }
+
+    /**
+     * Given a time slot's data, convert its data to what the server expects.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'convertRecord',
+    value: function convertRecord(record) {
+      var result = {
+        period: record.period,
+        device: record.device,
+        environment: record.environment,
+        usage: record.usage,
+        performance: {}
+      };
+
+      Object.keys(record.performance).forEach(function (performanceKey) {
+        var item = record.performance[performanceKey];
+        result.performance[performanceKey] = {
+          max: Math.round(item.max),
+          count: item.count,
+          mean: Math.round(item.time / item.count) };
+      });
+      return result;
+    }
+
+    /**
+     * Send data to the server; do not send any data from the current hour.
+     *
+     * Remove any data successfully sent from our records.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'sendData',
+    value: function sendData() {
+      var _this4 = this;
+
+      var doNotSendCurrentRecord = this.getCurrentStateObject(true);
+      var records = this.state.records.filter(function (record) {
+        return record !== doNotSendCurrentRecord;
+      });
+      if (records.length) {
+        Xhr({
+          sync: false,
+          method: 'POST',
+          url: this.telemetryUrl,
+          headers: {
+            'content-type': 'application/json'
+          },
+          data: {
+            id: Util.uuid(this.state.id),
+            layer_app_id: this.client.appId,
+            records: records.map(function (record) {
+              return _this4.convertRecord(record);
+            })
+          }
+        }, function (result) {
+          if (result.success) {
+            // Remove any records that were sent from our state
+            _this4.state.records = _this4.state.records.filter(function (record) {
+              return records.indexOf(record) === -1;
+            });
+            _this4.writeState();
+          }
+        });
+      }
+      this.clearEvents();
+    }
+
+    /**
+     * Periodicalily call sendData to send updates to the server.
+     *
+     * @method
+     */
+
+  }, {
+    key: 'setupReportingInterval',
+    value: function setupReportingInterval() {
+      if (this.enabled) {
+        // Send any stale data
+        this.sendData();
+        this._intervalId = setInterval(this.sendData.bind(this), this.reportingInterval);
+      }
+    }
+
+    /**
+     * If the enabled property is set, automatically clear or start the interval.
+     *
+     * ```
+     * telemetryMonitor.enabled = false;
+     * ```
+     *
+     * The above code will stop the telemetryMonitor from sending data.
+     *
+     * @method
+     */
+
+  }, {
+    key: '__updateEnabled',
+    value: function __updateEnabled() {
+      if (this._intervalId) {
+        clearInterval(this._intervalId);
+        this._intervalId = 0;
+      }
+      if (this.enabled) this.setupReportingInterval();
+    }
+  }]);
+
+  return TelemetryMonitor;
+}(Root);
+
+/**
+ * The URL to `POST` telemetry data to.
+ *
+ * @property {String}
+ */
+
+
+TelemetryMonitor.prototype.telemetryUrl = 'https://telemetry.layer.com';
+
+/**
+ * ID for the `window.setInterval` operation
+ *
+ * @property {Number}
+ */
+TelemetryMonitor.prototype._intervalId = 0;
+
+/**
+ * The reporting interval controls how frequently the module tries to report on usage data.
+ *
+ * It also is used to determine how to segment data into time slices.
+ *
+ * Value should not excede 1 day.
+ *
+ * @property {Number} [reportingInterval=3,600,000]  Number of miliseconds between submitting usage reports; defaults to once per hour
+ */
+TelemetryMonitor.prototype.reportingInterval = 1000 * 60 * 60;
+
+/**
+ * To avoid performance issues, we only write changes asynchronously; this timeoutId tracks that this has been scheduled.
+ *
+ * @property {Number}
+ */
+TelemetryMonitor.prototype._writeTimeoutId = 0;
+
+/**
+ * Constructor sets this to be the key within localStorage for accessing the cached telemetry data.
+ *
+ * @property {String}
+ */
+TelemetryMonitor.prototype.storageKey = '';
+
+/**
+ * Current state object.
+ *
+ * Initialized with data from localStorage, and any changes to it are written
+ * back to localStorage.
+ *
+ * Sending records causes them to be removed from the state.
+ *
+ * @property {Object}
+ */
+TelemetryMonitor.prototype.state = null;
+
+/**
+ * Cache of in-progress performance events.
+ *
+ * Each key has a value representing a timestamp.  Events are removed once they are completed.
+ *
+ * @property {Object}
+ */
+TelemetryMonitor.prototype.tempState = null;
+
+/**
+ * Telemetry defaults to enabled, but can be disabled by setting this to `false`
+ *
+ * @property {Boolean}
+ */
+TelemetryMonitor.prototype.enabled = true;
+
+/**
+ * Pointer to the layer.Client
+ *
+ * @property {layer.Client}
+ */
+TelemetryMonitor.prototype.client = null;
+
+/**
+ * The presence of this causes layer.Root to automatically generate an id if one isn't present.
+ *
+ * This id is written to localStorage so that it can persist across sessions.
+ *
+ * @static
+ * @property {String}
+ */
+TelemetryMonitor.prefixUUID = 'layer:///telemetry/';
+
+TelemetryMonitor._supportedEvents = Root._supportedEvents.concat(['telemetry-environment']);
+
+Root.initClass.apply(TelemetryMonitor, [TelemetryMonitor, 'TelemetryMonitor']);
+module.exports = TelemetryMonitor;
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./client-utils":75,"./root":110,"./xhr":123}],114:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40321,7 +41585,7 @@ Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingI
 module.exports = TypingIndicatorListener;
 
 
-},{"../client-registry":72,"../root":108,"./typing-indicators":112}],112:[function(require,module,exports){
+},{"../client-registry":74,"../root":110,"./typing-indicators":115}],115:[function(require,module,exports){
 'use strict';
 
 /**
@@ -40358,7 +41622,7 @@ module.exports = {
 };
 
 
-},{}],113:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40512,9 +41776,6 @@ var TypingListener = function () {
     /**
      * Whenever the key is pressed, send a "started" or "finished" event.
      *
-     * If its a "start" event, schedule a pause-test that will send
-     * a "pause" event if typing stops.
-     *
      * @method _handleKeyPress
      * @private
      * @param  {KeyboardEvent} evt
@@ -40583,7 +41844,7 @@ var TypingListener = function () {
 module.exports = TypingListener;
 
 
-},{"./typing-indicators":112,"./typing-publisher":114}],114:[function(require,module,exports){
+},{"./typing-indicators":115,"./typing-publisher":117}],117:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40851,7 +42112,197 @@ var TypingPublisher = function () {
 module.exports = TypingPublisher;
 
 
-},{"../client-registry":72,"./typing-indicators":112}],115:[function(require,module,exports){
+},{"../client-registry":74,"./typing-indicators":115}],118:[function(require,module,exports){
+(function (global){
+'use strict';
+
+/**
+ * Execute this function immediately after current processing is complete (setImmediate replacement).
+ *
+ * A depth of up to 10 is allowed.  That means that functions you schedule using defer
+ * can in turn schedule further actions.  The original actions are depth = 0; the actions scheduled
+ * by your actions are depth = 1.  These new actions may in turn schedule further actions, which happen at depth = 3.
+ * But to avoid infinite loops, if depth reaches 10, it clears the queue and ignores them.
+ *
+ * @method defer
+ * @param {Function} f
+ */
+var setImmediate = global.getNativeSupport && global.getNativeSupport('setImmediate');
+if (setImmediate) {
+  module.exports = setImmediate;
+} else {
+  (function () {
+
+    // Process all callbacks in the setImmediateQueue
+    var setImmediateProcessor = function setImmediateProcessor() {
+      // Processing the queue is no longer scheduled; clear any scheduling info.
+      setImmediateIsPending = false;
+      clearTimeout(setImmediateId);
+      setImmediateId = 0;
+
+      // Our initial depth is depth 0
+      setImmediateDepth = 0;
+      setImmediateQueue.push(setImmediateDepth);
+
+      // Process all functions and depths in the queue starting always with the item at index 0,
+      // and removing them from the queue before processing them.
+      while (setImmediateQueue.length) {
+        var item = setImmediateQueue.shift();
+        if (typeof item === 'function') {
+          try {
+            item();
+          } catch (err) {
+            console.error(err);
+          }
+        } else if (item >= setImmediateMaxDepth) {
+          setImmediateQueue = [];
+          console.error('Layer Error: setImmediate Max Queue Depth Exceded');
+        }
+      }
+    };
+    // Schedule the function to be called by adding it to the queue, and setting up scheduling if its needed.
+
+
+    var setImmediateId = 0,
+        setImmediateDepth = 0,
+
+
+    // Have we scheduled the queue to be processed? If not, this is false
+    setImmediateIsPending = false,
+
+
+    // Queue of functions to call and depth integers
+    setImmediateQueue = [];
+
+    // If a setImmediate callback itself calls setImmediate which in turn calls setImmediate, at what point do we suspect we have an infinite loop?
+    // A depth of 10 is currently considered OK, but this may need to be increased.
+    var setImmediateMaxDepth = 10;module.exports = function defer(func) {
+      if (typeof func !== 'function') throw new Error('Function expected in defer');
+
+      setImmediateQueue.push(func);
+
+      // If postMessage has not already been called, call it
+      if (!setImmediateIsPending) {
+        setImmediateIsPending = true;
+        if (typeof document !== 'undefined') {
+          window.postMessage({ type: 'layer-set-immediate' }, '*');
+        } else {
+          // React Native reportedly lacks a document, and throws errors on the second parameter
+          window.postMessage({ type: 'layer-set-immediate' });
+        }
+
+        // Having seen scenarios where postMessage failed to trigger, set a backup using setTimeout that will be canceled
+        // if postMessage is succesfully called.
+        setImmediateId = setTimeout(setImmediateProcessor, 0);
+      }
+    };
+
+    // For Unit Testing
+    module.exports.flush = function () {
+      return setImmediateProcessor();
+    };
+    module.exports.reset = function () {
+      setImmediateQueue = [];
+    };
+
+    addEventListener('message', function (event) {
+      if (event.data.type !== 'layer-set-immediate') return;
+      setImmediateProcessor();
+    });
+  })();
+}
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],119:[function(require,module,exports){
+'use strict';
+
+/**
+ * Run the Layer Parser on the request.
+ *
+ * Parameters here
+ * are the parameters specied in [Layer-Patch](https://github.com/layerhq/node-layer-patch), plus
+ * a client object.
+ *
+ *      layerParse({
+ *          object: conversation,
+ *          type: 'Conversation',
+ *          operations: layerPatchOperations,
+ *          client: client
+ *      });
+ *
+ * @method
+ * @param {Object} request - layer-patch parameters
+ * @param {Object} request.object - Object being updated  by the operations
+ * @param {string} request.type - Type of object being updated
+ * @param {Object[]} request.operations - Array of change operations to perform upon the object
+ * @param {layer.Client} request.client
+ */
+var LayerParser = require('layer-patch');
+
+var parser = void 0;
+
+/**
+ * Creates a LayerParser
+ *
+ * @method
+ * @private
+ * @param {Object} request - see layer.ClientUtils.layerParse
+ */
+function createParser(request) {
+  request.client.once('destroy', function () {
+    return parser = null;
+  });
+
+  parser = new LayerParser({
+    camelCase: true,
+    getObjectCallback: function getObjectCallback(id) {
+      return request.client.getObject(id);
+    },
+    createObjectCallback: function createObjectCallback(id, obj) {
+      return request.client._createObject(obj);
+    },
+    propertyNameMap: {
+      Conversation: {
+        unreadMessageCount: 'unreadCount'
+      },
+      Identity: {
+        presence: '_presence'
+      }
+    },
+    changeCallbacks: {
+      Message: {
+        all: function all(updateObject, newValue, oldValue, paths) {
+          updateObject._handlePatchEvent(newValue, oldValue, paths);
+        }
+      },
+      Conversation: {
+        all: function all(updateObject, newValue, oldValue, paths) {
+          updateObject._handlePatchEvent(newValue, oldValue, paths);
+        }
+      },
+      Channel: {
+        all: function all(updateObject, newValue, oldValue, paths) {
+          updateObject._handlePatchEvent(newValue, oldValue, paths);
+        }
+      },
+      Identity: {
+        all: function all(updateObject, newValue, oldValue, paths) {
+          updateObject._handlePatchEvent(newValue, oldValue, paths);
+        }
+      }
+    }
+  });
+}
+
+// Docs in client-utils.js
+module.exports = function (request) {
+  if (!parser) createParser(request);
+  parser.parse(request);
+};
+
+
+},{"layer-patch":125}],120:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41063,7 +42514,7 @@ WebsocketChangeManager.prototype.client = null;
 module.exports = WebsocketChangeManager;
 
 
-},{"../client-utils":73,"../logger":80,"../models/channel":89,"../models/conversation":93,"../models/message":97}],116:[function(require,module,exports){
+},{"../client-utils":75,"../logger":82,"../models/channel":91,"../models/conversation":95,"../models/message":99}],121:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41391,7 +42842,7 @@ WebsocketRequestManager.prototype.socketManager = null;
 module.exports = WebsocketRequestManager;
 
 
-},{"../client-utils":73,"../layer-error":77,"../logger":80}],117:[function(require,module,exports){
+},{"../client-utils":75,"../layer-error":79,"../logger":82}],122:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41909,7 +43360,7 @@ var SocketManager = function (_Root) {
         isChangesArray: false
       });
 
-      if (this.client.presenceEnabled) {
+      if (this.client.isPresenceEnabled) {
         this.client.socketRequestManager.sendRequest({
           data: {
             method: 'Presence.update',
@@ -42134,7 +43585,7 @@ var SocketManager = function (_Root) {
     value: function _scheduleReconnect() {
       var _this6 = this;
 
-      if (this.isDestroyed || !this.client.isOnline) return;
+      if (this.isDestroyed || !this.client.isOnline || !this.client.isAuthenticated) return;
 
       var maxDelay = (this.client.onlineManager.pingFrequency - 1000) / 1000;
       var delay = Utils.getExponentialBackoffSeconds(maxDelay, Math.min(15, this._lostConnectionCount));
@@ -42160,7 +43611,7 @@ var SocketManager = function (_Root) {
     value: function _validateSessionBeforeReconnect() {
       var _this7 = this;
 
-      if (this.isDestroyed || !this.client.isOnline) return;
+      if (this.isDestroyed || !this.client.isOnline || !this.client.isAuthenticated) return;
 
       var maxDelay = 30 * 1000; // maximum delay of 30 seconds per ping
       var diff = Date.now() - this._lastValidateSessionRequest - maxDelay;
@@ -42299,7 +43750,7 @@ Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
 
 
-},{"../client-utils":73,"../const":75,"../layer-error":77,"../logger":80,"../root":108,"websocket":64}],118:[function(require,module,exports){
+},{"../client-utils":75,"../const":77,"../layer-error":79,"../logger":82,"../root":110,"websocket":66}],123:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -42375,6 +43826,7 @@ function parseLinkHeaders(linkHeader) {
 }
 
 module.exports = function (request, callback) {
+  var startTime = Date.now();
   var req = Xhr ? new Xhr() : new XMLHttpRequest();
   var method = (request.method || 'GET').toUpperCase();
 
@@ -42388,6 +43840,7 @@ module.exports = function (request, callback) {
       success: this.status && this.status < 300,
       xhr: this
     };
+
     var isJSON = String(headers['content-type']).split(/;/)[0].match(/^application\/json/) || request.format === 'json';
 
     if (this.responseType === 'blob' || this.responseType === 'arraybuffer') {
@@ -42413,9 +43866,13 @@ module.exports = function (request, callback) {
         result.data = this.responseText;
       }
 
+      // Note that it is a successful connection if we get back an error from the server,
+      // it may have been a failed request, but the connection was good.
       module.exports.trigger({
         target: this,
-        status: !this.responseText && !this.status ? 'connection:error' : 'connection:success'
+        status: !this.responseText && !this.status ? 'connection:error' : 'connection:success',
+        duration: Date.now() - startTime,
+        request: request
       });
 
       if (!this.responseText && !this.status) {
@@ -42531,7 +43988,7 @@ module.exports.trigger = function (evt) {
 };
 
 
-},{"xhr2":64}],119:[function(require,module,exports){
+},{"xhr2":66}],124:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -42809,7 +44266,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],120:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -43044,7 +44501,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],121:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -43079,7 +44536,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],122:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -43264,5 +44721,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":121}]},{},[41])(41)
+},{"./rng":126}]},{},[41])(41)
 });

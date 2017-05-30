@@ -6,10 +6,11 @@
 
 import 'webcomponents.js/webcomponents-lite';
 import layerUI from './base';
-import { registerComponent, registerAll, unregisterComponent } from './components/component';
+import { registerComponent, registerAll, unregisterComponent, registerMessageComponent } from './components/component';
 import './handlers/message/layer-message-unknown';
 
 layerUI.registerComponent = registerComponent;
+layerUI.registerMessageComponent = registerMessageComponent;
 
 /**
  * Unregister a component.  Must be called before layerUI.init().

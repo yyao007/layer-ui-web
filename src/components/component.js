@@ -965,6 +965,8 @@ function _registerComponent(tagName) {
 
   classDef._onAfterCreate = {
     value: function _onAfterCreate() {
+      // Happens during unit tests
+      if (this.properties._internalState.onDestroyCalled) return;
 
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
@@ -1530,8 +1532,13 @@ const standardClassMethods = {
   onDetach: {
     mode: registerComponent.MODES.AFTER,
     value: function onDetach() {
-      this.properties.mainComponent = null;
-      this.properties.parentComponent = null;
+      if (this.properties.mainComponent && !this.properties.mainComponent.contains(this)) {
+        this.properties.mainComponent = null;
+      }
+
+      if (this.properties.parentComponent && !this.properties.parentComponent.contains(this)) {
+        this.properties.parentComponent = null;
+      }
       this.properties._internalState.onDetachCalled = true;
     },
   },
@@ -1550,6 +1557,8 @@ const standardClassMethods = {
    * @private
    */
   onDestroy: function onDestroy() {
+    this.properties._internalState.onDestroyCalled = true;
+    this.properties._internalState.disableSetters = true;
     this.properties._internalState.layerEventSubscriptions
       .forEach(subscribedObject => subscribedObject.off(null, null, this));
     this.properties._internalState.layerEventSubscriptions = [];
@@ -1576,3 +1585,4 @@ module.exports = {
   registerAll,
   unregisterComponent,
 };
+

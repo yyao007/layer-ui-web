@@ -28,6 +28,9 @@ layer-message-item-sent, layer-message-item-received {
     display: none;
   }
 
+  .layer-message-text-plain-after-text {
+    margin-top: 6px;
+  }
 
   layer-delete {
     opacity: 0;
@@ -38,6 +41,15 @@ layer-message-item-sent, layer-message-item-received {
     opacity: 0.2;
     &:hover {
       opacity: 1;
+    }
+  }
+
+  &.layer-message-preview {
+    .layer-message-text, layer-message-image canvas, layer-message-video video {
+      opacity: 0.5;
+    }
+    layer-message-status, layer-date {
+      display: none;
     }
   }
 }

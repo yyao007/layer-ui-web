@@ -30,7 +30,20 @@ import { registerComponent } from '../../../components/component';
 registerComponent('layer-file-upload-button', {
   mixins: [MainComponent],
   properties: {
-
+    /**
+     * Set the `accept` attribute of the file upload widget.
+     *
+     * For more info, see https://www.w3schools.com/tags/att_input_accept.asp
+     *
+     * Possible value: `image/*,video/*`
+     *
+     * @property {String} [accept=*\/*]
+     */
+    accept: {
+      set(newValue) {
+        this.nodes.input.accept = newValue;
+      },
+    },
   },
   methods: {
 

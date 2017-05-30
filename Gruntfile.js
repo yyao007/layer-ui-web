@@ -137,7 +137,17 @@ module.exports = function (grunt) {
         }
       }
     },
-
+    jsducktemplates: {
+      build: {
+        files: [
+          {
+            src: ['src/components/**/*.html']
+          }
+        ],
+        options: {
+        }
+      }
+    },
     jsduckfixes: {
       build: {
         files: [
@@ -344,6 +354,7 @@ module.exports = function (grunt) {
           endOfClassCodeBlock += 2;
           var prefix = outputES5.substring(0, indexOfClassCodeBlock);
           var classComment = outputES5.substring(indexOfClassCodeBlock, endOfClassCodeBlock);
+          classComment = classComment.replace(/\n\s*\*/g, "\n *") + '\n';
           var postfix =  outputES5.substring(endOfClassCodeBlock);
           outputES5 = classComment + prefix + postfix;
         }
@@ -444,6 +455,30 @@ module.exports = function (grunt) {
       });
     });
 
+    /* Adds template info to the jsduck class definition comments */
+    grunt.registerMultiTask('jsducktemplates', 'Adding templates to Docs', function() {
+      var options = this.options();
+
+      this.files.forEach(function(fileGroup) {
+        fileGroup.src.forEach(function(file, index) {
+          var template = grunt.file.read(file);
+          var srcFilePath = file.replace(/src/, 'lib-es5').replace(/\.html/, '.js');
+          var srcFile = grunt.file.read(srcFilePath);
+          var startIndex = srcFile.indexOf("@class");
+          console.log(srcFilePath + "  " + startIndex);
+
+          if (startIndex !== -1) {
+            var layerIds = (template.match(/layer-id=["'](.*?)["']/gm) || []).map(function(match) {
+              return match.replace(/^.*["'](.*)["']/, "$1");
+            });
+
+            srcFile = srcFile.substring(0, startIndex) +
+            `### Templates\n\n * You can see the template for the latest template version at [${file.replace(/^.*\//, '')}](https://github.com/layerhq/layer-ui-web/blob/master/src/${srcFilePath.replace(/^.*lib-es5/,'').replace(/\.js$/, '.html')})  \n * \n * The following layer-id attributes are expected in templates for this component: \n * \n * * ${layerIds.join('\n * * ')} \n` + srcFile.substring(startIndex);
+            grunt.file.write(srcFilePath, srcFile);
+          }
+        });
+      });
+  });
 
   // Building
   grunt.loadNpmTasks('grunt-browserify');
@@ -460,7 +495,7 @@ module.exports = function (grunt) {
   grunt.registerTask('coverage', ['webcomponents', 'browserify:coverage', "generate-tests"]);
   grunt.registerTask('theme', ['less', 'copy']),
 
-  grunt.registerTask('docs', ['debug', 'jsduck', 'jsduckfixes']);
+  grunt.registerTask('docs', ['debug', 'jsducktemplates', 'jsduck', 'jsduckfixes']);
   grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
   grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
 
@@ -471,3 +506,4 @@ module.exports = function (grunt) {
   grunt.registerTask("test", ["generate-tests", "connect:saucelabs", "saucelabs-jasmine"]);
   grunt.registerTask("develop", ["connect:develop", "watch"]);
 };
+

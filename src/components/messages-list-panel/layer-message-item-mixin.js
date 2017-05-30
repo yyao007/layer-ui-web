@@ -9,6 +9,22 @@
  * * `layer-message-item-sent`: Rendering for Messages sent by the owner of this Session
  * * `layer-message-item-received`: Rendering for Messages sent by other users
  *
+ * ## CSS Classes
+ *
+ * * When sending a message, if using `presend()` the message item will have the CSS class `layer-message-preview` until its sent
+ * * The tagName used to render the content within the message item will be used as a class name of the parent item.
+ *   If using a `<layer-message-text-plain />` widget within the item, the item itself will receive the `layer-message-text-plain` CSS class
+ * * `layer-unread-message` will be applied to any message that the user has received but which hasn't been marked as read
+ * * `layer-message-status-read-by-all`: All receipients of your user's message have read the message
+ * * `layer-message-status-read-by-some`: Some receipients of your user's message have read the message
+ * * `layer-message-status-read-by-none`: No receipients of your user's message have read the message
+ * * `layer-message-status-delivered-to-all`: All receipients of your user's message have received the message on their device
+ * * `layer-message-status-delivered-to-some`: Some receipients of your user's message have received the message on their device
+ * * `layer-message-status-delivered-to-none`: No receipients of your user's message have received the message on their device
+ * * `layer-message-status-pending`: The Message is trying to reach the server and has not yet completed sending
+ * * `layer-list-item-last`: The message is the last in a series of messages from the same sender and within the same block of time
+ * * `layer-list-item-first`: The message is the first in a series of messages from the same sender and within the same block of time
+ *
  * ## Advanced Customization
  *
  * The simple way to customize the widget is to modify its template.
@@ -85,6 +101,16 @@ import Layer from 'layer-websdk';
 
 module.exports = {
   properties: {
+
+    /**
+     * Rather than sort out `instanceof` operations, you can use `isMessageListItem` to test to see if a widget represents a Message Item.
+     *
+     * A Message Item only shows up in a MessageList; other places where Messages are rendered (layer-notifier, layer-conversation-last-message, etc...) are
+     * NOT Message Items, and may need to keep its content more compact.
+     */
+    isMessageListItem: {
+      value: true,
+    },
 
     // Every List Item has an item property, here it represents the Conversation to render
     item: {},
@@ -198,6 +224,7 @@ module.exports = {
       this.toggleClass(`${statusPrefix}-delivered-to-none`, deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE);
 
       this.toggleClass(`${statusPrefix}-pending`, this.properties.item.isSaving());
+      this.toggleClass('layer-message-preview', this.properties.item.isNew());
     },
 
     /**

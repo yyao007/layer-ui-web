@@ -1,9 +1,21 @@
 describe("List Mixin", function() {
 
-    var el, testRoot, client, query;
+    var el, testRoot, client, query, timeoutId, restoreAnimatedScrollTo;
 
     beforeEach(function() {
       jasmine.clock().install();
+
+      restoreAnimatedScrollTo = layerUI.animatedScrollTo;
+      spyOn(layerUI, "animatedScrollTo").and.callFake(function(node, position, duration, callback) {
+        var timeoutId = setTimeout(function() {
+          node.scrollTop = position;
+          if (callback) callback();
+        }, duration);
+        return function() {
+          clearTimeout(timeoutId);
+        };
+      });
+
       client = new layer.Client({
         appId: 'layer:///apps/staging/Fred'
       });
@@ -156,6 +168,8 @@ describe("List Mixin", function() {
 
     describe("The onCreate() method", function() {
       it("Should wire up the scroll event handler", function(done) {
+        el.style.height = "100px";
+        el.style.overflow = "auto";
         jasmine.clock().uninstall();
         setTimeout(function() {
           el.properties.isSelfScrolling = false;
@@ -163,8 +177,6 @@ describe("List Mixin", function() {
             expect(true).toBe(true);
             done();
           });
-          el.style.height = "100px";
-          el.style.overflow = "auto";
           el.scrollTop = 500;
         }, 1000);
       });
@@ -277,6 +289,74 @@ describe("List Mixin", function() {
         spyOn(query, "update");
         el._handleScroll();
         expect(query.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("The scrollToItem() method", function() {
+
+      beforeEach(function() {
+        el.style.height = '300px';
+      });
+
+      it("Should scroll to the specified item and return true", function() {
+        var identity = client.getIdentity("layer:///identities/user40");
+        var identityWidget = document.getElementById(el._getItemId(identity.id));
+        expect(el.scrollToItem(identity)).toEqual(true);
+        expect(el.scrollTop).toEqual(identityWidget.offsetTop - el.offsetTop);
+        expect(el.scrollTop).not.toEqual(0);
+      });
+
+      it("Should do nothing and return false", function() {
+        var identity = new layer.Identity({
+          client: client,
+          userId: 'user200',
+          id: 'layer:///identities/user200',
+          displayName: 'User 200',
+          isFullIdentity: true
+        });
+        expect(el.scrollToItem(identity)).toEqual(false);
+        expect(el.scrollTop).toEqual(0);
+      });
+
+      it("Should return true and animate scrolling", function() {
+        var identity = client.getIdentity("layer:///identities/user40");
+        var identityWidget = document.getElementById(el._getItemId(identity.id));
+
+        expect(el.scrollToItem(identity, 200)).toEqual(true);
+        jasmine.clock().tick(200);
+
+        expect(el.scrollTop).toEqual(identityWidget.offsetTop - el.offsetTop);
+        expect(el.scrollTop).not.toEqual(0);
+      });
+
+      it("Should call the animateScrolling callback", function() {
+        var identity = client.getIdentity("layer:///identities/user40");
+        var spy = jasmine.createSpy('callback');
+        el.scrollToItem(identity, 200, spy);
+        expect(spy).not.toHaveBeenCalled();
+        jasmine.clock().tick(200);
+        expect(spy).toHaveBeenCalled();
+      });
+
+      // Sadly this does more to test the spy and callFake function than actually test the code
+      it("Should skip callback of prior animation and only callback on new animation", function() {
+        var identity = client.getIdentity("layer:///identities/user40");
+        var identity2 = client.getIdentity("layer:///identities/user60");
+        var identityWidget = document.getElementById(el._getItemId(identity2.id));
+
+        var position;
+        var count = 0;
+        var spy = function() {
+          count++;
+          position = el.scrollTop;
+        };
+        el.scrollToItem(identity, 200, spy);
+        jasmine.clock().tick(50);
+        el.scrollToItem(identity2, 200, spy);
+        jasmine.clock().tick(200);
+        expect(count).toEqual(1);
+        expect(position).toEqual(identityWidget.offsetTop - el.offsetTop);
+        expect(position).toEqual(el.scrollTop);
       });
     });
 
@@ -433,8 +513,14 @@ describe("List Mixin", function() {
 
     describe("The _renderResetData() method", function() {
       it("Should reset listData", function() {
+        spyOn(el, "_renderResetData").and.callThrough();
         el.properties.listData = query.data;
+
+        // Run
         query.reset();
+
+        // Posttest
+        expect(el._renderResetData).toHaveBeenCalled();
         expect(el.properties.listData.length).toEqual(0);
         expect(query.data).not.toBe(el.properties.listData);
       });

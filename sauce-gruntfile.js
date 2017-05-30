@@ -94,7 +94,22 @@ var unsupportedBrowsers = {
     browsers = Object.keys(supportedBrowsers).map(function(key) {return supportedBrowsers[key]});
   }
 
+  // Why this? Travis tunnel to saucelabs only sometimes survives long
+  // enough for all 11 tests to run.  So randomly test 3 browsers each run.
+  function getRandomThree() {
+    var browsersHash = {};
+    while(Object.keys(browsersHash).length < 3) {
+      var randomIndex = Math.floor(Math.random() * Object.keys(supportedBrowsers).length);
+      var key = Object.keys(supportedBrowsers)[randomIndex];
+      browsersHash[key] = supportedBrowsers[key];
+    }
+    var browserArray = Object.keys(browsersHash).map(function(key) {return browsersHash[key]});;
+    console.dir(browserArray);
+    return browserArray;
+  }
+
   if (process.env.TRAVIS_JOB_NUMBER) {
+    browsers = getRandomThree();
     browsers.forEach(function(item) {
       item['tunnel-identifier'] = process.env.TRAVIS_JOB_NUMBER;
     });
@@ -103,12 +118,12 @@ var unsupportedBrowsers = {
   result.tasks.saucelabs = {
     all: {
       options: {
+        browsers: browsers,
         build: "Layer UI Web <%= pkg.version %>" + (process.env.TRAVIS_JOB_NUMBER ? ' ' + process.env.TRAVIS_JOB_NUMBER : ''),
         urls: ["http://127.0.0.1:9999/test/SpecRunner.html"],
         tunneled: true,
         concurrency: 1,
         throttled: 1,
-        browsers: browsers,
         testname: "Running LUI Web <%= pkg.version %> Unit Test",
         tags: ["master", 'Unit Test', 'Web'],
 
@@ -145,7 +160,6 @@ var unsupportedBrowsers = {
               console.error("Unit Test Errors for " + result.platform.join(', ') + "\n •", result.result.errors.join("\n • "));
               callback(false);
             }
-
         }
       }
     }

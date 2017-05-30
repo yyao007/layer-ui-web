@@ -36,16 +36,18 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.List
  * @mixin layerUI.mixins.MainComponent
+ * @mixin layerUI.mixins.ListLoadIndicator
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';
 import HasQuery from '../../../mixins/has-query';
+import ListLoadIndicator from '../../../mixins/list-load-indicator';
 import '../layer-identity-item/layer-identity-item';
 
 registerComponent('layer-identities-list', {
-  mixins: [List, MainComponent, HasQuery],
+  mixins: [List, MainComponent, HasQuery, ListLoadIndicator],
 
 
   /**
@@ -151,6 +153,12 @@ registerComponent('layer-identities-list', {
      * var newList = list.selectedIdentities.concat([]);
      * newList.push(identity1);
      * list.selectedIdentities = newList;
+     * ```
+     *
+     * You can clear the list with
+     *
+     * ```javascript
+     * list.selectedIdentities = [];
      * ```
      *
      * @property {layer.Identity[]} [selectedIdentities=[]]

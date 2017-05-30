@@ -28,6 +28,7 @@ registerComponent('layer-identity-item', {
      */
     selected: {
       type: Boolean,
+      noGetterFromSetter: true,
       set(value) {
         if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
         this.innerNode.classList[value ? 'add' : 'remove']('layer-identity-item-selected');
@@ -46,7 +47,7 @@ registerComponent('layer-identity-item', {
      */
     onCreate() {
       if (!this.id) this.id = Layer.Util.generateUUID();
-      this.nodes.checkbox.addEventListener('change', this._onChange.bind(this));
+      this.nodes.checkbox.addEventListener('click', this.onClick.bind(this));
       this.nodes.checkbox.id = `${this.id}-checkbox`;
       this.nodes.title.setAttribute('for', this.nodes.checkbox.id);
     },
@@ -56,11 +57,11 @@ registerComponent('layer-identity-item', {
      *
      * If the custom event is canceled, roll back the change.
      *
-     * @method _onChange
+     * @method onClick
      * @param {Event} evt
      * @private
      */
-    _onChange(evt) {
+    onClick(evt) {
       evt.stopPropagation();
       const checked = this.selected;
       const identity = this.item;
@@ -69,9 +70,9 @@ registerComponent('layer-identity-item', {
       const customEventResult = this.trigger(`layer-identity-item-${checked ? 'selected' : 'deselected'}`, { item: identity });
 
       if (customEventResult) {
-        this.innerNode.classList[checked ? 'add' : 'remove']('layer-identity-item-selected');
+        this.selected = !this.properties.selected;
       } else {
-        this.selected = !checked;
+        evt.preventDefault();
       }
       this.onSelection(evt);
     },

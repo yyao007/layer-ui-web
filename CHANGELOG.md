@@ -1,5 +1,31 @@
 # Layer UI for Web Change Log
 
+# 1.0.2
+
+* Possibly Breaking Changes
+  * If you use textHandlers to push `textData.afterText` items to render, these items now render outside of the chat bubble.  This shouldn't break most CSS themes, but if you use this feature, please test and review how these render.
+  * The `layer-conversation-selected` and `onConversationSelected` events no longer come with `event.detail.originalEvent`, and now trigger events regardless of whether a selection is done by the user clicking or by your app setting `conversationList.selectedId = conversationId`
+
+* Adds component template info to the API Reference
+* Better support for Previewing a message before its sent:
+  * Use `message.presend()` instead of `message.send()` to see a preview of a message in the Message List without sending it
+  * MessageHandlers will now call `onRender` instead of `onRerender` when there is a change to a message that has not been sent
+* Adds the `isMessageListItem` property to `<layer-message-item-sent />` and `<layer-message-item-received />`
+* Text renderers:
+  * On processing text handlers, `isMessageListItem` will be passed as an argument, allowing you to skip rendering some content
+    if we are NOT in a Message List (i.e. a `layer-notifier`, or the Last Message of a `<layer-conversation-item />`
+  * Text renderers that add an `afterText` will ONLY have `afterText` rendered for MessageListItems even if your app tries to populate them elsewhere.
+  * Text renderers `afterText` will get unique CSS classes based on the handler name: `layer-message-text-plain-${handlerName}`
+* File Upload widget now has an `accept` attribute; see https://www.w3schools.com/tags/att_input_accept.asp for usage
+* Adds `endOfMessagesNode` to `<layer-conversation-panel />` allowing for a customizable message to be displayed when the user
+  has scrolled/paged to the top of a conversation, and there are no more messages to load.
+* Adds `dataLoadingNode` to all lists allowing for a customizable message to be displayed when the data is being paged in.
+* #21: Fixes error where `registerMessageComponent` isn't exposed by the `layerUI` object.
+* All list widgets now have a `scrollToItem(item)` method for scrolling to a specified Message, Conversation, Identity, etc...
+* Adds an onDestroy state, and some sanity checks around `widget.properties._internalState.onDestroyCalled` to ignore calls executed on destroyed widgets
+* Adds mocks to simplify tests involving requestAnimationFrame on scrolling
+* `<layer-identities-list />` now uses `onclick` instead of `onchange` events
+
 # 1.0.1
 
 * No longer requires client to be available on `layerUI.init()`; now waits for client to be available

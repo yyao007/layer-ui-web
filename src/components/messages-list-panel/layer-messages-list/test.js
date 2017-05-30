@@ -1,5 +1,5 @@
 describe('layer-messages-list', function() {
-  var el, testRoot, client, conversation, query, user1;
+  var el, testRoot, client, conversation, query, user1, restoreAnimatedScrollTo, animatedScrollIndex = 1;
 
   beforeAll(function(done) {
     if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
@@ -8,6 +8,16 @@ describe('layer-messages-list', function() {
 
   beforeEach(function() {
     jasmine.clock().install();
+    restoreAnimatedScrollTo = layerUI.animatedScrollTo;
+    spyOn(layerUI, "animatedScrollTo").and.callFake(function(node, position, duration, callback) {
+      var timeoutId = setTimeout(function() {
+        node.scrollTop = position;
+        if (callback) callback();
+      }, duration);
+      return function() {
+        clearTimeout(timeoutId);
+      };
+    });
 
     client = new layer.Client({
       appId: 'layer:///apps/staging/Fred'
@@ -54,15 +64,17 @@ describe('layer-messages-list', function() {
     el.style.height = '300px';
 
     layer.Util.defer.flush();
-    jasmine.clock().tick(500);
+    jasmine.clock().tick(800);
   });
 
   afterEach(function() {
+    layerUI.animatedScrollTo = restoreAnimatedScrollTo;
     document.body.removeChild(testRoot);
     if (el) el.onDestroy();
     jasmine.clock().uninstall();
     layer.Client.removeListenerForNewClient();
   });
+
 
   describe("The disable property", function() {
     it("Should scroll to bottom and stick to bottom when turned off", function() {
@@ -282,40 +294,25 @@ describe('layer-messages-list', function() {
     });
   });
 
-  describe("The animateScrollTo() method", function() {
-    beforeEach(function(done) {
-      jasmine.clock().uninstall();
-      setTimeout(done, 1000);
+  describe("The animatedScrollTo() method", function() {
+    it("Should scroll to the specified position", function() {
+      el.animatedScrollTo(55);
+      jasmine.clock().tick(350);
+      expect(el.scrollTop).toEqual(55);
     });
 
-    it("Should scroll to the specified position", function(done) {
-      el.animateScrollTo(55);
-      setTimeout(function() {
-        expect(el.scrollTop).toEqual(55);
-        done();
-      }, 2000);
-    });
-
-    it("Should check for visibility", function(done) {
-      setTimeout(function() {
+    it("Should check for visibility", function() {
         spyOn(el, "_checkVisibility");
-        el.animateScrollTo(55);
-        setTimeout(function() {
-          expect(el._checkVisibility).toHaveBeenCalledWith();
-          done();
-        }, 1500);
-      }, 1000);
+        el.animatedScrollTo(55);
+        jasmine.clock().tick(350);
+        expect(el._checkVisibility).toHaveBeenCalledWith();
     });
 
-    it("Should not cause paging of the query", function(done) {
-      setTimeout(function() {
+    it("Should not cause paging of the query", function() {
         spyOn(query, "update");
-        el.animateScrollTo(55);
-        setTimeout(function() {
-          expect(query.update).not.toHaveBeenCalled();
-          done();
-        }, 1500);
-      }, 1000);
+        el.animatedScrollTo(55);
+        jasmine.clock().tick(350);
+        expect(query.update).not.toHaveBeenCalled();
     });
   });
 
@@ -409,23 +406,23 @@ describe('layer-messages-list', function() {
     it("Should mark the first message as read", function() {
       el.childNodes[2].item.isRead = false;
       el.scrollTop = 0;
-      el._markAsRead(el.childNodes[2]);
-      expect(el.childNodes[2].item.isRead).toBe(true);
+      el._markAsRead(el.childNodes[1]);
+      expect(el.childNodes[1].item.isRead).toBe(true);
     });
 
     it("Should not mark the first message as read if disabled", function() {
-      el.childNodes[2].item.isRead = false;
+      el.childNodes[1].item.isRead = false;
       el.scrollTop = 0;
       el.properties.disable = true;
-      el._markAsRead(el.childNodes[2]);
-      expect(el.childNodes[2].item.isRead).toBe(false);
+      el._markAsRead(el.childNodes[1]);
+      expect(el.childNodes[1].item.isRead).toBe(false);
     });
 
     it("Should not mark the first message as read if scrolled partially out of view", function() {
-      el.childNodes[2].item.isRead = false;
+      el.childNodes[1].item.isRead = false;
       el.scrollTop = 40;
-      el._markAsRead(el.childNodes[2]);
-      expect(el.childNodes[2].item.isRead).toBe(false);
+      el._markAsRead(el.childNodes[1]);
+      expect(el.childNodes[1].item.isRead).toBe(false);
     });
 
     it("Should  mark the 50th message as read if scrolled into view", function() {
@@ -608,34 +605,30 @@ describe('layer-messages-list', function() {
   });
 
   describe("The _renderResetData() method", function() {
-    it("Should reset listData", function() {
-      el.properties.listData = query.data;
-      query.reset();
-      expect(el.properties.listData.length).toEqual(0);
-      expect(query.data).not.toBe(el.properties.listData);
-    });
 
     it("Should reset the scroll position", function() {
       el.scrollTop = 100;
       expect(el.scrollTop > 0).toBe(true);
-      query.reset();
+      el._renderResetData();
       expect(el.scrollTop > 0).toBe(false);
     });
 
-    it("Should empty the list of items, but still contain a loadingIndicator node", function() {
+    it("Should empty the list of items, but still contain a loadingIndicator, emptyList, and endOfListIndicator node", function() {
       el.onRender();
       jasmine.clock().tick(150);
       expect(el.childNodes.length > 2).toBe(true);
-      query.reset();
+      el._renderResetData();
       expect(el.childNodes.length > 2).toBe(false);
-      expect(el.childNodes[1].classList.contains('layer-load-indicator')).toBe(true);
+      expect(el.querySelector('.layer-load-indicator').classList.contains).not.toBe(null);
+      expect(el.querySelector('.layer-end-of-results-indicator').classList.contains).not.toBe(null);
+      expect(el.querySelector('.layer-empty-list').classList.contains).not.toBe(null);
     });
 
     it("Should reset assorted state", function() {
       el.properties.stuckToBottom = false;
       el.properties.lastPagedAt = 5;
       el.properties.isSelfScrolling = true;
-      query.reset();
+      el._renderResetData();
       expect(el.properties.stuckToBottom).toEqual(true);
       expect(el.properties.lastPagedAt).toEqual(0);
       expect(el.properties.isSelfScrolling).toEqual(false);
@@ -687,14 +680,14 @@ describe('layer-messages-list', function() {
       var queryData = [].concat(query.data).reverse();
       var mid5 = queryData[5].id;
       var midNext = queryData[6].id;
-      expect(el.childNodes[7].item.id).toEqual(mid5);
+      expect(el.childNodes[6].item.id).toEqual(mid5);
 
       // Run
       queryData[5].destroy();
       jasmine.clock().tick(1);
 
       // Posttest
-      expect(el.childNodes[7].item.id).toEqual(midNext);
+      expect(el.childNodes[6].item.id).toEqual(midNext);
     });
   });
 
@@ -728,7 +721,7 @@ describe('layer-messages-list', function() {
 
       var newElement = el.querySelector('#' + el._getItemId(message.id));
       expect(newElement.item).toBe(message);
-      expect(newElement).toBe(el.childNodes[80 + 2]); // + 2 for loadingIndicator and emptyNode
+      expect(newElement).toBe(el.childNodes[80 + 1]); // + 1 for list header
     });
 
     it("Should insert a list item at the proper index take 2", function() {
@@ -747,7 +740,7 @@ describe('layer-messages-list', function() {
 
       var newElement = el.querySelector('#' + el._getItemId(message.id));
       expect(newElement.item).toBe(message);
-      expect(newElement).toBe(el.childNodes[80 + 2]); // + 2 for loadingIndicator and emptyNode
+      expect(newElement).toBe(el.childNodes[80 + 1]); // + 1 for list header
     });
 
     it("Should call _gatherAndProcessAffectedItems on 3 items before and 3 items after the inserted item", function() {
@@ -848,7 +841,7 @@ describe('layer-messages-list', function() {
     it("Should scroll to bottom if stuck to bottom and new item is bottom", function() {
       var message = conversation.createMessage("What the???");
       el.properties.stuckToBottom = true;
-      spyOn(el, "animateScrollTo");
+      spyOn(el, "animatedScrollTo");
       // Run
       query.data.push(message);
       query._triggerChange({
@@ -860,7 +853,7 @@ describe('layer-messages-list', function() {
 
       // Posttest
       jasmine.clock().tick(200);
-      expect(el.animateScrollTo).toHaveBeenCalledWith(el.scrollHeight - el.clientHeight);
+      expect(el.animatedScrollTo).toHaveBeenCalledWith(el.scrollHeight - el.clientHeight);
     });
 
     it("Should _checkVisibility rather than scroll if not stuck to bottom", function() {
@@ -907,17 +900,17 @@ describe('layer-messages-list', function() {
   describe("The _findFirstVisibleItem() method", function() {
     it("Should return first item", function() {
       el.scrollTop = 0;
-      expect(el._findFirstVisibleItem()).toBe(el.childNodes[2]);
+      expect(el._findFirstVisibleItem()).toBe(el.childNodes[1]);
     });
 
     it("Should return second item", function() {
-      el.scrollTo(el.childNodes[3].offsetTop + el.childNodes[0].offsetTop);
-      expect(el._findFirstVisibleItem()).toBe(el.childNodes[3]);
+      el.scrollTo(el.childNodes[2].offsetTop - el.offsetTop);
+      expect(el._findFirstVisibleItem()).toBe(el.childNodes[2]);
     });
 
     it("Should return third item", function() {
-      el.scrollTo(el.childNodes[4].offsetTop + el.childNodes[0].offsetTop);
-      expect(el._findFirstVisibleItem()).toBe(el.childNodes[4]);
+      el.scrollTo(el.childNodes[3].offsetTop - el.offsetTop);
+      expect(el._findFirstVisibleItem()).toBe(el.childNodes[3]);
     });
   });
 
@@ -937,7 +930,7 @@ describe('layer-messages-list', function() {
     it("Should call _renderPagedDataDone with top 3 items and two new items", function() {
       spyOn(el, "_renderPagedDataDone");
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
-      var affectedItems = [messages[1], messages[0], el.childNodes[2].item, el.childNodes[3].item, el.childNodes[4].item];
+      var affectedItems = [messages[1], messages[0], el.childNodes[1].item, el.childNodes[2].item, el.childNodes[3].item];
       el._renderPagedData({type: 'data', data: messages});
       jasmine.clock().tick(1000);
       expect(el._renderPagedDataDone).toHaveBeenCalledWith(affectedItems, jasmine.any(DocumentFragment), {type: 'data', data: messages});
@@ -959,15 +952,15 @@ describe('layer-messages-list', function() {
       var fragment = el._generateFragment(messages);
       spyOn(el, "_processAffectedWidgets");
       el._renderPagedDataDone([query.data[99], query.data[98], messages[0], messages[1]], fragment, {type: 'data', data: messages});
-      expect(el._processAffectedWidgets).toHaveBeenCalledWith(jasmine.arrayContaining([el.childNodes[2], el.childNodes[3], el.childNodes[4], el.childNodes[4]]), true);
+      expect(el._processAffectedWidgets).toHaveBeenCalledWith(jasmine.arrayContaining([el.childNodes[1], el.childNodes[2], el.childNodes[3], el.childNodes[3]]), true);
     });
 
-    it("Should insert the Document Fragment just after the loading indicator", function() {
+    it("Should insert the Document Fragment just after the list header", function() {
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el._generateFragment(messages);
       el._renderPagedDataDone([query.data[99], query.data[98], messages[0], messages[1]], fragment, {type: 'data', data: messages});
-      expect(el.childNodes[1].classList.contains('layer-load-indicator')).toBe(true);
-      expect(el.childNodes[2].item).toBe(messages[0]);
+      expect(el.childNodes[0].classList.contains('layer-list-header')).toBe(true);
+      expect(el.childNodes[1].item).toBe(messages[0]);
     });
 
     it("Should scroll to bottom if stuck to bottom", function() {
@@ -977,6 +970,7 @@ describe('layer-messages-list', function() {
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el._generateFragment(messages);
       el._renderPagedDataDone([query.data[99], query.data[98], messages[0], messages[1]], fragment, {type: 'data', data: messages});
+      layer.Util.defer.flush();
       expect(el.scrollTo).toHaveBeenCalledWith(el.scrollHeight - el.clientHeight);
     });
 
@@ -988,6 +982,7 @@ describe('layer-messages-list', function() {
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el._generateFragment(messages);
       el._renderPagedDataDone([query.data[99], query.data[98], messages[0], messages[1]], fragment, {type: 'data', data: messages});
+      layer.Util.defer.flush();
 
       // What was the 11th item is now the 13th item
       expect(el.scrollTo).toHaveBeenCalledWith(el.childNodes[13].offsetTop - el.firstChild.offsetTop);

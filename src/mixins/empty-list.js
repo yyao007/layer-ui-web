@@ -5,7 +5,7 @@
  */
 module.exports = {
   properties: {
-/**
+    /**
      * If the query has no data and is not loading data, this should be true.
      *
      * @property {Boolean} [isEmptyList=false]

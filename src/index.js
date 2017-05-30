@@ -45,6 +45,8 @@ require('./handlers/text/youtube');
 require('./utils/date-separator');
 
 LayerUI.files = require('./utils/files');
+LayerUI.animatedScrollTo = require('animated-scrollto');
+
 LayerUI.mixins = {
   MessageHandler: require('./mixins/message-handler'),
   HasQuery: require('./mixins/has-query'),

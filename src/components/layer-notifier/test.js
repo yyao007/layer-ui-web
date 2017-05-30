@@ -32,6 +32,7 @@ if (window.Notification) {
       layer.Util.defer.flush();
     });
     afterEach(function() {
+      layer.Util.defer.reset();
       document.body.removeChild(testRoot);
       layer.Client.removeListenerForNewClient();
     });
