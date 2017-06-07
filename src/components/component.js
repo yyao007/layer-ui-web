@@ -1438,6 +1438,12 @@ const standardClassMethods = {
     return Array.prototype.slice.call(this.querySelectorAll(selector));
   },
 
+  toggleClass: function toggleClass(...args) {
+    const cssClass = args[0];
+    const enable = (args.length === 2) ? args[1] : !this.classList.contains(cssClass);
+    this.classList[enable ? 'add' : 'remove'](cssClass);
+  },
+
   /**
    * MIXIN HOOK: Each time a Component is initialized, its onCreate methods will be called.
    *

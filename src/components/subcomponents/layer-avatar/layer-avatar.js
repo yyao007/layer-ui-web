@@ -43,12 +43,14 @@
  * @class layerUI.components.subcomponents.Avatar
  * @extends layerUI.components.Component
  */
+import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import '../layer-presence/layer-presence';
 import SizeProperty from '../../../mixins/size-property';
+import MainComponent from '../../../mixins/main-component';
 
 registerComponent('layer-avatar', {
-  mixins: [SizeProperty],
+  mixins: [SizeProperty, MainComponent],
   properties: {
 
     /**
@@ -66,6 +68,16 @@ registerComponent('layer-avatar', {
         }
         if (!newValue) newValue = [];
         if (!Array.isArray(newValue)) newValue = [newValue];
+        newValue = newValue.map((identity) => {
+          if (identity instanceof Layer.Identity) {
+            return identity;
+          } else {
+            return this.client.getIdentity(identity.id);
+          }
+        });
+        this.properties.users = newValue;
+
+
         // classList.toggle doesn't work right in IE 11
         this.classList[newValue.length ? 'add' : 'remove']('layer-has-user');
         this.onRender();

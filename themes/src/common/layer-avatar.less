@@ -1,12 +1,12 @@
 
 layer-avatar {
   span:not(.layer-text-avatar) {
-    border: solid 1px rgb(219, 222, 228)
+    border: solid 1px @color-avatar-background;
   }
   span.layer-text-avatar {
-    border: solid 1px white;
-    background-color: rgb(219, 222, 228);
-    color: #ffffff;
+    border: solid 1px @color-white;
+    background-color: @color-avatar-background;
+    color: @color-avatar-text;
   }
 
   &.layer-has-user {
@@ -20,7 +20,7 @@ layer-avatar {
     margin-right: 0px;
     &:before {
       content: " ";
-      border: solid 2px white;
+      border: solid 2px @color-white;
       position: absolute;
       border-radius: 16px;
       top: -2px;
@@ -30,7 +30,7 @@ layer-avatar {
     }
     &.layer-presence-invisible:before {
       content: " ";
-      border: solid 2px white;
+      border: solid 2px @color-white;
       position: absolute;
       top: -4px;
       bottom: -4px;
@@ -59,7 +59,7 @@ layer-avatar {
   }
 
   &.layer-avatar-cluster > span:not(.layer-text-avatar) {
-      box-shadow: 0 0 1px 1px white
+      box-shadow: 0 0 1px 1px @color-white
   }
 
   &.layer-size-small {

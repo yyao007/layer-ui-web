@@ -1,0 +1,198 @@
+/**
+ * Styles for Conversation Items that appear within the Conversation List widget
+ *
+ * From left-to-right we have roughly:
+ * 1. Avatar or Presence
+ * 2. Title
+ * 3. Date
+ * 4. Last Message
+ *
+ * TODO: Titles that list names should highlight which users are present
+ */
+layer-conversation-item {
+
+  /* Style a basic Conversation Item.  Note that it may be better to put
+   * background color on layer-conversations-list rather than layer-conversation-item
+   */
+  .layer-list-item {
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    border-bottom: @border-list-item;
+    &:not(:first-child) {
+      border-top: @border-list-item;
+    }
+    padding-right: 12px;
+  }
+
+  /* Style the selected Conversation Item */
+  &.layer-selected-item  .layer-list-item {
+    border-left: 3px solid @color-lightblue;
+  }
+
+  &.layer-size-large .layer-list-item {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-height: 72px;
+
+    layer-conversation-title {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    layer-date {
+      font-size: 12px;
+    }
+
+    layer-conversation-last-message {
+      display: block;
+    }
+  }
+
+  &.layer-size-medium .layer-list-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    min-height: 60px;
+
+    layer-conversation-title {
+      font-size: 16px;
+    }
+
+    layer-date {
+      font-size: 12px;
+    }
+  }
+
+  &.layer-size-small .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 48px;
+
+    layer-conversation-title {
+      font-size: 14px;
+    }
+
+    layer-date {
+      font-size: 10px;
+    }
+  }
+  &.layer-size-tiny .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 32px;
+
+    layer-conversation-title {
+      font-size: 14px;
+    }
+
+    layer-date {
+      display: none;
+    }
+  }
+
+
+   /**
+    * 1. Avatar or Presence
+    */
+   layer-avatar {
+     margin: 0px 12px;
+   }
+
+   layer-presence.presence-without-avatar, .layer-group-counter {
+     margin: 0px 8px 0px 12px;
+   }
+
+   .layer-group-counter {
+    font-size: 8px;
+    font-weight: bold;
+    color: @color-conversation-group-count;
+    border: solid 1px @color-conversation-group-count;
+    border-radius: 4px;
+    width: 12px;
+    height: 12px;
+    text-align: center;
+   }
+
+
+
+  /**
+   * Conversation Titles have 3 states:
+   * A. Normal
+   * B. Unread
+   * C. Selected
+   */
+  layer-conversation-title {
+    color: @color-conversation-item-title;
+    font-weight: normal;
+
+    margin-right: 10px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &.layer-conversation-unread-messages layer-conversation-title {
+    font-weight: bold;
+  }
+
+
+  /**
+   * Dates have 3 states:
+   * A. Normal
+   * B. Unread
+   * C. Selected
+   */
+  layer-date {
+    color: @color-conversation-item-read;
+  }
+
+  &.layer-conversation-unread-messages layer-date {
+    color: @color-conversation-item-unread;
+  }
+
+  layer-conversation-last-message {
+    display: none;
+  }
+
+  /**
+   * Conversation Last Messages have 3 states:
+   * A. Normal
+   * B. Unread
+   * C. Selected
+   */
+   layer-conversation-last-message {
+      font-size: 14px;
+      color: @color-conversation-item-read;
+      overflow-y: hidden;
+   }
+
+
+   &.layer-conversation-unread-messages layer-conversation-last-message {
+      color: @color-conversation-item-unread;
+   }
+
+   &.layer-selected-item  layer-conversation-last-message {
+
+   }
+
+
+  /**
+   * Conversation Delete button has 2 states:
+   * A. Normal
+   * B. Selected
+   * C. Selected
+   */
+   layer-delete {
+      visibility: hidden;
+    }
+
+    &.layer-selected-item layer-delete {
+      visibility: visible;
+      opacity: 0.2;
+      padding: 2px 4px 8px;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+}
+
+

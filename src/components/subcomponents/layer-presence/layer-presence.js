@@ -89,11 +89,14 @@ registerComponent('layer-presence', {
       },
     },
 
+    // See SizeProperty Mixin...
     size: {
       value: 'small',
     },
+
+    // See SizeProperty Mixin...
     supportedSizes: {
-      value: ['small', 'medium', 'large']
+      value: ['small', 'medium', 'large'],
     },
   },
   methods: {

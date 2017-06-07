@@ -174,6 +174,10 @@ module.exports = {
     messageStatusRenderer: {},
   },
   methods: {
+    onCreate: function onCreate() {
+      this.classList.add('layer-message-item');
+    },
+
     onRender: function onRender() {
       try {
 

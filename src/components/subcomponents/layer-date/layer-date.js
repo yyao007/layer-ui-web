@@ -36,6 +36,8 @@ registerComponent('layer-date', {
     /**
      * Date to be rendered
      *
+     * TODO: We do not need seconds in a typical date output; need to investigate how to do that with localizations
+     *
      * @property {Date} [date=null]
      */
     date: {

@@ -1,25 +1,28 @@
+/*
+ * TODO: Presence icon that represents multiple people (just shows the number of people and no presence info)
+ */
 layer-presence {
   margin-left: 12px;
   margin-right: 8px;
   &.layer-presence-away {
-    background-color: rgb(245, 166, 35);
+    background-color: @color-away;
   }
 
   &.layer-presence-busy {
-    background-color: rgb(208, 2, 27);
+    background-color: @color-busy;
   }
 
   &.layer-presence-available {
-    background-color: rgb(126, 214, 37);
+    background-color: @color-available;
   }
 
   &.layer-presence-offline {
-    background-color: rgb(219, 219, 219);
+    background-color: @color-offline;
   }
 
   &.layer-presence-invisible {
-    background-color: #FFFFFF;
-    border: solid #50C062;
+    background-color: transparent;
+    border: solid @color-invisible;
   }
 
   &.layer-size-small {
@@ -56,6 +59,4 @@ layer-presence {
       border-width: 2px;
     }
   }
-
-
 }

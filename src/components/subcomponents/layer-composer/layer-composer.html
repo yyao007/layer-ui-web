@@ -11,20 +11,16 @@
         padding: 1px 0px;
       }
       layer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {
-        line-height: 1.2em;
         min-height: 20px;
         overflow :hidden;
         border-width: 0px;
         font-size: 1em;
-        padding: 4px 8px;
         box-sizing: border-box;
-        font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
         margin: 0px;
       }
       layer-composer textarea {
         resize: none;
         outline: none;
-        color: rgba(0,0,0,0.87);
         position: absolute;
         z-index: 2;
         top: 0px;
@@ -56,7 +52,7 @@
   <div class='layer-compose-edit-panel' layer-id='editPanel'>
     <div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div>
     <div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div>
-    <textarea rows="1" layer-id='input'></textarea>
+    <textarea required='true' rows="1" layer-id='input'></textarea>
   </div>
   <layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>
 </template>

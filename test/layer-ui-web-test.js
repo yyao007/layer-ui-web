@@ -1028,7 +1028,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '1.0.2';
+layerUI.version = '2.0.0';
 
 var clientVersions = _layerWebsdk2.default.Client.version.split('.').map(function (value) {
   return Number(value);
@@ -2534,6 +2534,12 @@ var standardClassMethods = {
     return Array.prototype.slice.call(this.querySelectorAll(selector));
   },
 
+  toggleClass: function toggleClass() {
+    var cssClass = arguments.length <= 0 ? undefined : arguments[0];
+    var enable = arguments.length === 2 ? arguments.length <= 1 ? undefined : arguments[1] : !this.classList.contains(cssClass);
+    this.classList[enable ? 'add' : 'remove'](cssClass);
+  },
+
   /**
    * MIXIN HOOK: Each time a Component is initialized, its onCreate methods will be called.
    *
@@ -2901,6 +2907,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
       var isRead = !this.item.lastMessage || this.item.lastMessage.isRead;
 
+      this.nodes.groupCounter.innerHTML = users.length;
+      this.toggleClass('layer-group-conversation', users.length > 1);
+      this.toggleClass('layer-direct-message-conversation', users.length === 1);
       this.nodes.timestamp.date = this.item.lastMessage ? this.item.lastMessage.sentAt : null;
       this.nodes.avatar.users = users;
       this.nodes.presence.item = users.length === 1 ? users[0] : null;
@@ -2952,8 +2961,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='timestamp' date-or-time='true'></layer-date></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div><!-- <layer-delete layer-id='delete'></layer-delete> --></div>", "");
-  layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item .layer-list-item layer-avatar {\nmargin-right: 15px;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='timestamp' date-or-time='true'></layer-date></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div><!-- <layer-delete layer-id='delete'></layer-delete> --></div>", "");
+  layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item .layer-list-item layer-avatar {\nmargin-right: 15px;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../../mixins/list-item-selection":46,"../../../mixins/size-property":54,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-delete/layer-delete":25}],8:[function(require,module,exports){
 /**
@@ -3296,7 +3305,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div>", "");
-  layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list":50,"../../../mixins/list-load-indicator":48,"../../../mixins/list-selection":49,"../../../mixins/main-component":51,"../../../mixins/size-property":54,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":77}],9:[function(require,module,exports){
 /**
@@ -3654,7 +3663,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
-  layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":45,"../../../mixins/list":50,"../../../mixins/list-load-indicator":48,"../../../mixins/main-component":51,"../layer-identity-item/layer-identity-item":10,"layer-websdk":77}],10:[function(require,module,exports){
 /**
@@ -5423,7 +5432,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
-  layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ntext-align: center;\nborder-top: solid 1px #ccc;\nfont-style: italic;\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../mixins/list":50,"../../../mixins/list-selection":49,"../../../mixins/main-component":51,"../../component":5,"../layer-membership-item/layer-membership-item":13,"layer-websdk":77}],15:[function(require,module,exports){
 /**
@@ -5608,6 +5617,10 @@ module.exports = {
     messageStatusRenderer: {}
   },
   methods: {
+    onCreate: function onCreate() {
+      this.classList.add('layer-message-item');
+    },
+
     onRender: function onRender() {
       try {
 
@@ -5712,8 +5725,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-message-body-and-avatar'><layer-avatar layer-id='avatar' show-presence='false'></layer-avatar><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div></div><div class='layer-sender-info'><div class='layer-sender-name' layer-id='sender'></div><layer-date layer-id='date'></layer-date></div></div>", "");
-  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-body-and-avatar {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received .layer-message-item-main .layer-message-item-content {\nmax-width: 90%;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-message-body-and-avatar'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div></div><div class='layer-sender-info'><div class='layer-sender-name' layer-id='sender'></div><layer-date layer-id='date'></layer-date></div></div>", "");
+  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-body-and-avatar {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../layer-message-item-mixin":15}],17:[function(require,module,exports){
 'use strict';
@@ -5744,7 +5757,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-message-body-and-avatar' layer-id='messageRow'><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><div class='layer-avatar-delete-panel'><layer-avatar layer-id='avatar' show-presence='false'></layer-avatar><layer-delete layer-id='delete'></layer-delete></div></div><div class='layer-sender-info layer-sender-details'><div class='layer-sender-name' layer-id='sender'></div><layer-message-status layer-id='status'></layer-message-status><layer-date layer-id='date'></layer-date></div></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-message-body-and-avatar' layer-id='messageRow'><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><div class='layer-avatar-delete-panel'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><layer-delete layer-id='delete'></layer-delete></div></div><div class='layer-sender-info layer-sender-details'><div class='layer-sender-name' layer-id='sender'></div><layer-message-status layer-id='status'></layer-message-status><layer-date layer-id='date'></layer-date></div></div>", "");
   layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-body-and-avatar {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: inline-block;\ntext-align: right;\nmax-width: 90%;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-avatar-delete-panel {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":47,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../../subcomponents/layer-delete/layer-delete":25,"../../subcomponents/layer-message-status/layer-message-status":27,"../layer-message-item-mixin":15}],18:[function(require,module,exports){
@@ -6526,6 +6539,10 @@ var PAGING_DELAY = 2000;
  */
 'use strict';
 
+var _layerWebsdk = require('layer-websdk');
+
+var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
+
 var _component = require('../../../components/component');
 
 require('../layer-presence/layer-presence');
@@ -6534,10 +6551,14 @@ var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
+var _mainComponent = require('../../../mixins/main-component');
+
+var _mainComponent2 = _interopRequireDefault(_mainComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-avatar', {
-  mixins: [_sizeProperty2.default],
+  mixins: [_sizeProperty2.default, _mainComponent2.default],
   properties: {
 
     /**
@@ -6549,6 +6570,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     users: {
       set: function set(newValue, oldValue) {
+        var _this = this;
+
         if (oldValue && newValue && newValue.length === oldValue.length) {
           var matches = newValue.filter(function (identity) {
             return oldValue.indexOf(identity) !== -1;
@@ -6557,6 +6580,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         }
         if (!newValue) newValue = [];
         if (!Array.isArray(newValue)) newValue = [newValue];
+        newValue = newValue.map(function (identity) {
+          if (identity instanceof _layerWebsdk2.default.Identity) {
+            return identity;
+          } else {
+            return _this.client.getIdentity(identity.id);
+          }
+        });
+        this.properties.users = newValue;
+
         // classList.toggle doesn't work right in IE 11
         this.classList[newValue.length ? 'add' : 'remove']('layer-has-user');
         this.onRender();
@@ -6624,7 +6656,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     _renderUser: function _renderUser(user, users) {
-      var _this = this;
+      var _this2 = this;
 
       var span = document.createElement('span');
       if (user.avatarUrl && !this.properties.failedToLoadImage) {
@@ -6633,7 +6665,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         span.appendChild(img);
         img.onerror = function () {
           img.parentNode.removeChild(img);
-          span.innerHTML = _this._getUserText(user);
+          span.innerHTML = _this2._getUserText(user);
           span.classList.add('layer-text-avatar');
         };
         img.src = user.avatarUrl;
@@ -6668,7 +6700,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/size-property":54,"../layer-presence/layer-presence":28}],20:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":51,"../../../mixins/size-property":54,"../layer-presence/layer-presence":28,"layer-websdk":77}],20:[function(require,module,exports){
 /**
  * Provides a Button Panel for adding custom actions to the layerUI.Composer panel.
  *
@@ -7130,8 +7162,8 @@ var TAB = 9;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-composer", "<layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>", "");
-  layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nline-height: 1.2em;\nmin-height: 20px;\noverflow :hidden;\nborder-width: 0px;\nfont-size: 1em;\npadding: 4px 8px;\nbox-sizing: border-box;\nfont-family: \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;\nmargin: 0px;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\ncolor: rgba(0,0,0,0.87);\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nwidth: 100%;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-composer", "<layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea required='true' rows=\"1\" layer-id='input'></textarea></div><layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>", "");
+  layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nmin-height: 20px;\noverflow :hidden;\nborder-width: 0px;\nfont-size: 1em;\nbox-sizing: border-box;\nmargin: 0px;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nwidth: 100%;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../layer-compose-button-panel/layer-compose-button-panel":20,"layer-websdk":77}],22:[function(require,module,exports){
 /**
@@ -7407,6 +7439,8 @@ var _component = require('../../../components/component');
 
     /**
      * Date to be rendered
+     *
+     * TODO: We do not need seconds in a typical date output; need to investigate how to do that with localizations
      *
      * @property {Date} [date=null]
      */
@@ -7982,9 +8016,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     },
 
+    // See SizeProperty Mixin...
     size: {
       value: 'small'
     },
+
+    // See SizeProperty Mixin...
     supportedSizes: {
       value: ['small', 'medium', 'large']
     }
@@ -9091,6 +9128,7 @@ require('./components/identities-list-panel/layer-identities-list/layer-identiti
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
 require('./components/layer-conversation-panel/layer-conversation-panel');
 require('./components/layer-notifier/layer-notifier');
+require('./components/subcomponents/layer-presence/layer-presence');
 
 // Load standard utilities
 require('./components/subcomponents/layer-file-upload-button/layer-file-upload-button');
@@ -9136,6 +9174,7 @@ require('./components/identities-list-panel/layer-identities-list/layer-identiti
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
 require('./components/layer-conversation-panel/layer-conversation-panel');
 require('./components/layer-notifier/layer-notifier');
+require('./components/subcomponents/layer-presence/layer-presence');
 
 // Load standard utilities
 require('./components/subcomponents/layer-file-upload-button/layer-file-upload-button');
@@ -9168,7 +9207,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-send-button/layer-send-button":29,"./handlers/message/layer-message-image/layer-message-image":31,"./handlers/message/layer-message-text-plain":32,"./handlers/message/layer-message-video":34,"./handlers/text/autolinker":35,"./handlers/text/code-blocks":36,"./handlers/text/emoji":37,"./handlers/text/images":38,"./handlers/text/newline":39,"./handlers/text/youtube":40,"./layer-ui":42,"./mixins/focus-on-keydown":44,"./mixins/has-query":45,"./mixins/list":50,"./mixins/list-item":47,"./mixins/list-item-selection":46,"./mixins/list-selection":49,"./mixins/main-component":51,"./mixins/message-handler":52,"./utils/date-separator":56,"./utils/files":57,"animated-scrollto":60}],42:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-presence/layer-presence":28,"./components/subcomponents/layer-send-button/layer-send-button":29,"./handlers/message/layer-message-image/layer-message-image":31,"./handlers/message/layer-message-text-plain":32,"./handlers/message/layer-message-video":34,"./handlers/text/autolinker":35,"./handlers/text/code-blocks":36,"./handlers/text/emoji":37,"./handlers/text/images":38,"./handlers/text/newline":39,"./handlers/text/youtube":40,"./layer-ui":42,"./mixins/focus-on-keydown":44,"./mixins/has-query":45,"./mixins/list":50,"./mixins/list-item":47,"./mixins/list-item-selection":46,"./mixins/list-selection":49,"./mixins/main-component":51,"./mixins/message-handler":52,"./utils/date-separator":56,"./utils/files":57,"animated-scrollto":60}],42:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
