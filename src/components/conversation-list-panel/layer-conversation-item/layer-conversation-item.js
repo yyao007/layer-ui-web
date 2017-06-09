@@ -18,7 +18,7 @@ import ListItem from '../../../mixins/list-item';
 import ListItemSelection from '../../../mixins/list-item-selection';
 import SizeProperty from '../../../mixins/size-property';
 import '../../subcomponents/layer-conversation-last-message/layer-conversation-last-message';
-import '../../subcomponents/layer-delete/layer-delete';
+import '../../subcomponents/layer-menu-button/layer-menu-button';
 import '../../subcomponents/layer-avatar/layer-avatar';
 import '../../subcomponents/layer-conversation-title/layer-conversation-title';
 
@@ -83,9 +83,14 @@ registerComponent('layer-conversation-item', {
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large'],
     },
+
+    menuOptions: {
+      set() {
+        this.nodes.menuButton.options = this.properties.menuOptions;
+      },
+    },
   },
   methods: {
-
     onRender() {
       this.onRerender();
     },

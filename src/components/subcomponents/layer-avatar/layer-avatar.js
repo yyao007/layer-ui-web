@@ -44,6 +44,7 @@
  * @extends layerUI.components.Component
  */
 import Layer from 'layer-websdk';
+
 import { registerComponent } from '../../../components/component';
 import '../layer-presence/layer-presence';
 import SizeProperty from '../../../mixins/size-property';
@@ -62,10 +63,17 @@ registerComponent('layer-avatar', {
      */
     users: {
       set(newValue, oldValue) {
+        if (Array.isArray(newValue)) {
+          newValue = newValue.map(user => (user instanceof Layer.Identity ? user : this.client.getIdentity(user.id)));
+          this.properties.users = newValue;
+        }
+
+        // If nothing changed other than the array pointer, do nothing
         if (oldValue && newValue && newValue.length === oldValue.length) {
           const matches = newValue.filter(identity => oldValue.indexOf(identity) !== -1);
           if (matches !== newValue.length) return;
         }
+
         if (!newValue) newValue = [];
         if (!Array.isArray(newValue)) newValue = [newValue];
         newValue = newValue.map((identity) => {
@@ -79,7 +87,7 @@ registerComponent('layer-avatar', {
 
 
         // classList.toggle doesn't work right in IE 11
-        this.classList[newValue.length ? 'add' : 'remove']('layer-has-user');
+        this.toggleClass('layer-has-user', newValue.length);
         this.onRender();
       },
     },
@@ -123,7 +131,11 @@ registerComponent('layer-avatar', {
       }
 
       // Render each user
-      this.users.forEach(this._renderUser.bind(this));
+      if (this.users.length === 1) {
+        this._renderUser(this.users[0]);
+      } else {
+        this._sortMultiAvatars().forEach(this._renderUser.bind(this));
+      }
 
       // Add the "cluster" css if rendering multiple users
       // No classList.toggle due to poor IE11 support
@@ -150,17 +162,50 @@ registerComponent('layer-avatar', {
         span.appendChild(img);
         img.onerror = () => {
           img.parentNode.removeChild(img);
-          span.innerHTML = this._getUserText(user);
-          span.classList.add('layer-text-avatar');
+          this._setupTextAvatar(span, user);
         };
         img.src = user.avatarUrl;
       } else {
-        span.classList.add('layer-text-avatar');
-        span.innerHTML = this._getUserText(user);
+        this._setupTextAvatar(span, user);
       }
       this.appendChild(span);
     },
-    _getUserText(user) {
+
+    _setupTextAvatar(node, user) {
+      const text = this.onGenerateInitials(user);
+      node.innerHTML = text;
+      node.classList[text ? 'add' : 'remove']('layer-text-avatar');
+      node.classList[!text ? 'add' : 'remove']('layer-empty-avatar');
+    },
+
+    /**
+     * MIXIN HOOK: Replace this with your own initial generator
+     *
+     * A user's intitials are put into an avatar if no image is present.
+     * You can replace Layer's method for coming up with initials with your own:
+     *
+     * ```
+     * layerUI.init({
+     *   mixins: {
+     *     'layer-avatar': {
+     *        methods: {
+     *          onGenerateInitials: {
+     *            mode: layerUI.Component.MODES.OVERWRITE, // replace existing mechanism
+     *            value: function onGenerateInitials() {
+     *              return 'OO';
+     *            }
+     *          }
+     *        }
+     *      }
+     *   }
+     * });
+     * ```
+     *
+     * @method
+     * @param {layer.Identity} user
+     * @returns {String}
+     */
+    onGenerateInitials(user) {
       // Use first and last name if provided
       if (user.firstName && user.lastName) {
         return user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
@@ -176,7 +221,24 @@ registerComponent('layer-avatar', {
       else {
         return user.displayName.substring(0, 2).toUpperCase();
       }
-    }
+    },
+
+    _sortMultiAvatars() {
+      return this.users
+          .filter(user => !user.sessionOwner)
+          .sort((userA, userB) => {
+            if (userA.type === 'BOT' && userB.type !== 'BOT') return 1;
+            if (userB.type === 'BOT' && userA.type !== 'BOT') return -1;
+            if (userA.avatarUrl && !userB.avatarUrl) return -1;
+            if (userB.avatarUrl && !userA.avatarUrl) return 1;
+            if (!userA.avatarUrl) {
+              if (this.onGenerateInitials(userA) && !this.onGenerateInitials(userB)) return -1;
+              if (this.onGenerateInitials(userB) && !this.onGenerateInitials(userA)) return 1;
+            }
+            if (this.users.indexOf(userA) > this.users.indexOf(userB)) return 1;
+            return -1;
+          });
+    },
   },
 });
 

@@ -72,23 +72,41 @@ registerComponent('layer-conversation-title', {
         if (!conversation) {
           this.innerHTML = '';
         } else {
-          let title = conversation.metadata.conversationName ||
-            conversation.metadata.title;
+          let title = conversation.metadata.conversationName;
           if (!title) {
-            const userNames = conversation.participants
+            const users = conversation.participants
               .filter(user => !user.sessionOwner) // don't show the user their own name
-              .filter(user => user.displayName)   // don't show users who lack a name
-              .map(user => user.displayName);     // replace identity object with the name
-
-            if (userNames.length) {
-              title = userNames.join(', ').replace(/, ([^,]*)$/, ' and $1');
+              .filter(user => user.displayName);
+            if (users.length === 1) {
+              title = users[0].displayName;
             } else {
-              title = 'No Title';
+              const sortedUsers = this._sortNames();
+              const sortedNames = sortedUsers.slice(0, 3).map(user => user.firstName || user.lastName || user.displayName);
+              let names = sortedNames.join(', ');
+              if (sortedUsers.length > 3) names += '&#8230;';
+              title = names || 'No Title';
             }
           }
           if (title !== this.innerHTML) this.innerHTML = title;
         }
       }
+    },
+
+    _sortNames() {
+      const participants = this.item.participants;
+      return participants
+          .filter(user => !user.sessionOwner)
+          .filter(user => user.firstName || user.lastName || user.displayName)
+          .sort((userA, userB) => {
+            if ((!userA.firstName && !userA.lastName) && (userB.firstName || userB.lastName)) return 1;
+            if ((userA.firstName || userA.lastName) && (!userB.firstName && !userB.lastName)) return -1;
+            if (!userA.firstName && !userA.lastName) {
+              if (userA.displayName && !userB.displayName) return -1;
+              if (!userA.displayName && userB.displayName) return 1;
+            }
+            if (participants.indexOf(userA) > participants.indexOf(userB)) return 1;
+            return -1;
+          });
     },
   },
 });

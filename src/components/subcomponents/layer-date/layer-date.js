@@ -32,6 +32,33 @@ import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-date', {
   properties: {
+    format: {
+      value: {},
+      set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.format = JSON.parse(value);
+          } catch (e) {
+            this.properties.format = {};
+          }
+        }
+        this.onRender();
+      },
+    },
+
+    todayFormat: {
+      value: {},
+      set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.todayFormat = JSON.parse(value);
+          } catch (e) {
+            this.properties.todayFormat = {};
+          }
+        }
+        this.onRender();
+      },
+    },
 
     /**
      * Date to be rendered
@@ -42,21 +69,8 @@ registerComponent('layer-date', {
      */
     date: {
       set(value) {
-        if (value) {
-          if (this.dateRenderer) {
-            this.value = this.dateRenderer(value);
-          } else {
-            const dateStr = value.toLocaleDateString();
-            const timeStr = value.toLocaleTimeString();
-            if (this.dateOrTime) {
-              this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr;
-            } else {
-              this.value = new Date().toLocaleDateString() === dateStr ? timeStr : dateStr + ' ' + timeStr;
-            }
-          }
-        } else {
-          this.value = '';
-        }
+        this.setAttribute('title', value ? value.toLocaleString() : '');
+        this.onRender();
       },
     },
 
@@ -86,8 +100,44 @@ registerComponent('layer-date', {
      */
     dateRenderer: {},
 
-    dateOrTime: {
-      type: Boolean,
+    /**
+     * Values are 'always', 'never', 'ifold'.
+     */
+    showYear: {
+      value: 'ifold',
+    },
+  },
+  methods: {
+    onRender: function onRender() {
+      const value = this.date;
+      if (value) {
+        if (this.dateRenderer) {
+          this.value = this.dateRenderer(value);
+        } else {
+          const today = new Date();
+          const isToday = value.toLocaleDateString() === today.toLocaleDateString();
+          const formatSrc = isToday ? this.todayFormat : this.format;
+          const isThisYear = today.getFullYear() === value.getFullYear();
+          const monthsDiff = today.getMonth() - value.getMonth() + (12 * (today.getFullYear() - value.getFullYear()));
+          const isWithinSixMonths = monthsDiff < 6;
+          const format = {};
+          Object.keys(formatSrc).forEach(name => (format[name] = formatSrc[name]));
+
+          if (!format.year) {
+            switch (this.showYear) {
+              case 'always':
+                format.year = 'numeric';
+                break;
+              case 'ifold':
+                if (!isThisYear && !isWithinSixMonths) format.year = 'numeric';
+                break;
+            }
+          }
+          this.value = value.toLocaleString('lookup', format);
+        }
+      } else {
+        this.value = '';
+      }
     },
   },
 });

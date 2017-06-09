@@ -36,7 +36,6 @@ layer-conversation-item {
 
     layer-conversation-title {
       font-size: 16px;
-      margin-bottom: 6px;
     }
 
     layer-date {
@@ -44,6 +43,7 @@ layer-conversation-item {
     }
 
     layer-conversation-last-message {
+      margin-top: 6px;
       display: block;
     }
   }
@@ -176,23 +176,26 @@ layer-conversation-item {
 
 
   /**
-   * Conversation Delete button has 2 states:
+   * Conversation Menu button
    * A. Normal
    * B. Selected
    * C. Selected
    */
-   layer-delete {
-      visibility: hidden;
-    }
+   layer-menu-button {
+      opacity: 0.1;
+      font-size: 20px;
+      top: -6px;
+      right: -4px;
+      color: @color-conversation-item-menu-button;
+      padding: 0px 4px;
 
-    &.layer-selected-item layer-delete {
-      visibility: visible;
-      opacity: 0.2;
-      padding: 2px 4px 8px;
       &:hover {
-        opacity: 0.8;
+        color: @color-black;
       }
-    }
+   }
+   &:hover layer-menu-button {
+      opacity: 1;
+   }
 }
 
 

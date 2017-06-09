@@ -14,13 +14,12 @@ layer-messages-list .layer-message-item.layer-list-item-first .layer-list-item {
 }
 
 /* Styling for Message Groups */
-layer-message-item-sent.layer-list-item-last, layer-message-item-received.layer-list-item-last {
+layer-message-item-sent, layer-message-item-received {
 
-  .layer-sender-info {
+  .layer-sender-name, layer-date, layer-message-status {
     color: @color-message-item-status;
     font-size: 0.8em;
     margin-top: 4px;
-    display: block;
     layer-date {
       display: inline;
     }
@@ -31,10 +30,12 @@ layer-message-item-sent.layer-list-item-last, layer-message-item-received.layer-
   }
 }
 
-// Last message in group of sent messages
 layer-message-item-sent {
   .layer-sender-info {
     margin-right: 32px + 12px + 12px; // avatar has 12px right, 12px left and is 32px wide
+    layer-date, layer-message-status {
+      display: inline-block;
+    }
   }
   .layer-sender-name {
     display: none;
@@ -43,13 +44,25 @@ layer-message-item-sent {
     display: inline-block;
     margin-right: 5px;
   }
+
+  &.layer-list-item-last {
+    .layer-sender-info {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
 }
 
 // Last message in group of received messages
 layer-message-item-received {
   /* Position the senders name */
-  .layer-sender-name {
-    display: inline-block;
+  .layer-sender-name, layer-date {
+    display: none;
+  }
+  &.layer-list-item-first .layer-sender-name,
+  &.layer-list-item-last layer-date {
+    display: block;
     margin-right: 5px;
     margin-left: 55px;
   }
@@ -62,7 +75,7 @@ layer-messages-list {
    * or if the message is not the last message in the Message Group.
    */
   layer-avatar:not(.layer-has-user),
-  &:not(.layer-list-item-last) layer-avatar {
+  .layer-message-item:not(.layer-list-item-last) layer-avatar {
     height: 0px;
     overflow: hidden;
   }

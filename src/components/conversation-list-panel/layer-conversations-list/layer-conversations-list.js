@@ -269,10 +269,39 @@ registerComponent('layer-conversations-list', {
       },
     },
 
+    /**
+     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
+     * but not to the currently generated items.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.menuOptions = [
+     *  {text: "label1", method: method1},
+     *  {text: "label2", method: method2},
+     *  {text: "label3", method: method3}
+     * ];
+     * ```
+     *
+     * Method is called with the associated layer.Conversation as input.
+     *
+     * @property {Object[]}
+     */
+    menuOptions: {
+      value: [
+        {
+          text: 'delete',
+          method(item) {
+            item.delete(Layer.Constants.DELETION_MODE.ALL);
+          },
+        },
+      ],
+    },
+
     size: {
       value: 'medium',
       set(size) {
-        for (var i = 0; i < this.childNodes.length; i++) {
+        for (let i = 0; i < this.childNodes.length; i++) {
           this.childNodes[i].size = size;
         }
       },
@@ -298,6 +327,7 @@ registerComponent('layer-conversations-list', {
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       conversationWidget.size = this.size;
+      conversationWidget.menuOptions = this.menuOptions;
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
     },
