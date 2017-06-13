@@ -32,14 +32,14 @@ import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-date', {
   properties: {
-    format: {
-      value: {},
+    defaultFormat: {
+      value: { hour: '2-digit', minute: '2-digit' },
       set(value) {
         if (typeof value === 'string') {
           try {
-            this.properties.format = JSON.parse(value);
+            this.properties.defaultFormat = JSON.parse(value);
           } catch (e) {
-            this.properties.format = {};
+            this.properties.defaultFormat = {};
           }
         }
         this.onRender();
@@ -47,13 +47,37 @@ registerComponent('layer-date', {
     },
 
     todayFormat: {
-      value: {},
       set(value) {
         if (typeof value === 'string') {
           try {
             this.properties.todayFormat = JSON.parse(value);
           } catch (e) {
-            this.properties.todayFormat = {};
+            // No-op
+          }
+        }
+        this.onRender();
+      },
+    },
+
+    weekFormat: {
+      set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.weekFormat = JSON.parse(value);
+          } catch (e) {
+            // No-op
+          }
+        }
+        this.onRender();
+      },
+    },
+    olderFormat: {
+      set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.olderFormat = JSON.parse(value);
+          } catch (e) {
+            // No-op
           }
         }
         this.onRender();
@@ -99,13 +123,6 @@ registerComponent('layer-date', {
      * @property {Function} [dateRender=null]
      */
     dateRenderer: {},
-
-    /**
-     * Values are 'always', 'never', 'ifold'.
-     */
-    showYear: {
-      value: 'ifold',
-    },
   },
   methods: {
     onRender: function onRender() {
@@ -116,23 +133,20 @@ registerComponent('layer-date', {
         } else {
           const today = new Date();
           const isToday = value.toLocaleDateString() === today.toLocaleDateString();
-          const formatSrc = isToday ? this.todayFormat : this.format;
+          const isWeek = value.getTime() > today.getTime() - 6 * 24 * 60 * 60 * 1000;
           const isThisYear = today.getFullYear() === value.getFullYear();
-          const monthsDiff = today.getMonth() - value.getMonth() + (12 * (today.getFullYear() - value.getFullYear()));
-          const isWithinSixMonths = monthsDiff < 6;
-          const format = {};
-          Object.keys(formatSrc).forEach(name => (format[name] = formatSrc[name]));
 
-          if (!format.year) {
-            switch (this.showYear) {
-              case 'always':
-                format.year = 'numeric';
-                break;
-              case 'ifold':
-                if (!isThisYear && !isWithinSixMonths) format.year = 'numeric';
-                break;
-            }
+          let format;
+          if (isToday && this.todayFormat) {
+            format = this.todayFormat;
+          } else if (isWeek && this.weekFormat) {
+            format = this.weekFormat;
+          } else if (!isThisYear && this.olderFormat) {
+            format = this.olderFormat;
+          } else {
+            format = this.defaultFormat;
           }
+
           this.value = value.toLocaleString('lookup', format);
         }
       } else {

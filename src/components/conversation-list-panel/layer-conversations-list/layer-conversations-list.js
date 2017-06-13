@@ -298,8 +298,40 @@ registerComponent('layer-conversations-list', {
       ],
     },
 
+    /**
+     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
+     * but not to the currently generated items.
+     *
+     * Use this to configure how dates are rendered.
+     * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString for details
+     * on the parameters that are supported by `toLocaleString`.
+     *
+     * There are four supported inputs
+     *
+     * * `today`: How to render dates that are today
+     * * `week`: How to render dates that are not today, but within a 6 of today (note if today is
+     *   wednesday, 1 week ago is also wednesday, and rendering `wednesday` would be confusing, so its 6 rather than 7 days.
+     * * `default`: The default format to use
+     * * `older`: The format to use for dates that are in a different year and more than 6 months in the past
+     *
+     * Example:
+     *
+     * ```
+     * widget.dateFormat = {
+     *    today: {"hour": "numeric", "minute": "numeric"},
+     *    week: {"weekday": "short"},
+     *    default: {"month": "short", "day": "2-digit"},
+     *    older: {"month": "short", "year": "numeric"}
+     * }
+     * ```
+     *
+     * @property {Object}
+     */
+    dateFormat: {},
+
+
     size: {
-      value: 'medium',
+      value: 'large',
       set(size) {
         for (let i = 0; i < this.childNodes.length; i++) {
           this.childNodes[i].size = size;
@@ -309,6 +341,8 @@ registerComponent('layer-conversations-list', {
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large'],
     },
+
+
   },
   methods: {
     /**
@@ -327,7 +361,9 @@ registerComponent('layer-conversations-list', {
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       conversationWidget.size = this.size;
-      conversationWidget.menuOptions = this.menuOptions;
+      if (this.menuOptions) conversationWidget.menuOptions = this.menuOptions;
+      if (this.dateFormat) conversationWidget.dateFormat = this.dateFormat;
+
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
     },

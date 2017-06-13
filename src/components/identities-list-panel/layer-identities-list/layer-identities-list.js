@@ -44,11 +44,11 @@ import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';
 import HasQuery from '../../../mixins/has-query';
 import ListLoadIndicator from '../../../mixins/list-load-indicator';
+import SizeProperty from '../../../mixins/size-property';
 import '../layer-identity-item/layer-identity-item';
 
 registerComponent('layer-identities-list', {
-  mixins: [List, MainComponent, HasQuery, ListLoadIndicator],
-
+  mixins: [List, MainComponent, HasQuery, ListLoadIndicator, SizeProperty],
 
   /**
    * The user has clicked to select an Identity in the Identities List.
@@ -174,6 +174,19 @@ registerComponent('layer-identities-list', {
         });
         this._renderSelection();
       },
+    },
+
+    size: {
+      value: 'large',
+      set(size) {
+        for (let i = 0; i < this.childNodes.length; i++) {
+          this.childNodes[i].size = size;
+        }
+      },
+    },
+
+    supportedSizes: {
+      value: ['small', 'medium', 'large'],
     },
 
     /**

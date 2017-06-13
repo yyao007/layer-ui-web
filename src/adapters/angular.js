@@ -103,7 +103,7 @@ function initAngular(angular) {
 
     controllers.directive(controllerName, () => {
       return {
-        retrict: 'E',
+        restrict: 'E',
         link: (scope, elem, attrs) => {
           const functionProps = component.properties;
           setupProps(scope, elem[0], attrs, functionProps);

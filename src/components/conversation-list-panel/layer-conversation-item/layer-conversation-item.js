@@ -70,7 +70,7 @@ registerComponent('layer-conversation-item', {
     canFullyRenderLastMessage: {},
 
     size: {
-      value: 'medium',
+      value: 'large',
       set(size) {
         Object.keys(this.nodes).forEach((nodeName) => {
           const node = this.nodes[nodeName];
@@ -80,8 +80,18 @@ registerComponent('layer-conversation-item', {
         });
       },
     },
+
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large'],
+    },
+
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short' },
+        older: { month: 'short', year: 'numeric' },
+        default: { month: 'short', day: 'numeric' },
+      },
     },
 
     menuOptions: {
@@ -91,6 +101,13 @@ registerComponent('layer-conversation-item', {
     },
   },
   methods: {
+    onAfterCreate() {
+      const dateFormat = this.dateFormat;
+      if (dateFormat && this.nodes.timestamp) {
+        Object.keys(dateFormat).forEach(formatName => (this.nodes.timestamp[formatName + 'Format'] = dateFormat[formatName]));
+      }
+    },
+
     onRender() {
       this.onRerender();
     },
@@ -102,7 +119,18 @@ registerComponent('layer-conversation-item', {
       this.nodes.groupCounter.innerHTML = users.length;
       this.toggleClass('layer-group-conversation', users.length > 1);
       this.toggleClass('layer-direct-message-conversation', users.length === 1);
-      this.nodes.timestamp.date = this.item.lastMessage ? this.item.lastMessage.sentAt : null;
+      if (!this.item.lastMessage) {
+        this.nodes.timestamp.value = '';
+      } else if (this.item.lastMessage.isNew()) {
+        this.item.lastMessage.on('messages:change', this.onRerender, this);
+        this.nodes.timestamp.value = '';
+      } else if (this.item.lastMessage.isSaving()) {
+        this.nodes.timestamp.value = 'Pending'; // LOCALIZE!
+        this.item.lastMessage.on('messages:change', this.onRerender, this);
+      } else {
+        this.item.lastMessage.off('messages:change', this.onRerender, this);
+        this.nodes.timestamp.date = this.item.lastMessage.sentAt;
+      }
       this.nodes.avatar.users = users;
       this.nodes.presence.item = users.length === 1 ? users[0] : null;
       this.classList[isRead ? 'remove' : 'add']('layer-conversation-unread-messages');

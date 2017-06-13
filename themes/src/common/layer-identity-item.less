@@ -1,0 +1,69 @@
+layer-identity-item {
+
+  /* Style a basic Conversation Item.  Note that it may be better to put
+   * background color on layer-identities-list rather than layer-identity-item
+   */
+  .layer-list-item {
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    border-bottom: @border-list-item;
+    &:not(:first-child) {
+      border-top: @border-list-item;
+    }
+    padding-right: 12px;
+    padding-left: 12px;
+    box-sizing: border-box;
+
+    input[type=checkbox] {
+      margin-left: 12px;
+    }
+
+    .layer-identity-name {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  &.layer-size-large .layer-list-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    min-height: 60px;
+
+    .layer-identity-name {
+      font-size: 16px;
+    }
+
+    layer-avatar {
+      margin-right: 12px;
+    }
+  }
+
+  &.layer-size-medium .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 48px;
+
+    .layer-identity-name {
+      font-size: 14px;
+    }
+
+    layer-avatar {
+      margin-right: 12px;
+    }
+  }
+
+  &.layer-size-small .layer-list-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    min-height: 32px;
+
+    .layer-identity-name {
+      font-size: 16px;
+    }
+
+    layer-avatar {
+      margin-right: 8px;
+    }
+  }
+}

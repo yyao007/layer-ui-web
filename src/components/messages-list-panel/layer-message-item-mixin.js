@@ -158,6 +158,15 @@ module.exports = {
      */
     dateRenderer: {},
 
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
+        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+      },
+    },
+
     /**
      * Provide property to override the function used to render a date for each Message Item.
      *
@@ -176,6 +185,13 @@ module.exports = {
   methods: {
     onCreate: function onCreate() {
       this.classList.add('layer-message-item');
+    },
+
+    onAfterCreate() {
+      const dateFormat = this.dateFormat;
+      if (dateFormat && this.nodes.date) {
+        Object.keys(dateFormat).forEach(formatName => (this.nodes.date[formatName + 'Format'] = dateFormat[formatName]));
+      }
     },
 
     onRender: function onRender() {

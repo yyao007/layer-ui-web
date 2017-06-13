@@ -111,7 +111,7 @@ function initAngular(angular) {
 
     controllers.directive(controllerName, function () {
       return {
-        retrict: 'E',
+        restrict: 'E',
         link: function link(scope, elem, attrs) {
           var functionProps = component.properties;
           setupProps(scope, elem[0], attrs, functionProps);
@@ -2881,7 +2881,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     canFullyRenderLastMessage: {},
 
     size: {
-      value: 'medium',
+      value: 'large',
       set: function set(size) {
         var _this = this;
 
@@ -2893,8 +2893,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         });
       }
     },
+
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large']
+    },
+
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short' },
+        older: { month: 'short', year: 'numeric' },
+        default: { month: 'short', day: 'numeric' }
+      }
     },
 
     menuOptions: {
@@ -2904,6 +2914,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
+    onAfterCreate: function onAfterCreate() {
+      var _this2 = this;
+
+      var dateFormat = this.dateFormat;
+      if (dateFormat && this.nodes.timestamp) {
+        Object.keys(dateFormat).forEach(function (formatName) {
+          return _this2.nodes.timestamp[formatName + 'Format'] = dateFormat[formatName];
+        });
+      }
+    },
     onRender: function onRender() {
       this.onRerender();
     },
@@ -2916,7 +2936,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.nodes.groupCounter.innerHTML = users.length;
       this.toggleClass('layer-group-conversation', users.length > 1);
       this.toggleClass('layer-direct-message-conversation', users.length === 1);
-      this.nodes.timestamp.date = this.item.lastMessage ? this.item.lastMessage.sentAt : null;
+      if (!this.item.lastMessage) {
+        this.nodes.timestamp.value = '';
+      } else if (this.item.lastMessage.isNew()) {
+        this.item.lastMessage.on('messages:change', this.onRerender, this);
+        this.nodes.timestamp.value = '';
+      } else if (this.item.lastMessage.isSaving()) {
+        this.nodes.timestamp.value = 'Pending'; // LOCALIZE!
+        this.item.lastMessage.on('messages:change', this.onRerender, this);
+      } else {
+        this.item.lastMessage.off('messages:change', this.onRerender, this);
+        this.nodes.timestamp.date = this.item.lastMessage.sentAt;
+      }
       this.nodes.avatar.users = users;
       this.nodes.presence.item = users.length === 1 ? users[0] : null;
       this.classList[isRead ? 'remove' : 'add']('layer-conversation-unread-messages');
@@ -2967,7 +2998,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='timestamp' today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"month\": \"short\", \"day\": \"2-digit\"}' ></layer-date><layer-menu-button layer-id='menuButton'></layer-menu-button></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='timestamp'></layer-date><layer-menu-button layer-id='menuButton'></layer-menu-button></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div></div>", "");
   layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item .layer-list-item layer-avatar {\nmargin-right: 15px;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/list-item-selection":48,"../../../mixins/size-property":56,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-menu-button/layer-menu-button":27}],8:[function(require,module,exports){
@@ -3293,8 +3324,39 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }]
     },
 
+    /**
+     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
+     * but not to the currently generated items.
+     *
+     * Use this to configure how dates are rendered.
+     * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString for details
+     * on the parameters that are supported by `toLocaleString`.
+     *
+     * There are four supported inputs
+     *
+     * * `today`: How to render dates that are today
+     * * `week`: How to render dates that are not today, but within a 6 of today (note if today is
+     *   wednesday, 1 week ago is also wednesday, and rendering `wednesday` would be confusing, so its 6 rather than 7 days.
+     * * `default`: The default format to use
+     * * `older`: The format to use for dates that are in a different year and more than 6 months in the past
+     *
+     * Example:
+     *
+     * ```
+     * widget.dateFormat = {
+     *    today: {"hour": "numeric", "minute": "numeric"},
+     *    week: {"weekday": "short"},
+     *    default: {"month": "short", "day": "2-digit"},
+     *    older: {"month": "short", "year": "numeric"}
+     * }
+     * ```
+     *
+     * @property {Object}
+     */
+    dateFormat: {},
+
     size: {
-      value: 'medium',
+      value: 'large',
       set: function set(size) {
         for (var i = 0; i < this.childNodes.length; i++) {
           this.childNodes[i].size = size;
@@ -3304,6 +3366,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large']
     }
+
   },
   methods: {
     /**
@@ -3321,7 +3384,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       conversationWidget.size = this.size;
-      conversationWidget.menuOptions = this.menuOptions;
+      if (this.menuOptions) conversationWidget.menuOptions = this.menuOptions;
+      if (this.dateFormat) conversationWidget.dateFormat = this.dateFormat;
+
       if (this.filter) conversationWidget._runFilter(this.filter);
       return conversationWidget;
     }
@@ -3343,6 +3408,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/list-selection":51,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":79}],9:[function(require,module,exports){
 /**
+<<<<<<< HEAD
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
  * This is typically used for creating/updating Conversation participant lists.
@@ -3383,6 +3449,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @mixin layerUI.mixins.ListLoadIndicator
  */
 'use strict';
+=======
+     * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
+     *
+     * This is typically used for creating/updating Conversation participant lists.
+     *
+     * This Component can be added to your project directly in the HTML file:
+     *
+     * ```
+     * <layer-identities-list></layer-identities-list>
+     * ```
+     *
+     * Or via DOM Manipulation:
+     *
+     * ```javascript
+     * var identitylist = document.createElement('layer-identities-list');
+     * ```
+     *
+     * And then its properties can be set as:
+     *
+     * ```javascript
+     * var identityList = document.querySelector('layer-identities-list');
+     * identityList.selectedIdentities = [identity3, identity6];
+     * identityList.onIdentitySelected = identityList.onIdentityDeselected = function(evt) {
+     *    log("The new selected users are: ", identityList.selectedIdentities);
+     * }
+     * ```
+     *
+     * ## Events
+     *
+     * Events listed here come from either this component, or its subcomponents.
+     *
+     * * {@link layerUI.components.IdentitiesListPanel.List#layer-identity-deselected layer-identity-deselected}: User has clicked to unselect an Identity
+     * * {@link layerUI.components.IdentitiesListPanel.List#layer-identity-selected layer-identity-selected}: User has clicked to select an Identity
+     *
+     * @class layerUI.components.IdentitiesListPanel.List
+     * @extends layerUI.components.Component
+     * @mixin layerUI.mixins.List
+     * @mixin layerUI.mixins.MainComponent
+     */'use strict';
+>>>>>>> Temp
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3402,16 +3508,26 @@ var _hasQuery = require('../../../mixins/has-query');
 
 var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
+<<<<<<< HEAD
 var _listLoadIndicator = require('../../../mixins/list-load-indicator');
 
 var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
+=======
+var _sizeProperty = require('../../../mixins/size-property');
+
+var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
+>>>>>>> Temp
 
 require('../layer-identity-item/layer-identity-item');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-identities-list', {
+<<<<<<< HEAD
   mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default],
+=======
+  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _sizeProperty2.default],
+>>>>>>> Temp
 
   /**
    * The user has clicked to select an Identity in the Identities List.
@@ -3539,6 +3655,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         });
         this._renderSelection();
       }
+    },
+
+    size: {
+      value: 'large',
+      set: function set(size) {
+        for (var i = 0; i < this.childNodes.length; i++) {
+          this.childNodes[i].size = size;
+        }
+      }
+    },
+
+    supportedSizes: {
+      value: ['small', 'medium', 'large']
     },
 
     /**
@@ -3699,6 +3828,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
+<<<<<<< HEAD
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/main-component":53,"../layer-identity-item/layer-identity-item":10,"layer-websdk":79}],10:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
@@ -3712,6 +3842,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @extends layerUI.components.Component
  */
 'use strict';
+=======
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":51,"../../../mixins/main-component":52,"../../../mixins/size-property":54,"../layer-identity-item/layer-identity-item":10,"layer-websdk":77}],10:[function(require,module,exports){
+/**
+     * The Layer User Item represents a single user within a User List.
+     *
+     * This widget could be used to represent a User elsewhere, in places where a `<layer-avatar />` is insufficient.
+     *
+     * This widget includes a checkbox for selection.
+     *
+     * @class layerUI.components.IdentitiesListPanel.Item
+     * @mixin layerUI.mixins.ListItem
+     * @extends layerUI.components.Component
+     */'use strict';
+>>>>>>> Temp
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3723,13 +3867,16 @@ var _listItem = require('../../../mixins/list-item');
 
 var _listItem2 = _interopRequireDefault(_listItem);
 
+var _sizeProperty = require('../../../mixins/size-property');
+
+var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
+
 require('../../subcomponents/layer-avatar/layer-avatar');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-identity-item', {
-  mixins: [_listItem2.default],
+  mixins: [_listItem2.default, _sizeProperty2.default],
   properties: {
 
     /**
@@ -3750,6 +3897,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       get: function get() {
         return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.properties.selected);
       }
+    },
+
+    size: {
+      value: 'large',
+      set: function set(size) {
+        var _this = this;
+
+        Object.keys(this.nodes).forEach(function (nodeName) {
+          var node = _this.nodes[nodeName];
+          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
+            node.size = size;
+          }
+        });
+      }
+    },
+
+    supportedSizes: {
+      value: ['small', 'medium', 'large']
     }
   },
   methods: {
@@ -3849,14 +4014,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-identity-name' layer-id='title'></label><input type='checkbox' layer-id='checkbox'></input></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}", "");
 })();
+<<<<<<< HEAD
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":79}],11:[function(require,module,exports){
+=======
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/size-property":54,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":77}],11:[function(require,module,exports){
+>>>>>>> Temp
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -4391,6 +4561,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       },
       set: function set(value) {
         this.nodes.list.getMessageDeleteEnabled = value;
+      }
+    },
+
+    /**
+     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
+     * but not to the currently generated items.
+     *
+     * Use this to configure how dates are rendered.
+     * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString for details
+     * on the parameters that are supported by `toLocaleString`.
+     *
+     * There are four supported inputs
+     *
+     * * `today`: How to render dates that are today
+     * * `week`: How to render dates that are not today, but within a 6 of today (note if today is
+     *   wednesday, 1 week ago is also wednesday, and rendering `wednesday` would be confusing, so its 6 rather than 7 days.
+     * * `default`: The default format to use
+     * * `older`: The format to use for dates that are in a different year and more than 6 months in the past
+     *
+     * Example:
+     *
+     * ```
+     * widget.dateFormat = {
+     *    today: {"hour": "numeric", "minute": "numeric"},
+     *    week: {"weekday": "short"},
+     *    default: {"month": "short", "day": "2-digit"},
+     *    older: {"month": "short", "year": "numeric"}
+     * }
+     * ```
+     *
+     * @property {Object}
+     */
+    dateFormat: {
+      set: function set() {
+        this.nodes.list.dateFormat = this.dateFormat;
       }
     },
 
@@ -5635,6 +5840,15 @@ module.exports = {
      */
     dateRenderer: {},
 
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
+        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }
+      }
+    },
+
     /**
      * Provide property to override the function used to render a date for each Message Item.
      *
@@ -5654,6 +5868,18 @@ module.exports = {
     onCreate: function onCreate() {
       this.classList.add('layer-message-item');
     },
+
+    onAfterCreate: function onAfterCreate() {
+      var _this = this;
+
+      var dateFormat = this.dateFormat;
+      if (dateFormat && this.nodes.date) {
+        Object.keys(dateFormat).forEach(function (formatName) {
+          return _this.nodes.date[formatName + 'Format'] = dateFormat[formatName];
+        });
+      }
+    },
+
 
     onRender: function onRender() {
       try {
@@ -5718,7 +5944,7 @@ module.exports = {
      * @private
      */
     _applyContentTag: function _applyContentTag() {
-      var _this = this;
+      var _this2 = this;
 
       var messageHandler = document.createElement(this._contentTag);
       messageHandler.parentComponent = this;
@@ -5728,7 +5954,7 @@ module.exports = {
       this.nodes.content.appendChild(messageHandler);
       _layerWebsdk2.default.Util.defer(function () {
         if (messageHandler.style.height) {
-          _this.nodes.content.style.height = messageHandler.style.height;
+          _this2.nodes.content.style.height = messageHandler.style.height;
         }
       });
     }
@@ -5973,6 +6199,37 @@ var PAGING_DELAY = 2000;
      * @property {Function}
      */
     getMessageDeleteEnabled: {},
+
+    /**
+     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
+     * but not to the currently generated items.
+     *
+     * Use this to configure how dates are rendered.
+     * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleString for details
+     * on the parameters that are supported by `toLocaleString`.
+     *
+     * There are four supported inputs
+     *
+     * * `today`: How to render dates that are today
+     * * `week`: How to render dates that are not today, but within a 6 of today (note if today is
+     *   wednesday, 1 week ago is also wednesday, and rendering `wednesday` would be confusing, so its 6 rather than 7 days.
+     * * `default`: The default format to use
+     * * `older`: The format to use for dates that are in a different year and more than 6 months in the past
+     *
+     * Example:
+     *
+     * ```
+     * widget.dateFormat = {
+     *    today: {"hour": "numeric", "minute": "numeric"},
+     *    week: {"weekday": "short"},
+     *    default: {"month": "short", "day": "2-digit"},
+     *    older: {"month": "short", "year": "numeric"}
+     * }
+     * ```
+     *
+     * @property {Object}
+     */
+    dateFormat: {},
 
     /**
      * Disable read receipts and other behaviors; typically used when the widget has been hidden from view.
@@ -6240,6 +6497,7 @@ var PAGING_DELAY = 2000;
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
         messageWidget.getDeleteEnabled = this.getMessageDeleteEnabled;
+        if (this.dateFormat) messageWidget.dateFormat = this.dateFormat;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
         return messageWidget;
@@ -7553,14 +7811,14 @@ var _component = require('../../../components/component');
 
 (0, _component.registerComponent)('layer-date', {
   properties: {
-    format: {
-      value: {},
+    defaultFormat: {
+      value: { hour: '2-digit', minute: '2-digit' },
       set: function set(value) {
         if (typeof value === 'string') {
           try {
-            this.properties.format = JSON.parse(value);
+            this.properties.defaultFormat = JSON.parse(value);
           } catch (e) {
-            this.properties.format = {};
+            this.properties.defaultFormat = {};
           }
         }
         this.onRender();
@@ -7568,13 +7826,37 @@ var _component = require('../../../components/component');
     },
 
     todayFormat: {
-      value: {},
       set: function set(value) {
         if (typeof value === 'string') {
           try {
             this.properties.todayFormat = JSON.parse(value);
           } catch (e) {
-            this.properties.todayFormat = {};
+            // No-op
+          }
+        }
+        this.onRender();
+      }
+    },
+
+    weekFormat: {
+      set: function set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.weekFormat = JSON.parse(value);
+          } catch (e) {
+            // No-op
+          }
+        }
+        this.onRender();
+      }
+    },
+    olderFormat: {
+      set: function set(value) {
+        if (typeof value === 'string') {
+          try {
+            this.properties.olderFormat = JSON.parse(value);
+          } catch (e) {
+            // No-op
           }
         }
         this.onRender();
@@ -7619,14 +7901,7 @@ var _component = require('../../../components/component');
      *
      * @property {Function} [dateRender=null]
      */
-    dateRenderer: {},
-
-    /**
-     * Values are 'always', 'never', 'ifold'.
-     */
-    showYear: {
-      value: 'ifold'
-    }
+    dateRenderer: {}
   },
   methods: {
     onRender: function onRender() {
@@ -7637,25 +7912,20 @@ var _component = require('../../../components/component');
         } else {
           var today = new Date();
           var isToday = value.toLocaleDateString() === today.toLocaleDateString();
-          var formatSrc = isToday ? this.todayFormat : this.format;
+          var isWeek = value.getTime() > today.getTime() - 6 * 24 * 60 * 60 * 1000;
           var isThisYear = today.getFullYear() === value.getFullYear();
-          var monthsDiff = today.getMonth() - value.getMonth() + 12 * (today.getFullYear() - value.getFullYear());
-          var isWithinSixMonths = monthsDiff < 6;
-          var format = {};
-          Object.keys(formatSrc).forEach(function (name) {
-            return format[name] = formatSrc[name];
-          });
 
-          if (!format.year) {
-            switch (this.showYear) {
-              case 'always':
-                format.year = 'numeric';
-                break;
-              case 'ifold':
-                if (!isThisYear && !isWithinSixMonths) format.year = 'numeric';
-                break;
-            }
+          var format = void 0;
+          if (isToday && this.todayFormat) {
+            format = this.todayFormat;
+          } else if (isWeek && this.weekFormat) {
+            format = this.weekFormat;
+          } else if (!isThisYear && this.olderFormat) {
+            format = this.olderFormat;
+          } else {
+            format = this.defaultFormat;
           }
+
           this.value = value.toLocaleString('lookup', format);
         }
       } else {

@@ -12,10 +12,11 @@
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
+import SizeProperty from '../../../mixins/size-property';
 import '../../subcomponents/layer-avatar/layer-avatar';
 
 registerComponent('layer-identity-item', {
-  mixins: [ListItem],
+  mixins: [ListItem, SizeProperty],
   properties: {
 
     /**
@@ -36,6 +37,22 @@ registerComponent('layer-identity-item', {
       get() {
         return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.properties.selected);
       },
+    },
+
+    size: {
+      value: 'large',
+      set(size) {
+        Object.keys(this.nodes).forEach((nodeName) => {
+          const node = this.nodes[nodeName];
+          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
+            node.size = size;
+          }
+        });
+      },
+    },
+
+    supportedSizes: {
+      value: ['small', 'medium', 'large'],
     },
   },
   methods: {
