@@ -10,9 +10,6 @@
       align-items: center;
     }
 
-    layer-identity-item .layer-list-item layer-avatar {
-      margin-right: 20px;
-    }
     layer-identity-item .layer-list-item label {
       flex-grow: 1;
       width: 100px; /* Flexbox bug */
@@ -23,9 +20,20 @@
     layer-identity-item.layer-identity-item-empty {
       display: none;
     }
+    layer-identity-item layer-presence {
+      display: none;
+    }
+    layer-identity-item.layer-size-small layer-presence {
+      display: block;
+    }
+    layer-identity-item.layer-size-small layer-avatar {
+      display: none;
+    }
+
   </style>
-  <div class='layer-list-item'>
+  <div class='layer-list-item' layer-id='listItem'>
     <layer-avatar layer-id='avatar'></layer-avatar>
+    <layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence>
     <label class='layer-identity-name' layer-id='title'></label>
     <input type='checkbox' layer-id='checkbox'></input>
   </div>

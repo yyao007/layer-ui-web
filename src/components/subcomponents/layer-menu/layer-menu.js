@@ -25,7 +25,7 @@ registerComponent('layer-menu', {
           const menuItem = document.createElement('div');
           menuItem.classList.add('layer-menu-button-menu-item');
           menuItem.innerHTML = option.text;
-          menuItem.addEventListener('click', (evt) => option.method(this.item));
+          menuItem.addEventListener('click', evt => option.method());
           menu.appendChild(menuItem);
         });
         if (this.firstChild) {
@@ -58,8 +58,11 @@ registerComponent('layer-menu', {
       },
     },
 
-    item: {},
-    near: {},
+    near: {
+      set(value) {
+        if (value && this.isShowing) this._showNear(value);
+      },
+    },
   },
   methods: {
 

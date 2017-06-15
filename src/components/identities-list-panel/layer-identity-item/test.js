@@ -106,11 +106,6 @@ describe('layer-identity-item', function() {
       // Posttest
       expect(called).toBe(true);
     });
-
-    it("Should setup the label for attribute", function() {
-      expect(el.nodes.checkbox.id.length > 0).toBe(true);
-      expect(el.nodes.title.getAttribute('for')).toEqual(el.nodes.checkbox.id);
-    });
   });
 
   describe("The _onChange() method", function() {
@@ -395,8 +390,9 @@ describe('layer-identity-item', function() {
     describe("The innerNode property", function() {
       it("Should point to our user data", function() {
         expect(el.innerNode.childNodes[0].tagName).toEqual('LAYER-AVATAR');
-        expect(el.innerNode.childNodes[1].tagName).toEqual('LABEL');
-        expect(el.innerNode.childNodes[2].tagName).toEqual('INPUT');
+        expect(el.innerNode.childNodes[1].tagName).toEqual('LAYER-PRESENCE');
+        expect(el.innerNode.childNodes[2].tagName).toEqual('LABEL');
+        expect(el.innerNode.childNodes[3].tagName).toEqual('INPUT');
       });
     });
 

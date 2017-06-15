@@ -1,15 +1,20 @@
+/*
+ * The Identity Item widget
+ */
 layer-identity-item {
 
-  /* Style a basic Conversation Item.  Note that it may be better to put
-   * background color on layer-identities-list rather than layer-identity-item
+  /*
+   * List items all contain a layer-list-item that contains the real contents of the item.
    */
   .layer-list-item {
+
+    /* Eventually this may be used outside of a list, but for now, these should always appear selectable */
     cursor: pointer;
-    border-left: 3px solid transparent;
-    border-bottom: @border-list-item;
-    &:not(:first-child) {
-      border-top: @border-list-item;
+    * {
+        cursor: pointer;
     }
+    border-bottom: @border-list-item;
+
     padding-right: 12px;
     padding-left: 12px;
     box-sizing: border-box;
@@ -25,6 +30,9 @@ layer-identity-item {
     }
   }
 
+  /*
+   * Manage the different sizes
+   */
   &.layer-size-large .layer-list-item {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -62,7 +70,7 @@ layer-identity-item {
       font-size: 16px;
     }
 
-    layer-avatar {
+    layer-presence.presence-without-avatar {
       margin-right: 8px;
     }
   }

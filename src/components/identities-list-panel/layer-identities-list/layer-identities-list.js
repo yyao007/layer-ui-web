@@ -295,11 +295,10 @@ registerComponent('layer-identities-list', {
     onRerender(evt = {}) {
       switch (evt.type) {
         // If its a remove event, find the user and remove its widget.
-        case 'remove': {
+        case 'remove':
           const removalIndex = this.selectedIdentities.indexOf(evt.target);
           if (removalIndex !== -1) this.selectedIdentities.splice(removalIndex, 1);
           break;
-        }
 
         // If its a reset event, all data is gone, rerender everything.
         case 'reset':
@@ -327,3 +326,4 @@ registerComponent('layer-identities-list', {
     },
   },
 });
+

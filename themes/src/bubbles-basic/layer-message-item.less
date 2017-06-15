@@ -102,12 +102,12 @@ layer-messages-list {
     /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
       * between text and bubble borders.
       */
-    layer-message-text-plain {
+    layer-message-text-plain .layer-message-text {
       padding: 8px 12px;
     }
 
     /* Give all messages the basic bubble treatment */
-    layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+    layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
       border-radius: @color-message-item-border-radius;
     }
 
@@ -141,7 +141,7 @@ layer-messages-list layer-message-item-received {
     }
 
   /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
-  layer-message-text-plain {
+  layer-message-text-plain .layer-message-text {
     color: @color-message-item-bubble-text-received;
     background-color: @color-message-item-bubble-received;
 
@@ -161,7 +161,7 @@ layer-messages-list layer-message-item-sent .layer-list-item {
       margin-right: 12px;
       margin-left: 8px;
     }
-  layer-message-text-plain, layer-message-image canvas, layer-message-video video {
+  layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
     color: @color-message-item-bubble-text-sent;
     margin: 0px;
   }

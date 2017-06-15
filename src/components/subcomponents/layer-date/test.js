@@ -22,27 +22,55 @@ describe('layer-date', function() {
     expect(el.date).toEqual(d);
   });
 
-  it('Should render time only if today', function() {
+  it('Should use todayFormat if today', function() {
     var d = new Date();
+    spyOn(d, "toLocaleString").and.callThrough();
+    el.todayFormat = {hour: 'numeric'};
+    el.weekFormat = {minute: 'numeric'};
+    el.defaultFormat = {month: 'numeric'};
+    el.olderFormat = {year: 'numeric'};
     el.date = d;
-    expect(el.innerHTML).toEqual(d.toLocaleTimeString());
+    expect(d.toLocaleString).toHaveBeenCalledWith('lookup', el.todayFormat);
+    expect(el.innerHTML).toEqual(d.toLocaleString('lookup', el.todayFormat));
   });
 
-  it('Should render date and time if not today', function() {
+  it('Should use weekFormat if week', function() {
     var d = new Date();
-    d.setDate(d.getDate() - 1);
+    d.setDate(d.getDate() - 3);
+    spyOn(d, "toLocaleString").and.callThrough();
+    el.todayFormat = {hour: 'numeric'};
+    el.weekFormat = {minute: 'numeric'};
+    el.defaultFormat = {month: 'numeric'};
+    el.olderFormat = {year: 'numeric'};
     el.date = d;
-    expect(el.innerHTML).toEqual(d.toLocaleDateString() + ' ' + d.toLocaleTimeString());
+    expect(d.toLocaleString).toHaveBeenCalledWith('lookup', el.weekFormat);
+    expect(el.innerHTML).toEqual(d.toLocaleString('lookup', el.weekFormat));
   });
 
-  it('Should rerender to new date', function() {
+  it('Should use olderFormat if not this year', function() {
     var d = new Date();
+    d.setFullYear(d.getFullYear() - 3);
+    spyOn(d, "toLocaleString").and.callThrough();
+    el.todayFormat = {hour: 'numeric'};
+    el.weekFormat = {minute: 'numeric'};
+    el.defaultFormat = {month: 'numeric'};
+    el.olderFormat = {year: 'numeric'};
     el.date = d;
+    expect(d.toLocaleString).toHaveBeenCalledWith('lookup', el.olderFormat);
+    expect(el.innerHTML).toEqual(d.toLocaleString('lookup', el.olderFormat));
+  });
 
-    var d2 = new Date();
-    d2.setDate(d.getDate() - 1);
-    el.date = d2;
-    expect(el.innerHTML).toEqual(d2.toLocaleDateString() + ' ' + d2.toLocaleTimeString());
+  it('Should use defaultFormat if this year; will fail stupid test if run first week of january', function() {
+    var d = new Date();
+    d.setDate(d.getDate() - 8);
+    spyOn(d, "toLocaleString").and.callThrough();
+    el.todayFormat = {hour: 'numeric'};
+    el.weekFormat = {minute: 'numeric'};
+    el.defaultFormat = {month: 'numeric'};
+    el.olderFormat = {year: 'numeric'};
+    el.date = d;
+    expect(d.toLocaleString).toHaveBeenCalledWith('lookup', el.defaultFormat);
+    expect(el.innerHTML).toEqual(d.toLocaleString('lookup', el.defaultFormat));
   });
 
   it('Should rerender to empty', function() {

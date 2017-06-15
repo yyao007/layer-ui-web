@@ -76,9 +76,9 @@ registerComponent('layer-conversation-title', {
           if (!title) {
             const users = conversation.participants
               .filter(user => !user.sessionOwner) // don't show the user their own name
-              .filter(user => user.displayName);
+              .filter(user => user.displayName || user.firstName || user.lastName);
             if (users.length === 1) {
-              title = users[0].displayName;
+              title = users[0].displayName || users[0].firstName || users[0].lastName;
             } else {
               const sortedUsers = this._sortNames();
               const sortedNames = sortedUsers.slice(0, 3).map(user => user.firstName || user.lastName || user.displayName);
@@ -98,6 +98,8 @@ registerComponent('layer-conversation-title', {
           .filter(user => !user.sessionOwner)
           .filter(user => user.firstName || user.lastName || user.displayName)
           .sort((userA, userB) => {
+            if (userA.type === 'BOT' && userB.type !== 'BOT') return 1;
+            if (userB.type === 'BOT' && userA.type !== 'BOT') return -1;
             if ((!userA.firstName && !userA.lastName) && (userB.firstName || userB.lastName)) return 1;
             if ((userA.firstName || userA.lastName) && (!userB.firstName && !userB.lastName)) return -1;
             if (!userA.firstName && !userA.lastName) {

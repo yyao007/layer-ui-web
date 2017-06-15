@@ -1,0 +1,18 @@
+/*
+ * The Menu Button widget
+ */
+layer-menu-button {
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.1;
+  font-size: 20px;
+  padding: 0px 4px;
+  color: @color-menu-button;
+  &:hover {
+    opacity: 1;
+    color: @color-menu-button-hover;
+  }
+}
+.layer-list-item:hover layer-menu-button {
+  opacity: 1;
+}

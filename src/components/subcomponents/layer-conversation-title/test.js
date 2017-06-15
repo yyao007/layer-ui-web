@@ -29,6 +29,7 @@ describe('layer-conversation-title', function() {
       client: client,
       userId: 'SaurumanTheMildlyAged',
       displayName: 'Sauruman the Mildly Aged',
+      firstName: 'Sauruman',
       id: 'layer:///identities/SaurumanTheMildlyAged',
       isFullIdentity: true
     });
@@ -96,11 +97,48 @@ describe('layer-conversation-title', function() {
       expect(el.innerHTML).toEqual("Gandalf the Gruesome");
     });
 
-    it("Should list participants displayName", function() {
+    it("Should use displayName or firstName or lastName if one-on-one conversation", function() {
+      conversation.participants = [new layer.Identity({
+        client: client,
+        userId: 'AAA',
+        displayName: 'display',
+        firstName: "first",
+        lastName: "last",
+        id: 'layer:///identities/AAA',
+        sessionOwner: false
+      })];
+      el.item = conversation;
+      el.onRender();
+      expect(el.innerHTML).toEqual('display');
+
+      conversation.participants[0].displayName = '';
+      el.onRender();
+      expect(el.innerHTML).toEqual('first');
+
+      conversation.participants[0].firstName = '';
+      el.onRender();
+      expect(el.innerHTML).toEqual('last');
+
+      conversation.participants[0].lastName = '';
+      el.onRender();
+      expect(el.innerHTML).toEqual('No Title');
+    });
+
+    it("Should use _sortNames to list participants names favoring first or last names", function() {
+      spyOn(el, "_sortNames").and.callThrough();
       el.item = conversation;
       conversation.addParticipants([user3]);
       jasmine.clock().tick(1);
-      expect(el.innerHTML).toEqual(user2.displayName + ' and ' + user3.displayName);
+      expect(el.innerHTML).toEqual(user2.firstName + ', ' + user3.displayName);
+
+      user3.lastName = 'Hey';
+      el.onRerender();
+      expect(el.innerHTML).toEqual(user2.firstName + ', ' + user3.lastName);
+
+      // For this state it should treat it as though there were a single user, and therefore use the displayName
+      user3.lastName = user3.displayName = '';
+      el.onRerender();
+      expect(el.innerHTML).toEqual(user2.displayName);
     });
 
     it("Should just show No Title", function() {
@@ -108,6 +146,58 @@ describe('layer-conversation-title', function() {
       conversation.removeParticipants([user2]);
       jasmine.clock().tick(1);
       expect(el.innerHTML).toEqual("No Title");
+    });
+  });
+
+  describe("The _sortNames method", function() {
+    var results;
+    beforeEach(function() {
+      conversation.participants = [
+        client.user,
+        new layer.Identity({
+          client: client,
+          userId: 'A',
+          id: 'layer:///identities/A',
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'B',
+          id: 'layer:///identities/B',
+          displayName: "B"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'bot',
+          id: 'layer:///identities/bot',
+          firstName: "bot"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'D',
+          id: 'layer:///identities/D',
+          lastName: "D"
+        }),
+      ];
+      el.item = conversation;
+      client.getIdentity("bot").type = 'BOT';
+      results = el._sortNames();
+    });
+
+    it("Should remove the session owner", function() {
+      expect(results.indexOf(client.user)).toEqual(-1);
+    });
+
+    it("Should put the bots last", function() {
+      expect(results[results.length - 1].userId).toEqual('bot');
+    });
+
+    it("Should not list anonymous user", function() {
+      expect(results.indexOf(client.getIdentity('A'))).toEqual(-1);
+    });
+
+    it("Should put users with first/last names before users with display names", function() {
+      expect(results[0].lastName).toEqual("D");
+      expect(results[1].displayName).toEqual("B");
     });
   });
 });

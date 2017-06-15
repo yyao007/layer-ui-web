@@ -1088,7 +1088,6 @@ function _registerComponent(tagName) {
       if (!this.properties) this.properties = {};
 
       this.properties._internalState = {
-        layerEventSubscriptions: [],
         onCreateCalled: false,
         onAfterCreateCalled: false,
         onRenderCalled: false,
@@ -1269,6 +1268,9 @@ registerComponent.MODES = {
 };
 
 const standardClassProperties = {
+  _layerEventSubscriptions: {
+    value: [],
+  },
   parentComponent: {},
   mainComponent: {
     get() {
@@ -1565,9 +1567,9 @@ const standardClassMethods = {
   onDestroy: function onDestroy() {
     this.properties._internalState.onDestroyCalled = true;
     this.properties._internalState.disableSetters = true;
-    this.properties._internalState.layerEventSubscriptions
+    this.properties._layerEventSubscriptions
       .forEach(subscribedObject => subscribedObject.off(null, null, this));
-    this.properties._internalState.layerEventSubscriptions = [];
+    this.properties._layerEventSubscriptions = [];
     this.classList.add('layer-node-destroyed');
   },
 };

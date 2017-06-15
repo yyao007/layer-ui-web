@@ -9,9 +9,6 @@
       flex-direction: row;
       align-items: center;
     }
-    layer-conversation-item .layer-list-item layer-avatar {
-      margin-right: 15px;
-    }
     layer-conversation-item  .layer-list-item .layer-conversation-item-content {
       flex-grow: 1;
       width: 100px; /* Flexbox bug */
@@ -47,12 +44,12 @@
   </style>
   <div class='layer-list-item' layer-id='innerNode'>
     <layer-avatar layer-id='avatar'></layer-avatar>
-    <layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence>
+    <layer-presence class='presence-without-avatar' layer-id='presence' size='medium'></layer-presence>
     <div class='layer-group-counter' layer-id='groupCounter'>2</div>
     <div class='layer-conversation-item-content'>
       <div class='layer-conversation-title-row'>
         <layer-conversation-title layer-id='title'></layer-conversation-title>
-        <layer-date layer-id='timestamp'></layer-date>
+        <layer-date layer-id='date'></layer-date>
         <layer-menu-button layer-id='menuButton'></layer-menu-button>
       </div>
       <layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message>

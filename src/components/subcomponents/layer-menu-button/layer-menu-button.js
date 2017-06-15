@@ -23,15 +23,12 @@ import '../layer-menu/layer-menu';
 
 registerComponent('layer-menu-button', {
   properties: {
+    getMenuOptions: {
+      type: Function,
+    },
 
-    /**
-     * Item to be deleted.
-     *
-     * @property {layer.Root} [item=null]
-     */
+    // Automatically set if within a List
     item: {},
-
-    options: {},
 
     /**
      * Different buttons may need menus of differing widths; set it here and its applied by the button, not style sheet.
@@ -63,17 +60,19 @@ registerComponent('layer-menu-button', {
     onButtonClick(evt) {
       evt.preventDefault();
       evt.stopPropagation();
-      let menuNode = document.querySelector('layer-menu');
-      if (!menuNode) {
-        menuNode = document.createElement('layer-menu');
-        document.body.appendChild(menuNode);
-      }
-      if (!menuNode.isShowing || menuNode.near !== this) {
-        menuNode.options = this.options;
-        menuNode.width = this.menuWidth;
-        menuNode.item = this.item;
-        menuNode.near = this;
-        menuNode.isShowing = true;
+      const options = this.getMenuOptions(this.item);
+      if (options) {
+        let menuNode = document.querySelector('layer-menu');
+        if (!menuNode) {
+          menuNode = document.createElement('layer-menu');
+          document.body.appendChild(menuNode);
+        }
+        if (!menuNode.isShowing || menuNode.near !== this) {
+          menuNode.options = options;
+          menuNode.width = this.menuWidth;
+          menuNode.near = this;
+          menuNode.isShowing = true;
+        }
       }
     },
   },

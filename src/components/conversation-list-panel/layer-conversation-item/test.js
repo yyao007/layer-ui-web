@@ -50,12 +50,11 @@ describe('layer-conversation-item', function() {
   });
 
   describe('The item property', function() {
-    it("Should update layer-delete, layer-conversation-last-message and layer-conversation-title", function() {
+    it("Should update  layer-conversation-last-message and layer-conversation-title", function() {
       var c2 = client.createConversation({
         participants: ['layer:///identities/GolumTheCutie']
       });
       el.item = c2;
-      expect(el.nodes.delete.item).toBe(c2);
       expect(el.nodes.lastMessage.item).toBe(c2);
       expect(el.nodes.title.item).toBe(c2);
     });
@@ -78,18 +77,81 @@ describe('layer-conversation-item', function() {
     });
   });
 
-  describe("The deleteConversationEnabled property", function() {
-    it("Should pass value on to layer-delete", function() {
-      el.deleteConversationEnabled = true;
-      expect(el.nodes.delete.enabled).toBe(true);
+  describe("The size property", function() {
+    it("Should pass value on to avatar", function() {
+      el.item = conversation;
+      el.size = 'small';
+      expect(el.nodes.avatar.size).toEqual('small');
 
-      el.deleteConversationEnabled = false;
-      expect(el.nodes.delete.enabled).toBe(false);
+      el.size = 'medium';
+      expect(el.nodes.avatar.size).toEqual('medium');
+
+      el.size = 'large';
+      expect(el.nodes.avatar.size).toEqual('large');
+    });
+
+    it("Should show/hide presence", function() {
+      el.item = conversation;
+
+      expect(el.nodes.presence.clientWidth).toEqual(0);
+      el.size = 'tiny';
+      jasmine.clock().uninstall();
+      expect(window.getComputedStyle(el.nodes.avatar).display).toEqual("none");
+      expect(window.getComputedStyle(el.nodes.presence).display).toEqual("block");
+    });
+  });
+
+  describe("The getMenuOptions property", function() {
+    it("Should pass function to the menu button", function() {
+      el.item = conversation;
+
+      var spy = jasmine.createSpy('spy');
+      el.getMenuOptions = spy;
+      expect(el.nodes.menuButton.getMenuOptions).toBe(spy);
+    });
+
+    it("Should handle absence of menu button", function() {
+      el.item = conversation;
+
+      delete el.nodes.menuButton;
+      var spy = jasmine.createSpy('spy');
+      expect(function() {
+        el.getMenuOptions = spy;
+      }).not.toThrow();
     });
   });
 
   describe("The onRerender() method", function() {
+    it("Should setup layer-direct-message-conversation and layer-group-conversation", function() {
+      conversation.addParticipants([user]);
+      el.item = conversation;
+      el.onRerender();
+      expect(el.classList.contains('layer-direct-message-conversation')).toBe(true);
+      expect(el.classList.contains('layer-group-conversation')).toBe(false);
 
+      conversation.addParticipants([user, "zzz"]);
+      el.onRerender();
+      expect(el.classList.contains('layer-direct-message-conversation')).toBe(false);
+      expect(el.classList.contains('layer-group-conversation')).toBe(true);
+    });
+
+    it("Should update the date", function() {
+      el.item = conversation;
+      el.onRerender();
+      expect(el.nodes.date.date).toBe(null);
+
+      var message = conversation.createMessage("hey").send();
+      el.onRerender();
+      expect(el.nodes.date.value).toEqual('Pending');
+
+      message.syncState = layer.Constants.SYNC_STATE.SYNCED;
+      el.onRerender();
+      expect(el.nodes.date.date).toEqual(message.sentAt);
+
+      message.destroy();
+      el.onRerender();
+      expect(el.nodes.date.date).toBe(null);
+    });
 
     it("Should update layer-avatar users", function() {
       el.item = conversation;

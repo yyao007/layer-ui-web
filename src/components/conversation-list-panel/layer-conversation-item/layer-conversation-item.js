@@ -85,6 +85,14 @@ registerComponent('layer-conversation-item', {
       value: ['tiny', 'small', 'medium', 'large'],
     },
 
+
+    /**
+     * Set the date format for the Conversation Item.
+     *
+     * Note that typically you'd set layerUI.components.ConversationsListPanel.List.dateFormat instead.
+     *
+     * @property {Object} [dateFormat]
+     */
     dateFormat: {
       value: {
         today: { hour: 'numeric', minute: 'numeric' },
@@ -94,17 +102,42 @@ registerComponent('layer-conversation-item', {
       },
     },
 
-    menuOptions: {
+    /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function,
       set() {
-        this.nodes.menuButton.options = this.properties.menuOptions;
+        if (this.nodes.menuButton) {
+          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
+        }
       },
     },
   },
   methods: {
     onAfterCreate() {
       const dateFormat = this.dateFormat;
-      if (dateFormat && this.nodes.timestamp) {
-        Object.keys(dateFormat).forEach(formatName => (this.nodes.timestamp[formatName + 'Format'] = dateFormat[formatName]));
+      if (dateFormat && this.nodes.date) {
+        Object.keys(dateFormat).forEach(formatName => (this.nodes.date[formatName + 'Format'] = dateFormat[formatName]));
       }
     },
 
@@ -118,18 +151,19 @@ registerComponent('layer-conversation-item', {
 
       this.nodes.groupCounter.innerHTML = users.length;
       this.toggleClass('layer-group-conversation', users.length > 1);
-      this.toggleClass('layer-direct-message-conversation', users.length === 1);
+      this.toggleClass('layer-direct-message-conversation', users.length <= 1);
       if (!this.item.lastMessage) {
-        this.nodes.timestamp.value = '';
+        this.nodes.date.date = null;
+        this.nodes.date.value = '';
       } else if (this.item.lastMessage.isNew()) {
         this.item.lastMessage.on('messages:change', this.onRerender, this);
-        this.nodes.timestamp.value = '';
+        this.nodes.date.value = '';
       } else if (this.item.lastMessage.isSaving()) {
-        this.nodes.timestamp.value = 'Pending'; // LOCALIZE!
+        this.nodes.date.value = 'Pending'; // LOCALIZE!
         this.item.lastMessage.on('messages:change', this.onRerender, this);
       } else {
         this.item.lastMessage.off('messages:change', this.onRerender, this);
-        this.nodes.timestamp.date = this.item.lastMessage.sentAt;
+        this.nodes.date.date = this.item.lastMessage.sentAt;
       }
       this.nodes.avatar.users = users;
       this.nodes.presence.item = users.length === 1 ? users[0] : null;

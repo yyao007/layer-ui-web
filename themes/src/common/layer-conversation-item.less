@@ -1,35 +1,36 @@
-/**
- * Styles for Conversation Items that appear within the Conversation List widget
+/*
+ * The Conversation Item widget
  *
  * From left-to-right we have roughly:
  * 1. Avatar or Presence
  * 2. Title
  * 3. Date
  * 4. Last Message
+ * 5. Menu button
  *
- * TODO: Titles that list names should highlight which users are present
  */
 layer-conversation-item {
 
-  /* Style a basic Conversation Item.  Note that it may be better to put
-   * background color on layer-conversations-list rather than layer-conversation-item
+  /*
+   * List items all contain a layer-list-item that contains the real contents of the item.
    */
   .layer-list-item {
     cursor: pointer;
-    border-left: 3px solid transparent;
     border-bottom: @border-list-item;
     &:not(:first-child) {
       border-top: @border-list-item;
     }
     padding-right: 12px;
+    padding-left: 12px;
     box-sizing: border-box;
   }
 
   /* Style the selected Conversation Item */
   &.layer-selected-item  .layer-list-item {
-    border-left: 3px solid @color-lightblue;
+    background-color: @color-conversation-item-selected-background;
   }
 
+  /* Style for Size Large */
   &.layer-size-large .layer-list-item {
     padding-top: 12px;
     padding-bottom: 12px;
@@ -45,10 +46,11 @@ layer-conversation-item {
 
     layer-conversation-last-message {
       margin-top: 6px;
-      display: block;
+      font-size: 14px;
     }
   }
 
+  /* Style for Size Medium */
   &.layer-size-medium .layer-list-item {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -61,8 +63,13 @@ layer-conversation-item {
     layer-date {
       font-size: 12px;
     }
+
+    layer-conversation-last-message {
+      display: none;
+    }
   }
 
+  /* Style for Size Small */
   &.layer-size-small .layer-list-item {
     padding-top: 8px;
     padding-bottom: 8px;
@@ -75,7 +82,13 @@ layer-conversation-item {
     layer-date {
       font-size: 10px;
     }
+
+    layer-conversation-last-message {
+      display: none;
+    }
   }
+
+  /* Style for Size Tiny */
   &.layer-size-tiny .layer-list-item {
     padding-top: 8px;
     padding-bottom: 8px;
@@ -88,34 +101,38 @@ layer-conversation-item {
     layer-date {
       display: none;
     }
+
+    layer-conversation-last-message {
+      display: none;
+    }
   }
 
 
-   /**
-    * 1. Avatar or Presence
+   /*
+    * Styles for Avatar, Presence or counter showing how many users are in the group
     */
    layer-avatar {
-     margin: 0px 12px;
+     margin-right: 12px;
    }
 
    layer-presence.presence-without-avatar, .layer-group-counter {
-     margin: 0px 8px 0px 12px;
+     margin-right: 8px;
    }
 
    .layer-group-counter {
-    font-size: 8px;
-    font-weight: bold;
-    color: @color-conversation-group-count;
-    border: solid 1px @color-conversation-group-count;
-    border-radius: 4px;
-    width: 12px;
-    height: 12px;
-    text-align: center;
+      font-size: 8px;
+      font-weight: bold;
+      color: @color-conversation-group-count;
+      border: solid 1px @color-conversation-group-count-border;
+      border-radius: 4px;
+      width: 12px;
+      height: 12px;
+      text-align: center;
    }
 
 
 
-  /**
+  /*
    * Conversation Titles have 3 states:
    * A. Normal
    * B. Unread
@@ -136,7 +153,7 @@ layer-conversation-item {
   }
 
 
-  /**
+  /*
    * Dates have 3 states:
    * A. Normal
    * B. Unread
@@ -144,14 +161,11 @@ layer-conversation-item {
    */
   layer-date {
     color: @color-conversation-item-read;
+    padding-right: 6px; // take this out if not using the menu button
   }
 
   &.layer-conversation-unread-messages layer-date {
     color: @color-conversation-item-unread;
-  }
-
-  layer-conversation-last-message {
-    display: none;
   }
 
   /**
@@ -161,41 +175,24 @@ layer-conversation-item {
    * C. Selected
    */
    layer-conversation-last-message {
-      font-size: 14px;
       color: @color-conversation-item-read;
       overflow-y: hidden;
    }
-
 
    &.layer-conversation-unread-messages layer-conversation-last-message {
       color: @color-conversation-item-unread;
    }
 
-   &.layer-selected-item  layer-conversation-last-message {
-
-   }
-
-
   /**
    * Conversation Menu button
-   * A. Normal
-   * B. Selected
-   * C. Selected
    */
-   layer-menu-button {
-      opacity: 0.1;
-      font-size: 20px;
-      top: -6px;
-      right: -4px;
-      color: @color-conversation-item-menu-button;
-      padding: 0px 4px;
-
-      &:hover {
-        color: @color-black;
+   .layer-conversation-title-row {
+      position: relative;
+      layer-menu-button {
+          position: absolute;
+          top: -6px;
+          right: -8px;
       }
-   }
-   &:hover layer-menu-button {
-      opacity: 1;
    }
 }
 

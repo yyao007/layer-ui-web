@@ -32,9 +32,11 @@
 @color-conversation-item-title: @color-black;
 @color-conversation-item-read: @color-g3;
 @color-conversation-item-unread: @color-black;
+@color-conversation-item-selected-background: @color-g1;
+
+/* Group Counters are part of Conversation Item if using the Small size Items */
 @color-conversation-group-count: @color-g3;
 @color-conversation-group-count-border: @color-g3;
-@color-conversation-item-menu-button: @color-g3;
 
 /* Color Definitions: Message Item */
 @color-message-item-status: @color-g3;
@@ -49,6 +51,10 @@
 @color-send-button-disabled: @color-g3;
 @color-send-button-enabled: @color-lightblue;
 
+/* Menu Button */
+@color-menu-button: @color-g3;
+@color-menu-button-hover: @color-black;
+
 /* Menu */
 @color-menu-background: @color-white;
 @color-menu-border: @color-g3;
@@ -59,6 +65,9 @@
 /* Misc Stuff */
 @color-date-separator: @color-g3;
 @color-loading-indicator: @color-darknavy;
+
+/* Non color Stuff */
+@border-list-item: solid 1px @color-g1;
 
 
 /** OLD STUFF **/
@@ -75,7 +84,6 @@
 @border-highlight: solid 3px #19a5e4;
 
 /* Customize identities-list and conversation-list */
-@border-list-item: solid 1px rgb(221,228,231);
 @listbackground: white;
 
 @fontsize-large: 1.1rem;

@@ -270,32 +270,39 @@ registerComponent('layer-conversations-list', {
     },
 
     /**
-     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
-     * but not to the currently generated items.
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
      *
      * Format is:
      *
      * ```
-     * widget.menuOptions = [
-     *  {text: "label1", method: method1},
-     *  {text: "label2", method: method2},
-     *  {text: "label3", method: method3}
-     * ];
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
      * ```
      *
-     * Method is called with the associated layer.Conversation as input.
-     *
-     * @property {Object[]}
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
      */
-    menuOptions: {
-      value: [
-        {
-          text: 'delete',
-          method(item) {
-            item.delete(Layer.Constants.DELETION_MODE.ALL);
+    getMenuOptions: {
+      type: Function,
+      value: function getMenuOptions(conversation) {
+        return [
+          {
+            text: 'delete',
+            method() {
+              conversation.delete(Layer.Constants.DELETION_MODE.ALL);
+            },
           },
-        },
-      ],
+        ];
+      },
     },
 
     /**
@@ -361,7 +368,7 @@ registerComponent('layer-conversations-list', {
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       conversationWidget.size = this.size;
-      if (this.menuOptions) conversationWidget.menuOptions = this.menuOptions;
+      if (this.getMenuOptions) conversationWidget.getMenuOptions = this.getMenuOptions;
       if (this.dateFormat) conversationWidget.dateFormat = this.dateFormat;
 
       if (this.filter) conversationWidget._runFilter(this.filter);

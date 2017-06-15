@@ -29,6 +29,7 @@
  *
  * @class layerUI.components.subcomponents.Delete
  * @extends layerUI.components.Component
+ * @deprecated
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';

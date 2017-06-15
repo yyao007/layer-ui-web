@@ -42,12 +42,14 @@ registerComponent('layer-identity-item', {
     size: {
       value: 'large',
       set(size) {
-        Object.keys(this.nodes).forEach((nodeName) => {
-          const node = this.nodes[nodeName];
-          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
-            node.size = size;
-          }
-        });
+        switch (size) {
+          case 'large':
+            this.nodes.avatar.size = 'medium';
+            break;
+          case 'medium':
+            this.nodes.avatar.size = 'small';
+            break;
+        }
       },
     },
 
@@ -64,9 +66,8 @@ registerComponent('layer-identity-item', {
      */
     onCreate() {
       if (!this.id) this.id = Layer.Util.generateUUID();
-      this.nodes.checkbox.addEventListener('click', this.onClick.bind(this));
+      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
       this.nodes.checkbox.id = `${this.id}-checkbox`;
-      this.nodes.title.setAttribute('for', this.nodes.checkbox.id);
     },
 
     /**
@@ -80,14 +81,14 @@ registerComponent('layer-identity-item', {
      */
     onClick(evt) {
       evt.stopPropagation();
-      const checked = this.selected;
+      const checked = evt.target === this.nodes.checkbox ? this.selected : !this.selected; // toggle
       const identity = this.item;
 
       // Trigger the event and see if evt.preventDefault() was called
       const customEventResult = this.trigger(`layer-identity-item-${checked ? 'selected' : 'deselected'}`, { item: identity });
 
       if (customEventResult) {
-        this.selected = !this.properties.selected;
+        this.selected = checked;
       } else {
         evt.preventDefault();
       }
@@ -123,6 +124,15 @@ registerComponent('layer-identity-item', {
       this.nodes.avatar.users = [this.item];
       this.nodes.title.innerHTML = this.item.displayName;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);
+    },
+
+    /**
+     * Mixin Hook: Override this to use an alternate title.
+     *
+     * @method onRenderTitle
+     */
+    onRenderTitle() {
+      this.nodes.title.innerHTML = this.item.displayName;
     },
 
     /**
