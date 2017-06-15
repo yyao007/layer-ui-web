@@ -207,7 +207,7 @@ registerComponent('layer-avatar', {
      */
     onGenerateInitials(user) {
       // Use first and last name if provided
-      if (user.firstName && user.lastName) {
+      if (user.firstName || user.lastName) {
         return user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
       }
 

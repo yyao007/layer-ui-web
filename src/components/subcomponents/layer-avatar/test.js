@@ -14,7 +14,8 @@ describe('layer-avatar', function() {
       client: client,
       userId: 'FrodoTheDodo',
       id: 'layer:///identities/FrodoTheDodo',
-      isFullIdentity: true
+      isFullIdentity: true,
+      sessionOwner: true
     });
     client._clientAuthenticated();
 
@@ -59,8 +60,8 @@ describe('layer-avatar', function() {
     client.user.avatarUrl = 'http://abby.normal.frankentein/';
     el.users = [client.user];
     expect(el.childNodes.length).toEqual(2);
-    expect(el.firstChild.tagName).toEqual('IMG');
-    expect(el.firstChild.src).toEqual(client.user.avatarUrl);
+    expect(el.firstChild.firstChild.tagName).toEqual('IMG');
+    expect(el.firstChild.firstChild.src).toEqual(client.user.avatarUrl);
     expect(el.childNodes[1].tagName).toEqual('LAYER-PRESENCE');
   });
 
@@ -76,7 +77,7 @@ describe('layer-avatar', function() {
 
   it("Should generate a span with first two letters of displayName", function() {
     client.user.displayName = 'Abby';
-    client.user.lastName = 'Normal'
+    client.user.lastName = ''
     el.users = [client.user];
     expect(el.childNodes.length).toEqual(2);
     expect(el.firstChild.tagName).toEqual('SPAN');
@@ -85,14 +86,25 @@ describe('layer-avatar', function() {
   });
 
   it("Should generate multiple spans for multiple users", function() {
-    client.user.firstName = 'Abby';
-    client.user.lastName = 'Normal'
-    el.users = [client.user, client.user];
+    el.users = [
+      new layer.Identity({
+          client: client,
+          userId: 'AA',
+          id: 'layer:///identities/AA',
+          displayName: "Abby"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'BB',
+          id: 'layer:///identities/BB',
+          displayName: 'Normal'
+        })
+    ];
     expect(el.childNodes.length).toEqual(2);
     expect(el.childNodes[0].tagName).toEqual('SPAN');
     expect(el.childNodes[1].tagName).toEqual('SPAN');
-    expect(el.childNodes[0].firstChild.textContent).toEqual('AN');
-    expect(el.childNodes[1].firstChild.textContent).toEqual('AN');
+    expect(el.childNodes[0].firstChild.textContent).toEqual('AB');
+    expect(el.childNodes[1].firstChild.textContent).toEqual('NO');
   });
 
   it("Should not set cluster class if one user", function() {
@@ -121,5 +133,114 @@ describe('layer-avatar', function() {
     client.isPresenceEnabled = false;
     el.users = [client.user];
     expect(el.nodes.presence).toBe(undefined);
+  });
+
+  describe("The onGenerateInitials() method", function() {
+    it("Should use firstName and lastName above all else", function() {
+      client.user.displayName = "Abe Baker";
+      client.user.firstName = "Craig";
+      client.user.lastName = "Doug";
+      expect(el.onGenerateInitials(client.user)).toEqual('CD');
+    });
+
+    it("Should use firstName or lastName above all else", function() {
+      client.user.displayName = "Abe Baker";
+      client.user.firstName = "";
+      client.user.lastName = "Doug";
+      expect(el.onGenerateInitials(client.user)).toEqual('D');
+
+      client.user.firstName = "Craig";
+      client.user.lastName = "";
+      expect(el.onGenerateInitials(client.user)).toEqual('C');
+    });
+
+    it("Should use displayName initials if available", function() {
+      client.user.displayName = "Abe Baker";
+      client.user.firstName = "";
+      client.user.lastName = "";
+      expect(el.onGenerateInitials(client.user)).toEqual('AB');
+    });
+
+    it("Should identify the last initial", function() {
+      client.user.displayName = "Abe Baker Craig";
+      client.user.firstName = "";
+      client.user.lastName = "";
+      expect(el.onGenerateInitials(client.user)).toEqual('AC');
+    });
+
+    it("Should use first two letters of display name if no initials found", function() {
+      client.user.displayName = "AbeDoug";
+      client.user.firstName = "";
+      client.user.lastName = "";
+      expect(el.onGenerateInitials(client.user)).toEqual('AB');
+    });
+
+    it("Should return empty string if nothing found", function() {
+      client.user.displayName = "";
+      client.user.firstName = "";
+      client.user.lastName = "";
+      expect(el.onGenerateInitials(client.user)).toEqual('');
+    });
+  });
+
+  describe("The _sortMultiAvatars method", function() {
+    var results;
+    beforeEach(function() {
+      el.users = [
+        client.user,
+        new layer.Identity({
+          client: client,
+          userId: 'A',
+          id: 'layer:///identities/A',
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'B',
+          id: 'layer:///identities/B',
+          displayName: "B"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'C',
+          id: 'layer:///identities/C',
+          avatarUrl: "C"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'bot',
+          id: 'layer:///identities/bot',
+          firstName: "bot"
+        }),
+        new layer.Identity({
+          client: client,
+          userId: 'D',
+          id: 'layer:///identities/D',
+          lastName: "D"
+        }),
+      ];
+      client.getIdentity("bot").type = 'BOT';
+      results = el._sortMultiAvatars();
+    });
+
+    it("Should remove the session owner", function() {
+      expect(results.indexOf(client.user)).toEqual(-1);
+    });
+
+    it("Should put the bots last", function() {
+      expect(results[results.length - 1].userId).toEqual('bot');
+    });
+
+    it("Should put the anonymous user second last", function() {
+      expect(results[results.length - 2].userId).toEqual('A');
+    });
+
+    it("Should put users with an avatar first", function() {
+      expect(results[0].avatarUrl).toEqual("C");
+    });
+
+    it("SHould put users with initials after the avatar url, and in the order provided", function() {
+      expect(results[1].displayName).toEqual("B");
+      expect(results[2].lastName).toEqual("D");
+    });
   });
 });

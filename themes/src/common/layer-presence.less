@@ -1,30 +1,32 @@
 /*
- * TODO: Presence icon that represents multiple people (just shows the number of people and no presence info)
+ * Presence widget theme
  */
 layer-presence {
-  margin-left: 12px;
-  margin-right: 8px;
+  box-sizing: border-box;
+
+  /* Styling for each presence state */
   &.layer-presence-away {
-    background-color: @color-away;
+    background-color: @color-presence-away;
   }
 
   &.layer-presence-busy {
-    background-color: @color-busy;
+    background-color: @color-presence-busy;
   }
 
   &.layer-presence-available {
-    background-color: @color-available;
+    background-color: @color-presence-available;
   }
 
   &.layer-presence-offline {
-    background-color: @color-offline;
+    background-color: @color-presence-offline;
   }
 
   &.layer-presence-invisible {
-    background-color: white; // change to the background color of the page
-    border: solid @color-invisible;
+    background-color: @color-presence-invisible-inside;
+    border: solid 2px @color-presence-invisible;
   }
 
+  /* Styling for each presence size */
   &.layer-size-small {
     width: 8px;
     height: 8px;
@@ -38,25 +40,5 @@ layer-presence {
   &.layer-size-large {
     width: 12px;
     height: 12px;
-  }
-
-  &.layer-presence-invisible {
-    &.layer-size-small {
-      width: 4px;
-      height: 4px;
-      border-width: 2px;
-    }
-
-    &.layer-size-medium {
-      width: 6px;
-      height: 6px;
-      border-width: 2px;
-    }
-
-    &.layer-size-large {
-      width: 8px;
-      height: 8px;
-      border-width: 2px;
-    }
   }
 }

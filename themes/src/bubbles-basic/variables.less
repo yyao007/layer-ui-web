@@ -13,21 +13,27 @@
 @color-red: #eb3838;
 
 /* Color Definitions: Presence */
-@color-busy: @color-red;
-@color-away: @color-yellow;
-@color-offline: @color-g2;
-@color-invisible: @color-green;
-@color-available: @color-green;
+@color-presence-busy: @color-red;
+@color-presence-away: @color-yellow;
+@color-presence-offline: @color-g2;
+@color-presence-invisible: @color-green;
+@color-presence-invisible-inside: transparent;
+@color-presence-available: @color-green;
 
 /* Color Definitions: Avatar */
 @color-avatar-background: @color-g2;
 @color-avatar-text: @color-white;
+@color-avatar-border: transparent;
+@color-avatar-multi-avatar-border: @color-white;
+@color-avatar-presence-border: @color-white;
+@color-avatar-presence-invisible-inside: @color-white; // Note that transparent does not work here; but this is currently a rare state to handle
 
 /* Color Definitions: Conversation Item */
 @color-conversation-item-title: @color-black;
 @color-conversation-item-read: @color-g3;
 @color-conversation-item-unread: @color-black;
 @color-conversation-group-count: @color-g3;
+@color-conversation-group-count-border: @color-g3;
 @color-conversation-item-menu-button: @color-g3;
 
 /* Color Definitions: Message Item */

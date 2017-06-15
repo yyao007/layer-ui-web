@@ -119,7 +119,7 @@ registerComponent('layer-presence', {
      * @method
      */
     onRerender(user) {
-      const status = this.item.status;
+      const status = this.item ? this.item.status : '';
       this.classList[status === 'available' ? 'add' : 'remove']('layer-presence-available');
       this.classList[status === 'busy' ? 'add' : 'remove']('layer-presence-busy');
       this.classList[status === 'away' ? 'add' : 'remove']('layer-presence-away');

@@ -1,67 +1,36 @@
-
+/*
+ * Avatar widget theme
+ */
 layer-avatar {
-  span:not(.layer-text-avatar) {
-    border: solid 1px @color-avatar-background;
-  }
-  span.layer-text-avatar {
-    border: solid 1px @color-white; // Change this to match the page background color
-    background-color: @color-avatar-background;
-    color: @color-avatar-text;
-  }
+  position: relative;
+  overflow: hidden;
+  text-align: center;
 
-  &.layer-has-user {
-    position: relative;
-    overflow: hidden;
-    text-align: center;
-  }
-
-  layer-presence {
-    margin-left: 0px;
-    margin-right: 0px;
-    &:before {
-      content: " ";
-      border: solid 2px @color-white;
-      position: absolute;
-      border-radius: 16px;
-      top: -2px;
-      bottom: -2px;
-      left: -2px;
-      right: -2px;
-    }
-    &.layer-presence-invisible:before {
-      content: " ";
-      border: solid 2px @color-white; // change color to the background color for the page
-      position: absolute;
-      top: -4px;
-      bottom: -4px;
-      left: -4px;
-      right: -4px;
-    }
-  }
-
+  /* Every avatar has a span that contains text (initials) or an Image tag. If text, it will have a layer-text-avatar css class */
   span {
+    border: solid 1px @color-avatar-border;
     display: block;
     align-items: center;
-    justify-content: center;
     border-radius: 50%;
     overflow: hidden;
+
+    /* Text customizations */
     &.layer-text-avatar {
       display: flex;
+      background-color: @color-avatar-background;
+      color: @color-avatar-text;
     }
+
+    /* Image customizations */
     img {
       width: 100%;
       height: 100%;
     }
   }
 
-  &.layer-avatar-cluster > span {
-      position: absolute;
-  }
-
-  &.layer-avatar-cluster > span:not(.layer-text-avatar) {
-      box-shadow: 0 0 1px 1px @color-white
-  }
-
+  /*
+   * Handle the layout of each size of Avatar
+   */
   &.layer-size-small {
     width: 32px;
     height: 32px;
@@ -110,7 +79,45 @@ layer-avatar {
     }
   }
 
-  /* Clustered Avatars for Group Chats */
+  /*
+   * Presence is not a required part of the Avatar widget.  If you do not want it,
+   * you should set the Avatar.showPresence property to false rather than setting
+   * display: none.  Why? Because if showPresence is false, the presence widget is not created,
+   * which is more efficient.
+   */
+  layer-presence {
+    &.layer-presence-invisible {
+      background-color: @color-avatar-presence-invisible-inside;
+    }
+    &:before {
+      content: " ";
+      border: solid 2px @color-avatar-presence-border;
+      position: absolute;
+      border-radius: 16px;
+      top: -2px;
+      bottom: -2px;
+      left: -2px;
+      right: -2px;
+    }
+    &.layer-presence-invisible:before {
+      top: -4px;
+      bottom: -4px;
+      left: -4px;
+      right: -4px;
+    }
+  }
+
+    &.layer-avatar-cluster > span {
+    position: absolute;
+
+    &:nth-child(n+2) {
+      border: solid 1px @color-white;
+    }
+  }
+
+  /*
+   * Clustered Avatars for Group Chats have size and layout adjustments
+   */
   &.layer-avatar-cluster {
     &.layer-size-small, &.layer-size-medium, &.layer-size-large, &.layer-size-larger {
       & > *:nth-child(1) {
