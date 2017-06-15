@@ -1,6 +1,10 @@
 # Layer UI for Web Change Log
 
-# 1.0.2
+## 1.0.3
+
+* Fixes bug that prevents event handlers from being cleaned up once a component is removed from the page
+
+## 1.0.2
 
 * Possibly Breaking Changes
   * If you use textHandlers to push `textData.afterText` items to render, these items now render outside of the chat bubble.  This shouldn't break most CSS themes, but if you use this feature, please test and review how these render.
@@ -26,13 +30,13 @@
 * Adds mocks to simplify tests involving requestAnimationFrame on scrolling
 * `<layer-identities-list />` now uses `onclick` instead of `onchange` events
 
-# 1.0.1
+## 1.0.1
 
 * No longer requires client to be available on `layerUI.init()`; now waits for client to be available
 * Adds safety check to `layer-typing-indicator`
 * Conversation List `sortBy` is now used for initialization only and does not update the query
 
-# 1.0.0
+## 1.0.0
 
 * Breaking Changes
     * Conversation List now defaults to being sorted by `lastMessage` rather than `createdAt`; change this using the Conversation List `sortBy` property.
@@ -56,7 +60,7 @@ GA Release of Layer UI for Web
 * Adds ConversationPanel property `initialConversationId` for setting an initial Conversation; changes to this value do not
   affect the widget.  This property works well when using `listen-to` to change conversations, but still want an initial conversation.
 
-# 0.10.1
+## 0.10.1
 
 * Bug Fixes
   * First message in conversation now has `layer-list-item-first` css class which was missing.
@@ -64,7 +68,7 @@ GA Release of Layer UI for Web
   * Can now set `ConversationPanel.conversation = null` to clear the conversation
   * Restores the missing `ConversationPanel.getMessageDeleteEnabled` callback to enable the delete button on a per-message basis
 
-# 0.10.0
+## 0.10.0
 
 ### Breaking Changes
 
@@ -116,11 +120,11 @@ These features currently require access to our Preview Server, but should be ava
 * Adds Channel support: `<layer-channels-list />` and `<layer-membership-list />`
 * Adds `<layer-presence />` widget, which is now built into `<layer-avatar />`
 
-# 0.9.13
+## 0.9.13
 
 * Fixes another bug in how Angular Adapater worked with Webcomponents lifecycle within Webcomponents Polyfil
 
-# 0.9.12
+## 0.9.12
 
 * Fixes bug in how Angular Adapater worked with Webcomponents lifecycle within Webcomponents Polyfil
 
