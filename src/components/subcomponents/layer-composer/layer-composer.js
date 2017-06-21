@@ -208,6 +208,7 @@ registerComponent('layer-composer', {
           body: this.nodes.input.value,
         }));
         this.nodes.input.value = '';
+        this._onInput();
       }
 
       if (parts.length === 0) return;
@@ -310,8 +311,8 @@ registerComponent('layer-composer', {
           this.send();
         } else {
           event.target.value += '\n';
+          this._onInput(event);
         }
-        this._onInput(event);
       } else if (!layerUI.settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
         event.preventDefault();
         event.target.value += '\t  ';

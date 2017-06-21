@@ -1,5 +1,10 @@
 # Layer UI for Web Change Log
 
+## 1.0.4
+
+* Fixes bug where SEND button, on sending, fails to trigger a Composer resize
+* Fixes bug where document.cloneNode generated dom nodes have doubled templates
+
 ## 1.0.3
 
 * Fixes bug that prevents event handlers from being cleaned up once a component is removed from the page

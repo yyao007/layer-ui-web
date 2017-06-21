@@ -928,12 +928,16 @@ function _registerComponent(tagName) {
 
 
       // If a template has been assigned for this class, append it to this node, and parse for layer-ids
-      // TODO: Rearchitect layer-message-item to be a place holder for a layer-message-sent-item or layer-message-received-item so that
-      // we don't need this hokey stuff here
+      // Note that in the event of a node.cloneNode() properties are not copied, but attributes are.
+      // Also, in the event of a cloneNode, the template in full is copied, and should not be reimported.
+      // layer-has-template allows us to insure we don't import a template if one is provided via cloneNode.
       const templateNode = this.getTemplate();
       if (templateNode) {
-        const clone = document.importNode(templateNode.content, true);
-        this.appendChild(clone);
+        if (!this.getAttribute('layer-has-template')) {
+          const clone = document.importNode(templateNode.content, true);
+          this.appendChild(clone);
+          this.setAttribute('layer-has-template', 'true');
+        }
         this.setupDomNodes();
       }
 

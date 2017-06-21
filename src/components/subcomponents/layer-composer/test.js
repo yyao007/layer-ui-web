@@ -186,9 +186,11 @@ describe('layer-composer', function() {
       el.conversation = conversation;
     });
 
-    it("Should clear the input", function() {
+    it("Should clear the input and trigger input changes", function() {
+      spyOn(el, "_onInput");
       el.send();
       expect(el.value).toEqual("");
+      expect(el._onInput).toHaveBeenCalled();
     });
 
     it("Should trigger layer-send-message and send the message typed", function() {
@@ -319,8 +321,12 @@ describe('layer-composer', function() {
     });
 
     it("Should call onRender() whether its an ENTER or a letter", function() {
+      el.value = "hey";
+      el.properties.client = client;
+
       spyOn(el, "onRender");
       var preventSpy = jasmine.createSpy('preventDefault');
+
       el._onKeyDown({
         preventDefault: preventSpy,
         keyCode: 13,
@@ -332,7 +338,7 @@ describe('layer-composer', function() {
     });
 
     it("Should call _triggerChange", function() {
-      el.properties.value = "hi";
+      el.value = "hi";
       el.properties.client = client;
 
       spyOn(el, "_triggerChange");

@@ -1123,4 +1123,43 @@ describe('Components', function() {
       expect(eventTwoCalled).toBe(false);
     });
   });
+
+  describe("cloning components", function() {
+    it("Should reuse prior template", function() {
+      layerUI.registerComponent('template-clone-test1', {
+        template: '<label layer-id="label">Frodo must die</label>',
+      });
+
+      var el = document.createElement('template-clone-test1');
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      var newEl = el.cloneNode(true);
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el.childNodes.length).toEqual(1);
+      expect(el.querySelectorAll('label').length).toEqual(1);
+    });
+
+    it("Should handle case where template is not yet generated", function() {
+      layerUI.registerComponent('template-clone-test2', {
+        template: '<label layer-id="label">Frodo must die</label>',
+      });
+
+      var el = document.createElement('template-clone-test2');
+      var newEl = el.cloneNode(true);
+      testRoot.appendChild(el);
+      jasmine.clock().tick(10);
+      CustomElements.takeRecords();
+      layer.Util.defer.flush();
+
+      expect(el.childNodes.length).toEqual(1);
+      expect(el.querySelectorAll('label').length).toEqual(1);
+    });
+  });
 });
