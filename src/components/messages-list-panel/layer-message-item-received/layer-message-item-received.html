@@ -12,11 +12,17 @@
       align-content: stretch;
     }
 
-    layer-message-item-received .layer-message-body-and-avatar {
+    layer-message-item-received .layer-message-row {
       display: flex;
       flex-direction: row;
       align-items: flex-end;
     }
+
+    layer-message-item-received .layer-replacable-content {
+      display: flex;
+      flex-direction: row;
+    }
+
 
     layer-message-item-received  .layer-message-item-main {
       flex-grow: 1;
@@ -29,14 +35,43 @@
     }
   </style>
   <div class='layer-list-item' layer-id='innerNode'>
-    <div class='layer-sender-name' layer-id='sender'></div>
-    <div class='layer-message-body-and-avatar'>
-      <layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar>
+
+    <!-- Header -->
+    <div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'>
+      <div class='layer-replacable-content'>
+        <div class='layer-sender-name' layer-id='sender'></div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class='layer-message-row' layer-id='messageRow'>
+
+      <!-- Body: Near Side -->
+      <div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'>
+          <layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar>
+        </div>
+      </div>
+
+      <!-- Body: Message Contents -->
       <div class='layer-message-item-main'>
         <div class='layer-message-item-content' layer-id='content'></div>
       </div>
+
+      <!-- Body: Far Side -->
+      <div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'>
+          <layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button>
+        </div>
+      </div>
     </div>
-    <layer-date layer-id='date' show-year="never" today-format='{"hour": "numeric", "minute": "numeric"}' format='{"hour": "numeric", "minute": "numeric"}'></layer-date>
+
+    <!-- Footer -->
+    <div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'>
+      <div class='layer-replacable-content'>
+        <layer-date layer-id='date' show-year="never" today-format='{"hour": "numeric", "minute": "numeric"}' format='{"hour": "numeric", "minute": "numeric"}'></layer-date>
+      </div>
+    </div>
   </div>
 </template>
 <script>

@@ -25,13 +25,8 @@ module.exports = {
      * style height to be at least as tall as your custom node.
      *
      * @property {HTMLElement} [dataLoadingNode=null]
+     * @removed See replaceableContent instead
      */
-    dataLoadingNode: {
-      set(value) {
-        this.nodes.loadIndicator.innerHTML = '';
-        if (value) this.nodes.loadIndicator.appendChild(value);
-      },
-    },
   },
   methods: {
     onRender() {

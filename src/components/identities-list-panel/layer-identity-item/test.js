@@ -71,6 +71,26 @@ describe('layer-identity-item', function() {
     });
   });
 
+  describe("The size property", function() {
+    it("Should pass size to the avatar", function() {
+      el.size = 'medium';
+      expect(el.nodes.avatar.size).toEqual('small');
+
+      el.size = 'large';
+      expect(el.nodes.avatar.size).toEqual('medium');
+    });
+
+    it("Should hide or show presence and avatar", function() {
+      expect(window.getComputedStyle(el.nodes.avatar).display).toEqual("block");
+      expect(window.getComputedStyle(el.nodes.presence).display).toEqual("none");
+
+      el.size = 'small';
+
+      expect(window.getComputedStyle(el.nodes.avatar).display).toEqual("none");
+      expect(window.getComputedStyle(el.nodes.presence).display).toEqual("block");
+    });
+  });
+
   describe("The create() method", function() {
     it("Should initialize selected to true from innerHTML", function() {
       testRoot.innerHTML = '<layer-identity-item selected="true"></layer-identity-item>';

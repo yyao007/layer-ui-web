@@ -482,15 +482,23 @@ describe('layer-messages-list', function() {
       expect(item.messageStatusRenderer).toBe(messageStatusRenderer);
     });
 
-    it("Should setup getMessageDeleteEnabled", function() {
-      var getMessageDeleteEnabled = jasmine.createSpy('getMessageDeleteEnabled');
+    it("Should setup getMenuOptions", function() {
+      var getMenuOptions = jasmine.createSpy('getMenuOptions');
 
-      el.getMessageDeleteEnabled = getMessageDeleteEnabled;
+      el.getMenuOptions = getMenuOptions;
 
       var m = conversation.createMessage("m?");
       var item = el._generateItem(m);
-      expect(item.getDeleteEnabled).toBe(getMessageDeleteEnabled);
+      expect(item.getMenuOptions).toBe(getMenuOptions);
     });
+
+    it("Should set dateFormat", function() {
+      el.dateFormat = {year: "number"};
+      var result = el._generateItem(query.data[1]);
+      layer.Util.defer.flush();
+      expect(result.dateFormat).toEqual({year: "number"});
+    });
+
 
     it("Should return layer-message-unknown if no handlers", function() {
       var m = conversation.createMessage({
@@ -959,7 +967,7 @@ describe('layer-messages-list', function() {
       var messages = [conversation.createMessage("mm 0"), conversation.createMessage("mm 1")];
       var fragment = el._generateFragment(messages);
       el._renderPagedDataDone([query.data[99], query.data[98], messages[0], messages[1]], fragment, {type: 'data', data: messages});
-      expect(el.childNodes[0].classList.contains('layer-list-header')).toBe(true);
+      expect(el.childNodes[0].classList.contains('layer-list-meta')).toBe(true);
       expect(el.childNodes[1].item).toBe(messages[0]);
     });
 

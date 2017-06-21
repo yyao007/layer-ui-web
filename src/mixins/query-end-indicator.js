@@ -34,13 +34,8 @@ module.exports = {
      * style height to be at least as tall as your custom node.
      *
      * @property {HTMLElement} [endOfResultsNode=null]
+     * @removed See replaceableContent instead
      */
-    endOfResultsNode: {
-      set(value) {
-        this.nodes.endOfResultsNode.innerHTML = '';
-        if (value) this.nodes.endOfResultsNode.appendChild(value);
-      },
-    },
   },
   methods: {
     onRender() {

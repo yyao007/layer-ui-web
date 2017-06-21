@@ -5,6 +5,7 @@
  */
 import Layer from 'layer-websdk';
 import { settings, version } from '../base';
+import { registerComponent } from '../components/component';
 
 module.exports = {
   properties: {

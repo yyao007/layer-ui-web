@@ -91,7 +91,7 @@ registerComponent('layer-menu', {
       const bounds = node.getBoundingClientRect();
       if (bounds.right + this.menuWidth > document.body.clientWidth) {
         this.style.left = '';
-        this.style.right = bounds.left + 'px';
+        this.style.right = '5px';
       } else {
         this.style.right = '';
         this.style.left = bounds.right + 'px';

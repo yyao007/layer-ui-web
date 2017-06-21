@@ -11,7 +11,13 @@
       display: block;
     }
   </style>
-  <div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>
+  <div class='layer-list-meta' layer-id='listMeta'>
+    <div class='layer-empty-list' layer-id='emptyNode'></div>
+    <div class='layer-meta-toggle'>
+      <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div>
+      <div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>
+    </div>
+  </div>
 </template>
 <script>
   window.layerUI.registerTemplate('layer-identities-list');

@@ -76,13 +76,22 @@ registerComponent('layer-presence', {
      */
     item: {
       set(value) {
-        if (value && !(value instanceof Layer.Identity)) {
-          const client = Layer.Client.getClient(value.clientId);
-          if (client) {
-            value = this.properties.item = client.getIdentity(value.id);
-          } else {
-            value = this.properties.item = null;
+        if (value) {
+          if (value instanceof Layer.Message) {
+            value = value.sender;
+          } else if (value instanceof Layer.Conversation) {
+            value = value.participants.filter(identity => !identity.sessionOwner)[0];
+          } else if (typeof value === 'object' && !(value instanceof Layer.Identity)) {
+            const client = Layer.Client.getClient(value.clientId);
+            if (client) {
+              value = client.getIdentity(value.id);
+            }
           }
+
+          if (!(value instanceof Layer.Identity)) {
+            value = null;
+          }
+          this.properties.item = value;
         }
         if (value) value.on('identities:change', this.onRerender, this);
         this.onRender();

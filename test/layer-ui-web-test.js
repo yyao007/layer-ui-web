@@ -315,26 +315,63 @@ function initReact(React, ReactDom) {
     })).replace(/^Layer/, '');
 
     libraryResult[className] = React.createClass({
+
+      // hacky putting this here, but unable to provide a constructor in this environment and this is the only gaurenteed call.
+      getInitialState: function getInitialState() {
+        var _this = this;
+
+        if (this.props.replaceableContent && !this.replaceableContent) {
+          this.replaceableContent = {};
+          Object.keys(this.props.replaceableContent).forEach(function (nodeName) {
+            var value = _this.props.replaceableContent[nodeName];
+            if (typeof value === 'function' && !value.replaceableIsSetup) {
+
+              _this.replaceableContent[nodeName] = function (widget, parent) {
+                var result = value(widget);
+                if (!(value instanceof HTMLElement)) {
+                  var tmpNode = parent || document.createElement('div');
+                  widget.addEventListener('layer-widget-destroyed', function () {
+                    return ReactDom.unmountComponentAtNode(tmpNode);
+                  });
+                  return ReactDom.render(result, tmpNode);
+                } else {
+                  return result;
+                }
+              };
+            }
+          });
+        }
+        return null;
+      },
+
+
       /**
        * On mounting, copy in all properties, and optionally setup a Query.
        *
        * Delay added to prevent Webcomponents property setters from being blown away in safari and firefox
        */
       componentDidMount: function componentDidMount() {
-        var _this = this;
+        var _this2 = this;
 
+        this.node.componentDidMount = true;
         // Get the properties/attributes that match those used in this.props
         var props = component.properties.filter(function (property) {
-          return _this.props[property.propertyName] || _this.props[property.attributeName];
+          return property.propertyName in _this2.props || property.attributeName in _this2.props;
         });
 
         // Set the webcomponent properties
         props.forEach(function (propDef) {
-          var value = propDef.propertyName in _this.props ? _this.props[propDef.propertyName] : _this.props[propDef.attributeName];
+          var value = propDef.propertyName in _this2.props ? _this2.props[propDef.propertyName] : _this2.props[propDef.attributeName];
+          if (propDef.propertyName === 'replaceableContent' && _this2.replaceableContent) value = _this2.replaceableContent;
           if (propDef.type === HTMLElement && value) {
-            value = _this.handleReactDom(propDef, value);
+            value = _this2.handleReactDom(propDef, value);
           }
-          _this.node[propDef.propertyName] = value;
+          if (!_this2.node.properties) _this2.node.properties = {};
+          if (!_this2.node.properties._internalState) {
+            _this2.node.properties[propDef.propertyName] = value;
+          } else {
+            _this2.node[propDef.propertyName] = value;
+          }
         });
 
         // Browsers running the polyfil may not yet have initialized the component at this point.
@@ -345,7 +382,10 @@ function initReact(React, ReactDom) {
           evt.initCustomEvent('HTMLImportsLoaded', true, true, null);
           document.dispatchEvent(evt);
         }
-        this.node._onAfterCreate();
+
+        // The webcomponents polyfil is unable to initilize a component thats in
+        // a DocumentFragment so it must follow a more typical lifecycle
+        if (this.node._onAfterCreate) this.node._onAfterCreate();
       },
 
 
@@ -353,23 +393,24 @@ function initReact(React, ReactDom) {
        * Copy all properties into the dom node, but never let React recreate this widget.
        */
       shouldComponentUpdate: function shouldComponentUpdate(nextProps) {
-        var _this2 = this;
+        var _this3 = this;
 
         // Get the properties/attributes that match those used in this.props
         var props = component.properties.filter(function (property) {
-          return _this2.props[property.propertyName] || _this2.props[property.attributeName];
+          return _this3.props[property.propertyName] || _this3.props[property.attributeName];
         });
 
         // Set the webcomponent properties if they have changed
         props.forEach(function (propDef) {
-          var name = propDef.propertyName in _this2.props ? propDef.propertyName : propDef.attributeName;
+          var name = propDef.propertyName in _this3.props ? propDef.propertyName : propDef.attributeName;
           var value = nextProps[name];
+          if (propDef.propertyName === 'replaceableContent' && _this3.replaceableContent) value = _this3.replaceableContent;
           if (propDef.type === HTMLElement && value) {
-            value = _this2.handleReactDom(propDef, value);
+            value = _this3.handleReactDom(propDef, value);
           }
 
-          if (value !== _this2.props[name]) {
-            _this2.node[propDef.propertyName] = value;
+          if (value !== _this3.props[name]) {
+            _this3.node[propDef.propertyName] = value;
           }
         }, this);
         return false;
@@ -401,11 +442,11 @@ function initReact(React, ReactDom) {
         return this.layerUIGeneratedNodes[propDef.propertyName];
       },
       render: function render() {
-        var _this3 = this;
+        var _this4 = this;
 
         return React.createElement(componentName, {
           ref: function ref(node) {
-            _this3.node = node;
+            _this4.node = node;
           },
           id: this.props.id
         });
@@ -1752,7 +1793,8 @@ function getPropArray(classDef) {
       type: classDef.properties[propertyName].type,
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
-      propagateToChildren: classDef.properties[propertyName].propagateToChildren
+      propagateToChildren: classDef.properties[propertyName].propagateToChildren,
+      value: classDef.properties[propertyName].value
     };
   }).sort(function (a, b) {
     if (a.order !== undefined && b.order !== undefined) {
@@ -2096,6 +2138,54 @@ function _registerComponent(tagName) {
       // only way around this is to add another Layer.Util.defer() to our lifecycle
       this._setupListeners();
 
+      Object.keys(this.properties.replaceableContent || {}).forEach(function (nodeName) {
+        var oldNode = _this5.nodes[nodeName];
+        var newNode = void 0;
+
+        // Transform a function into a node if we've been given a function...
+        // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
+        // in which case it should handle turning it into a node; lists in particular need to manage
+        // creation of the node once per list-item
+        if (oldNode) {
+          if (typeof _this5.properties.replaceableContent[nodeName] === 'function') {
+            oldNode.innerHTML = '';
+            newNode = _this5.properties.replaceableContent[nodeName](_this5, oldNode);
+            // let a = document.createElement('div');
+            // let b = document.createElement('div');
+            // b.innerHTML = "hello!!";
+            // b.addEventListener('click', function() {alert("223");});
+            // oldNode.parentNode.appendChild(b);
+          } else {
+            newNode = _this5.properties.replaceableContent[nodeName];
+          }
+
+          if (newNode) {
+            // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
+            if (!_this5.contains(newNode)) {
+              var docFragment = void 0;
+              if (newNode.tagName === 'TEMPLATE') {
+                docFragment = document.importNode(newNode.content, true);
+                newNode = docFragment.firstChild;
+              }
+
+              var oldClasses = oldNode.classList;
+              for (var _i = 0; _i < oldClasses.length; _i++) {
+                newNode.classList.add(oldClasses[_i]);
+              }
+              newNode.setAttribute('layer-id', nodeName);
+
+              var parent = oldNode.parentNode;
+              var replaceIndex = Array.prototype.indexOf.call(parent.childNodes, oldNode);
+              if (!_this5.contains(newNode)) {
+                parent.replaceChild(newNode, oldNode);
+              }
+              _this5.nodes[nodeName] = parent.childNodes[replaceIndex];
+            }
+            _this5.onReplaceableContentAdded(nodeName, _this5.nodes[nodeName]);
+          }
+        }
+      });
+
       this.onAfterCreate();
     }
   };
@@ -2181,7 +2271,6 @@ function _registerComponent(tagName) {
       if (!this.properties) this.properties = {};
 
       this.properties._internalState = {
-        layerEventSubscriptions: [],
         onCreateCalled: false,
         onAfterCreateCalled: false,
         onRenderCalled: false,
@@ -2219,7 +2308,9 @@ function _registerComponent(tagName) {
     value: function _copyInAttribute(prop) {
 
       var finalValue = null;
-      var value = this.getAttribute(prop.attributeName);
+
+      // Special case for React Adapter + Replaceable content makes it possible that the value is already in properties
+      var value = prop.propertyName in this.properties ? this.properties[prop.propertyName] : this.getAttribute(prop.attributeName);
 
       // Firefox seems to need this alternative to getAttribute().
       // TODO: Verify this and determine if it uses the getter here.
@@ -2363,10 +2454,25 @@ registerComponent.MODES = {
 };
 
 var standardClassProperties = {
+  replaceableContent: {
+    noGetterFromSetter: true,
+    propagateToChildren: true,
+    order: 4,
+    get: function get() {
+
+      if (this.mainComponent && this.mainComponent.properties.replaceableContent !== this.properties.replaceableContent) {
+        return this.mainComponent.replaceableContent;
+      }
+      return this.properties.replaceableContent;
+    }
+  },
+  _layerEventSubscriptions: {
+    value: []
+  },
   parentComponent: {},
   mainComponent: {
     get: function get() {
-      if (this.properties._isMainComponent) return this;
+      if (!this.properties.parentComponent && this.properties._isMainComponent) return this;
       if (!this.properties.mainComponent) {
         this.properties.mainComponent = this.properties.parentComponent.mainComponent;
       }
@@ -2385,6 +2491,22 @@ var standardClassProperties = {
 };
 
 var standardClassMethods = {
+  onReplaceableContentAdded: function onReplaceableContentAdded(name, node) {
+    var index = 0;
+    // Setup each node added this way as a full part of this component
+    var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, function () {
+      return true;
+    }, false);
+    var currentNode = void 0;
+    while (currentNode = nodeIterator.nextNode()) {
+      if (!currentNode.properties) currentNode.properties = {};
+      currentNode.properties.parentComponent = this;
+      if (!currentNode.id) currentNode.id = _layerWebsdk2.default.Util.generateUUID();
+      this.nodes[currentNode.id] = currentNode;
+      index++;
+    }
+  },
+
   /**
    * The setupDomNodes method looks at all child nodes of this node that have layer-id properties and indexes them in the `nodes` property.
    *
@@ -2534,6 +2656,16 @@ var standardClassMethods = {
     return Array.prototype.slice.call(this.querySelectorAll(selector));
   },
 
+  /**
+   * Toggle a CSS Class.
+   *
+   * Why do we have this? Well, sadly as long as we support IE11 which has an incorrect implementation
+   * of node.classList.toggle, we will have to do this ourselves.
+   *
+   * @method toggleClass
+   * @param {String} className
+   * @param {Boolean} [enable=!enable]
+   */
   toggleClass: function toggleClass() {
     var cssClass = arguments.length <= 0 ? undefined : arguments[0];
     var enable = arguments.length === 2 ? arguments.length <= 1 ? undefined : arguments[1] : !this.classList.contains(cssClass);
@@ -2663,10 +2795,10 @@ var standardClassMethods = {
 
     this.properties._internalState.onDestroyCalled = true;
     this.properties._internalState.disableSetters = true;
-    this.properties._internalState.layerEventSubscriptions.forEach(function (subscribedObject) {
+    this.properties._layerEventSubscriptions.forEach(function (subscribedObject) {
       return subscribedObject.off(null, null, _this9);
     });
-    this.properties._internalState.layerEventSubscriptions = [];
+    this.properties._layerEventSubscriptions = [];
     this.classList.add('layer-node-destroyed');
   }
 };
@@ -2898,6 +3030,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       value: ['tiny', 'small', 'medium', 'large']
     },
 
+    /**
+     * Set the date format for the Conversation Item.
+     *
+     * Note that typically you'd set layerUI.components.ConversationsListPanel.List.dateFormat instead.
+     *
+     * @property {Object} [dateFormat]
+     */
     dateFormat: {
       value: {
         today: { hour: 'numeric', minute: 'numeric' },
@@ -2907,9 +3046,34 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     },
 
-    menuOptions: {
+    /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function,
       set: function set() {
-        this.nodes.menuButton.options = this.properties.menuOptions;
+        if (this.nodes.menuButton) {
+          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
+        }
       }
     }
   },
@@ -2918,9 +3082,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       var _this2 = this;
 
       var dateFormat = this.dateFormat;
-      if (dateFormat && this.nodes.timestamp) {
+      if (dateFormat && this.nodes.date) {
         Object.keys(dateFormat).forEach(function (formatName) {
-          return _this2.nodes.timestamp[formatName + 'Format'] = dateFormat[formatName];
+          return _this2.nodes.date[formatName + 'Format'] = dateFormat[formatName];
         });
       }
     },
@@ -2935,18 +3099,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
       this.nodes.groupCounter.innerHTML = users.length;
       this.toggleClass('layer-group-conversation', users.length > 1);
-      this.toggleClass('layer-direct-message-conversation', users.length === 1);
+      this.toggleClass('layer-direct-message-conversation', users.length <= 1);
       if (!this.item.lastMessage) {
-        this.nodes.timestamp.value = '';
+        this.nodes.date.date = null;
+        this.nodes.date.value = '';
       } else if (this.item.lastMessage.isNew()) {
         this.item.lastMessage.on('messages:change', this.onRerender, this);
-        this.nodes.timestamp.value = '';
+        this.nodes.date.value = '';
       } else if (this.item.lastMessage.isSaving()) {
-        this.nodes.timestamp.value = 'Pending'; // LOCALIZE!
+        this.nodes.date.value = 'Pending'; // LOCALIZE!
         this.item.lastMessage.on('messages:change', this.onRerender, this);
       } else {
         this.item.lastMessage.off('messages:change', this.onRerender, this);
-        this.nodes.timestamp.date = this.item.lastMessage.sentAt;
+        this.nodes.date.date = this.item.lastMessage.sentAt;
       }
       this.nodes.avatar.users = users;
       this.nodes.presence.item = users.length === 1 ? users[0] : null;
@@ -2998,8 +3163,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='timestamp'></layer-date><layer-menu-button layer-id='menuButton'></layer-menu-button></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div></div>", "");
-  layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item .layer-list-item layer-avatar {\nmargin-right: 15px;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence' size='medium'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='date'></layer-date><layer-menu-button layer-id='menuButton'></layer-menu-button></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div></div>", "");
+  layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/list-item-selection":48,"../../../mixins/size-property":56,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-menu-button/layer-menu-button":27}],8:[function(require,module,exports){
 /**
@@ -3298,30 +3463,37 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     /**
-     * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
-     * but not to the currently generated items.
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
      *
      * Format is:
      *
      * ```
-     * widget.menuOptions = [
-     *  {text: "label1", method: method1},
-     *  {text: "label2", method: method2},
-     *  {text: "label3", method: method3}
-     * ];
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
      * ```
      *
-     * Method is called with the associated layer.Conversation as input.
-     *
-     * @property {Object[]}
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
      */
-    menuOptions: {
-      value: [{
-        text: 'delete',
-        method: function method(item) {
-          item.delete(_layerWebsdk2.default.Constants.DELETION_MODE.ALL);
-        }
-      }]
+    getMenuOptions: {
+      type: Function,
+      value: function getMenuOptions(conversation) {
+        return [{
+          text: 'delete',
+          method: function method() {
+            conversation.delete(_layerWebsdk2.default.Constants.DELETION_MODE.ALL);
+          }
+        }];
+      }
     },
 
     /**
@@ -3384,7 +3556,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       conversationWidget.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
       conversationWidget.item = conversation;
       conversationWidget.size = this.size;
-      if (this.menuOptions) conversationWidget.menuOptions = this.menuOptions;
+      if (this.getMenuOptions) conversationWidget.getMenuOptions = this.getMenuOptions;
       if (this.dateFormat) conversationWidget.dateFormat = this.dateFormat;
 
       if (this.filter) conversationWidget._runFilter(this.filter);
@@ -3403,12 +3575,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div>", "");
+  layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div></div></div>", "");
   layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/list-selection":51,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":79}],9:[function(require,module,exports){
 /**
-<<<<<<< HEAD
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
  * This is typically used for creating/updating Conversation participant lists.
@@ -3449,46 +3620,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @mixin layerUI.mixins.ListLoadIndicator
  */
 'use strict';
-=======
-     * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
-     *
-     * This is typically used for creating/updating Conversation participant lists.
-     *
-     * This Component can be added to your project directly in the HTML file:
-     *
-     * ```
-     * <layer-identities-list></layer-identities-list>
-     * ```
-     *
-     * Or via DOM Manipulation:
-     *
-     * ```javascript
-     * var identitylist = document.createElement('layer-identities-list');
-     * ```
-     *
-     * And then its properties can be set as:
-     *
-     * ```javascript
-     * var identityList = document.querySelector('layer-identities-list');
-     * identityList.selectedIdentities = [identity3, identity6];
-     * identityList.onIdentitySelected = identityList.onIdentityDeselected = function(evt) {
-     *    log("The new selected users are: ", identityList.selectedIdentities);
-     * }
-     * ```
-     *
-     * ## Events
-     *
-     * Events listed here come from either this component, or its subcomponents.
-     *
-     * * {@link layerUI.components.IdentitiesListPanel.List#layer-identity-deselected layer-identity-deselected}: User has clicked to unselect an Identity
-     * * {@link layerUI.components.IdentitiesListPanel.List#layer-identity-selected layer-identity-selected}: User has clicked to select an Identity
-     *
-     * @class layerUI.components.IdentitiesListPanel.List
-     * @extends layerUI.components.Component
-     * @mixin layerUI.mixins.List
-     * @mixin layerUI.mixins.MainComponent
-     */'use strict';
->>>>>>> Temp
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3508,26 +3639,21 @@ var _hasQuery = require('../../../mixins/has-query');
 
 var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
-<<<<<<< HEAD
 var _listLoadIndicator = require('../../../mixins/list-load-indicator');
 
 var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
-=======
+
 var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
->>>>>>> Temp
 
 require('../layer-identity-item/layer-identity-item');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-identities-list', {
-<<<<<<< HEAD
-  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default],
-=======
-  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _sizeProperty2.default],
->>>>>>> Temp
+  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default, _sizeProperty2.default],
 
   /**
    * The user has clicked to select an Identity in the Identities List.
@@ -3782,11 +3908,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       switch (evt.type) {
         // If its a remove event, find the user and remove its widget.
         case 'remove':
-          {
-            var removalIndex = this.selectedIdentities.indexOf(evt.target);
-            if (removalIndex !== -1) this.selectedIdentities.splice(removalIndex, 1);
-            break;
-          }
+          var removalIndex = this.selectedIdentities.indexOf(evt.target);
+          if (removalIndex !== -1) this.selectedIdentities.splice(removalIndex, 1);
+          break;
 
         // If its a reset event, all data is gone, rerender everything.
         case 'reset':
@@ -3820,16 +3944,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
+  layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div></div></div>", "");
   layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-<<<<<<< HEAD
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/main-component":53,"../layer-identity-item/layer-identity-item":10,"layer-websdk":79}],10:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-identity-item/layer-identity-item":10,"layer-websdk":79}],10:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -3842,20 +3964,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @extends layerUI.components.Component
  */
 'use strict';
-=======
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":51,"../../../mixins/main-component":52,"../../../mixins/size-property":54,"../layer-identity-item/layer-identity-item":10,"layer-websdk":77}],10:[function(require,module,exports){
-/**
-     * The Layer User Item represents a single user within a User List.
-     *
-     * This widget could be used to represent a User elsewhere, in places where a `<layer-avatar />` is insufficient.
-     *
-     * This widget includes a checkbox for selection.
-     *
-     * @class layerUI.components.IdentitiesListPanel.Item
-     * @mixin layerUI.mixins.ListItem
-     * @extends layerUI.components.Component
-     */'use strict';
->>>>>>> Temp
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3902,14 +4010,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     size: {
       value: 'large',
       set: function set(size) {
-        var _this = this;
-
-        Object.keys(this.nodes).forEach(function (nodeName) {
-          var node = _this.nodes[nodeName];
-          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
-            node.size = size;
-          }
-        });
+        switch (size) {
+          case 'large':
+            this.nodes.avatar.size = 'medium';
+            break;
+          case 'medium':
+            this.nodes.avatar.size = 'small';
+            break;
+        }
       }
     },
 
@@ -3926,9 +4034,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onCreate: function onCreate() {
       if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
-      this.nodes.checkbox.addEventListener('click', this.onClick.bind(this));
+      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
       this.nodes.checkbox.id = this.id + '-checkbox';
-      this.nodes.title.setAttribute('for', this.nodes.checkbox.id);
     },
 
 
@@ -3943,14 +4050,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onClick: function onClick(evt) {
       evt.stopPropagation();
-      var checked = this.selected;
+      var checked = evt.target === this.nodes.checkbox ? this.selected : !this.selected; // toggle
       var identity = this.item;
 
       // Trigger the event and see if evt.preventDefault() was called
       var customEventResult = this.trigger('layer-identity-item-' + (checked ? 'selected' : 'deselected'), { item: identity });
 
       if (customEventResult) {
-        this.selected = !this.properties.selected;
+        this.selected = checked;
       } else {
         evt.preventDefault();
       }
@@ -3993,6 +4100,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
     /**
+     * Mixin Hook: Override this to use an alternate title.
+     *
+     * @method onRenderTitle
+     */
+    onRenderTitle: function onRenderTitle() {
+      this.nodes.title.innerHTML = this.item.displayName;
+    },
+
+
+    /**
      * Run a filter on this item, and hide it if it doesn't match the filter.
      *
      * @method _runFilter
@@ -4019,14 +4136,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-identity-name' layer-id='title'></label><input type='checkbox' layer-id='checkbox'></input></div>", "");
-  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><input type='checkbox' layer-id='checkbox'></input></div>", "");
+  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence {\ndisplay: none;\n}\nlayer-identity-item.layer-size-small layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-small layer-avatar {\ndisplay: none;\n}", "");
 })();
-<<<<<<< HEAD
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":79}],11:[function(require,module,exports){
-=======
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/size-property":54,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":77}],11:[function(require,module,exports){
->>>>>>> Temp
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/size-property":56,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":79}],11:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -4072,7 +4185,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * Events listed here come from either this component, or its subcomponents.
  *
  * * {@link layerUI.components.subcomponents.Composer#layer-send-message layer-send-message}: User has requested their Message be sent
- * * {@link layerUI.components.subcomponents.Delete#layer-message-deleted layer-message-deleted}: User has requested a Message be deleted
  * * {@link layerUI.components.subcomponents.TypingIndicator#layer-typing-indicator-change layer-typing-indicator-change}: Someone in the Conversation has started/stopped typing
  *
  * @class layerUI.components.ConversationPanel
@@ -4182,6 +4294,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.item
+   * @removed 2.0, use menu options callback to perform any needed actions or trigger any needed events
    */
 
   /**
@@ -4201,6 +4314,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.item
+   * @removed 2.0, use menu options callback to perform any needed actions or trigger any needed events
    */
 
   /**
@@ -4278,7 +4392,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
    * @param {String} evt.detail.value
    * @param {String} evt.detail.oldValue
    */
-  events: ['layer-message-deleted', 'layer-send-message', 'layer-typing-indicator-change', 'layer-composer-change-value'],
+  events: ['layer-send-message', 'layer-typing-indicator-change', 'layer-composer-change-value'],
 
   properties: {
 
@@ -4544,26 +4658,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     /**
-     * Deletion of this Message is enabled.
-     *
-     * ```
-     * widget.getMessageDeleteEnabled = function(message) {
-     *    return message.sender.sessionOwner;
-     * }
-     * ```
-     *
-     * @property {Function}
-     */
-    getMessageDeleteEnabled: {
+         * Provide a function that returns the menu items for the given Conversation.
+         *
+         * Note that this is called each time the user clicks on a menu button to open the menu,
+         * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+         *
+         * Format is:
+         *
+         * ```
+         * widget.getMenuOptions = function(message) {
+         *   return [
+         *     {text: "label1", method: method1},
+         *     {text: "label2", method: method2},
+         *     {text: "label3", method: method3}
+         *   ];
+         * }
+         * ```
+         *
+         * @property {Function} getMenuOptions
+         * @property {layer.Message} getMenuOptions.message
+         * @property {Object[]} getMenuOptions.returns
+         */
+    getMenuOptions: {
       type: Function,
-      value: function value(message) {
-        return message.sender.sessionOwner;
+      value: function getMenuOptions(message) {
+        return [{
+          text: 'delete',
+          method: function method() {
+            message.delete(_layerWebsdk2.default.Constants.DELETION_MODE.ALL);
+          }
+        }];
       },
       set: function set(value) {
-        this.nodes.list.getMessageDeleteEnabled = value;
+        this.nodes.list.getMenuOptions = value;
       }
     },
-
     /**
      * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
      * but not to the currently generated items.
@@ -4708,7 +4837,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @method onCreate
      * @private
      */
-    onCreate: function onCreate() {},
+    onAfterCreate: function onAfterCreate() {},
 
 
     /**
@@ -5850,6 +5979,37 @@ module.exports = {
     },
 
     /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function,
+      set: function set() {
+        if (this.nodes.menuButton) {
+          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
+        }
+      }
+    },
+
+    /**
      * Provide property to override the function used to render a date for each Message Item.
      *
      * Note that changing this will not regenerate the list; this should be set when initializing a new List.
@@ -5985,8 +6145,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-sender-name' layer-id='sender'></div><div class='layer-message-body-and-avatar'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div></div><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div>", "");
-  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-body-and-avatar {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><div class='layer-sender-name' layer-id='sender'></div></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Near Side --><div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Far Side --><div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div></div></div>", "");
+  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received .layer-replacable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../layer-message-item-mixin":15}],17:[function(require,module,exports){
 'use strict';
@@ -6017,8 +6177,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-message-body-and-avatar' layer-id='messageRow'><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><div class='layer-avatar-delete-panel'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><layer-delete layer-id='delete'></layer-delete></div></div><div class='layer-sender-info layer-sender-details'><div class='layer-sender-name' layer-id='sender'></div><layer-message-status layer-id='status'></layer-message-status><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div></div>", "");
-  layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-body-and-avatar {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: inline-block;\ntext-align: right;\nmax-width: 90%;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-avatar-delete-panel {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Far Side --><div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Near Side --><div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-message-status layer-id='status'></layer-message-status><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div></div></div>", "");
+  layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-replacable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: inline-block;\ntext-align: left;\nmax-width: 90%;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-message-near-side > div {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../../subcomponents/layer-delete/layer-delete":25,"../../subcomponents/layer-message-status/layer-message-status":29,"../layer-message-item-mixin":15}],18:[function(require,module,exports){
 /**
@@ -6188,19 +6348,6 @@ var PAGING_DELAY = 2000;
     messageStatusRenderer: {},
 
     /**
-     * Deletion of this Message is enabled.
-     *
-     * ```
-     * widget.getMessageDeleteEnabled = function(message) {
-     *    return message.sender.sessionOwner;
-     * }
-     * ```
-     *
-     * @property {Function}
-     */
-    getMessageDeleteEnabled: {},
-
-    /**
      * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
      * but not to the currently generated items.
      *
@@ -6230,6 +6377,32 @@ var PAGING_DELAY = 2000;
      * @property {Object}
      */
     dateFormat: {},
+
+    /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(message) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Message} getMenuOptions.message
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function
+    },
 
     /**
      * Disable read receipts and other behaviors; typically used when the widget has been hidden from view.
@@ -6496,10 +6669,10 @@ var PAGING_DELAY = 2000;
         messageWidget.id = this._getItemId(message.id);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
-        messageWidget.getDeleteEnabled = this.getMessageDeleteEnabled;
         if (this.dateFormat) messageWidget.dateFormat = this.dateFormat;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
+        messageWidget.getMenuOptions = this.getMenuOptions;
         return messageWidget;
       } else {
         return null;
@@ -6752,7 +6925,7 @@ var PAGING_DELAY = 2000;
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
-      var nextItem = this.nodes.listHeader.nextSibling;
+      var nextItem = this.nodes.listMeta.nextSibling;
       this.insertBefore(fragment, nextItem);
 
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful
@@ -6780,7 +6953,7 @@ var PAGING_DELAY = 2000;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-messages-list", "<div class='layer-list-header' layer-id='listHeader'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'>This is the beginning of your conversation</div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div></div></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'><div class='layer-replacable-content'>          This is the beginning of your conversation        </div></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replacable-content'>          Loading messages...        </div></div></div></div>", "");
   layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-header-toggle {\nmin-height: 20px;\nmargin-bottom: 2px;\n}\nlayer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {\ntext-align: center;\ndisplay: none;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator,\nlayer-messages-list.layer-end-of-results .layer-end-of-results-indicator {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":45,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/query-end-indicator":55,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":79}],19:[function(require,module,exports){
@@ -6852,6 +7025,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _component.registerComponent)('layer-avatar', {
   mixins: [_sizeProperty2.default, _mainComponent2.default],
   properties: {
+    item: {
+      set: function set(value) {
+        if (value instanceof _layerWebsdk2.default.Message) {
+          this.users = [value.sender];
+        } else if (value instanceof _layerWebsdk2.default.Conversation) {
+          this.users = value.participants;
+        } else {
+          this.users = [];
+        }
+      }
+    },
 
     /**
      * Array of users to be represented by this Avatar.
@@ -6861,6 +7045,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @property {layer.Identity[]} [users=[]}
      */
     users: {
+      value: [],
       set: function set(newValue, oldValue) {
         var _this = this;
 
@@ -6912,16 +7097,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate: function onCreate() {
-      this.properties.users = [];
-    },
-
 
     /**
      * Render the users represented by this widget.
@@ -7015,7 +7190,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onGenerateInitials: function onGenerateInitials(user) {
       // Use first and last name if provided
-      if (user.firstName && user.lastName) {
+      if (user.firstName || user.lastName) {
         return user.firstName.substring(0, 1).toUpperCase() + user.lastName.substring(0, 1).toUpperCase();
       }
 
@@ -7356,6 +7531,7 @@ var TAB = 9;
           body: this.nodes.input.value
         }));
         this.nodes.input.value = '';
+        this._onInput(event);
       }
 
       if (parts.length === 0) return;
@@ -7462,8 +7638,8 @@ var TAB = 9;
           this.send();
         } else {
           event.target.value += '\n';
+          this._onInput(event);
         }
-        this._onInput(event);
       } else if (!_base2.default.settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
         event.preventDefault();
         event.target.value += '\t  ';
@@ -7730,10 +7906,10 @@ var _component = require('../../../components/component');
               return !user.sessionOwner;
             }) // don't show the user their own name
             .filter(function (user) {
-              return user.displayName;
+              return user.displayName || user.firstName || user.lastName;
             });
             if (users.length === 1) {
-              title = users[0].displayName;
+              title = users[0].displayName || users[0].firstName || users[0].lastName;
             } else {
               var sortedUsers = this._sortNames();
               var sortedNames = sortedUsers.slice(0, 3).map(function (user) {
@@ -7755,6 +7931,8 @@ var _component = require('../../../components/component');
       }).filter(function (user) {
         return user.firstName || user.lastName || user.displayName;
       }).sort(function (userA, userB) {
+        if (userA.type === 'BOT' && userB.type !== 'BOT') return 1;
+        if (userB.type === 'BOT' && userA.type !== 'BOT') return -1;
         if (!userA.firstName && !userA.lastName && (userB.firstName || userB.lastName)) return 1;
         if ((userA.firstName || userA.lastName) && !userB.firstName && !userB.lastName) return -1;
         if (!userA.firstName && !userA.lastName) {
@@ -7973,6 +8151,7 @@ var _component = require('../../../components/component');
  *
  * @class layerUI.components.subcomponents.Delete
  * @extends layerUI.components.Component
+ * @deprecated
  */
 'use strict';
 
@@ -8242,19 +8421,22 @@ var _component = require('../../../components/component');
 
 require('../layer-menu/layer-menu');
 
+var _mainComponent = require('../../../mixins/main-component');
+
+var _mainComponent2 = _interopRequireDefault(_mainComponent);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-menu-button', {
+  mixins: [_mainComponent2.default],
   properties: {
+    getMenuOptions: {
+      type: Function
+    },
 
-    /**
-     * Item to be deleted.
-     *
-     * @property {layer.Root} [item=null]
-     */
+    // Automatically set if within a List
     item: {},
-
-    options: {},
 
     /**
      * Different buttons may need menus of differing widths; set it here and its applied by the button, not style sheet.
@@ -8287,29 +8469,30 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onButtonClick: function onButtonClick(evt) {
       evt.preventDefault();
       evt.stopPropagation();
-      var menuNode = document.querySelector('layer-menu');
-      if (!menuNode) {
-        menuNode = document.createElement('layer-menu');
-        document.body.appendChild(menuNode);
-      }
-      if (!menuNode.isShowing || menuNode.near !== this) {
-        menuNode.options = this.options;
-        menuNode.width = this.menuWidth;
-        menuNode.item = this.item;
-        menuNode.near = this;
-        menuNode.isShowing = true;
+      var options = this.getMenuOptions(this.item);
+      if (options) {
+        var menuNode = document.querySelector('layer-menu');
+        if (!menuNode) {
+          menuNode = document.createElement('layer-menu');
+          document.body.appendChild(menuNode);
+        }
+        if (!menuNode.isShowing || menuNode.near !== this) {
+          menuNode.options = options;
+          menuNode.width = this.menuWidth;
+          menuNode.near = this;
+          menuNode.isShowing = true;
+        }
       }
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-menu-button", "&#8285;", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../layer-menu/layer-menu":28,"layer-websdk":79}],28:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53,"../layer-menu/layer-menu":28,"layer-websdk":79}],28:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -8339,8 +8522,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   properties: {
     options: {
       set: function set(value) {
-        var _this = this;
-
         var menu = document.createElement('div');
         menu.classList.add('layer-menu-button-menu-list');
         value.forEach(function (option) {
@@ -8348,7 +8529,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           menuItem.classList.add('layer-menu-button-menu-item');
           menuItem.innerHTML = option.text;
           menuItem.addEventListener('click', function (evt) {
-            return option.method(_this.item);
+            return option.method();
           });
           menu.appendChild(menuItem);
         });
@@ -8382,8 +8563,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     },
 
-    item: {},
-    near: {}
+    near: {
+      set: function set(value) {
+        if (value && this.isShowing) this._showNear(value);
+      }
+    }
   },
   methods: {
 
@@ -8404,13 +8588,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       if (this.isShowing) this.isShowing = false;
     },
     _showNear: function _showNear() {
-      var _this2 = this;
+      var _this = this;
 
       var node = this.near;
       var bounds = node.getBoundingClientRect();
       if (bounds.right + this.menuWidth > document.body.clientWidth) {
         this.style.left = '';
-        this.style.right = bounds.left + 'px';
+        this.style.right = '5px';
       } else {
         this.style.right = '';
         this.style.left = bounds.right + 'px';
@@ -8420,9 +8604,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.style.top = bounds.bottom + 'px';
       this.style.width = this.menuWidth + 'px';
       setTimeout(function () {
-        if (_this2.offsetTop + _this2.clientHeight > document.body.clientHeight) {
-          _this2.style.top = '';
-          _this2.style.bottom = '2px';
+        if (_this.offsetTop + _this.clientHeight > document.body.clientHeight) {
+          _this.style.top = '';
+          _this.style.bottom = '2px';
         }
       }, 1);
     }
@@ -8615,6 +8799,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; 
+
+
 var _layerWebsdk = require('layer-websdk');
 
 var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
@@ -8630,7 +8817,6 @@ var _sizeProperty = require('../../../mixins/size-property');
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 
 (0, _component.registerComponent)('layer-presence', {
   mixins: [_mainComponent2.default, _sizeProperty2.default],
@@ -8664,13 +8850,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     item: {
       set: function set(value) {
-        if (value && !(value instanceof _layerWebsdk2.default.Identity)) {
-          var client = _layerWebsdk2.default.Client.getClient(value.clientId);
-          if (client) {
-            value = this.properties.item = client.getIdentity(value.id);
-          } else {
-            value = this.properties.item = null;
+        if (value) {
+          if (value instanceof _layerWebsdk2.default.Message) {
+            value = value.sender;
+          } else if (value instanceof _layerWebsdk2.default.Conversation) {
+            value = value.participants.filter(function (identity) {
+              return !identity.sessionOwner;
+            })[0];
+          } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !(value instanceof _layerWebsdk2.default.Identity)) {
+            var client = _layerWebsdk2.default.Client.getClient(value.clientId);
+            if (client) {
+              value = client.getIdentity(value.id);
+            }
           }
+
+          if (!(value instanceof _layerWebsdk2.default.Identity)) {
+            value = null;
+          }
+          this.properties.item = value;
         }
         if (value) value.on('identities:change', this.onRerender, this);
         this.onRender();
@@ -8709,7 +8906,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @method
      */
     onRerender: function onRerender(user) {
-      var status = this.item.status;
+      var status = this.item ? this.item.status : '';
       this.classList[status === 'available' ? 'add' : 'remove']('layer-presence-available');
       this.classList[status === 'busy' ? 'add' : 'remove']('layer-presence-busy');
       this.classList[status === 'away' ? 'add' : 'remove']('layer-presence-away');
@@ -10001,21 +10198,8 @@ module.exports = {
       set: function set(value) {
         this.nodes.emptyNode.style.display = value ? '' : 'none';
       }
-    },
-
-    /**
-     * A dom node to render when there are no messages in the list.
-     *
-     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
-     *
-     * @property {HTMLElement} [emptyNode=null]
-     */
-    emptyNode: {
-      set: function set(value) {
-        this.nodes.emptyNode.innerHTML = '';
-        if (value) this.nodes.emptyNode.appendChild(value);
-      }
     }
+
   },
   methods: {
     onRender: function onRender() {
@@ -10293,6 +10477,9 @@ module.exports = {
  */
 'use strict';
 
+var _component = require('../components/component');
+
+var _base = require('../base');
 
 
 module.exports = {
@@ -10425,6 +10612,28 @@ module.exports = {
       }
     },
 
+    onReplaceableContentAdded: {
+      mode: _component.registerComponent.MODES.AFTER,
+      value: function onReplaceableContentAdded(name, node) {
+        // Setup each node added this way as a full part of this component
+        var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, function () {
+          return true;
+        }, false);
+        var currentNode = void 0;
+        while (currentNode = nodeIterator.nextNode()) {
+          if (_base.components[currentNode.tagName.toLowerCase()]) {
+            if (!currentNode.properties._internalState) {
+              // hit using polyfil
+              currentNode.properties.item = this.item;
+            } else {
+              // hit using real webcomponents
+              currentNode.item = this.item;
+            }
+          }
+        }
+      }
+    },
+
     /**
      * Adds the CSS class to this list item's outer node.
      *
@@ -10461,7 +10670,7 @@ module.exports = {
     }
   }
 };
-},{}],50:[function(require,module,exports){
+},{"../base":4,"../components/component":5}],50:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that data is currently loading.
  *
@@ -10481,24 +10690,8 @@ module.exports = {
       set: function set(value) {
         this.classList[value ? 'add' : 'remove']('layer-loading-data');
       }
-    },
-
-    /**
-     * A dom node to render when data is loading for the list.
-     *
-     * Could just be a message "Messages Loading...".  Or you can add interactive widgets.
-     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
-     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
-     * style height to be at least as tall as your custom node.
-     *
-     * @property {HTMLElement} [dataLoadingNode=null]
-     */
-    dataLoadingNode: {
-      set: function set(value) {
-        this.nodes.loadIndicator.innerHTML = '';
-        if (value) this.nodes.loadIndicator.appendChild(value);
-      }
     }
+
   },
   methods: {
     onRender: function onRender() {
@@ -10642,6 +10835,15 @@ var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// Shallow array comparison test
+
+function isEqual(arr1, arr2) {
+  if (arr1.length !== arr2.length) return false;
+  for (var i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}
 
 module.exports = {
   mixins: [_hasQuery2.default],
@@ -10942,9 +11144,29 @@ module.exports = {
      * @private
      */
     _generateFragmentItem: function _generateFragmentItem(item, fragment) {
+      var _this5 = this;
+
       var itemInstance = item instanceof _layerWebsdk2.default.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         var widget = this._generateItem(itemInstance);
+
+        // propagate any custom nodes down to the list items
+        if (this.customNodes) {
+          widget.customNodes = {};
+          Object.keys(widget.nodes).forEach(function (nodeName) {
+            if (_this5.customNodes[nodeName]) {
+              if (typeof _this5.customNodes[nodeName] === 'function') {
+                // no-op
+              } else if (_this5.customNodes[nodeName].tagName !== 'TEMPLATE') {
+                var template = document.createElement('template');
+                template.content.appendChild(_this5.customNodes[nodeName]);
+                _this5.customNodes[nodeName] = template;
+              }
+              widget.customNodes[nodeName] = _this5.customNodes[nodeName];
+            }
+          });
+        }
+
         widget.parentComponent = this;
         widget.setAttribute('layer-item-id', item.id.replace(/^layer:\/\/\//, '').replace(/\//g, '_'));
         if (widget) {
@@ -10976,11 +11198,11 @@ module.exports = {
      * @private
      */
     _gatherAndProcessAffectedItems: function _gatherAndProcessAffectedItems(affectedItems, isTopItemNew) {
-      var _this5 = this;
+      var _this6 = this;
 
       if (affectedItems.length) {
         var itemIds = affectedItems.map(function (item) {
-          return _this5._getItemId(item.id);
+          return _this6._getItemId(item.id);
         });
         var affectedWidgets = this.querySelectorAllArray('#' + itemIds.join(', #'));
         this._processAffectedWidgets(affectedWidgets, isTopItemNew);
@@ -10999,7 +11221,7 @@ module.exports = {
      * @private
      */
     _processAffectedWidgets: function _processAffectedWidgets(widgets, isTopItemNew) {
-      var _this6 = this;
+      var _this7 = this;
 
       // Get the index of our first widget within listData
       var firstIndex = void 0;
@@ -11015,9 +11237,9 @@ module.exports = {
 
       // Allow external processing of the widgets
       widgets.forEach(function (widget, index) {
-        if (_this6.properties.onRenderListItem) {
+        if (_this7.properties.onRenderListItem) {
           try {
-            _this6.properties.onRenderListItem(widget, _this6.properties.listData, firstIndex + index, isTopItemNew);
+            _this7.properties.onRenderListItem(widget, _this7.properties.listData, firstIndex + index, isTopItemNew);
           } catch (err) {
             console.error('Error in onRenderListItem for ' + widget.item.id + '; ' + err);
           }
@@ -11146,7 +11368,7 @@ module.exports = {
       this.properties.listData = [].concat(this.properties.query.data);
       var fragment = this._generateFragment(evt.data);
 
-      this.insertBefore(fragment, this.nodes.loadIndicator);
+      this.insertBefore(fragment, this.nodes.listMeta);
 
       // isTopItemNew is true if there wasn't any prior data... data length == event length
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);
@@ -11191,8 +11413,9 @@ var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
 
 var _base = require('../base');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _component = require('../components/component');
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 module.exports = {
   properties: {
@@ -11282,8 +11505,8 @@ module.exports = {
       if (useSafariCss) this.classList.add('safari');
     }
   }
-};
-},{"../base":4,"layer-websdk":79}],54:[function(require,module,exports){
+}; 
+},{"../base":4,"../components/component":5,"layer-websdk":79}],54:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -11463,24 +11686,8 @@ module.exports = {
       set: function set(value) {
         this.classList[value && !this.isEmptyList ? 'add' : 'remove']('layer-end-of-results');
       }
-    },
-
-    /**
-     * A dom node to render when there are no messages in the list.
-     *
-     * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
-     * Note that using the default template, this widget may be wrapped in a div with CSS class `layer-header-toggle`,
-     * you should insure that they height of this toggle does not change when your custom node is shown.  Set the
-     * style height to be at least as tall as your custom node.
-     *
-     * @property {HTMLElement} [endOfResultsNode=null]
-     */
-    endOfResultsNode: {
-      set: function set(value) {
-        this.nodes.endOfResultsNode.innerHTML = '';
-        if (value) this.nodes.endOfResultsNode.appendChild(value);
-      }
     }
+
   },
   methods: {
     onRender: function onRender() {
@@ -26227,10 +26434,10 @@ var Client = function (_ClientAuth) {
 
       if (object.isSaved()) {
         if (this._scheduleCheckAndPurgeCacheAt < Date.now()) {
-          this._scheduleCheckAndPurgeCacheAt = Date.now() + Client.CACHE_PURGE_INTERVAL;
+          this._scheduleCheckAndPurgeCacheAt = Date.now() + Client.QUERIED_CACHE_PURGE_INTERVAL;
           setTimeout(function () {
             return _this4._runScheduledCheckAndPurgeCache();
-          }, Client.CACHE_PURGE_INTERVAL);
+          }, Client.QUERIED_CACHE_PURGE_INTERVAL);
         }
         this._scheduleCheckAndPurgeCacheItems.push(object);
       }
@@ -26266,10 +26473,16 @@ var Client = function (_ClientAuth) {
   }, {
     key: '_isCachedObject',
     value: function _isCachedObject(obj) {
+      if (obj._loadType === 'fetched') return true;
       var list = Object.keys(this._models.queries);
       for (var i = 0; i < list.length; i++) {
         var query = this._models.queries[list[i]];
-        if (query._getItem(obj.id)) return true;
+        if (query._getItem(obj.id)) {
+          if (obj._loadType === 'websocket') obj._loadType = 'queried';
+          return true;
+        } else if (obj._loadType === 'websocket' && Date.now() - obj.localCreatedAt.getTime() < Client.WEBSOCKET_CACHE_PURGE_INTERVAL) {
+          return true;
+        }
       }
       return false;
     }
@@ -26496,7 +26709,7 @@ Client.prototype.telemetryMonitor = null;
  * @static
  * @type {String}
  */
-Client.version = '3.3.1';
+Client.version = '3.3.3';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -26508,7 +26721,8 @@ Client.version = '3.3.1';
  * @static
  * @type {number}
  */
-Client.CACHE_PURGE_INTERVAL = 10 * 60 * 1000;
+Client.QUERIED_CACHE_PURGE_INTERVAL = 10 * 60 * 1000; // 10 minutes
+Client.WEBSOCKET_CACHE_PURGE_INTERVAL = 60 * 60 * 1000; // one hour
 
 Client._ignoredEvents = ['conversations:loaded', 'conversations:loaded-error'];
 
@@ -28734,8 +28948,10 @@ var NONE = _require$LOG.NONE;
 
 // Pretty arbitrary test that IE/edge fails and others don't.  Yes I could do a more direct
 // test for IE/edge but its hoped that MS will fix this around the time they cleanup their internal console object.
+// Note that uglifyjs with drop_console=true will throw an error on console.assert.toString().match; so we instead do (console.assert.toString() || "") which drop_console
+// on replacing console.assert.toString() with (void 0) will still work
 
-var supportsConsoleFormatting = Boolean(console.assert && console.assert.toString().match(/assert/));
+var supportsConsoleFormatting = Boolean(console.assert && (console.assert.toString() || "").match(/assert/));
 var LayerCss = 'color: #888; font-weight: bold;';
 var Black = 'color: black';
 /* istanbulify ignore next */
@@ -29022,16 +29238,19 @@ module.exports = {
      * @return {layer.Channel}
      */
     getChannel: function getChannel(id, canLoad) {
+      var result = null;
+
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Channel.isValidId(id)) {
         id = Channel.prefixUUID + id;
       }
       if (this._models.channels[id]) {
-        return this._models.channels[id];
+        result = this._models.channels[id];
       } else if (canLoad) {
-        return Channel.load(id, this);
+        result = Channel.load(id, this);
       }
-      return null;
+      if (canLoad) result._loadType = 'fetched';
+      return result;
     },
 
 
@@ -29230,6 +29449,7 @@ module.exports = {
       if (!this.isAuthenticated) throw new Error(ErrorDictionary.clientMustBeReady);
       if (!('private' in options)) options.private = false;
       options.client = this;
+      options._loadType = 'websocket'; // treat this the same as a websocket loaded object
       return Channel.create(options);
     }
   }
@@ -29441,16 +29661,18 @@ module.exports = {
      * @return {layer.Conversation}
      */
     getConversation: function getConversation(id, canLoad) {
+      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Conversation.isValidId(id)) {
         id = Conversation.prefixUUID + id;
       }
       if (this._models.conversations[id]) {
-        return this._models.conversations[id];
+        result = this._models.conversations[id];
       } else if (canLoad) {
-        return Conversation.load(id, this);
+        result = Conversation.load(id, this);
       }
-      return null;
+      if (canLoad) result._loadType = 'fetched';
+      return result;
     },
 
 
@@ -29647,6 +29869,7 @@ module.exports = {
       if (!this.isAuthenticated) throw new Error(ErrorDictionary.clientMustBeReady);
       if (!('distinct' in options)) options.distinct = true;
       options.client = this;
+      options._loadType = 'websocket'; // treat this the same as a websocket loaded object
       return Conversation.create(options);
     }
   }
@@ -29681,6 +29904,16 @@ module.exports = {
    * @param {layer.Identity} evt.target
    */
   'identities:loaded',
+
+  /**
+   * A call to layer.Identity.load has failed
+   *
+   * @event
+   * @event
+   * @param {layer.LayerEvent} evt
+   * @param {layer.LayerError} evt.error
+   */
+  'identities:loaded-error',
 
   /**
    * An Identity has had a change in its properties.
@@ -29800,17 +30033,19 @@ module.exports = {
      * @return {layer.Identity}
      */
     getIdentity: function getIdentity(id, canLoad) {
+      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Identity.isValidId(id)) {
         id = Identity.prefixUUID + encodeURIComponent(id);
       }
 
       if (this._models.identities[id]) {
-        return this._models.identities[id];
+        result = this._models.identities[id];
       } else if (canLoad) {
-        return Identity.load(id, this);
+        result = Identity.load(id, this);
       }
-      return null;
+      if (canLoad) result._loadType = 'fetched';
+      return result;
     },
 
 
@@ -30061,14 +30296,16 @@ module.exports = {
      * @return {layer.Membership}
      */
     getMember: function getMember(id, canLoad) {
+      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
       if (this._models.members[id]) {
-        return this._models.members[id];
+        result = this._models.members[id];
       } else if (canLoad) {
-        return Syncable.load(id, this);
+        result = Syncable.load(id, this);
       }
-      return null;
+      if (canLoad) result._loadType = 'fetched';
+      return result;
     },
 
 
@@ -30330,6 +30567,8 @@ module.exports = {
      * @return {layer.Message}
      */
     getMessage: function getMessage(id, canLoad) {
+      var result = null;
+
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
       // NOTE: This could be an announcement
@@ -30338,11 +30577,13 @@ module.exports = {
       }
 
       if (this._models.messages[id]) {
-        return this._models.messages[id];
+        result = this._models.messages[id];
       } else if (canLoad) {
-        return Syncable.load(id, this);
+        result = Syncable.load(id, this);
       }
-      return null;
+      if (canLoad) result._loadType = 'fetched';
+
+      return result;
     },
 
 
@@ -31108,6 +31349,7 @@ var Channel = function (_Container) {
       } : options;
       messageConfig.clientId = this.clientId;
       messageConfig.conversationId = this.id;
+      messageConfig._loadType = 'websocket'; // treat this the same as a websocket loaded object
 
       return new ChannelMessage(messageConfig);
     }
@@ -33226,6 +33468,7 @@ var Conversation = function (_Container) {
       } : options;
       messageConfig.clientId = this.clientId;
       messageConfig.conversationId = this.id;
+      messageConfig._loadType = 'websocket'; // treat this the same as a websocket loaded object
 
       return new ConversationMessage(messageConfig);
     }
@@ -34203,7 +34446,7 @@ var Identity = function (_Syncable) {
     } else if (!options.id && options.userId) {
       options.id = Identity.prefixUUID + encodeURIComponent(options.userId);
     } else if (options.id && !options.userId) {
-      options.userId = options.id.substring(Identity.prefixUUID.length);
+      options.userId = decodeURIComponent(options.id.substring(Identity.prefixUUID.length));
     }
 
     // Make sure we have an clientId property
@@ -35572,6 +35815,7 @@ var MessagePart = function (_Root) {
      * @param  {Object} response
      * @param  {Blob} body
      * @param  {layer.Client} client
+     * @param {Number} [retryCount=0]
      */
 
   }, {
@@ -35579,9 +35823,10 @@ var MessagePart = function (_Root) {
     value: function _processContentResponse(response, body, client) {
       var _this8 = this;
 
+      var retryCount = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
       this._content = new Content(response.id);
       this.hasContent = true;
-
       xhr({
         url: response.upload_url,
         method: 'PUT',
@@ -35591,17 +35836,47 @@ var MessagePart = function (_Root) {
           'Upload-Content-Type': this.mimeType
         }
       }, function (result) {
-        return _this8._processContentUploadResponse(result, response, client);
+        return _this8._processContentUploadResponse(result, response, client, body, retryCount);
       });
     }
+
+    /**
+     * Process the response to uploading the content to google cloud storage.
+     *
+     * Result is either:
+     *
+     * 1. trigger `parts:send` on success
+     * 2. call `_processContentResponse` to retry
+     * 3. trigger `messages:sent-error` if retries have failed
+     *
+     * @method _processContentUploadResponse
+     * @private
+     * @param  {Object} uploadResult    Response from google cloud server; note that the xhr method assumes some layer-like behaviors and may replace non-json responses with js objects.
+     * @param  {Object} contentResponse Response to `POST /content` from before
+     * @param  {layer.Client} client
+     * @param  {Blob} body
+     * @param  {Number} retryCount
+     */
+
   }, {
     key: '_processContentUploadResponse',
-    value: function _processContentUploadResponse(uploadResult, contentResponse, client) {
+    value: function _processContentUploadResponse(uploadResult, contentResponse, client, body, retryCount) {
       if (!uploadResult.success) {
         if (!client.onlineManager.isOnline) {
           client.onlineManager.once('connected', this._processContentResponse.bind(this, contentResponse, client), this);
+        } else if (retryCount < MessagePart.MaxRichContentRetryCount) {
+          this._processContentResponse(contentResponse, body, client, retryCount + 1);
         } else {
-          logger.error('We don\'t yet handle this!');
+          logger.error('Failed to upload rich content; triggering message:sent-error event; status of ', uploadResult.status, this);
+          this._getMessage().trigger('messages:sent-error', {
+            error: new LayerError({
+              message: 'Upload of rich content failed',
+              httpStatus: uploadResult.status,
+              code: 0,
+              data: uploadResult.xhr
+            }),
+            part: this
+          });
         }
       } else {
         this.trigger('parts:send', {
@@ -35881,6 +36156,13 @@ MessagePart.prototype.size = 0;
  */
 MessagePart.TextualMimeTypes = [/^text\/.+$/, /^application\/json(\+.+)?$/];
 
+/**
+ * Number of retry attempts to make before giving up on uploading Rich Content to Google Cloud Storage.
+ *
+ * @type {Number}
+ */
+MessagePart.MaxRichContentRetryCount = 3;
+
 MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'content-loaded-error', 'messageparts:change'].concat(Root._supportedEvents);
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
@@ -36122,6 +36404,7 @@ var Message = function (_Syncable) {
         parts.clientId = this.clientId;
         adjustedParts = [new MessagePart(parts)];
       }
+      this._setupPartIds(adjustedParts);
       if (adjustedParts) {
         adjustedParts.forEach(function (part) {
           part.off('messageparts:change', _this2._onMessagePartChange, _this2); // if we already subscribed, don't create a redundant subscription
@@ -36182,9 +36465,12 @@ var Message = function (_Syncable) {
         } else if ((typeof part === 'undefined' ? 'undefined' : _typeof(part)) === 'object') {
           this.parts.push(new MessagePart(part));
         }
-        var thePart = this.parts[this.parts.length - 1];
+        var index = this.parts.length - 1;
+        var thePart = this.parts[index];
+
         thePart.off('messageparts:change', this._onMessagePartChange, this); // if we already subscribed, don't create a redundant subscription
         thePart.on('messageparts:change', this._onMessagePartChange, this);
+        if (!part.id) part.id = this.id + '/parts/' + index;
         this._addToMimeAttributesMap(thePart);
       }
       return this;
@@ -36573,6 +36859,27 @@ var Message = function (_Syncable) {
     }
 
     /**
+     * Setup message-part ids for parts that lack that id; for locally created parts.
+     *
+     * @private
+     * @method
+     * @param {layer.MessagePart[]} parts
+     */
+
+  }, {
+    key: '_setupPartIds',
+    value: function _setupPartIds(parts) {
+      var _this9 = this;
+
+      // Assign IDs to preexisting Parts so that we can call getPartById()
+      if (parts) {
+        parts.forEach(function (part, index) {
+          if (!part.id) part.id = _this9.id + '/parts/' + index;
+        });
+      }
+    }
+
+    /**
      * Populates this instance with the description from the server.
      *
      * Can be used for creating or for updating the instance.
@@ -36585,7 +36892,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(message) {
-      var _this9 = this;
+      var _this10 = this;
 
       this._inPopulateFromServer = true;
       var client = this.getClient();
@@ -36594,16 +36901,9 @@ var Message = function (_Syncable) {
       this.url = message.url;
       var oldPosition = this.position;
       this.position = message.position;
-
-      // Assign IDs to preexisting Parts so that we can call getPartById()
-      if (this.parts) {
-        this.parts.forEach(function (part, index) {
-          if (!part.id) part.id = _this9.id + '/parts/' + index;
-        });
-      }
-
+      this._setupPartIds(message.parts);
       this.parts = message.parts.map(function (part) {
-        var existingPart = _this9.getPartById(part.id);
+        var existingPart = _this10.getPartById(part.id);
         if (existingPart) {
           existingPart._populateFromServer(part);
           return existingPart;
@@ -37603,6 +37903,29 @@ Syncable.prototype.syncState = SYNC_STATE.NEW;
  * @private
  */
 Syncable.prototype._syncCounter = 0;
+
+/**
+ * Specifies why this object was loaded.
+ *
+ * Values are:
+ *
+ * * fetched
+ * * queried
+ * * websocket
+ *
+ * Fetched objects must be destroyed by the fetcher when done.
+ *
+ * Queried objects can be destroyed once the query no longer uses them.
+ *
+ * Websocket objects can stick around for a while but must eventually be cleaned up unless they are used by a Query.
+ * Currently, a websocket object will stick around for one hour unless its used by a Query.
+ * Locally created objects are treated as websocket created objects since
+ * once created we get a websocket create event for them.
+ *
+ * @type {String} [_loadType=queried]
+ * @private
+ */
+Syncable.prototype._loadType = 'queried';
 
 /**
  * Prefix to use when triggering events
@@ -45341,7 +45664,8 @@ var WebsocketChangeManager = function () {
     key: '_handleCreate',
     value: function _handleCreate(msg) {
       msg.data.fromWebsocket = true;
-      this.client._createObject(msg.data);
+      var obj = this.client._createObject(msg.data);
+      if (obj) obj._loadType = 'websocket';
     }
 
     /**

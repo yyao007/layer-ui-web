@@ -78,24 +78,56 @@ function initReact(React, ReactDom) {
         .replace(/^Layer/, '');
 
     libraryResult[className] = React.createClass({
+
+      // hacky putting this here, but unable to provide a constructor in this environment and this is the only gaurenteed call.
+      getInitialState() {
+        if (this.props.replaceableContent && !this.replaceableContent) {
+          this.replaceableContent = {};
+          Object.keys(this.props.replaceableContent).forEach((nodeName) => {
+            const value = this.props.replaceableContent[nodeName];
+            if (typeof value === 'function' && !value.replaceableIsSetup) {
+
+              this.replaceableContent[nodeName] = (widget, parent) => {
+                const result = value(widget);
+                if (!(value instanceof HTMLElement)) {
+                  const tmpNode = parent || document.createElement('div');
+                  widget.addEventListener('layer-widget-destroyed', () => ReactDom.unmountComponentAtNode(tmpNode));
+                  return ReactDom.render(result, tmpNode);
+                } else {
+                  return result;
+                }
+              };
+            }
+          });
+        }
+        return null;
+      },
+
       /**
        * On mounting, copy in all properties, and optionally setup a Query.
        *
        * Delay added to prevent Webcomponents property setters from being blown away in safari and firefox
        */
       componentDidMount() {
+        this.node.componentDidMount = true;
         // Get the properties/attributes that match those used in this.props
         const props = component.properties.filter(property =>
-          this.props[property.propertyName] || this.props[property.attributeName]);
+          property.propertyName in this.props || property.attributeName in this.props);
 
         // Set the webcomponent properties
         props.forEach((propDef) => {
           let value = propDef.propertyName in this.props ?
             this.props[propDef.propertyName] : this.props[propDef.attributeName];
+          if (propDef.propertyName === 'replaceableContent' && this.replaceableContent) value = this.replaceableContent;
           if (propDef.type === HTMLElement && value) {
             value = this.handleReactDom(propDef, value);
           }
-          this.node[propDef.propertyName] = value;
+          if (!this.node.properties) this.node.properties = {};
+          if (!this.node.properties._internalState) {
+            this.node.properties[propDef.propertyName] = value;
+          } else {
+            this.node[propDef.propertyName] = value;
+          }
         });
 
         // Browsers running the polyfil may not yet have initialized the component at this point.
@@ -106,7 +138,11 @@ function initReact(React, ReactDom) {
           evt.initCustomEvent('HTMLImportsLoaded', true, true, null);
           document.dispatchEvent(evt);
         }
-        this.node._onAfterCreate();
+
+        // The webcomponents polyfil is unable to initilize a component thats in
+        // a DocumentFragment so it must follow a more typical lifecycle
+        if (this.node._onAfterCreate) this.node._onAfterCreate();
+
       },
 
       /**
@@ -121,6 +157,7 @@ function initReact(React, ReactDom) {
         props.forEach((propDef) => {
           const name = propDef.propertyName in this.props ? propDef.propertyName : propDef.attributeName;
           let value = nextProps[name];
+          if (propDef.propertyName === 'replaceableContent' && this.replaceableContent) value = this.replaceableContent;
           if (propDef.type === HTMLElement && value) {
             value = this.handleReactDom(propDef, value);
           }
@@ -167,6 +204,7 @@ function initReact(React, ReactDom) {
         });
       },
     });
+
   });
   return libraryResult;
 }

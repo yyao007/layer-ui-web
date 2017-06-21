@@ -53,6 +53,17 @@ import MainComponent from '../../../mixins/main-component';
 registerComponent('layer-avatar', {
   mixins: [SizeProperty, MainComponent],
   properties: {
+    item: {
+      set(value) {
+        if (value instanceof Layer.Message) {
+          this.users = [value.sender];
+        } else if (value instanceof Layer.Conversation) {
+          this.users = value.participants;
+        } else {
+          this.users = [];
+        }
+      },
+    },
 
     /**
      * Array of users to be represented by this Avatar.
@@ -62,6 +73,7 @@ registerComponent('layer-avatar', {
      * @property {layer.Identity[]} [users=[]}
      */
     users: {
+      value: [],
       set(newValue, oldValue) {
         if (Array.isArray(newValue)) {
           newValue = newValue.map(user => (user instanceof Layer.Identity ? user : this.client.getIdentity(user.id)));
@@ -108,15 +120,6 @@ registerComponent('layer-avatar', {
     },
   },
   methods: {
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate() {
-      this.properties.users = [];
-    },
 
     /**
      * Render the users represented by this widget.

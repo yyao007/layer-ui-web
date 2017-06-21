@@ -18,11 +18,16 @@
       align-items: stretch;
     }
 
-    layer-message-item-sent .layer-message-body-and-avatar {
+    layer-message-item-sent .layer-message-row {
       display: flex;
       flex-direction: row;
       align-items: flex-end;
       flex-grow: 1;
+    }
+
+    layer-message-item-sent .layer-replacable-content {
+      display: flex;
+      flex-direction: row;
     }
 
     layer-message-item-sent .layer-message-item-main {
@@ -32,7 +37,7 @@
     }
     layer-message-item-sent .layer-message-item-main .layer-message-item-content {
       display: inline-block;
-      text-align: right;
+      text-align: left;
       max-width: 90%;
     }
 
@@ -41,26 +46,47 @@
       display: block;
     }
 
-    layer-message-item-sent .layer-avatar-delete-panel {
+    layer-message-item-sent .layer-message-near-side > div {
       display: flex;
       flex-direction: row;
       align-items: center;
     }
   </style>
   <div class='layer-list-item' layer-id='innerNode'>
-    <div class='layer-message-body-and-avatar' layer-id='messageRow'>
+
+    <!-- Header -->
+    <div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'>
+      <div class='layer-replacable-content'></div>
+    </div>
+
+    <!-- Body -->
+    <div class='layer-message-row' layer-id='messageRow'>
+
+      <!-- Body: Far Side -->
+      <div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'></div>
+      </div>
+
+      <!-- Body: Message Contents -->
       <div class='layer-message-item-main'>
         <div class='layer-message-item-content' layer-id='content'></div>
       </div>
-      <div class='layer-avatar-delete-panel'>
-        <layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar>
-        <layer-delete layer-id='delete'></layer-delete>
+
+      <!-- Body: Near Side -->
+      <div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'>
+          <layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar>
+          <layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button>
+        </div>
       </div>
     </div>
-    <div class='layer-sender-info layer-sender-details'>
-      <div class='layer-sender-name' layer-id='sender'></div>
-      <layer-message-status layer-id='status'></layer-message-status>
-      <layer-date layer-id='date' show-year="never" today-format='{"hour": "numeric", "minute": "numeric"}' format='{"hour": "numeric", "minute": "numeric"}'></layer-date>
+
+    <!-- Footer -->
+    <div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'>
+      <div class='layer-replacable-content'>
+        <layer-message-status layer-id='status'></layer-message-status>
+        <layer-date layer-id='date' show-year="never" today-format='{"hour": "numeric", "minute": "numeric"}' format='{"hour": "numeric", "minute": "numeric"}'></layer-date>
+      </div>
     </div>
   </div>
 </template>

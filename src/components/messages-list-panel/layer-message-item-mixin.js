@@ -168,6 +168,37 @@ module.exports = {
     },
 
     /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(conversation) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Conversation} getMenuOptions.conversation
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function,
+      set() {
+        if (this.nodes.menuButton) {
+          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
+        }
+      },
+    },
+
+    /**
      * Provide property to override the function used to render a date for each Message Item.
      *
      * Note that changing this will not regenerate the list; this should be set when initializing a new List.

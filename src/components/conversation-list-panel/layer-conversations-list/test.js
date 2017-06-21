@@ -231,18 +231,26 @@ describe('layer-conversations-list', function() {
       expect(result.tagName).toEqual('LAYER-CHANNEL-ITEM');
     });
 
-    it("Should set deleteConversationEnabled via callback", function() {
-      el.deleteConversationEnabled = jasmine.createSpy('deleteEnabled').and.returnValue(true);
+    it("Should set getMenuOptions callback", function() {
+      var spy = jasmine.createSpy('menuOptions');
+      el.getMenuOptions = spy;
       var result = el._generateItem(query.data[1]);
       layer.Util.defer.flush();
-      expect(result.nodes.delete.enabled).toBe(true);
-      expect(el.deleteConversationEnabled).toHaveBeenCalledWith(query.data[1]);
+      expect(result.getMenuOptions).toBe(spy);
+    });
 
-      el.deleteConversationEnabled = jasmine.createSpy('deleteEnabled').and.returnValue(false);
+    it("Should set size", function() {
+      el.size = "small";
       var result = el._generateItem(query.data[1]);
       layer.Util.defer.flush();
-      expect(el.deleteConversationEnabled).toHaveBeenCalledWith(query.data[1]);
-      expect(result.nodes.delete.enabled).toBe(false);
+      expect(result.size).toEqual("small");
+    });
+
+    it("Should set dateFormat", function() {
+      el.dateFormat = {year: "number"};
+      var result = el._generateItem(query.data[1]);
+      layer.Util.defer.flush();
+      expect(result.dateFormat).toEqual({year: "number"});
     });
 
     it("Should run the filter", function() {

@@ -63,13 +63,6 @@ describe('layer-conversation-panel', function() {
   });
 
   describe('Event Handling', function() {
-    it("Should call onMessageDeleted when child triggers layer-message-deleted", function() {
-      var spy = jasmine.createSpy('callback');
-      el.onMessageDeleted = spy;
-      el.firstChild.trigger('layer-message-deleted', {message: query.data[1]});
-      expect(spy).toHaveBeenCalledWith(jasmine.any(CustomEvent));
-    });
-
     it("Should call onSendMessage when child triggers layer-send-message", function() {
       var spy = jasmine.createSpy('callback');
       el.onSendMessage = spy;
@@ -370,6 +363,15 @@ describe('layer-conversation-panel', function() {
       el.onRenderListItem = f;
       layer.Util.defer.flush();
       expect(el.nodes.list.onRenderListItem).toBe(f);
+    });
+  });
+
+  describe("The getMenuOptions property", function() {
+    it("Should set the list getMenuOptions property", function() {
+      var f = function() {};
+      el.getMenuOptions = f;
+      layer.Util.defer.flush();
+      expect(el.nodes.list.getMenuOptions).toBe(f);
     });
   });
 

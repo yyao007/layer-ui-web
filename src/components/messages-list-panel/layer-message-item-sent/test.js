@@ -113,6 +113,32 @@ describe('layer-message-item', function() {
     });
   });
 
+  describe("The getMenuOptions property", function() {
+    it("Should set the list getMenuOptions property", function() {
+      var f = function() {};
+      el.getMenuOptions = f;
+      layer.Util.defer.flush();
+      expect(el.nodes.menuButton.getMenuOptions).toBe(f);
+    });
+  });
+
+  describe("The dateFormat property", function() {
+    it("Should set the date widgets format properties", function() {
+
+      el.dateFormat = {
+        today: {hour: "number"},
+        default: {minute: "short"},
+        week: {year: "short"},
+        older: {weekday: "short"}
+      };
+      layer.Util.defer.flush();
+      expect(el.nodes.date.todayFormat).toEqual({hour: "number"});
+      expect(el.nodes.date.defaultFormat).toEqual({minute: "short"});
+      expect(el.nodes.date.weekFormat).toEqual({year: "short"});
+      expect(el.nodes.date.olderFormat).toEqual({weekday: "short"});
+    });
+  });
+
   describe("The messageStatusRenderer property", function() {
     it("Should be passed to the sentAt widget", function() {
       var f = function() {};

@@ -678,6 +678,7 @@ function getPropArray(classDef) {
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
       propagateToChildren: classDef.properties[propertyName].propagateToChildren,
+      value: classDef.properties[propertyName].value,
     };
   }).sort((a, b) => {
     if (a.order !== undefined && b.order !== undefined) {
@@ -1004,6 +1005,54 @@ function _registerComponent(tagName) {
       // only way around this is to add another Layer.Util.defer() to our lifecycle
       this._setupListeners();
 
+      Object.keys(this.properties.replaceableContent || {}).forEach((nodeName) => {
+        const oldNode = this.nodes[nodeName];
+        let newNode;
+
+        // Transform a function into a node if we've been given a function...
+        // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
+        // in which case it should handle turning it into a node; lists in particular need to manage
+        // creation of the node once per list-item
+        if (oldNode) {
+          if (typeof this.properties.replaceableContent[nodeName] === 'function') {
+            oldNode.innerHTML = '';
+            newNode = this.properties.replaceableContent[nodeName](this, oldNode);
+            // let a = document.createElement('div');
+            // let b = document.createElement('div');
+            // b.innerHTML = "hello!!";
+            // b.addEventListener('click', function() {alert("223");});
+            // oldNode.parentNode.appendChild(b);
+          } else {
+            newNode = this.properties.replaceableContent[nodeName];
+          }
+
+          if (newNode) {
+            // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
+            if (!this.contains(newNode)) {
+              let docFragment;
+              if (newNode.tagName === 'TEMPLATE') {
+                docFragment = document.importNode(newNode.content, true);
+                newNode = docFragment.firstChild;
+              }
+
+              const oldClasses = oldNode.classList;
+              for (let i = 0; i < oldClasses.length; i++) {
+                newNode.classList.add(oldClasses[i]);
+              }
+              newNode.setAttribute('layer-id', nodeName);
+
+              const parent = oldNode.parentNode;
+              const replaceIndex = Array.prototype.indexOf.call(parent.childNodes, oldNode);
+              if (!this.contains(newNode)) {
+                parent.replaceChild(newNode, oldNode);
+              }
+              this.nodes[nodeName] = parent.childNodes[replaceIndex];
+            }
+            this.onReplaceableContentAdded(nodeName, this.nodes[nodeName]);
+          }
+        }
+      });
+
       this.onAfterCreate();
     },
   };
@@ -1123,7 +1172,10 @@ function _registerComponent(tagName) {
     value: function _copyInAttribute(prop) {
 
       let finalValue = null;
-      let value = this.getAttribute(prop.attributeName);
+
+      // Special case for React Adapter + Replaceable content makes it possible that the value is already in properties
+      let value = prop.propertyName in this.properties ? this.properties[prop.propertyName] : this.getAttribute(prop.attributeName);
+
 
       // Firefox seems to need this alternative to getAttribute().
       // TODO: Verify this and determine if it uses the getter here.
@@ -1267,14 +1319,27 @@ registerComponent.MODES = {
   DEFAULT: 'DEFAULT',
 };
 
+
 const standardClassProperties = {
+  replaceableContent: {
+    noGetterFromSetter: true,
+    propagateToChildren: true,
+    order: 4,
+    get() {
+
+      if (this.mainComponent && this.mainComponent.properties.replaceableContent !== this.properties.replaceableContent) {
+        return this.mainComponent.replaceableContent;
+      }
+      return this.properties.replaceableContent;
+    },
+  },
   _layerEventSubscriptions: {
     value: [],
   },
   parentComponent: {},
   mainComponent: {
     get() {
-      if (this.properties._isMainComponent) return this;
+      if (!this.properties.parentComponent && this.properties._isMainComponent) return this;
       if (!this.properties.mainComponent) {
         this.properties.mainComponent = this.properties.parentComponent.mainComponent;
       }
@@ -1293,6 +1358,25 @@ const standardClassProperties = {
 };
 
 const standardClassMethods = {
+  onReplaceableContentAdded: function onReplaceableContentAdded(name, node) {
+    let index = 0;
+    // Setup each node added this way as a full part of this component
+    const nodeIterator = document.createNodeIterator(
+      node,
+      NodeFilter.SHOW_ELEMENT,
+      () => true,
+      false
+    );
+    let currentNode;
+    while (currentNode = nodeIterator.nextNode()) {
+      if (!currentNode.properties) currentNode.properties = {};
+      currentNode.properties.parentComponent = this;
+      if (!currentNode.id) currentNode.id = Layer.Util.generateUUID();
+      this.nodes[currentNode.id] = currentNode;
+      index++;
+    }
+  },
+
   /**
    * The setupDomNodes method looks at all child nodes of this node that have layer-id properties and indexes them in the `nodes` property.
    *
@@ -1440,6 +1524,16 @@ const standardClassMethods = {
     return Array.prototype.slice.call(this.querySelectorAll(selector));
   },
 
+  /**
+   * Toggle a CSS Class.
+   *
+   * Why do we have this? Well, sadly as long as we support IE11 which has an incorrect implementation
+   * of node.classList.toggle, we will have to do this ourselves.
+   *
+   * @method toggleClass
+   * @param {String} className
+   * @param {Boolean} [enable=!enable]
+   */
   toggleClass: function toggleClass(...args) {
     const cssClass = args[0];
     const enable = (args.length === 2) ? args[1] : !this.classList.contains(cssClass);

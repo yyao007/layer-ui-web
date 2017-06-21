@@ -5,9 +5,18 @@
  * @mixin layerUI.mixins.HasQuery
  */
 import Layer from 'layer-websdk';
-import { animatedScrollTo } from '../base';
+import { animatedScrollTo, components } from '../base';
 import { registerComponent } from '../components/component';
 import HasQuery from './has-query';
+
+// Shallow array comparison test
+function isEqual(arr1, arr2) {
+  if (arr1.length !== arr2.length) return false;
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+  return true;
+}
 
 module.exports = {
   mixins: [HasQuery],
@@ -286,6 +295,24 @@ module.exports = {
       const itemInstance = item instanceof Layer.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
         const widget = this._generateItem(itemInstance);
+
+        // propagate any custom nodes down to the list items
+        if (this.customNodes) {
+          widget.customNodes = {};
+          Object.keys(widget.nodes).forEach((nodeName) => {
+            if (this.customNodes[nodeName]) {
+              if (typeof this.customNodes[nodeName] === 'function') {
+                // no-op
+              } else if (this.customNodes[nodeName].tagName !== 'TEMPLATE') {
+                const template = document.createElement('template');
+                template.content.appendChild(this.customNodes[nodeName]);
+                this.customNodes[nodeName] = template;
+              }
+              widget.customNodes[nodeName] = this.customNodes[nodeName];
+            }
+          });
+        }
+
         widget.parentComponent = this;
         widget.setAttribute('layer-item-id', item.id.replace(/^layer:\/\/\//, '').replace(/\//g, '_'));
         if (widget) {
@@ -474,7 +501,7 @@ module.exports = {
       this.properties.listData = [].concat(this.properties.query.data);
       const fragment = this._generateFragment(evt.data);
 
-      this.insertBefore(fragment, this.nodes.loadIndicator);
+      this.insertBefore(fragment, this.nodes.listMeta);
 
       // isTopItemNew is true if there wasn't any prior data... data length == event length
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);

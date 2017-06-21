@@ -5,6 +5,8 @@
  *
  * @class layerUI.mixins.ListItem
  */
+import { registerComponent } from '../components/component';
+import { components } from '../base';
 
 module.exports = {
   properties: {
@@ -130,6 +132,31 @@ module.exports = {
     onRender: {
       conditional: function onCanRender() {
         return Boolean(this.item);
+      },
+    },
+
+    onReplaceableContentAdded: {
+      mode: registerComponent.MODES.AFTER,
+      value: function onReplaceableContentAdded(name, node) {
+        // Setup each node added this way as a full part of this component
+        const nodeIterator = document.createNodeIterator(
+          node,
+          NodeFilter.SHOW_ELEMENT,
+          () => true,
+          false,
+        );
+        let currentNode;
+        while (currentNode = nodeIterator.nextNode()) {
+          if (components[currentNode.tagName.toLowerCase()]) {
+            if (!currentNode.properties._internalState) {
+              // hit using polyfil
+              currentNode.properties.item = this.item;
+            } else {
+              // hit using real webcomponents
+              currentNode.item = this.item;
+            }
+          }
+        }
       },
     },
 

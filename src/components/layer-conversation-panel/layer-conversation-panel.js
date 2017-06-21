@@ -43,7 +43,6 @@
  * Events listed here come from either this component, or its subcomponents.
  *
  * * {@link layerUI.components.subcomponents.Composer#layer-send-message layer-send-message}: User has requested their Message be sent
- * * {@link layerUI.components.subcomponents.Delete#layer-message-deleted layer-message-deleted}: User has requested a Message be deleted
  * * {@link layerUI.components.subcomponents.TypingIndicator#layer-typing-indicator-change layer-typing-indicator-change}: Someone in the Conversation has started/stopped typing
  *
  * @class layerUI.components.ConversationPanel
@@ -134,6 +133,7 @@ registerComponent('layer-conversation-panel', {
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.item
+   * @removed 2.0, use menu options callback to perform any needed actions or trigger any needed events
    */
 
   /**
@@ -153,6 +153,7 @@ registerComponent('layer-conversation-panel', {
    * @param {Event} evt
    * @param {Object} evt.detail
    * @param {layer.Message} evt.detail.item
+   * @removed 2.0, use menu options callback to perform any needed actions or trigger any needed events
    */
 
   /**
@@ -230,7 +231,7 @@ registerComponent('layer-conversation-panel', {
    * @param {String} evt.detail.value
    * @param {String} evt.detail.oldValue
    */
-  events: ['layer-message-deleted', 'layer-send-message', 'layer-typing-indicator-change',
+  events: ['layer-send-message', 'layer-typing-indicator-change',
     'layer-composer-change-value'],
 
   properties: {
@@ -493,27 +494,44 @@ registerComponent('layer-conversation-panel', {
       },
     },
 
-    /**
-     * Deletion of this Message is enabled.
+/**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
      *
      * ```
-     * widget.getMessageDeleteEnabled = function(message) {
-     *    return message.sender.sessionOwner;
+     * widget.getMenuOptions = function(message) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
      * }
      * ```
      *
-     * @property {Function}
+     * @property {Function} getMenuOptions
+     * @property {layer.Message} getMenuOptions.message
+     * @property {Object[]} getMenuOptions.returns
      */
-    getMessageDeleteEnabled: {
+    getMenuOptions: {
       type: Function,
-      value(message) {
-        return message.sender.sessionOwner;
+      value: function getMenuOptions(message) {
+        return [
+          {
+            text: 'delete',
+            method() {
+              message.delete(Layer.Constants.DELETION_MODE.ALL);
+            },
+          },
+        ];
       },
       set(value) {
-        this.nodes.list.getMessageDeleteEnabled = value;
-      },
+        this.nodes.list.getMenuOptions = value;
+      }
     },
-
     /**
      * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
      * but not to the currently generated items.
@@ -658,7 +676,7 @@ registerComponent('layer-conversation-panel', {
      * @method onCreate
      * @private
      */
-    onCreate() {
+    onAfterCreate() {
     },
 
     /**

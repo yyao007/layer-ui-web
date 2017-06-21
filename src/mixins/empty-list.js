@@ -24,13 +24,8 @@ module.exports = {
      * Could just be a message "Empty Conversation".  Or you can add interactive widgets.
      *
      * @property {HTMLElement} [emptyNode=null]
+     * @removed See replaceableContent instead
      */
-    emptyNode: {
-      set(value) {
-        this.nodes.emptyNode.innerHTML = '';
-        if (value) this.nodes.emptyNode.appendChild(value);
-      },
-    },
   },
   methods: {
     onRender() {

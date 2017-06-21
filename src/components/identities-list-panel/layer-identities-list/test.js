@@ -245,6 +245,13 @@ describe('layer-identities-list', function() {
       expect(result.selected).toBe(false);
     });
 
+    it("Should set size", function() {
+      el.size = "small";
+      var result = el._generateItem(query.data[1]);
+      layer.Util.defer.flush();
+      expect(result.size).toEqual("small");
+    });
+
     it("Should run the filter", function() {
       el.filter = 'Not this again';
       var result = el._generateItem(query.data[1]);

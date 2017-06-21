@@ -142,8 +142,9 @@ describe("List Item Mixin", function() {
   describe("The innerNode property", function() {
     it("Should point to our user data", function() {
       expect(el.innerNode.childNodes[0].tagName).toEqual('LAYER-AVATAR');
-      expect(el.innerNode.childNodes[1].tagName).toEqual('LABEL');
-      expect(el.innerNode.childNodes[2].tagName).toEqual('INPUT');
+      expect(el.innerNode.childNodes[1].tagName).toEqual('LAYER-PRESENCE');
+      expect(el.innerNode.childNodes[2].tagName).toEqual('LABEL');
+      expect(el.innerNode.childNodes[3].tagName).toEqual('INPUT');
     });
   });
 

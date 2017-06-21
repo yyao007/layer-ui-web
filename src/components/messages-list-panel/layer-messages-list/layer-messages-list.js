@@ -137,19 +137,6 @@ registerComponent('layer-messages-list', {
     messageStatusRenderer: {},
 
     /**
-     * Deletion of this Message is enabled.
-     *
-     * ```
-     * widget.getMessageDeleteEnabled = function(message) {
-     *    return message.sender.sessionOwner;
-     * }
-     * ```
-     *
-     * @property {Function}
-     */
-    getMessageDeleteEnabled: {},
-
-    /**
      * This iteration of this property is not dynamic; it will be applied to all future Conversation Items,
      * but not to the currently generated items.
      *
@@ -179,6 +166,32 @@ registerComponent('layer-messages-list', {
      * @property {Object}
      */
     dateFormat: {},
+
+    /**
+     * Provide a function that returns the menu items for the given Conversation.
+     *
+     * Note that this is called each time the user clicks on a menu button to open the menu,
+     * but is not dynamic in that it will regenerate the list as the Conversation's properties change.
+     *
+     * Format is:
+     *
+     * ```
+     * widget.getMenuOptions = function(message) {
+     *   return [
+     *     {text: "label1", method: method1},
+     *     {text: "label2", method: method2},
+     *     {text: "label3", method: method3}
+     *   ];
+     * }
+     * ```
+     *
+     * @property {Function} getMenuOptions
+     * @property {layer.Message} getMenuOptions.message
+     * @property {Object[]} getMenuOptions.returns
+     */
+    getMenuOptions: {
+      type: Function,
+    },
 
     /**
      * Disable read receipts and other behaviors; typically used when the widget has been hidden from view.
@@ -428,10 +441,10 @@ registerComponent('layer-messages-list', {
         messageWidget.id = this._getItemId(message.id);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;
-        messageWidget.getDeleteEnabled = this.getMessageDeleteEnabled;
         if (this.dateFormat) messageWidget.dateFormat = this.dateFormat;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
+        messageWidget.getMenuOptions = this.getMenuOptions;
         return messageWidget;
       } else {
         return null;
@@ -666,7 +679,7 @@ registerComponent('layer-messages-list', {
 
       // Now that DOM manipulation is completed,
       // we can add the document fragments to the page
-      const nextItem = this.nodes.listHeader.nextSibling;
+      const nextItem = this.nodes.listMeta.nextSibling;
       this.insertBefore(fragment, nextItem);
 
       // TODO PERFORMANCE: We should not need to do this as we page UP; very wasteful

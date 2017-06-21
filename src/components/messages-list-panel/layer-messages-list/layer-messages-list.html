@@ -22,11 +22,30 @@
       display: block;
     }
   </style>
-  <div class='layer-list-header' layer-id='listHeader'>
-    <div class='layer-empty-list' layer-id='emptyNode'></div>
+  <!-- The List Header contains a collection of special nodes that may render at the top of the list for
+    different conditions -->
+  <div class='layer-list-meta' layer-id='listMeta'>
+
+    <!-- Rendered when the list is empty -->
+    <div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'>
+      <div class='layer-replacable-content'></div>
+    </div>
+
     <div class='layer-header-toggle'>
-      <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'>This is the beginning of your conversation</div>
-      <div class='layer-load-indicator' layer-id='loadIndicator'>Loading messages...</div>
+
+      <!-- Rendered when there are no more results to page to -->
+      <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'>
+          This is the beginning of your conversation
+        </div>
+      </div>
+
+      <!-- Rendered when waiting for server data -->
+      <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
+        <div class='layer-replacable-content'>
+          Loading messages...
+        </div>
+      </div>
     </div>
   </div>
 </template>

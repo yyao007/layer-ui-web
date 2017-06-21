@@ -1,0 +1,237 @@
+layer-messages-list .layer-message-item:first {
+  margin-top: 8px;
+}
+
+layer-messages-list .layer-message-item:last {
+  margin-bottom: 8px;
+}
+
+
+/* Styles for Message Items that appear within the Message List Widget */
+layer-messages-list .layer-message-item.layer-list-item-first .layer-list-item {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Styling for Message Groups */
+layer-message-item-sent, layer-message-item-received {
+
+  .layer-sender-name, layer-date, layer-message-status {
+    color: @color-message-item-status;
+    font-size: 0.8em;
+    margin-top: 4px;
+    layer-date {
+      display: inline;
+    }
+  }
+  layer-message-status:after {
+    content: '-';
+    margin-left: 5px;
+  }
+}
+
+layer-message-item-sent {
+  .layer-sender-info {
+    margin-right: 32px + 12px + 12px + 8px; // avatar has 12px right, 12px left and is 32px wide; 8px for internal padding of the bubble
+    layer-date, layer-message-status {
+      display: inline-block;
+    }
+  }
+  .layer-sender-name {
+    display: none;
+  }
+  layer-message-status {
+    display: inline-block;
+    margin-right: 5px;
+  }
+
+  &.layer-list-item-last {
+    .layer-sender-info {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// Last message in group of received messages
+layer-message-item-received {
+  /* Position the senders name */
+  .layer-sender-name, layer-date {
+    display: none;
+  }
+  &.layer-list-item-first .layer-sender-name,
+  &.layer-list-item-last layer-date {
+    display: block;
+    margin-right: 5px;
+    margin-left: 64px;
+  }
+}
+
+layer-messages-list {
+
+  /* Do not show the avatar if there is no user associated with the avatar
+   * (only happens with messages sent via via Server API 1.0 using a bot name)
+   * or if the message is not the last message in the Message Group.
+   */
+  layer-avatar:not(.layer-has-user),
+  .layer-message-item:not(.layer-list-item-last) layer-avatar {
+    height: 0px;
+    overflow: hidden;
+  }
+
+  /* Hide all information about the message including status, date and sender;
+   * style these all to be smaller than the message itself
+   */
+  .layer-sender-info {
+    display: none;
+  }
+
+  /**
+   * Common layout for all types of messages
+   */
+  .layer-list-item {
+    font-size: 14px;
+    margin-bottom: 4px;
+
+    /* The Message Content refers to the image, text or other content, and ommits any information about
+     * sender, date, status, etc... */
+    .layer-message-item-content {
+      display: inline-block;
+    }
+    /* Only text-plain messages get the full-on chat bubble treatment; so make sure they get suitable padding
+      * between text and bubble borders.
+      */
+    layer-message-text-plain .layer-message-text {
+      padding: 8px 12px;
+    }
+
+    /* Give all messages the basic bubble treatment */
+    layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
+      border-radius: @color-message-item-border-radius;
+    }
+
+    .layer-message-text-plain-after-text {
+      margin-top: 6px;
+    }
+  }
+
+  /* Styling for content from Text Processor's afterText properties */
+  .layer-parsed-image {
+    height: 200px;
+  }
+
+  &.layer-message-preview .layer-list-item {
+    .layer-message-text, layer-message-image canvas, layer-message-video video {
+      opacity: 0.5;
+    }
+    layer-message-status, layer-date {
+      display: none;
+    }
+  }
+}
+
+/* Custom formating for Messages received by the sesson owner when menus are showing */
+layer-messages-list.layer-has-menu layer-message-item-received {
+  .layer-list-item {
+    /* Position the participant's avatar */
+    layer-avatar {
+      margin-left: 4px;
+    }
+    layer-menu-button {
+      margin-left: 4px;
+      display: block;
+    }
+  }
+
+  &.layer-list-item-first .layer-sender-name,
+  &.layer-list-item-last layer-date {
+    margin-left: 74px;
+  }
+}
+
+
+/*
+ * Custom formatting for Messages received by the session owner.
+ */
+layer-messages-list layer-message-item-received {
+    layer-avatar {
+      margin-right: 8px;
+      margin-left: 12px;
+    }
+
+    layer-menu-button {
+      display: none;
+    }
+
+  /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
+  layer-message-text-plain .layer-message-text {
+    color: @color-message-item-bubble-text-received;
+    background-color: @color-message-item-bubble-received;
+
+    a, a:visited, a:focus, a:active {
+      color: @color-message-item-bubble-text-received;
+    }
+  }
+}
+
+
+/* Custom formating for Messages sent by the sesson owner when menus are showing */
+layer-messages-list.layer-has-menu layer-message-item-sent .layer-list-item {
+  /* Position the participant's avatar */
+  layer-avatar {
+    margin-right: 4px;
+  }
+  layer-menu-button {
+    margin-right: 4px;
+    display: block;
+  }
+
+  .layer-sender-info {
+    margin-right: 32px + 12px + 12px + 8px + 9px; // avatar has 12px right, 12px left and is 32px wide; 8px for internal padding of the bubble and 9px for the menu
+  }
+}
+
+/*
+ * Custom formatting for Messages sent by the session owner.
+ */
+layer-messages-list layer-message-item-sent .layer-list-item {
+  /* Position the participant's avatar */
+  layer-avatar {
+    margin-right: 12px;
+    margin-left: 8px;
+  }
+  layer-menu-button {
+    display: none;
+  }
+
+  layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
+    color: @color-message-item-bubble-text-sent;
+    margin: 0px;
+  }
+
+  .layer-message-text {
+    margin-left: 20px;
+    color: @color-message-item-bubble-text-sent;
+    background-color: @color-message-item-bubble-sent;
+
+    a, a:visited, a:focus, a:active {
+      color: @color-message-item-bubble-text-sent;
+    }
+  }
+
+  layer-delete {
+    display: none; // uncomment to enable it
+    opacity: 0;
+    &.layer-delete-enabled {
+      opacity: 0.1;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+  .layer-sender-info {
+    text-align: right;
+  }
+}
+

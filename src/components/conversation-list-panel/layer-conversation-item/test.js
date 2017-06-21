@@ -77,6 +77,23 @@ describe('layer-conversation-item', function() {
     });
   });
 
+  describe("The dateFormat property", function() {
+    it("Should set the date widgets format properties", function() {
+
+      el.dateFormat = {
+        today: {hour: "number"},
+        default: {minute: "short"},
+        week: {year: "short"},
+        older: {weekday: "short"}
+      };
+      layer.Util.defer.flush();
+      expect(el.nodes.date.todayFormat).toEqual({hour: "number"});
+      expect(el.nodes.date.defaultFormat).toEqual({minute: "short"});
+      expect(el.nodes.date.weekFormat).toEqual({year: "short"});
+      expect(el.nodes.date.olderFormat).toEqual({weekday: "short"});
+    });
+  });
+
   describe("The size property", function() {
     it("Should pass value on to avatar", function() {
       el.item = conversation;
