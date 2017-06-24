@@ -177,16 +177,12 @@ registerComponent('layer-identities-list', {
     },
 
     size: {
-      value: 'large',
-      set(size) {
-        for (let i = 0; i < this.childNodes.length; i++) {
-          this.childNodes[i].size = size;
-        }
-      },
+      value: 'medium',
+      propagateToChildren: true,
     },
 
     supportedSizes: {
-      value: ['small', 'medium', 'large'],
+      value: ['tiny', 'small', 'medium'],
     },
 
     /**

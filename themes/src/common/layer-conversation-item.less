@@ -111,11 +111,15 @@ layer-conversation-item {
    /*
     * Styles for Avatar, Presence or counter showing how many users are in the group
     */
-   layer-avatar {
+   layer-avatar, layer-presence {
      margin-right: 12px;
    }
 
-   layer-presence.presence-without-avatar, .layer-group-counter {
+   layer-presence.layer-presence-within-avatar {
+     margin-right: 0px;
+   }
+
+   layer-presence, .layer-group-counter {
      margin-right: 8px;
    }
 
@@ -186,14 +190,42 @@ layer-conversation-item {
   /**
    * Conversation Menu button
    */
-   .layer-conversation-title-row {
-      position: relative;
-      layer-menu-button {
+   .layer-conversation-right-side {
+      align-self: stretch;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+     .layer-replaceable-content {
+       position: relative;
+       layer-menu-button {
           position: absolute;
-          top: -6px;
           right: -12px;
-      }
+       }
+     }
    }
+
+  .layer-conversation-title-row {
+    align-items: center;
+  }
+
+  &.layer-size-large .layer-conversation-title-row {
+    align-items: flex-start;
+  }
+
+   &.layer-size-large .layer-conversation-right-side layer-menu-button {
+      top: -6px;
+   }
+
+  &.layer-size-medium .layer-conversation-right-side layer-menu-button {
+      top: 5px;
+  }
+
+  &.layer-size-small .layer-conversation-right-side layer-menu-button {
+      top: 1px;
+  }
+  &.layer-size-tiny .layer-conversation-right-side layer-menu-button {
+      top: -6px;
+  }
 }
 
 

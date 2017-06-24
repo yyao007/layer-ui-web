@@ -12,11 +12,11 @@
       }
       layer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {
         min-height: 20px;
-        overflow :hidden;
+        overflow: hidden;
         border-width: 0px;
         font-size: 1em;
-        box-sizing: border-box;
         margin: 0px;
+        width: 100%;
       }
       layer-composer textarea {
         resize: none;
@@ -25,7 +25,6 @@
         z-index: 2;
         top: 0px;
         left: 0px;
-        width: 100%;
         height: 100%;
         overflow-y: auto;
         white-space: pre-wrap;
@@ -47,14 +46,23 @@
         position: absolute;
         right: 10000px;
       }
+      layer-composer .layer-button-panel .layer-replaceable-content {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+      }
   </style>
-  <layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel>
+  <div layer-id='composerButtonPanelLeft' class='layer-button-panel layer-button-panel-left'>
+    <div class='layer-replaceable-content'></div>
+  </div>
   <div class='layer-compose-edit-panel' layer-id='editPanel'>
     <div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div>
     <div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div>
-    <textarea required='true' rows="1" layer-id='input'></textarea>
+    <textarea rows="1" layer-id='input'></textarea>
   </div>
-  <layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>
+  <div layer-id='composerButtonPanelRight' class='layer-button-panel layer-button-panel-right'>
+    <div class='layer-replaceable-content'></div>
+  </div>
 </template>
 <script>
   window.layerUI.registerTemplate('layer-composer');

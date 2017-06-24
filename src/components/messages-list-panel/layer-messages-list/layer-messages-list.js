@@ -97,6 +97,7 @@ import ListLoadIndicator from '../../../mixins/list-load-indicator';
 import QueryEndIndicator from '../../../mixins/query-end-indicator';
 import '../layer-message-item-sent/layer-message-item-sent';
 import '../layer-message-item-received/layer-message-item-received';
+import '../../subcomponents/layer-start-of-conversation/layer-start-of-conversation';
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
 const PAGING_DELAY = 2000;
@@ -104,6 +105,16 @@ const PAGING_DELAY = 2000;
 registerComponent('layer-messages-list', {
   mixins: [List, HasQuery, EmptyList, ListLoadIndicator, QueryEndIndicator],
   properties: {
+
+    /**
+     * Supplemental property which helps drive the welcome message
+     *
+     * @property {layer.Conversation}
+     */
+    conversation: {
+      // Enables it to be made avaialble to any emptyNode, endOfConversation node, etc...  also over applies by writing to all Message Items too.
+      propagateToChildren: true,
+    },
 
     /**
      * Provide property to override the function used to render a date for each Message Item.
@@ -165,7 +176,14 @@ registerComponent('layer-messages-list', {
      *
      * @property {Object}
      */
-    dateFormat: {},
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
+        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+      },
+    },
 
     /**
      * Provide a function that returns the menu items for the given Conversation.
@@ -223,9 +241,72 @@ registerComponent('layer-messages-list', {
     screenFullsBeforePaging: {
       value: 2.0,
     },
+
+    replaceableContent: {
+      value: {
+        messageRowLeftSide: function messageRowLeftSide(widget) {
+          const item = widget.item;
+          if (item.sender.sessionOwner) {
+            return null;
+          } else {
+            const div = document.createElement('div');
+            div.classList.add('layer-replaceable-content');
+            const avatar = document.createElement('layer-avatar');
+            avatar.size = 'small';
+            avatar.showPresence = false;
+            avatar.setAttribute('layer-id', 'avatar');
+            div.appendChild(avatar);
+            return div;
+          }
+        },
+        messageRowRightSide: function messageRowRightSide(widget) {
+          const item = widget.item;
+          const div = document.createElement('div');
+          div.classList.add('layer-replaceable-content');
+          if (item.sender.sessionOwner) {
+            const avatar = document.createElement('layer-avatar');
+            avatar.size = 'small';
+            avatar.showPresence = false;
+            avatar.setAttribute('layer-id', 'avatar');
+            div.appendChild(avatar);
+          }
+          const menu = document.createElement('layer-menu-button');
+          menu.setAttribute('layer-id', 'menuButton');
+          div.appendChild(menu);
+          return div;
+        },
+        messageRowFooter: function messageRowFooter(widget) {
+          const item = widget.item;
+          const parentNode = document.createElement('div');
+          parentNode.classList.add('layer-replaceable-content');
+          if (item.sender.sessionOwner) {
+            const status = document.createElement('layer-message-status');
+            status.setAttribute('layer-id', 'status');
+            parentNode.appendChild(status);
+          }
+          const date = document.createElement('layer-date');
+          date.setAttribute('layer-id', 'date');
+          date.dateFormat = this.dateFormat;
+          parentNode.appendChild(date);
+          return parentNode;
+        },
+        messageRowHeader: function messageRowHeader(widget) {
+          if (!widget.item.sender.sessionOwner) {
+            const div = document.createElement('div');
+            div.setAttribute('layer-id', 'sender');
+            div.classList.add('layer-sender-name');
+            return div;
+          }
+        },
+        endOfResultsNode: function endOfResultsNode(widget) {
+          const result = document.createElement('layer-start-of-conversation');
+          result.setAttribute('layer-id', 'startOfConversation');
+          return result;
+        },
+      },
+    },
   },
   methods: {
-
     /**
      * Constructor.
      *
@@ -445,6 +526,9 @@ registerComponent('layer-messages-list', {
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
         messageWidget.getMenuOptions = this.getMenuOptions;
+        if (this.query.pagedToEnd && this.query.data.indexOf(message) === this.query.data.length - 1) {
+          messageWidget.classList.add('layer-first-message-of-conversation');
+        }
         return messageWidget;
       } else {
         return null;
@@ -606,6 +690,13 @@ registerComponent('layer-messages-list', {
       value(evt) {
         if (evt.data.length === 0) {
           this.isDataLoading = this.properties.query.isFiring;
+          if (this.query.pagedToEnd) {
+            const firstItem = this.querySelectorAllArray('.layer-message-item')[0];
+            if (firstItem && firstItem.item && firstItem.item === this.query.data[this.query.data.length - 1]) {
+              firstItem.classList.add('layer-first-message-of-conversation');
+            }
+          }
+          this._renderPagedDataDone([], null, evt);
           return;
         }
 
@@ -656,6 +747,8 @@ registerComponent('layer-messages-list', {
      * @private
      */
     _renderPagedDataDone(affectedItems, fragment, evt) {
+      if (!fragment) return; // called without fragment to trigger mixin versions of _renderPagedDataDone
+
       // Find the nodes of all affected items in both the document and the fragment,
       // and call processAffectedWidgets on them
       if (affectedItems.length) {

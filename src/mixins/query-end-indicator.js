@@ -39,8 +39,9 @@ module.exports = {
   },
   methods: {
     onRender() {
-      if (this.endOfResultsNode) this.nodes.endOfResultsNode.appendChild(this.endOfResultsNode);
+      if (!this.query || !this.query.data) this.isEndOfResults = true;
     },
+
 
     /**
      * Call this after rendering any query-paged data.

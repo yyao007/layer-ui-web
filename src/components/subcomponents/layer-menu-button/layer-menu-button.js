@@ -27,7 +27,14 @@ registerComponent('layer-menu-button', {
   properties: {
     getMenuOptions: {
       type: Function,
+      get() {
+        return this.properties.getMenuOptions || this.parentComponent.getMenuOptions;
+      },
+      set(value) {
+        this.toggleClass('layer-has-menu', Boolean(value));
+      },
     },
+
 
     // Automatically set if within a List
     item: {},

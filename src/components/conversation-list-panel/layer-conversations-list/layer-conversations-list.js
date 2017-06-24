@@ -349,7 +349,33 @@ registerComponent('layer-conversations-list', {
       value: ['tiny', 'small', 'medium', 'large'],
     },
 
-
+    replaceableContent: {
+      value: {
+        conversationRowLeftSide(widget) {
+          const div = document.createElement('div');
+          const avatar = document.createElement('layer-avatar');
+          avatar.setAttribute('layer-id', 'avatar');
+          avatar.size = this.size;
+          const presence = document.createElement('layer-presence');
+          presence.setAttribute('layer-id', 'presence');
+          presence.size = 'medium';
+          const groupCounter = document.createElement('div');
+          groupCounter.classList.add('layer-group-counter');
+          groupCounter.setAttribute('layer-id', 'groupCounter');
+          div.appendChild(avatar);
+          div.appendChild(presence);
+          div.appendChild(groupCounter);
+          return div;
+        },
+        conversationRowRightSide(widget) {
+          const div = document.createElement('div');
+          const menuButton = document.createElement('layer-menu-button');
+          menuButton.setAttribute('layer-id', 'menuButton');
+          div.appendChild(menuButton);
+          return div;
+        },
+      },
+    },
   },
   methods: {
     /**

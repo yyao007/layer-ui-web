@@ -43,16 +43,20 @@
     }
   </style>
   <div class='layer-list-item' layer-id='innerNode'>
-    <layer-avatar layer-id='avatar'></layer-avatar>
-    <layer-presence class='presence-without-avatar' layer-id='presence' size='medium'></layer-presence>
-    <div class='layer-group-counter' layer-id='groupCounter'>2</div>
+    <div class='layer-conversation-left-side' layer-id='conversationRowLeftSide' layer-has-replaceable='true'>
+      <div class='layer-replaceable-content'></div>
+    </div>
+
     <div class='layer-conversation-item-content'>
       <div class='layer-conversation-title-row'>
         <layer-conversation-title layer-id='title'></layer-conversation-title>
         <layer-date layer-id='date'></layer-date>
-        <layer-menu-button layer-id='menuButton'></layer-menu-button>
       </div>
       <layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message>
+    </div>
+
+    <div class='layer-conversation-right-side' layer-id='conversationRowRightSide' layer-has-replaceable='true'>
+      <div class='layer-replaceable-content'></div>
     </div>
   </div>
 </template>

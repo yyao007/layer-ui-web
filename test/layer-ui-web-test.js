@@ -328,7 +328,14 @@ function initReact(React, ReactDom) {
 
               _this.replaceableContent[nodeName] = function (widget, parent) {
                 var result = value(widget);
-                if (!(value instanceof HTMLElement)) {
+                if (result && !(result instanceof HTMLElement)) {
+
+                  // React does bad stuff if you give it a component without children to ReactDom.render()
+                  if (!result.props.children) {
+                    result = React.createElement('div', null, result);
+                  }
+
+                  // Render it
                   var tmpNode = parent || document.createElement('div');
                   widget.addEventListener('layer-widget-destroyed', function () {
                     return ReactDom.unmountComponentAtNode(tmpNode);
@@ -458,7 +465,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":79}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":80}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -657,7 +664,8 @@ layerUI.addListItemSeparator = function addListItemSeparator(listItemNode, conte
 
   if (content) {
     node = document.createElement('div');
-    node.classList.add(contentClass);
+    if (contentClass) node.classList.add(contentClass);
+    node.classList.add('layer-list-item-separator');
   }
 
   if (content) {
@@ -1089,7 +1097,7 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":79}],5:[function(require,module,exports){
+},{"layer-websdk":80}],5:[function(require,module,exports){
 /**
  * This is the base class for all UI classes in the Layer UI Framework.
  *
@@ -1655,6 +1663,10 @@ function setupMixin(classDef, mixin) {
       if (mixin.properties[name].propagateToChildren !== undefined && classDef.properties[name].propagateToChildren === undefined) {
         classDef.properties[name].propagateToChildren = mixin.properties[name].propagateToChildren;
       }
+      // if (mixin.properties[name].mixinWithChildren !== undefined &&
+      //     classDef.properties[name].mixinWithChildren === undefined) {
+      //   classDef.properties[name].mixinWithChildren = mixin.properties[name].mixinWithChildren;
+      // }
     }
   });
 
@@ -1794,6 +1806,7 @@ function getPropArray(classDef) {
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
       propagateToChildren: classDef.properties[propertyName].propagateToChildren,
+      //mixinWithChildren: classDef.properties[propertyName].mixinWithChildren,
       value: classDef.properties[propertyName].value
     };
   }).sort(function (a, b) {
@@ -1904,6 +1917,11 @@ function setupProperty(classDef, prop, propertyDefHash) {
           }
         }
       }
+
+      var listeners = this.properties._internalState.propertyListeners[name];
+      if (listeners) listeners.forEach(function (fn) {
+        return fn(value, wasInit ? null : oldValue, _this2);
+      });
     }
   };
 
@@ -2100,6 +2118,8 @@ function _registerComponent(tagName) {
       // Happens during unit tests
       if (this.properties._internalState.onDestroyCalled) return;
 
+      if (!this.properties._internalState.onProcessReplaceableContentCalled) this._onProcessReplaceableContent();
+
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
       this.properties._internalState.disableSetters = false;
@@ -2112,7 +2132,7 @@ function _registerComponent(tagName) {
         var value = _this5.properties[prop.propertyName];
         // UNIT TEST: This line is primarily to keep unit tests from throwing errors
         if (value instanceof _layerWebsdk2.default.Root && value.isDestroyed) return;
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && prop.propertyName !== 'replaceableContent') {
           // Force the setter to trigger; this will force the value to be converted to the correct type,
           // and call all setters
           _this5[prop.propertyName] = value;
@@ -2127,7 +2147,7 @@ function _registerComponent(tagName) {
         // If there is no value, but the parent component has the same property name, presume it to also be
         // propagateToChildren, and copy its value; useful for allowing list-items to automatically grab
         // all parent propagateToChildren properties.
-        else if (prop.propagateToChildren && _this5.parentComponent) {
+        else if (prop.propagateToChildren /* || prop.mixinWithChildren*/ && _this5.parentComponent) {
             var parentValue = _this5.parentComponent.properties[prop.propertyName];
             if (parentValue) _this5[prop.propertyName] = parentValue;
           }
@@ -2137,54 +2157,6 @@ function _registerComponent(tagName) {
       // Warning: these listeners may miss events triggered while initializing properties
       // only way around this is to add another Layer.Util.defer() to our lifecycle
       this._setupListeners();
-
-      Object.keys(this.properties.replaceableContent || {}).forEach(function (nodeName) {
-        var oldNode = _this5.nodes[nodeName];
-        var newNode = void 0;
-
-        // Transform a function into a node if we've been given a function...
-        // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
-        // in which case it should handle turning it into a node; lists in particular need to manage
-        // creation of the node once per list-item
-        if (oldNode) {
-          if (typeof _this5.properties.replaceableContent[nodeName] === 'function') {
-            oldNode.innerHTML = '';
-            newNode = _this5.properties.replaceableContent[nodeName](_this5, oldNode);
-            // let a = document.createElement('div');
-            // let b = document.createElement('div');
-            // b.innerHTML = "hello!!";
-            // b.addEventListener('click', function() {alert("223");});
-            // oldNode.parentNode.appendChild(b);
-          } else {
-            newNode = _this5.properties.replaceableContent[nodeName];
-          }
-
-          if (newNode) {
-            // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
-            if (!_this5.contains(newNode)) {
-              var docFragment = void 0;
-              if (newNode.tagName === 'TEMPLATE') {
-                docFragment = document.importNode(newNode.content, true);
-                newNode = docFragment.firstChild;
-              }
-
-              var oldClasses = oldNode.classList;
-              for (var _i = 0; _i < oldClasses.length; _i++) {
-                newNode.classList.add(oldClasses[_i]);
-              }
-              newNode.setAttribute('layer-id', nodeName);
-
-              var parent = oldNode.parentNode;
-              var replaceIndex = Array.prototype.indexOf.call(parent.childNodes, oldNode);
-              if (!_this5.contains(newNode)) {
-                parent.replaceChild(newNode, oldNode);
-              }
-              _this5.nodes[nodeName] = parent.childNodes[replaceIndex];
-            }
-            _this5.onReplaceableContentAdded(nodeName, _this5.nodes[nodeName]);
-          }
-        }
-      });
 
       this.onAfterCreate();
     }
@@ -2273,12 +2245,14 @@ function _registerComponent(tagName) {
       this.properties._internalState = {
         onCreateCalled: false,
         onAfterCreateCalled: false,
+        onProcessReplaceableContentCalled: false,
         onRenderCalled: false,
         onAttachCalled: false,
         onDetachCalled: false,
         disableSetters: true,
         disableGetters: true,
-        inPropInit: []
+        inPropInit: [],
+        propertyListeners: {}
       };
 
       // props.forEach((prop) => {
@@ -2455,15 +2429,13 @@ registerComponent.MODES = {
 
 var standardClassProperties = {
   replaceableContent: {
-    noGetterFromSetter: true,
-    propagateToChildren: true,
-    order: 4,
-    get: function get() {
-
-      if (this.mainComponent && this.mainComponent.properties.replaceableContent !== this.properties.replaceableContent) {
-        return this.mainComponent.replaceableContent;
-      }
-      return this.properties.replaceableContent;
+    set: function set() {
+      // TODO: Investigate allowing this to update, which involves:
+      // 1. Propagating to all children
+      // 2. Detecting when a subproperty/function has changed so we don't have to rip out all nodes and replace them with identical nodes
+      // 3. Reapplying setup commonly done in onAfterCreate and onRender
+      // Um.
+      if (this.properties._internalState.onProcessReplaceableContentCalled) throw new Error('replaceableContent can only be set during initialization');
     }
   },
   _layerEventSubscriptions: {
@@ -2492,20 +2464,22 @@ var standardClassProperties = {
 
 var standardClassMethods = {
   onReplaceableContentAdded: function onReplaceableContentAdded(name, node) {
-    var index = 0;
-    // Setup each node added this way as a full part of this component
-    var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, function () {
-      return true;
-    }, false);
-    var currentNode = void 0;
-    while (currentNode = nodeIterator.nextNode()) {
+    var _this8 = this;
+
+    this._findNodesWithin(node, function (currentNode) {
       if (!currentNode.properties) currentNode.properties = {};
-      currentNode.properties.parentComponent = this;
+      currentNode.properties.parentComponent = _this8;
       if (!currentNode.id) currentNode.id = _layerWebsdk2.default.Util.generateUUID();
-      this.nodes[currentNode.id] = currentNode;
-      index++;
-    }
+      _this8.nodes[currentNode.getAttribute('layer-id') || currentNode.id] = currentNode;
+    });
   },
+
+  addPropertyListener: function addPropertyListener(name, fn) {
+    var propertyListeners = this.properties._internalState.propertyListeners;
+    if (!propertyListeners[name]) propertyListeners[name] = [];
+    propertyListeners[name].push(fn);
+  },
+
 
   /**
    * The setupDomNodes method looks at all child nodes of this node that have layer-id properties and indexes them in the `nodes` property.
@@ -2519,17 +2493,17 @@ var standardClassMethods = {
    * @protected
    */
   setupDomNodes: function setupDomNodes() {
-    var _this8 = this;
+    var _this9 = this;
 
     this.nodes = {};
 
     this._findNodesWithin(this, function (node, isComponent) {
       var layerId = node.getAttribute && node.getAttribute('layer-id');
-      if (layerId) _this8.nodes[layerId] = node;
+      if (layerId) _this9.nodes[layerId] = node;
 
       if (isComponent) {
         if (!node.properties) node.properties = {};
-        node.properties.parentComponent = _this8;
+        node.properties.parentComponent = _this9;
       }
     });
   },
@@ -2548,13 +2522,14 @@ var standardClassMethods = {
     var children = node.childNodes;
     for (var i = 0; i < children.length; i++) {
       var innerNode = children[i];
+      if (innerNode instanceof HTMLElement) {
+        var isLUIComponent = Boolean(_base2.default.components[innerNode.tagName.toLowerCase()]);
+        callback(innerNode, isLUIComponent);
 
-      var isLUIComponent = Boolean(innerNode instanceof HTMLElement && _base2.default.components[innerNode.tagName.toLowerCase()]);
-      callback(innerNode, isLUIComponent);
-
-      // If its not a custom webcomponent with children that it manages and owns, iterate on it
-      if (!isLUIComponent) {
-        this._findNodesWithin(innerNode, callback);
+        // If its not a custom webcomponent with children that it manages and owns, iterate on it
+        if (!isLUIComponent) {
+          this._findNodesWithin(innerNode, callback);
+        }
       }
     }
   },
@@ -2688,6 +2663,72 @@ var standardClassMethods = {
   },
 
   /**
+   * As part of the lifecycle, this must fire before onAfterCreate because onAfterCreate assumes that all dom have loaded via templates/elsewhere.
+   *
+   * TODO: Need to test against raw JS and various frameworks to insure we always have a css class 'layer-replaceable-content' div
+   * @method
+   * @private
+   */
+  _onProcessReplaceableContent: function _onProcessReplaceableContent() {
+    var _this10 = this;
+
+    this.properties._internalState.onProcessReplaceableContentCalled = true;
+
+    // Make sure that the parent component has processed its replaceable content, and passed its values on to this component.
+    // Parent component will in turn call this on its parent until we reach the Main Component
+    var parent = this.parentComponent;
+    if (parent) {
+      if (!parent.properties._internalState.onProcessReplaceableContentCalled) parent._onProcessReplaceableContent();
+      this.replaceableContent = Object.assign({}, parent.properties.replaceableContent, this.properties.replaceableContent);
+    }
+
+    Object.keys(this.properties.replaceableContent || {}).forEach(function (nodeName) {
+      var parentNode = _this10.nodes[nodeName];
+      var newNode = void 0;
+
+      // Transform a function into a node if we've been given a function...
+      // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
+      // in which case it should handle turning it into a node; lists in particular need to manage
+      // creation of the node once per list-item
+      if (parentNode) {
+        if (typeof _this10.properties.replaceableContent[nodeName] === 'function') {
+          var oldChild = parentNode.firstChild;
+          parentNode.removeChild(oldChild);
+          newNode = _this10.properties.replaceableContent[nodeName](_this10, parentNode);
+          if (!newNode) parentNode.appendChild(oldChild); // lame... but handles case where callback returns null
+        } else {
+          newNode = _this10.properties.replaceableContent[nodeName];
+        }
+
+        if (newNode) {
+          var alreadyInWidget = _this10.contains(newNode);
+
+          // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
+          if (!alreadyInWidget && (newNode.tagName !== 'DIV' || !newNode.classList.contains('layer-replaceable-content') && !newNode.firstChild)) {
+            var tmpNode = document.createElement('div');
+            tmpNode.appendChild(newNode);
+            newNode = tmpNode;
+          }
+
+          if (!newNode.classList.contains('layer-replaceable-content')) newNode.classList.add('layer-replaceable-content');
+
+          if (!alreadyInWidget) {
+            var docFragment = void 0;
+            if (newNode.tagName === 'TEMPLATE') {
+              docFragment = document.importNode(newNode.content, true);
+              newNode = docFragment.firstChild;
+            }
+
+            parentNode.appendChild(newNode);
+          }
+          _this10.onReplaceableContentAdded(nodeName, newNode);
+        }
+      }
+    });
+  },
+
+
+  /**
    * MIXIN HOOK: Each time a Component is initialized, its onAfterCreate methods will be called.
    *
    * While one could use layerUI.Components.Component.onCreate, this handler allows you to wait for all
@@ -2791,12 +2832,13 @@ var standardClassMethods = {
    * @private
    */
   onDestroy: function onDestroy() {
-    var _this9 = this;
+    var _this11 = this;
 
+    this.properties._internalState.propertyListeners = null;
     this.properties._internalState.onDestroyCalled = true;
     this.properties._internalState.disableSetters = true;
     this.properties._layerEventSubscriptions.forEach(function (subscribedObject) {
-      return subscribedObject.off(null, null, _this9);
+      return subscribedObject.off(null, null, _this11);
     });
     this.properties._layerEventSubscriptions = [];
     this.classList.add('layer-node-destroyed');
@@ -2822,7 +2864,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":57,"layer-websdk":79}],6:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":58,"layer-websdk":80}],6:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -2922,7 +2964,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-channel-item", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-channel-item-content'><div layer-id='title' class='layer-channel-title'></div></div><layer-delete layer-id='delete'></layer-delete></div>", "");
   layerUI.buildStyle("layer-channel-item", "layer-channel-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-channel-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-channel-item  .layer-list-item .layer-channel-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-channel-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/list-item-selection":48,"../../subcomponents/layer-delete/layer-delete":25}],7:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/list-item-selection":49,"../../subcomponents/layer-delete/layer-delete":25}],7:[function(require,module,exports){
 /**
  * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
  * conversation within a list of conversations.
@@ -2970,13 +3012,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
-    item: {
-      set: function set(newConversation, oldConversation) {
-        if (this.nodes.lastMessage) {
-          this.nodes.lastMessage.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
-        }
-      }
-    },
+    item: {},
 
     /**
      * Enable deletion of this Conversation.
@@ -3163,10 +3199,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence class='presence-without-avatar' layer-id='presence' size='medium'></layer-presence><div class='layer-group-counter' layer-id='groupCounter'>2</div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='date'></layer-date><layer-menu-button layer-id='menuButton'></layer-menu-button></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-conversation-left-side' layer-id='conversationRowLeftSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='date'></layer-date></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div><div class='layer-conversation-right-side' layer-id='conversationRowRightSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div>", "");
   layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/list-item-selection":48,"../../../mixins/size-property":56,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-menu-button/layer-menu-button":27}],8:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/list-item-selection":49,"../../../mixins/size-property":57,"../../subcomponents/layer-avatar/layer-avatar":20,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":22,"../../subcomponents/layer-conversation-title/layer-conversation-title":23,"../../subcomponents/layer-menu-button/layer-menu-button":27}],8:[function(require,module,exports){
 /**
  * The Layer Conversation List widget renders a scrollable, pagable list of Conversations.
  *
@@ -3537,8 +3573,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
     supportedSizes: {
       value: ['tiny', 'small', 'medium', 'large']
-    }
+    },
 
+    replaceableContent: {
+      value: {
+        conversationRowLeftSide: function conversationRowLeftSide(widget) {
+          var div = document.createElement('div');
+          var avatar = document.createElement('layer-avatar');
+          avatar.setAttribute('layer-id', 'avatar');
+          avatar.size = this.size;
+          var presence = document.createElement('layer-presence');
+          presence.setAttribute('layer-id', 'presence');
+          presence.size = 'medium';
+          var groupCounter = document.createElement('div');
+          groupCounter.classList.add('layer-group-counter');
+          groupCounter.setAttribute('layer-id', 'groupCounter');
+          div.appendChild(avatar);
+          div.appendChild(presence);
+          div.appendChild(groupCounter);
+          return div;
+        },
+        conversationRowRightSide: function conversationRowRightSide(widget) {
+          var div = document.createElement('div');
+          var menuButton = document.createElement('layer-menu-button');
+          menuButton.setAttribute('layer-id', 'menuButton');
+          div.appendChild(menuButton);
+          return div;
+        }
+      }
+    }
   },
   methods: {
     /**
@@ -3578,7 +3641,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div></div></div>", "");
   layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/list-selection":51,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":79}],9:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/list-selection":52,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":80}],9:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -3784,16 +3847,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     size: {
-      value: 'large',
-      set: function set(size) {
-        for (var i = 0; i < this.childNodes.length; i++) {
-          this.childNodes[i].size = size;
-        }
-      }
+      value: 'medium',
+      propagateToChildren: true
     },
 
     supportedSizes: {
-      value: ['small', 'medium', 'large']
+      value: ['tiny', 'small', 'medium']
     },
 
     /**
@@ -3951,7 +4010,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div></div></div>", "");
   layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-identity-item/layer-identity-item":10,"layer-websdk":79}],10:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":48,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"../layer-identity-item/layer-identity-item":10,"layer-websdk":80}],10:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -3981,7 +4040,10 @@ var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
 require('../../subcomponents/layer-avatar/layer-avatar');
 
+require('../../subcomponents/layer-age/layer-age');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 
 (0, _component.registerComponent)('layer-identity-item', {
   mixins: [_listItem2.default, _sizeProperty2.default],
@@ -4008,21 +4070,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
 
     size: {
-      value: 'large',
+      value: 'medium',
       set: function set(size) {
-        switch (size) {
-          case 'large':
-            this.nodes.avatar.size = 'medium';
-            break;
-          case 'medium':
-            this.nodes.avatar.size = 'small';
-            break;
-        }
+        if (size !== 'tiny') this.nodes.avatar.size = size;
       }
     },
 
     supportedSizes: {
-      value: ['small', 'medium', 'large']
+      value: ['tiny', 'small', 'medium']
     }
   },
   methods: {
@@ -4095,6 +4150,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRerender: function onRerender() {
       this.nodes.avatar.users = [this.item];
       this.nodes.title.innerHTML = this.item.displayName;
+      this.nodes.age.date = this.item.lastSeenAt;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);
     },
 
@@ -4131,15 +4187,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><input type='checkbox' layer-id='checkbox'></input></div>", "");
-  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence {\ndisplay: none;\n}\nlayer-identity-item.layer-size-small layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-small layer-avatar {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><input type='checkbox' layer-id='checkbox'></input></div>", "");
+  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../../mixins/size-property":56,"../../subcomponents/layer-avatar/layer-avatar":19,"layer-websdk":79}],11:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/size-property":57,"../../subcomponents/layer-age/layer-age":19,"../../subcomponents/layer-avatar/layer-avatar":20,"layer-websdk":80}],11:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -4831,14 +4886,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onAfterCreate: function onAfterCreate() {},
-
 
     /**
      * When a key is pressed and text is not focused, focus on the composer
@@ -4904,6 +4951,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         return;
       }
 
+      this.nodes.list.conversation = conversation;
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {
@@ -4963,7 +5011,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-panel", "<layer-messages-list layer-id='list'></layer-messages-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-composer layer-id='composer'></layer-composer>", "");
   layerUI.buildStyle("layer-conversation-panel", "layer-conversation-panel {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-messages-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-composer {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":46,"../../mixins/has-query":47,"../../mixins/main-component":53,"../messages-list-panel/layer-messages-list/layer-messages-list":18,"../subcomponents/layer-composer/layer-composer":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":32,"layer-websdk":79}],12:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":47,"../../mixins/has-query":48,"../../mixins/main-component":54,"../messages-list-panel/layer-messages-list/layer-messages-list":18,"../subcomponents/layer-composer/layer-composer":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":33,"layer-websdk":80}],12:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -5508,7 +5556,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
   layerUI.buildAndRegisterTemplate("layer-notifier", "<layer-avatar layer-id='avatar'></layer-avatar><div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title' layer-id='title'></div><div class='layer-message-item-placeholder'></div></div>", "");
   layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\nmax-height: 250px;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":5,"../../mixins/main-component":53,"../subcomponents/layer-avatar/layer-avatar":19,"notifyjs":74}],13:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/main-component":54,"../subcomponents/layer-avatar/layer-avatar":20,"notifyjs":75}],13:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -5597,7 +5645,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-membership-name' layer-id='title'></label></div>", "");
   layerUI.buildStyle("layer-membership-item", "layer-membership-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-membership-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-membership-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-membership-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-membership-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-membership-item.layer-membership-item-empty {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list-item":49,"../../../mixins/list-item-selection":48,"../../component":5,"../../subcomponents/layer-avatar/layer-avatar":19}],14:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list-item":50,"../../../mixins/list-item-selection":49,"../../component":5,"../../subcomponents/layer-avatar/layer-avatar":20}],14:[function(require,module,exports){
 /**
  * The Layer Membership List renders a pagable list of layer.Membership objects, and allows the user to
  * see who else is in the Channel with them.
@@ -5802,7 +5850,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":52,"../../../mixins/list-selection":51,"../../../mixins/main-component":53,"../../component":5,"../layer-membership-item/layer-membership-item":13,"layer-websdk":79}],15:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":53,"../../../mixins/list-selection":52,"../../../mixins/main-component":54,"../../component":5,"../layer-membership-item/layer-membership-item":13,"layer-websdk":80}],15:[function(require,module,exports){
 /**
  * The Layer Message Item widget renders a single Message synopsis.
  *
@@ -5969,14 +6017,7 @@ module.exports = {
      */
     dateRenderer: {},
 
-    dateFormat: {
-      value: {
-        today: { hour: 'numeric', minute: 'numeric' },
-        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
-        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
-        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }
-      }
-    },
+    dateFormat: {},
 
     /**
      * Provide a function that returns the menu items for the given Conversation.
@@ -6002,11 +6043,7 @@ module.exports = {
      */
     getMenuOptions: {
       type: Function,
-      set: function set() {
-        if (this.nodes.menuButton) {
-          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
-        }
-      }
+      propagateToChildren: true
     },
 
     /**
@@ -6120,7 +6157,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":79}],16:[function(require,module,exports){
+},{"layer-websdk":80}],16:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -6145,10 +6182,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><div class='layer-sender-name' layer-id='sender'></div></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Near Side --><div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Far Side --><div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div></div></div>", "");
-  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received .layer-replacable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='messageRowHeader' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Left Side --><div class='layer-message-left-side' layer-id='messageRowLeftSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><div class='layer-message-right-side' layer-id='messageRowRightSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='messageRowFooter' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div>", "");
+  layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received .layer-replaceable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../layer-message-item-mixin":15}],17:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../subcomponents/layer-avatar/layer-avatar":20,"../../subcomponents/layer-date/layer-date":24,"../layer-message-item-mixin":15}],17:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -6177,10 +6214,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Far Side --><div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Near Side --><div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar><layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'><div class='layer-replacable-content'><layer-message-status layer-id='status'></layer-message-status><layer-date layer-id='date' show-year=\"never\" today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date></div></div></div>", "");
-  layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-replacable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: inline-block;\ntext-align: left;\nmax-width: 90%;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-message-near-side > div {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><div class='layer-message-header' layer-id='messageRowHeader' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: left Side --><div class='layer-message-left-side' layer-id='messageRowLeftSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><div class='layer-message-right-side' layer-id='messageRowRightSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div><!-- Footer --><div class='layer-message-footer' layer-id='messageRowFooter' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div>", "");
+  layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-replaceable-content {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: inline-block;\ntext-align: left;\nmax-width: 90%;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-message-right-side > div {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":49,"../../subcomponents/layer-avatar/layer-avatar":19,"../../subcomponents/layer-date/layer-date":24,"../../subcomponents/layer-delete/layer-delete":25,"../../subcomponents/layer-message-status/layer-message-status":29,"../layer-message-item-mixin":15}],18:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../subcomponents/layer-avatar/layer-avatar":20,"../../subcomponents/layer-date/layer-date":24,"../../subcomponents/layer-delete/layer-delete":25,"../../subcomponents/layer-message-status/layer-message-status":29,"../layer-message-item-mixin":15}],18:[function(require,module,exports){
 /**
  * The Layer Message List widget renders a scrollable, pagable list of layerUI.components.MessagesListPanel.Item widgets.
  *
@@ -6306,15 +6343,27 @@ require('../layer-message-item-sent/layer-message-item-sent');
 
 require('../layer-message-item-received/layer-message-item-received');
 
+require('../../subcomponents/layer-start-of-conversation/layer-start-of-conversation');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.
+var PAGING_DELAY = 2000; 
 
-var PAGING_DELAY = 2000;
 
 (0, _component.registerComponent)('layer-messages-list', {
   mixins: [_list2.default, _hasQuery2.default, _emptyList2.default, _listLoadIndicator2.default, _queryEndIndicator2.default],
   properties: {
+
+    /**
+     * Supplemental property which helps drive the welcome message
+     *
+     * @property {layer.Conversation}
+     */
+    conversation: {
+      // Enables it to be made avaialble to any emptyNode, endOfConversation node, etc...  also over applies by writing to all Message Items too.
+      propagateToChildren: true
+    },
 
     /**
      * Provide property to override the function used to render a date for each Message Item.
@@ -6376,7 +6425,14 @@ var PAGING_DELAY = 2000;
      *
      * @property {Object}
      */
-    dateFormat: {},
+    dateFormat: {
+      value: {
+        today: { hour: 'numeric', minute: 'numeric' },
+        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
+        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
+        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' }
+      }
+    },
 
     /**
      * Provide a function that returns the menu items for the given Conversation.
@@ -6433,10 +6489,73 @@ var PAGING_DELAY = 2000;
      */
     screenFullsBeforePaging: {
       value: 2.0
+    },
+
+    replaceableContent: {
+      value: {
+        messageRowLeftSide: function messageRowLeftSide(widget) {
+          var item = widget.item;
+          if (item.sender.sessionOwner) {
+            return null;
+          } else {
+            var div = document.createElement('div');
+            div.classList.add('layer-replaceable-content');
+            var avatar = document.createElement('layer-avatar');
+            avatar.size = 'small';
+            avatar.showPresence = false;
+            avatar.setAttribute('layer-id', 'avatar');
+            div.appendChild(avatar);
+            return div;
+          }
+        },
+        messageRowRightSide: function messageRowRightSide(widget) {
+          var item = widget.item;
+          var div = document.createElement('div');
+          div.classList.add('layer-replaceable-content');
+          if (item.sender.sessionOwner) {
+            var avatar = document.createElement('layer-avatar');
+            avatar.size = 'small';
+            avatar.showPresence = false;
+            avatar.setAttribute('layer-id', 'avatar');
+            div.appendChild(avatar);
+          }
+          var menu = document.createElement('layer-menu-button');
+          menu.setAttribute('layer-id', 'menuButton');
+          div.appendChild(menu);
+          return div;
+        },
+        messageRowFooter: function messageRowFooter(widget) {
+          var item = widget.item;
+          var parentNode = document.createElement('div');
+          parentNode.classList.add('layer-replaceable-content');
+          if (item.sender.sessionOwner) {
+            var status = document.createElement('layer-message-status');
+            status.setAttribute('layer-id', 'status');
+            parentNode.appendChild(status);
+          }
+          var date = document.createElement('layer-date');
+          date.setAttribute('layer-id', 'date');
+          date.dateFormat = this.dateFormat;
+          parentNode.appendChild(date);
+          return parentNode;
+        },
+        messageRowHeader: function messageRowHeader(widget) {
+          if (!widget.item.sender.sessionOwner) {
+            var div = document.createElement('div');
+            div.setAttribute('layer-id', 'sender');
+            div.classList.add('layer-sender-name');
+            return div;
+          }
+        },
+        endOfResultsNode: function endOfResultsNode(widget) {
+          var result = document.createElement('layer-start-of-conversation');
+          result.setAttribute('layer-id', 'startOfConversation');
+          return result;
+        }
+      }
     }
   },
   methods: {
-
     /**
      * Constructor.
      *
@@ -6673,6 +6792,9 @@ var PAGING_DELAY = 2000;
         messageWidget._contentTag = handler.tagName;
         messageWidget.item = message;
         messageWidget.getMenuOptions = this.getMenuOptions;
+        if (this.query.pagedToEnd && this.query.data.indexOf(message) === this.query.data.length - 1) {
+          messageWidget.classList.add('layer-first-message-of-conversation');
+        }
         return messageWidget;
       } else {
         return null;
@@ -6842,6 +6964,13 @@ var PAGING_DELAY = 2000;
       value: function value(evt) {
         if (evt.data.length === 0) {
           this.isDataLoading = this.properties.query.isFiring;
+          if (this.query.pagedToEnd) {
+            var firstItem = this.querySelectorAllArray('.layer-message-item')[0];
+            if (firstItem && firstItem.item && firstItem.item === this.query.data[this.query.data.length - 1]) {
+              firstItem.classList.add('layer-first-message-of-conversation');
+            }
+          }
+          this._renderPagedDataDone([], null, evt);
           return;
         }
 
@@ -6901,6 +7030,8 @@ var PAGING_DELAY = 2000;
     _renderPagedDataDone: function _renderPagedDataDone(affectedItems, fragment, evt) {
       var _this7 = this;
 
+      if (!fragment) return; // called without fragment to trigger mixin versions of _renderPagedDataDone
+
       // Find the nodes of all affected items in both the document and the fragment,
       // and call processAffectedWidgets on them
       if (affectedItems.length) {
@@ -6953,10 +7084,117 @@ var PAGING_DELAY = 2000;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'><div class='layer-replacable-content'></div></div><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'><div class='layer-replacable-content'>          This is the beginning of your conversation        </div></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replacable-content'>          Loading messages...        </div></div></div></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replaceable-content'>          Loading messages...        </div></div></div></div>", "");
   layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-header-toggle {\nmin-height: 20px;\nmargin-bottom: 2px;\n}\nlayer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {\ntext-align: center;\ndisplay: none;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator,\nlayer-messages-list.layer-end-of-results .layer-end-of-results-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":45,"../../../mixins/has-query":47,"../../../mixins/list":52,"../../../mixins/list-load-indicator":50,"../../../mixins/query-end-indicator":55,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":79}],19:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":46,"../../../mixins/has-query":48,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/query-end-indicator":56,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":32,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":80}],19:[function(require,module,exports){
+/**
+ * The Layer Age widget renders how long ago a date is.
+ *
+ * TODO: Document this
+ *
+ * @class layerUI.components.subcomponents.Age
+ * @extends layerUI.components.Component
+ */
+'use strict';
+
+var _component = require('../../../components/component');
+
+function getMonthsDiff(a, b) {
+  return (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
+} 
+
+
+(0, _component.registerComponent)('layer-age', {
+  properties: {
+
+    /**
+     * Date to be rendered
+     *
+     * @property {Date} [date=null]
+     */
+    date: {
+      set: function set(value) {
+        this.setAttribute('title', value ? value.toLocaleString() : '');
+        this.onRender();
+      }
+    },
+
+    /**
+     * The actual rendered string.
+     *
+     * @property {String} [value='']
+     */
+    value: {
+      set: function set(value) {
+        this.innerHTML = value;
+      }
+    },
+
+    /**
+     * Provide property to override the function used to render a date for each Message Item.
+     *
+     * Note that changing this will not regenerate the list; this should be set when initializing a new List.
+     *
+     * ```javascript
+     * dateItem.ageRenderer = function(date) {
+     *    return date.toISOString();
+     * };
+     * ```
+     *
+     * @property {Function} [dateRender=null]
+     */
+    ageRenderer: {}
+  },
+  methods: {
+
+    onRender: function onRender() {
+      var value = this.date;
+      if (value) {
+        if (this.ageRenderer) {
+          this.value = this.ageRenderer(value);
+        } else {
+          var today = new Date();
+          var twoHours = 2 * 60 * 60 * 1000;
+          var twoDays = 2 * 24 * 60 * 60 * 1000;
+          var timeDiff = today.getTime() - value.getTime();
+          if (timeDiff < twoHours) {
+            var minutes = Math.floor(timeDiff / (60 * 1000));
+            if (minutes) {
+              this.value = minutes + ' min' + (minutes > 1 ? 's' : '') + ' ago';
+            } else {
+              this.value = '';
+            }
+          } else if (timeDiff < twoDays) {
+            var hours = Math.floor(timeDiff / (60 * 60 * 1000));
+            this.value = hours + ' hours ago';
+          } else {
+            var monthsDiff = getMonthsDiff(today, value);
+
+            if (monthsDiff < 2) {
+              var days = Math.floor(timeDiff / (24 * 60 * 60 * 1000));
+              this.value = days + ' days ago';
+            } else if (monthsDiff < 12) {
+              this.value = monthsDiff + ' months ago';
+            } else {
+              var years = today.getFullYear() - value.getFullYear();
+              this.value = years + ' year' + (years > 1 ? 's' : '') + ' ago';
+            }
+          }
+        }
+      } else {
+        this.value = 'Never Used';
+      }
+    }
+  }
+});
+
+(function () {
+  var layerUI = require('../../../base');
+  layerUI.buildAndRegisterTemplate("layer-age", "", "");
+  layerUI.buildStyle("layer-age", "layer-age {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}", "");
+})();
+},{"../../../base":4,"../../../components/component":5}],20:[function(require,module,exports){
 /**
  * The Layer Avatar widget renders an icon representing a user or users.
  *
@@ -7122,6 +7360,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.classList[this.users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
       if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
         this.nodes.presence = document.createElement('layer-presence');
+        this.nodes.presence.classList.add('layer-presence-within-avatar');
         this.nodes.presence.item = this.users[0];
         this.nodes.presence.size = this.size === 'larger' ? 'large' : this.size;
         this.appendChild(this.nodes.presence);
@@ -7231,80 +7470,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"../layer-presence/layer-presence":30,"layer-websdk":79}],20:[function(require,module,exports){
-/**
- * Provides a Button Panel for adding custom actions to the layerUI.Composer panel.
- *
- * You can populate this button panel using the layerUI.components.ConversationPanel.composeButtons property.
- *
- * Alternatively, you can replace this by defining a custom `layer-compose-button-panel` to make the resulting component entirely yours:
- *
- * ```
- * document.registerElement('layer-compose-button-panel', {
- *   prototype: Object.create(HTMLElement.prototype, {
- *     createdCallback: {
- *       value: function() {
- *         this.innerHTML = "<button>Click me!</button>";
- *       }
- *     }
- *   })
- * });
- *
- * // Call init after custom components are defined
- * layerUI.init({
- *   appId:  'layer:///apps/staging/UUID'
- * });
- * ```
- *
- * @class layerUI.components.subcomponents.ComposeButtonPanel
- * @extends layerUI.components.Component
- */
-'use strict';
-
-var _component = require('../../../components/component');
-
-(0, _component.registerComponent)('layer-compose-button-panel', {
-  properties: {
-    /**
-     * Custom buttons to put in the panel.
-     *
-     * @property {HTMLElement[]} [buttons=[]]
-     */
-    buttons: {
-      value: [],
-      set: function set(value) {
-        this.classList[value && value.length ? 'remove' : 'add']('is-empty');
-        this.onRender();
-      }
-    }
-  },
-  methods: {
-    /**
-     * Render any custom buttons provided via the `buttons` property.
-     *
-     * @method
-     * @private
-     */
-    onRender: function onRender() {
-      this.innerHTML = '';
-      if (this.buttons.length) {
-        var fragment = document.createDocumentFragment();
-        this.buttons.forEach(function (button) {
-          return fragment.appendChild(button);
-        });
-        this.appendChild(fragment);
-      }
-    }
-  }
-}); 
-
-
-(function () {
-  var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-compose-button-panel", "", "");
-  layerUI.buildStyle("layer-compose-button-panel", "layer-compose-button-panel.is-empty {\ndisplay: none;\n}\nlayer-compose-button-panel {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
-})();
-},{"../../../base":4,"../../../components/component":5}],21:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"../layer-presence/layer-presence":30,"layer-websdk":80}],21:[function(require,module,exports){
 /**
  * The Layer Composer widget provides the textarea for layerUI.components.ConversationPanel.
  *
@@ -7334,12 +7500,10 @@ var _base2 = _interopRequireDefault(_base);
 
 var _component = require('../../../components/component');
 
-require('../layer-compose-button-panel/layer-compose-button-panel');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var ENTER = 13; 
 
-var ENTER = 13;
 var TAB = 9;
 
 (0, _component.registerComponent)('layer-composer', {
@@ -7354,6 +7518,7 @@ var TAB = 9;
       set: function set(value) {
         if (value) this.client = value.getClient();
         this._setTypingListenerConversation();
+        if (this.manageDisabledState) this.disabled = !Boolean(value);
       }
     },
 
@@ -7376,23 +7541,15 @@ var TAB = 9;
      * Custom buttons to put in the panel, on the right side.
      *
      * @property {HTMLElement[]} [buttons=[]]
+     * @removed
      */
-    buttons: {
-      set: function set(value) {
-        this.nodes.buttonPanel.buttons = value;
-      }
-    },
 
     /**
      * Custom buttons to put in the panel, on the left side.
      *
      * @property {HTMLElement[]} [buttonsLeft=[]]
+     * @removed
      */
-    buttonsLeft: {
-      set: function set(value) {
-        this.nodes.buttonPanelLeft.buttons = value;
-      }
-    },
 
     /**
      * The text shown in the editor; this is the editor's value.
@@ -7423,8 +7580,31 @@ var TAB = 9;
       get: function get() {
         return this.nodes.input.placeholder;
       }
+    },
+
+    isEmpty: {
+      value: true,
+      type: Boolean,
+      set: function set(value) {
+        this.toggleClass('layer-is-empty', value);
+      }
+    },
+
+    disabled: {
+      type: Boolean,
+      value: false,
+      set: function set(value) {
+        this.toggleClass('layer-is-disabled', value);
+        this.nodes.input.disabled = value;
+      }
+    },
+
+    manageDisabledState: {
+      type: Boolean,
+      value: true
     }
   },
+
   methods: {
     /**
      * Constructor.
@@ -7434,7 +7614,6 @@ var TAB = 9;
      */
     onCreate: function onCreate() {
       this.classList.add('layer-composer-one-line-of-text');
-      this.properties.buttons = [];
 
       // Setting this in the template causes errors in IE 11.
       this.nodes.input.placeholder = 'Enter a message';
@@ -7477,6 +7656,8 @@ var TAB = 9;
        * @param {String} evt.detail.oldValue
        */
       this.trigger('layer-composer-change-value', { value: value, oldValue: oldValue });
+
+      this.isEmpty = !Boolean(this.value);
     },
 
 
@@ -7694,10 +7875,10 @@ var TAB = 9;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-composer", "<layer-compose-button-panel layer-id='buttonPanelLeft' class='layer-button-panel-left'></layer-compose-button-panel><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea required='true' rows=\"1\" layer-id='input'></textarea></div><layer-compose-button-panel layer-id='buttonPanel' class='layer-button-panel-right'></layer-compose-button-panel>", "");
-  layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nmin-height: 20px;\noverflow :hidden;\nborder-width: 0px;\nfont-size: 1em;\nbox-sizing: border-box;\nmargin: 0px;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nwidth: 100%;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-composer", "<div layer-id='composerButtonPanelLeft' class='layer-button-panel layer-button-panel-left'><div class='layer-replaceable-content'></div></div><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><div layer-id='composerButtonPanelRight' class='layer-button-panel layer-button-panel-right'><div class='layer-replaceable-content'></div></div>", "");
+  layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 0px;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-composer .layer-button-panel .layer-replaceable-content {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../layer-compose-button-panel/layer-compose-button-panel":20,"layer-websdk":79}],22:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":80}],22:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -7750,23 +7931,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         if (newValue) newValue.on('conversations:change', this.onRerender, this);
         this.onRender();
       }
-    },
+    }
 
-    /**
-     * Provide a function to determine if the last message is rendered in the Conversation List.
-     *
-     * By default, only text/plain last-messages are rendered in the Conversation List.  A Message that is NOT rendered
-     * is instead rendered using the MessageHandler's label: `(ICON) Image Message`
-     *
-     * ```javascript
-     * listItem.canFullyRenderLastMessage = function(message) {
-     *     return true; // Render all Last Messages
-     * }
-     * ```
-     *
-     * @property {Function} [canFullyRenderLastMessage=null]
-     */
-    canFullyRenderLastMessage: {}
   },
   methods: {
 
@@ -7803,8 +7969,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           var handler = _base2.default.getHandler(message, this);
           if (handler) {
             this.classList.add(handler.tagName);
+            var conversationItem = this.parentComponent;
             // Create the element specified by the handler and add it as a childNode.
-            if (!this.canFullyRenderLastMessage || this.canFullyRenderLastMessage(message)) {
+            if (!conversationItem || !conversationItem.canFullyRenderLastMessage || conversationItem.canFullyRenderLastMessage(message)) {
               var messageHandler = document.createElement(handler.tagName);
               messageHandler.parentComponent = this;
               messageHandler.message = message;
@@ -8265,7 +8432,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"layer-websdk":79}],26:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":80}],26:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -8391,7 +8558,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53,"layer-websdk":79}],27:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54,"layer-websdk":80}],27:[function(require,module,exports){
 /**
  * The Layer Menu Button renders a menu button and has associated menu items.
  *
@@ -8432,7 +8599,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   mixins: [_mainComponent2.default],
   properties: {
     getMenuOptions: {
-      type: Function
+      type: Function,
+      get: function get() {
+        return this.properties.getMenuOptions || this.parentComponent.getMenuOptions;
+      },
+      set: function set(value) {
+        this.toggleClass('layer-has-menu', Boolean(value));
+      }
     },
 
     // Automatically set if within a List
@@ -8492,7 +8665,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu-button", "&#8285;", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53,"../layer-menu/layer-menu":28,"layer-websdk":79}],28:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54,"../layer-menu/layer-menu":28,"layer-websdk":80}],28:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -8618,7 +8791,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu", "", "");
   layerUI.buildStyle("layer-menu", "layer-menu {\ndisplay: none;\nposition: absolute;\n}\nlayer-menu.layer-menu-list-showing {\ndisplay: block;\nz-index: 10;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"layer-websdk":79}],29:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":80}],29:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -8755,7 +8928,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"layer-websdk":79}],30:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":80}],30:[function(require,module,exports){
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
@@ -8937,7 +9110,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53,"../../../mixins/size-property":56,"layer-websdk":79}],31:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"layer-websdk":80}],31:[function(require,module,exports){
 /**
  * The Layer Send button widget provides an alternative to hitting a keyboard `ENTER` key for sending a message.
  *
@@ -9013,7 +9186,42 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-send-button", "<div></div>", "");
   layerUI.buildStyle("layer-send-button", "layer-send-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-send-button div {\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":53}],32:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54}],32:[function(require,module,exports){
+/**
+ * The Start of Conversation which renders some customizable welcome message based on the Conversation
+ *
+ * TODO: Document this
+ *
+ * @class layerUI.components.subcomponents.Age
+ * @extends layerUI.components.Component
+ */
+'use strict';
+
+var _component = require('../../../components/component');
+
+(0, _component.registerComponent)('layer-start-of-conversation', {
+  properties: {
+
+    /**
+     * Conversation that we are at the start of.
+     *
+     * @property {layer.Conversation}
+     */
+    conversation: {
+      set: function set(value) {
+        this.nodes.startDate.date = value ? value.createdAt : null;
+      }
+    }
+  }
+}); 
+
+
+(function () {
+  var layerUI = require('../../../base');
+  layerUI.buildAndRegisterTemplate("layer-start-of-conversation", "Conversation began <layer-date layer-id='startDate' default-format='{\"month\": \"long\", \"year\": \"numeric\", \"day\": \"numeric\", \"hour\": \"numeric\", \"minute\": \"numeric\" }' today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' week-format='{\"weekday\": \"long\", \"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date>", "");
+  layerUI.buildStyle("layer-start-of-conversation", "layer-start-of-conversation {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}\nlayer-start-of-conversation layer-date {\ndisplay: inline;\n}", "");
+})();
+},{"../../../base":4,"../../../components/component":5}],33:[function(require,module,exports){
 /**
  * The Layer Typing Indicator widget renders a short description of who is currently typing into the current Conversation.
  *
@@ -9171,7 +9379,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-typing-indicator", "<span class='layer-typing-message' layer-id='panel'></span>", "");
   layerUI.buildStyle("layer-typing-indicator", "layer-typing-indicator {\ndisplay: block;\n}\nlayer-typing-indicator span {\ndisplay: none;\n}\nlayer-typing-indicator.layer-typing-occuring span {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5}],33:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5}],34:[function(require,module,exports){
 /**
  * The Layer Image MessageHandler renders a single MessagePart image, or an Atlas 3-message-part Image.
  *
@@ -9404,7 +9612,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/message-handler":54,"../../../utils/sizing":61,"blueimp-load-image/js/load-image":69,"blueimp-load-image/js/load-image-exif":65,"blueimp-load-image/js/load-image-meta":66,"blueimp-load-image/js/load-image-orientation":67}],34:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/message-handler":55,"../../../utils/sizing":62,"blueimp-load-image/js/load-image":70,"blueimp-load-image/js/load-image-exif":66,"blueimp-load-image/js/load-image-meta":67,"blueimp-load-image/js/load-image-orientation":68}],35:[function(require,module,exports){
 /**
  * The Layer Plain Text MessageHandler renders a single text/plain message part.
  *
@@ -9553,7 +9761,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":54}],35:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":55}],36:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
@@ -9591,7 +9799,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 });
 
 // Do not register this handler
-},{"../../components/component":5,"../../mixins/message-handler":54}],36:[function(require,module,exports){
+},{"../../components/component":5,"../../mixins/message-handler":55}],37:[function(require,module,exports){
 /**
  * The Layer Video MessageHandler renders a single MessagePart Video, or an Atlas 3-message-part Video.
  *
@@ -9696,7 +9904,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":54,"../../utils/sizing":61}],37:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/message-handler":55,"../../utils/sizing":62}],38:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -9730,7 +9938,7 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":63}],38:[function(require,module,exports){
+},{"../../base":4,"autolinker":64}],39:[function(require,module,exports){
 /**
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
@@ -9760,7 +9968,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4}],39:[function(require,module,exports){
+},{"../../base":4}],40:[function(require,module,exports){
 /**
  * The Layer Emoji TextHandler replaces all :smile: and :-) with emoji images
  *
@@ -9811,7 +10019,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":76,"twemoji":77}],40:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":77,"twemoji":78}],41:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -9843,7 +10051,7 @@ _base2.default.registerTextHandler({
     }
   }
 });
-},{"../../base":4,"../../utils/is-url":60}],41:[function(require,module,exports){
+},{"../../base":4,"../../utils/is-url":61}],42:[function(require,module,exports){
 /**
  * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
  *
@@ -9898,7 +10106,7 @@ _base2.default.registerTextHandler({
     textData.text = body;
   }
 }); 
-},{"../../base":4}],42:[function(require,module,exports){
+},{"../../base":4}],43:[function(require,module,exports){
 /**
  * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
  *
@@ -9934,7 +10142,7 @@ _base2.default.registerTextHandler({
     }
   }
 }); 
-},{"../../base":4}],43:[function(require,module,exports){
+},{"../../base":4}],44:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -10065,7 +10273,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-presence/layer-presence":30,"./components/subcomponents/layer-send-button/layer-send-button":31,"./handlers/message/layer-message-image/layer-message-image":33,"./handlers/message/layer-message-text-plain":34,"./handlers/message/layer-message-video":36,"./handlers/text/autolinker":37,"./handlers/text/code-blocks":38,"./handlers/text/emoji":39,"./handlers/text/images":40,"./handlers/text/newline":41,"./handlers/text/youtube":42,"./layer-ui":44,"./mixins/focus-on-keydown":46,"./mixins/has-query":47,"./mixins/list":52,"./mixins/list-item":49,"./mixins/list-item-selection":48,"./mixins/list-selection":51,"./mixins/main-component":53,"./mixins/message-handler":54,"./utils/date-separator":58,"./utils/files":59,"animated-scrollto":62}],44:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-presence/layer-presence":30,"./components/subcomponents/layer-send-button/layer-send-button":31,"./handlers/message/layer-message-image/layer-message-image":34,"./handlers/message/layer-message-text-plain":35,"./handlers/message/layer-message-video":37,"./handlers/text/autolinker":38,"./handlers/text/code-blocks":39,"./handlers/text/emoji":40,"./handlers/text/images":41,"./handlers/text/newline":42,"./handlers/text/youtube":43,"./layer-ui":45,"./mixins/focus-on-keydown":47,"./mixins/has-query":48,"./mixins/list":53,"./mixins/list-item":50,"./mixins/list-item-selection":49,"./mixins/list-selection":52,"./mixins/main-component":54,"./mixins/message-handler":55,"./utils/date-separator":59,"./utils/files":60,"animated-scrollto":63}],45:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -10176,7 +10384,7 @@ _base2.default.init = function init() {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":5,"./handlers/message/layer-message-unknown":35,"webcomponents.js/webcomponents-lite":78}],45:[function(require,module,exports){
+},{"./base":4,"./components/component":5,"./handlers/message/layer-message-unknown":36,"webcomponents.js/webcomponents-lite":79}],46:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -10226,7 +10434,7 @@ module.exports = {
     }
   }
 };
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to refocus when keyboard input is received.
  *
@@ -10281,7 +10489,7 @@ module.exports = {
     }
   }
 };
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /**
  * A Mixin for main components that can receive or generate a Query
  *
@@ -10432,7 +10640,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":79}],48:[function(require,module,exports){
+},{"layer-websdk":80}],49:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -10467,7 +10675,7 @@ module.exports = {
     }
   }
 };
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /**
  * A List Item Mixin that provides common properties, shortcuts and code.
  *
@@ -10585,17 +10793,13 @@ module.exports = {
      * @property {layer.Root} [item=null]
      */
     item: {
+      propagateToChildren: true,
       set: function set(newItem, oldItem) {
-        var _this = this;
-
         // Disconnect from any previous Message we were rendering; not currently used.
         if (oldItem) oldItem.off(null, null, this);
 
         // Any changes to the Message should trigger a rerender
         if (newItem) newItem.on(newItem.constructor.eventPrefix + ':change', this.onRerender, this);
-        Object.keys(this.nodes).forEach(function (nodeName) {
-          _this.nodes[nodeName].item = newItem;
-        });
         this.onRender();
       }
     }
@@ -10615,21 +10819,29 @@ module.exports = {
     onReplaceableContentAdded: {
       mode: _component.registerComponent.MODES.AFTER,
       value: function onReplaceableContentAdded(name, node) {
+        var _this = this;
+
+        var props = _base.components[this.tagName.toLowerCase()].properties.filter(function (propDef) {
+          return propDef.propagateToChildren || propDef.mixinWithChildren;
+        });
+
         // Setup each node added this way as a full part of this component
         var nodeIterator = document.createNodeIterator(node, NodeFilter.SHOW_ELEMENT, function () {
           return true;
         }, false);
         var currentNode = void 0;
         while (currentNode = nodeIterator.nextNode()) {
-          if (_base.components[currentNode.tagName.toLowerCase()]) {
-            if (!currentNode.properties._internalState) {
-              // hit using polyfil
-              currentNode.properties.item = this.item;
-            } else {
-              // hit using real webcomponents
-              currentNode.item = this.item;
+          props.forEach(function (propDef) {
+            if (_base.components[currentNode.tagName.toLowerCase()]) {
+              if (!currentNode.properties._internalState) {
+                // hit using polyfil
+                currentNode.properties[propDef.propertyName] = _this[propDef.propertyName];
+              } else {
+                // hit using real webcomponents
+                currentNode[propDef.propertyName] = _this[propDef.propertyName];
+              }
             }
-          }
+          });
         }
       }
     },
@@ -10670,7 +10882,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":5}],50:[function(require,module,exports){
+},{"../base":4,"../components/component":5}],51:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that data is currently loading.
  *
@@ -10692,14 +10904,9 @@ module.exports = {
       }
     }
 
-  },
-  methods: {
-    onRender: function onRender() {
-      if (this.dataLoadingNode) this.nodes.loadIndicator.appendChild(this.dataLoadingNode);
-    }
   }
 };
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /**
  * A List Mixin that add a `selectedId` property to a List.
  *
@@ -10812,7 +11019,7 @@ module.exports = {
     }
   }
 };
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /**
  * A List Mixin that provides common list patterns
  *
@@ -11399,7 +11606,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":5,"./has-query":47,"layer-websdk":79}],53:[function(require,module,exports){
+},{"../base":4,"../components/component":5,"./has-query":48,"layer-websdk":80}],54:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
@@ -11506,7 +11713,7 @@ module.exports = {
     }
   }
 }; 
-},{"../base":4,"../components/component":5,"layer-websdk":79}],54:[function(require,module,exports){
+},{"../base":4,"../components/component":5,"layer-websdk":80}],55:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -11657,7 +11864,7 @@ module.exports = {
     onSent: function onSent() {}
   }
 }; 
-},{"../components/component":5}],55:[function(require,module,exports){
+},{"../components/component":5}],56:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that there is no more data to page in.
  *
@@ -11691,7 +11898,7 @@ module.exports = {
   },
   methods: {
     onRender: function onRender() {
-      if (this.endOfResultsNode) this.nodes.endOfResultsNode.appendChild(this.endOfResultsNode);
+      if (!this.query || !this.query.data) this.isEndOfResults = true;
     },
 
 
@@ -11713,7 +11920,7 @@ module.exports = {
     }
   }
 };
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -11746,7 +11953,7 @@ module.exports = {
     }
   }
 }; 
-},{"../components/component":5}],57:[function(require,module,exports){
+},{"../components/component":5}],58:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -11797,7 +12004,7 @@ module.exports = {
     }
   }
 };
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /**
  * Use this module to put a date separator between Messages from different dates in your Messages List.
  *
@@ -11836,14 +12043,20 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
   var needsBoundary = index === 0 || message.sentAt.toDateString() !== messages[index - 1].sentAt.toDateString();
 
   if (needsBoundary) {
-    var options = { weekday: 'long', year: 'numeric', month: 'short', day: '2-digit' };
-    var dateStr = messages[index].sentAt.toLocaleDateString(undefined, options);
-    _base2.default.addListItemSeparator(widget, '<span>' + dateStr + '</span>', dateClassName, true);
+    var dateWidget = document.createElement('layer-date');
+    dateWidget.weekFormat = { weekday: 'long' };
+    dateWidget.defaultFormat = { month: 'long', day: 'numeric' };
+    dateWidget.olderFormat = { month: 'long', day: 'numeric', year: 'numeric' };
+    dateWidget.date = messages[index].sentAt;
+    var parent = document.createElement('div');
+    parent.appendChild(dateWidget);
+    parent.classList.add(dateClassName + '-inner');
+    _base2.default.addListItemSeparator(widget, parent, dateClassName, true);
   } else {
     _base2.default.addListItemSeparator(widget, '', dateClassName, true);
   }
 };
-},{"../base":4}],59:[function(require,module,exports){
+},{"../base":4}],60:[function(require,module,exports){
 /**
  * This is a utility class which you can use to watch for user dragging and dropping
  * files from their file system into your app as part of a "Send Attached Message" action.
@@ -12148,7 +12361,7 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
 
   video.src = URL.createObjectURL(part.body);
 };
-},{"../base":4,"./sizing":61,"blueimp-load-image/js/load-image":69,"blueimp-load-image/js/load-image-exif":65,"blueimp-load-image/js/load-image-meta":66,"blueimp-load-image/js/load-image-orientation":67,"layer-websdk":79}],60:[function(require,module,exports){
+},{"../base":4,"./sizing":62,"blueimp-load-image/js/load-image":70,"blueimp-load-image/js/load-image-exif":66,"blueimp-load-image/js/load-image-meta":67,"blueimp-load-image/js/load-image-orientation":68,"layer-websdk":80}],61:[function(require,module,exports){
 'use strict';
 
 /*
@@ -12192,7 +12405,7 @@ module.exports = function isURL(extensions) {
   // resource path
   '(?:[/?#]\\S*)' + resource, 'igm');
 };
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -12223,7 +12436,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (window) {
     var requestAnimFrame = (function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||function(callback){window.setTimeout(callback,1000/60);};})();
 
@@ -12278,7 +12491,7 @@ module.exports = function (dimensions, maxSizes) {
     }
 })(window);
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -16456,7 +16669,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -16572,7 +16785,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -16874,7 +17087,7 @@ function fromByteArray (uint8) {
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":69,"./load-image-meta":66}],66:[function(require,module,exports){
+},{"./load-image":70,"./load-image-meta":67}],67:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -17035,7 +17248,7 @@ function fromByteArray (uint8) {
   }
 }))
 
-},{"./load-image":69}],67:[function(require,module,exports){
+},{"./load-image":70}],68:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -17222,7 +17435,7 @@ function fromByteArray (uint8) {
   }
 }))
 
-},{"./load-image":69,"./load-image-meta":66,"./load-image-scale":68}],68:[function(require,module,exports){
+},{"./load-image":70,"./load-image-meta":67,"./load-image-scale":69}],69:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -17506,7 +17719,7 @@ function fromByteArray (uint8) {
   }
 }))
 
-},{"./load-image":69}],69:[function(require,module,exports){
+},{"./load-image":70}],70:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -17646,9 +17859,9 @@ function fromByteArray (uint8) {
   }
 }(window))
 
-},{}],70:[function(require,module,exports){
-
 },{}],71:[function(require,module,exports){
+
+},{}],72:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -19441,7 +19654,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":64,"ieee754":72,"isarray":73}],72:[function(require,module,exports){
+},{"base64-js":65,"ieee754":73,"isarray":74}],73:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -19527,14 +19740,14 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -19740,7 +19953,7 @@ module.exports = Array.isArray || function (arr) {
   exports['default'] = Notify;
 
 }));
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -20647,7 +20860,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -20665,7 +20878,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":75}],77:[function(require,module,exports){
+},{"./emoji-map.js":76}],78:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -21262,7 +21475,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -23768,7 +23981,7 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
@@ -23779,7 +23992,7 @@ if (global.layer && global.layer.Client) {
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":88}],80:[function(require,module,exports){
+},{"./lib/layer":89}],81:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -25460,10 +25673,8 @@ module.exports = ClientAuthenticator;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":82,"./const":84,"./db-manager":85,"./layer-error":86,"./logger":89,"./models/identity":103,"./online-state-manager":108,"./root":117,"./sync-event":118,"./sync-manager":119,"./websockets/change-manager":127,"./websockets/request-manager":128,"./websockets/socket-manager":129,"./xhr":130}],81:[function(require,module,exports){
+},{"./client-utils":83,"./const":85,"./db-manager":86,"./layer-error":87,"./logger":90,"./models/identity":104,"./online-state-manager":109,"./root":118,"./sync-event":119,"./sync-manager":120,"./websockets/change-manager":128,"./websockets/request-manager":129,"./websockets/socket-manager":130,"./xhr":131}],82:[function(require,module,exports){
 'use strict';
-
-var _clientUtils = require('./client-utils');
 
 /**
  * Allows all components to have a clientId instead of a client pointer.
@@ -25478,12 +25689,16 @@ var _clientUtils = require('./client-utils');
 var registry = {};
 var listeners = [];
 
+var _require = require('./client-utils');
+
+var defer = _require.defer;
 /**
  * Register a new Client; will destroy any previous client with the same appId.
  *
  * @method register
  * @param  {layer.Client} client
  */
+
 function register(client) {
   var appId = client.appId;
   if (registry[appId] && !registry[appId].isDestroyed) {
@@ -25491,7 +25706,7 @@ function register(client) {
   }
   registry[appId] = client;
 
-  (0, _clientUtils.defer)(function () {
+  defer(function () {
     return listeners.forEach(function (listener) {
       return listener(client);
     });
@@ -25562,7 +25777,7 @@ module.exports = {
 };
 
 
-},{"./client-utils":82}],82:[function(require,module,exports){
+},{"./client-utils":83}],83:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -25953,7 +26168,7 @@ exports.asciiInit = function (version) {
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils/defer":125,"./utils/layer-parser":126,"base64url":134,"uuid":137}],83:[function(require,module,exports){
+},{"./utils/defer":126,"./utils/layer-parser":127,"base64url":135,"uuid":138}],84:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -26434,10 +26649,10 @@ var Client = function (_ClientAuth) {
 
       if (object.isSaved()) {
         if (this._scheduleCheckAndPurgeCacheAt < Date.now()) {
-          this._scheduleCheckAndPurgeCacheAt = Date.now() + Client.QUERIED_CACHE_PURGE_INTERVAL;
+          this._scheduleCheckAndPurgeCacheAt = Date.now() + Client.CACHE_PURGE_INTERVAL;
           setTimeout(function () {
             return _this4._runScheduledCheckAndPurgeCache();
-          }, Client.QUERIED_CACHE_PURGE_INTERVAL);
+          }, Client.CACHE_PURGE_INTERVAL);
         }
         this._scheduleCheckAndPurgeCacheItems.push(object);
       }
@@ -26473,16 +26688,10 @@ var Client = function (_ClientAuth) {
   }, {
     key: '_isCachedObject',
     value: function _isCachedObject(obj) {
-      if (obj._loadType === 'fetched') return true;
       var list = Object.keys(this._models.queries);
       for (var i = 0; i < list.length; i++) {
         var query = this._models.queries[list[i]];
-        if (query._getItem(obj.id)) {
-          if (obj._loadType === 'websocket') obj._loadType = 'queried';
-          return true;
-        } else if (obj._loadType === 'websocket' && Date.now() - obj.localCreatedAt.getTime() < Client.WEBSOCKET_CACHE_PURGE_INTERVAL) {
-          return true;
-        }
+        if (query._getItem(obj.id)) return true;
       }
       return false;
     }
@@ -26709,7 +26918,7 @@ Client.prototype.telemetryMonitor = null;
  * @static
  * @type {String}
  */
-Client.version = '3.3.3';
+Client.version = '3.3.2';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -26721,8 +26930,7 @@ Client.version = '3.3.3';
  * @static
  * @type {number}
  */
-Client.QUERIED_CACHE_PURGE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-Client.WEBSOCKET_CACHE_PURGE_INTERVAL = 60 * 60 * 1000; // one hour
+Client.CACHE_PURGE_INTERVAL = 10 * 60 * 1000;
 
 Client._ignoredEvents = ['conversations:loaded', 'conversations:loaded-error'];
 
@@ -26754,7 +26962,7 @@ Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
 
 
-},{"./client-authenticator":80,"./client-registry":81,"./client-utils":82,"./layer-error":86,"./logger":89,"./mixins/client-channels":90,"./mixins/client-conversations":91,"./mixins/client-identities":92,"./mixins/client-members":93,"./mixins/client-messages":94,"./mixins/client-queries":95,"./models/announcement":96,"./models/channel":98,"./models/channel-message":97,"./models/conversation":102,"./models/conversation-message":101,"./models/identity":103,"./models/membership":104,"./root":117,"./telemetry-monitor":120,"./typing-indicators/typing-indicator-listener":121,"./typing-indicators/typing-listener":123,"./typing-indicators/typing-publisher":124}],84:[function(require,module,exports){
+},{"./client-authenticator":81,"./client-registry":82,"./client-utils":83,"./layer-error":87,"./logger":90,"./mixins/client-channels":91,"./mixins/client-conversations":92,"./mixins/client-identities":93,"./mixins/client-members":94,"./mixins/client-messages":95,"./mixins/client-queries":96,"./models/announcement":97,"./models/channel":99,"./models/channel-message":98,"./models/conversation":103,"./models/conversation-message":102,"./models/identity":104,"./models/membership":105,"./root":118,"./telemetry-monitor":121,"./typing-indicators/typing-indicator-listener":122,"./typing-indicators/typing-listener":124,"./typing-indicators/typing-publisher":125}],85:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26852,7 +27060,7 @@ module.exports = {
 };
 
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28459,7 +28667,7 @@ Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
 
 
-},{"./client-utils":82,"./const":84,"./logger":89,"./models/announcement":96,"./root":117,"./sync-event":118}],86:[function(require,module,exports){
+},{"./client-utils":83,"./const":85,"./logger":90,"./models/announcement":97,"./root":118,"./sync-event":119}],87:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -28669,7 +28877,7 @@ LayerError.dictionary = {
 module.exports = LayerError;
 
 
-},{"./logger":89}],87:[function(require,module,exports){
+},{"./logger":90}],88:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28880,7 +29088,7 @@ LayerEvent.prototype.eventName = '';
 module.exports = LayerEvent;
 
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -28924,7 +29132,7 @@ layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-list
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
 
 
-},{"./client":83,"./client-authenticator":80,"./client-utils":82,"./const":84,"./db-manager":85,"./layer-error":86,"./layer-event":87,"./models/announcement":96,"./models/channel":98,"./models/channel-message":97,"./models/container":99,"./models/content":100,"./models/conversation":102,"./models/conversation-message":101,"./models/identity":103,"./models/membership":104,"./models/message":106,"./models/message-part":105,"./models/syncable":107,"./online-state-manager":108,"./queries/query":116,"./queries/query-builder":115,"./root":117,"./sync-event":118,"./sync-manager":119,"./typing-indicators/typing-indicators":122,"./typing-indicators/typing-listener":123,"./typing-indicators/typing-publisher":124,"./websockets/change-manager":127,"./websockets/request-manager":128,"./websockets/socket-manager":129,"./xhr":130}],89:[function(require,module,exports){
+},{"./client":84,"./client-authenticator":81,"./client-utils":83,"./const":85,"./db-manager":86,"./layer-error":87,"./layer-event":88,"./models/announcement":97,"./models/channel":99,"./models/channel-message":98,"./models/container":100,"./models/content":101,"./models/conversation":103,"./models/conversation-message":102,"./models/identity":104,"./models/membership":105,"./models/message":107,"./models/message-part":106,"./models/syncable":108,"./online-state-manager":109,"./queries/query":117,"./queries/query-builder":116,"./root":118,"./sync-event":119,"./sync-manager":120,"./typing-indicators/typing-indicators":123,"./typing-indicators/typing-listener":124,"./typing-indicators/typing-publisher":125,"./websockets/change-manager":128,"./websockets/request-manager":129,"./websockets/socket-manager":130,"./xhr":131}],90:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -29038,7 +29246,7 @@ var logger = new Logger();
 module.exports = logger;
 
 
-},{"./const":84}],90:[function(require,module,exports){
+},{"./const":85}],91:[function(require,module,exports){
 'use strict';
 
 /**
@@ -29238,19 +29446,16 @@ module.exports = {
      * @return {layer.Channel}
      */
     getChannel: function getChannel(id, canLoad) {
-      var result = null;
-
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Channel.isValidId(id)) {
         id = Channel.prefixUUID + id;
       }
       if (this._models.channels[id]) {
-        result = this._models.channels[id];
+        return this._models.channels[id];
       } else if (canLoad) {
-        result = Channel.load(id, this);
+        return Channel.load(id, this);
       }
-      if (canLoad) result._loadType = 'fetched';
-      return result;
+      return null;
     },
 
 
@@ -29449,14 +29654,13 @@ module.exports = {
       if (!this.isAuthenticated) throw new Error(ErrorDictionary.clientMustBeReady);
       if (!('private' in options)) options.private = false;
       options.client = this;
-      options._loadType = 'websocket'; // treat this the same as a websocket loaded object
       return Channel.create(options);
     }
   }
 };
 
 
-},{"../layer-error":86,"../models/channel":98}],91:[function(require,module,exports){
+},{"../layer-error":87,"../models/channel":99}],92:[function(require,module,exports){
 'use strict';
 
 /**
@@ -29661,18 +29865,16 @@ module.exports = {
      * @return {layer.Conversation}
      */
     getConversation: function getConversation(id, canLoad) {
-      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Conversation.isValidId(id)) {
         id = Conversation.prefixUUID + id;
       }
       if (this._models.conversations[id]) {
-        result = this._models.conversations[id];
+        return this._models.conversations[id];
       } else if (canLoad) {
-        result = Conversation.load(id, this);
+        return Conversation.load(id, this);
       }
-      if (canLoad) result._loadType = 'fetched';
-      return result;
+      return null;
     },
 
 
@@ -29869,14 +30071,13 @@ module.exports = {
       if (!this.isAuthenticated) throw new Error(ErrorDictionary.clientMustBeReady);
       if (!('distinct' in options)) options.distinct = true;
       options.client = this;
-      options._loadType = 'websocket'; // treat this the same as a websocket loaded object
       return Conversation.create(options);
     }
   }
 };
 
 
-},{"../layer-error":86,"../models/conversation":102}],92:[function(require,module,exports){
+},{"../layer-error":87,"../models/conversation":103}],93:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30033,19 +30234,17 @@ module.exports = {
      * @return {layer.Identity}
      */
     getIdentity: function getIdentity(id, canLoad) {
-      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
       if (!Identity.isValidId(id)) {
         id = Identity.prefixUUID + encodeURIComponent(id);
       }
 
       if (this._models.identities[id]) {
-        result = this._models.identities[id];
+        return this._models.identities[id];
       } else if (canLoad) {
-        result = Identity.load(id, this);
+        return Identity.load(id, this);
       }
-      if (canLoad) result._loadType = 'fetched';
-      return result;
+      return null;
     },
 
 
@@ -30185,7 +30384,7 @@ module.exports = {
 };
 
 
-},{"../client-utils":82,"../layer-error":86,"../models/identity":103,"../sync-event":118}],93:[function(require,module,exports){
+},{"../client-utils":83,"../layer-error":87,"../models/identity":104,"../sync-event":119}],94:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30296,16 +30495,14 @@ module.exports = {
      * @return {layer.Membership}
      */
     getMember: function getMember(id, canLoad) {
-      var result = null;
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
       if (this._models.members[id]) {
-        result = this._models.members[id];
+        return this._models.members[id];
       } else if (canLoad) {
-        result = Syncable.load(id, this);
+        return Syncable.load(id, this);
       }
-      if (canLoad) result._loadType = 'fetched';
-      return result;
+      return null;
     },
 
 
@@ -30348,7 +30545,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":86,"../models/membership":104,"../models/syncable":107}],94:[function(require,module,exports){
+},{"../layer-error":87,"../models/membership":105,"../models/syncable":108}],95:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30567,8 +30764,6 @@ module.exports = {
      * @return {layer.Message}
      */
     getMessage: function getMessage(id, canLoad) {
-      var result = null;
-
       if (typeof id !== 'string') throw new Error(ErrorDictionary.idParamRequired);
 
       // NOTE: This could be an announcement
@@ -30577,13 +30772,11 @@ module.exports = {
       }
 
       if (this._models.messages[id]) {
-        result = this._models.messages[id];
+        return this._models.messages[id];
       } else if (canLoad) {
-        result = Syncable.load(id, this);
+        return Syncable.load(id, this);
       }
-      if (canLoad) result._loadType = 'fetched';
-
-      return result;
+      return null;
     },
 
 
@@ -30694,7 +30887,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":86,"../models/message":106,"../models/syncable":107}],95:[function(require,module,exports){
+},{"../layer-error":87,"../models/message":107,"../models/syncable":108}],96:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30847,7 +31040,7 @@ module.exports = {
 };
 
 
-},{"../layer-error":86,"../queries/announcements-query":109,"../queries/channels-query":110,"../queries/conversations-query":111,"../queries/identities-query":112,"../queries/members-query":113,"../queries/messages-query":114,"../queries/query":116}],96:[function(require,module,exports){
+},{"../layer-error":87,"../queries/announcements-query":110,"../queries/channels-query":111,"../queries/conversations-query":112,"../queries/identities-query":113,"../queries/members-query":114,"../queries/messages-query":115,"../queries/query":117}],97:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31025,7 +31218,7 @@ Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
 
 
-},{"../layer-error":86,"../root":117,"./conversation-message":101,"./syncable":107}],97:[function(require,module,exports){
+},{"../layer-error":87,"../root":118,"./conversation-message":102,"./syncable":108}],98:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31207,7 +31400,7 @@ Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
 
 
-},{"../client-registry":81,"../const":84,"../layer-error":86,"../logger":89,"../root":117,"./message":106}],98:[function(require,module,exports){
+},{"../client-registry":82,"../const":85,"../layer-error":87,"../logger":90,"../root":118,"./message":107}],99:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -31349,7 +31542,6 @@ var Channel = function (_Container) {
       } : options;
       messageConfig.clientId = this.clientId;
       messageConfig.conversationId = this.id;
-      messageConfig._loadType = 'websocket'; // treat this the same as a websocket loaded object
 
       return new ChannelMessage(messageConfig);
     }
@@ -31898,7 +32090,7 @@ Syncable.subclasses.push(Channel);
 module.exports = Channel;
 
 
-},{"../client-utils":82,"../const":84,"../layer-error":86,"../layer-event":87,"../root":117,"./channel-message":97,"./container":99,"./syncable":107}],99:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../layer-error":87,"../layer-event":88,"../root":118,"./channel-message":98,"./container":100,"./syncable":108}],100:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -32544,7 +32736,7 @@ Syncable.subclasses.push(Container);
 module.exports = Container;
 
 
-},{"../client-utils":82,"../const":84,"../layer-error":86,"../root":117,"./syncable":107}],100:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../layer-error":87,"../root":118,"./syncable":108}],101:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32745,7 +32937,7 @@ Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
 
 
-},{"../root":117,"../xhr":130}],101:[function(require,module,exports){
+},{"../root":118,"../xhr":131}],102:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -33295,7 +33487,7 @@ Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMes
 module.exports = ConversationMessage;
 
 
-},{"../client-registry":81,"../client-utils":82,"../const":84,"../layer-error":86,"../root":117,"./message":106}],102:[function(require,module,exports){
+},{"../client-registry":82,"../client-utils":83,"../const":85,"../layer-error":87,"../root":118,"./message":107}],103:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -33468,7 +33660,6 @@ var Conversation = function (_Container) {
       } : options;
       messageConfig.clientId = this.clientId;
       messageConfig.conversationId = this.id;
-      messageConfig._loadType = 'websocket'; // treat this the same as a websocket loaded object
 
       return new ConversationMessage(messageConfig);
     }
@@ -34385,7 +34576,7 @@ Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
 
 
-},{"../client-utils":82,"../const":84,"../layer-error":86,"../layer-event":87,"../root":117,"./container":99,"./conversation-message":101,"./syncable":107}],103:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../layer-error":87,"../layer-event":88,"../root":118,"./container":100,"./conversation-message":102,"./syncable":108}],104:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34446,7 +34637,7 @@ var Identity = function (_Syncable) {
     } else if (!options.id && options.userId) {
       options.id = Identity.prefixUUID + encodeURIComponent(options.userId);
     } else if (options.id && !options.userId) {
-      options.userId = decodeURIComponent(options.id.substring(Identity.prefixUUID.length));
+      options.userId = options.id.substring(Identity.prefixUUID.length);
     }
 
     // Make sure we have an clientId property
@@ -35044,7 +35235,7 @@ Syncable.subclasses.push(Identity);
 module.exports = Identity;
 
 
-},{"../const":84,"../layer-error":86,"../root":117,"./syncable":107}],104:[function(require,module,exports){
+},{"../const":85,"../layer-error":87,"../root":118,"./syncable":108}],105:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35280,7 +35471,7 @@ Syncable.subclasses.push(Membership);
 module.exports = Membership;
 
 
-},{"../const":84,"../layer-error":86,"../root":117,"./syncable":107}],105:[function(require,module,exports){
+},{"../const":85,"../layer-error":87,"../root":118,"./syncable":108}],106:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35406,9 +35597,6 @@ var MessagePart = function (_Root) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(MessagePart).call(this, newOptions));
 
-    _this.mimeAttributes = {};
-    _this._moveMimeTypeToAttributes();
-
     if (!_this.size && _this.body) _this.size = _this.body.length;
 
     // Don't expose encoding; blobify it if its encoded.
@@ -35435,25 +35623,6 @@ var MessagePart = function (_Root) {
   }
 
   _createClass(MessagePart, [{
-    key: '_moveMimeTypeToAttributes',
-    value: function _moveMimeTypeToAttributes() {
-      var attributes = this.mimeAttributes;
-      var parameters = this.mimeType.split(/\s*;\s*/);
-      if (!parameters) return;
-      this.mimeType = parameters.shift();
-
-      parameters.forEach(function (param) {
-        var index = param.indexOf('=');
-        if (index === -1) {
-          attributes[param] = true;
-        } else {
-          var pName = param.substring(0, index);
-          var pValue = param.substring(index + 1);
-          attributes[pName] = pValue;
-        }
-      });
-    }
-  }, {
     key: 'destroy',
     value: function destroy() {
       if (this.__url) {
@@ -35707,22 +35876,14 @@ var MessagePart = function (_Root) {
   }, {
     key: '_sendBody',
     value: function _sendBody() {
-      var _this5 = this;
-
       if (typeof this.body !== 'string') {
         var err = 'MessagePart.body must be a string in order to send it';
         logger.error(err, { mimeType: this.mimeType, body: this.body });
         throw new Error(err);
       }
 
-      var attributeString = Object.keys(this.mimeAttributes).map(function (key) {
-        if (_this5.mimeAttributes[key] === true) return key;
-        return key + '=' + _this5.mimeAttributes[key];
-      }).join(';');
-      var mimeType = this.mimeType + (attributeString ? ';' + attributeString : '');
-
       var obj = {
-        mime_type: mimeType,
+        mime_type: this.mimeType,
         body: this.body
       };
       this.trigger('parts:send', obj);
@@ -35753,7 +35914,7 @@ var MessagePart = function (_Root) {
   }, {
     key: '_sendBlob',
     value: function _sendBlob(client) {
-      var _this6 = this;
+      var _this5 = this;
 
       /* istanbul ignore else */
       Util.blobToBase64(this.body, function (base64data) {
@@ -35761,12 +35922,12 @@ var MessagePart = function (_Root) {
           var body = base64data.substring(base64data.indexOf(',') + 1);
           var obj = {
             body: body,
-            mime_type: _this6.mimeType
+            mime_type: _this5.mimeType
           };
           obj.encoding = 'base64';
-          _this6.trigger('parts:send', obj);
+          _this5.trigger('parts:send', obj);
         } else {
-          _this6._generateContentAndSend(client);
+          _this5._generateContentAndSend(client);
         }
       });
     }
@@ -35783,7 +35944,7 @@ var MessagePart = function (_Root) {
   }, {
     key: '_generateContentAndSend',
     value: function _generateContentAndSend(client) {
-      var _this7 = this;
+      var _this6 = this;
 
       this.hasContent = true;
       var body = void 0;
@@ -35802,7 +35963,7 @@ var MessagePart = function (_Root) {
         },
         sync: {}
       }, function (result) {
-        return _this7._processContentResponse(result.data, body, client);
+        return _this6._processContentResponse(result.data, body, client);
       });
     }
 
@@ -35821,7 +35982,7 @@ var MessagePart = function (_Root) {
   }, {
     key: '_processContentResponse',
     value: function _processContentResponse(response, body, client) {
-      var _this8 = this;
+      var _this7 = this;
 
       var retryCount = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
 
@@ -35836,7 +35997,7 @@ var MessagePart = function (_Root) {
           'Upload-Content-Type': this.mimeType
         }
       }, function (result) {
-        return _this8._processContentUploadResponse(result, response, client, body, retryCount);
+        return _this7._processContentUploadResponse(result, response, client, body, retryCount);
       });
     }
 
@@ -36121,15 +36282,6 @@ Object.defineProperty(MessagePart.prototype, 'url', {
 MessagePart.prototype.mimeType = 'text/plain';
 
 /**
- * Mime Type Attributes are attributes provided via the mimeType.
- *
- * These attributes are removed from the mimeType and moved into a hash.
- *
- * @type {Object}
- */
-MessagePart.prototype.mimeAttributes = null;
-
-/**
  * Size of the layer.MessagePart.body.
  *
  * Will be set for you if not provided.
@@ -36169,7 +36321,7 @@ Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 module.exports = MessagePart;
 
 
-},{"../client-registry":81,"../client-utils":82,"../layer-error":86,"../logger":89,"../root":117,"../xhr":130,"./content":100}],106:[function(require,module,exports){
+},{"../client-registry":82,"../client-utils":83,"../layer-error":87,"../logger":90,"../root":118,"../xhr":131,"./content":101}],107:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -36413,30 +36565,6 @@ var Message = function (_Syncable) {
       }
       return adjustedParts;
     }
-  }, {
-    key: '__updateParts',
-    value: function __updateParts(parts) {
-      if (parts) this._regenerateMimeAttributesMap();
-    }
-  }, {
-    key: '_regenerateMimeAttributesMap',
-    value: function _regenerateMimeAttributesMap() {
-      var _this3 = this;
-
-      this._mimeAttributeMap = {};
-      this.parts.forEach(function (part) {
-        return _this3._addToMimeAttributesMap(part);
-      });
-    }
-  }, {
-    key: '_addToMimeAttributesMap',
-    value: function _addToMimeAttributesMap(part) {
-      var map = this._mimeAttributeMap;
-      Object.keys(part.mimeAttributes).forEach(function (name) {
-        if (!(name in map)) map[name] = [];
-        map[name].push({ part: part, value: part.mimeAttributes[name] });
-      });
-    }
 
     /**
      * Add a layer.MessagePart to this Message.
@@ -36471,7 +36599,6 @@ var Message = function (_Syncable) {
         thePart.off('messageparts:change', this._onMessagePartChange, this); // if we already subscribed, don't create a redundant subscription
         thePart.on('messageparts:change', this._onMessagePartChange, this);
         if (!part.id) part.id = this.id + '/parts/' + index;
-        this._addToMimeAttributesMap(thePart);
       }
       return this;
     }
@@ -36489,10 +36616,10 @@ var Message = function (_Syncable) {
   }, {
     key: '_onMessagePartChange',
     value: function _onMessagePartChange(evt) {
-      var _this4 = this;
+      var _this3 = this;
 
       evt.changes.forEach(function (change) {
-        _this4._triggerAsync('messages:change', {
+        _this3._triggerAsync('messages:change', {
           property: 'parts.' + change.property,
           oldValue: change.oldValue,
           newValue: change.newValue,
@@ -36532,7 +36659,7 @@ var Message = function (_Syncable) {
   }, {
     key: 'presend',
     value: function presend() {
-      var _this5 = this;
+      var _this4 = this;
 
       var client = this.getClient();
       if (!client) {
@@ -36552,7 +36679,7 @@ var Message = function (_Syncable) {
 
       // Make sure all data is in the right format for being rendered
       this._readAllBlobs(function () {
-        client._addMessage(_this5);
+        client._addMessage(_this4);
       });
     }
 
@@ -36587,7 +36714,7 @@ var Message = function (_Syncable) {
   }, {
     key: 'send',
     value: function send(notification) {
-      var _this6 = this;
+      var _this5 = this;
 
       var client = this.getClient();
       if (!client) {
@@ -36606,7 +36733,7 @@ var Message = function (_Syncable) {
 
       if (conversation.isLoading) {
         conversation.once(conversation.constructor.eventPrefix + ':loaded', function () {
-          return _this6.send(notification);
+          return _this5.send(notification);
         });
         conversation._setupMessage(this);
         return this;
@@ -36629,18 +36756,18 @@ var Message = function (_Syncable) {
       this._readAllBlobs(function () {
         // Calling this will add this to any listening Queries... so position needs to have been set first;
         // handled in conversation.send(this)
-        client._addMessage(_this6);
+        client._addMessage(_this5);
 
         // allow for modification of message before sending
-        _this6.trigger('messages:sending');
+        _this5.trigger('messages:sending');
 
         var data = {
-          parts: new Array(_this6.parts.length),
-          id: _this6.id
+          parts: new Array(_this5.parts.length),
+          id: _this5.id
         };
-        if (notification && _this6.conversationId) data.notification = notification;
+        if (notification && _this5.conversationId) data.notification = notification;
 
-        _this6._preparePartsForSending(data);
+        _this5._preparePartsForSending(data);
       });
       return this;
     }
@@ -36687,7 +36814,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_preparePartsForSending',
     value: function _preparePartsForSending(data) {
-      var _this7 = this;
+      var _this6 = this;
 
       var client = this.getClient();
       var count = 0;
@@ -36701,10 +36828,10 @@ var Message = function (_Syncable) {
           if (evt.encoding) data.parts[index].encoding = evt.encoding;
 
           count++;
-          if (count === _this7.parts.length) {
-            _this7._send(data);
+          if (count === _this6.parts.length) {
+            _this6._send(data);
           }
-        }, _this7);
+        }, _this6);
         part._send(client);
       });
     }
@@ -36723,7 +36850,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_send',
     value: function _send(data) {
-      var _this8 = this;
+      var _this7 = this;
 
       var client = this.getClient();
       var conversation = this.getConversation(false);
@@ -36747,7 +36874,7 @@ var Message = function (_Syncable) {
           target: this.id
         }
       }, function (success, socketData) {
-        return _this8._sendResult(success, socketData);
+        return _this7._sendResult(success, socketData);
       });
     }
   }, {
@@ -36869,12 +36996,12 @@ var Message = function (_Syncable) {
   }, {
     key: '_setupPartIds',
     value: function _setupPartIds(parts) {
-      var _this9 = this;
+      var _this8 = this;
 
       // Assign IDs to preexisting Parts so that we can call getPartById()
       if (parts) {
         parts.forEach(function (part, index) {
-          if (!part.id) part.id = _this9.id + '/parts/' + index;
+          if (!part.id) part.id = _this8.id + '/parts/' + index;
         });
       }
     }
@@ -36892,7 +37019,7 @@ var Message = function (_Syncable) {
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(message) {
-      var _this10 = this;
+      var _this9 = this;
 
       this._inPopulateFromServer = true;
       var client = this.getClient();
@@ -36903,7 +37030,7 @@ var Message = function (_Syncable) {
       this.position = message.position;
       this._setupPartIds(message.parts);
       this.parts = message.parts.map(function (part) {
-        var existingPart = _this10.getPartById(part.id);
+        var existingPart = _this9.getPartById(part.id);
         if (existingPart) {
           existingPart._populateFromServer(part);
           return existingPart;
@@ -36961,68 +37088,6 @@ var Message = function (_Syncable) {
         return aPart.id === partId;
       })[0] : null;
       return part || null;
-    }
-  }, {
-    key: 'getPartWithMimeType',
-    value: function getPartWithMimeType(mimeType) {
-      for (var i = 0; i < this.parts.length; i++) {
-        if (this.parts[i].mimeType === mimeType) return this.parts[i];
-      }
-      return null;
-    }
-
-    /**
-     * Returns array of layer.MessagePart that have the specified MIME Type attribute.
-     *
-     * ```
-     * // get all parts where mime type has "lang=en-us" in it
-     * var enUsParts = message.getPartsWithAttribute('lang', 'en-us');
-     *
-     * // get all parts where mime type has a "lang" attribute in it
-     * var allLangParts = message.getPartsWithAttribute('lang');
-     * ```
-     *
-     * @method
-     * @param {String} name
-     * @param {String} [value=null]
-     * @returns {layer.MessagePart[]}
-     */
-
-  }, {
-    key: 'getPartsWithAttribute',
-    value: function getPartsWithAttribute(name) {
-      var value = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-
-      if (!this._mimeAttributeMap[name]) return null;
-
-      var result = void 0;
-      if (value) {
-        result = this._mimeAttributeMap[name].filter(function (item) {
-          return item.value === value;
-        });
-      } else {
-        result = this._mimeAttributeMap[name];
-      }
-      return result.map(function (item) {
-        return item.part;
-      });
-    }
-
-    /**
-     * If there is a single message part that has the named attribute, return its value.
-     *
-     * If there are 0 or more than one message parts with this attribute, returns `null` instead.
-     *
-     * @method
-     * @param {String} name
-     * @returns {String}
-     */
-
-  }, {
-    key: 'getAttributeValue',
-    value: function getAttributeValue(name) {
-      if (!this._mimeAttributeMap[name] || this._mimeAttributeMap[name].length > 1) return null;
-      return this._mimeAttributeMap[name][0].value;
     }
 
     /**
@@ -37261,31 +37326,6 @@ Object.defineProperty(Message.prototype, 'isUnread', {
   }
 });
 
-/**
- * A map of every Message Part attribute.
- *
- * Structure is:
- *
- * ```
- * {
- *    attributeName: [
- *      {
- *        part: partWithThisValue,
- *        value: theValue
- *      },
- *      {
- *        part: partWithThisValue,
- *        value: theValue
- *      }
- *    ],
- *    attributeName2: [...]
- * }
- * ```
- * @type {Object}
- * @private
- */
-Message.prototype._mimeAttributeMap = null;
-
 Message.prototype._toObject = null;
 
 Message.prototype._inPopulateFromServer = false;
@@ -37396,7 +37436,7 @@ Syncable.subclasses.push(Message);
 module.exports = Message;
 
 
-},{"../client-utils":82,"../const":84,"../layer-error":86,"../root":117,"./identity":103,"./message-part":105,"./syncable":107}],107:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../layer-error":87,"../root":118,"./identity":104,"./message-part":106,"./syncable":108}],108:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37905,29 +37945,6 @@ Syncable.prototype.syncState = SYNC_STATE.NEW;
 Syncable.prototype._syncCounter = 0;
 
 /**
- * Specifies why this object was loaded.
- *
- * Values are:
- *
- * * fetched
- * * queried
- * * websocket
- *
- * Fetched objects must be destroyed by the fetcher when done.
- *
- * Queried objects can be destroyed once the query no longer uses them.
- *
- * Websocket objects can stick around for a while but must eventually be cleaned up unless they are used by a Query.
- * Currently, a websocket object will stick around for one hour unless its used by a Query.
- * Locally created objects are treated as websocket created objects since
- * once created we get a websocket create event for them.
- *
- * @type {String} [_loadType=queried]
- * @private
- */
-Syncable.prototype._loadType = 'queried';
-
-/**
  * Prefix to use when triggering events
  * @private
  * @static
@@ -37961,7 +37978,7 @@ Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
 
 
-},{"../client-registry":81,"../const":84,"../layer-error":86,"../root":117}],108:[function(require,module,exports){
+},{"../client-registry":82,"../const":85,"../layer-error":87,"../root":118}],109:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -38373,7 +38390,7 @@ module.exports = OnlineStateManager;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":82,"./const":84,"./logger":89,"./root":117,"./xhr":130}],109:[function(require,module,exports){
+},{"./client-utils":83,"./const":85,"./logger":90,"./root":118,"./xhr":131}],110:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38468,7 +38485,7 @@ Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuer
 module.exports = AnnouncementsQuery;
 
 
-},{"../root":117,"./messages-query":114,"./query":116}],110:[function(require,module,exports){
+},{"../root":118,"./messages-query":115,"./query":117}],111:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38770,7 +38787,7 @@ Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 module.exports = ChannelsQuery;
 
 
-},{"../const":84,"../root":117,"./conversations-query":111,"./query":116}],111:[function(require,module,exports){
+},{"../const":85,"../root":118,"./conversations-query":112,"./query":117}],112:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39105,7 +39122,7 @@ Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuer
 module.exports = ConversationsQuery;
 
 
-},{"../client-utils":82,"../const":84,"../root":117,"./query":116}],112:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../root":118,"./query":117}],113:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39226,7 +39243,7 @@ Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 module.exports = IdentitiesQuery;
 
 
-},{"../root":117,"./query":116}],113:[function(require,module,exports){
+},{"../root":118,"./query":117}],114:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39403,7 +39420,7 @@ Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 module.exports = MembersQuery;
 
 
-},{"../layer-error":86,"../logger":89,"../root":117,"./query":116}],114:[function(require,module,exports){
+},{"../layer-error":87,"../logger":90,"../root":118,"./query":117}],115:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39571,6 +39588,7 @@ var MessagesQuery = function (_Query) {
       var newRequest = 'conversations/' + predicateIds.uuid + '/messages?page_size=' + pageSize + (this._nextServerFromId ? '&from_id=' + this._nextServerFromId : '');
 
       // Don't query on unsaved conversations, nor repeat still firing queries
+      // If we have a conversation ID but no conversation object, try the query anyways.
       if ((!conversation || conversation.isSaved()) && newRequest !== this._firingRequest) {
         this.isFiring = true;
         this._firingRequest = newRequest;
@@ -39584,6 +39602,10 @@ var MessagesQuery = function (_Query) {
         }, function (results) {
           return _this2._processRunResults(results, newRequest, pageSize);
         });
+      }
+
+      if (conversation && !conversation.isSaved()) {
+        this.pagedToEnd = true;
       }
 
       // If there are no results, then its a new query; automatically populate it with the Conversation's lastMessage.
@@ -39627,6 +39649,10 @@ var MessagesQuery = function (_Query) {
         }, function (results) {
           return _this3._processRunResults(results, newRequest, pageSize);
         });
+      }
+
+      if (channel && !channel.isSaved()) {
+        this.pagedToEnd = true;
       }
     }
   }, {
@@ -39882,7 +39908,7 @@ Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 module.exports = MessagesQuery;
 
 
-},{"../client-utils":82,"../layer-error":86,"../logger":89,"../root":117,"./query":116}],115:[function(require,module,exports){
+},{"../client-utils":83,"../layer-error":87,"../logger":90,"../root":118,"./query":117}],116:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40570,7 +40596,7 @@ var QueryBuilder = {
 module.exports = QueryBuilder;
 
 
-},{"./query":116}],116:[function(require,module,exports){
+},{"./query":117}],117:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41084,9 +41110,8 @@ var Query = function (_Root) {
       this._firingRequest = '';
       if (results.success) {
         this.totalSize = Number(results.xhr.getResponseHeader('Layer-Count'));
+        if (results.data.length < pageSize || results.data.length === this.totalSize) this.pagedToEnd = true;
         this._appendResults(results, false);
-
-        if (results.data.length < pageSize) this.pagedToEnd = true;
       } else if (results.data.getNonce()) {
         this.client.once('ready', function () {
           _this2._run();
@@ -41751,7 +41776,7 @@ Root.initClass.apply(Query, [Query, 'Query']);
 module.exports = Query;
 
 
-},{"../client-utils":82,"../layer-error":86,"../logger":89,"../root":117}],117:[function(require,module,exports){
+},{"../client-utils":83,"../layer-error":87,"../logger":90,"../root":118}],118:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -42510,10 +42535,6 @@ function initClass(newClass, className) {
   if (newClass.mixins) {
     newClass.mixins.forEach(function (mixin) {
       if (mixin.events) newClass._supportedEvents = newClass._supportedEvents.concat(mixin.events);
-      Object.keys(mixin.staticMethods || {}).forEach(function (methodName) {
-        return newClass[methodName] = mixin.staticMethods[methodName];
-      });
-
       if (mixin.properties) {
         Object.keys(mixin.properties).forEach(function (key) {
           newClass.prototype[key] = mixin.properties[key];
@@ -42591,7 +42612,7 @@ module.exports = Root;
 module.exports.initClass = initClass;
 
 
-},{"./client-utils":82,"./layer-error":86,"./layer-event":87,"./logger":89,"backbone-events-standalone/backbone-events-standalone":131}],118:[function(require,module,exports){
+},{"./client-utils":83,"./layer-error":87,"./layer-event":88,"./logger":90,"backbone-events-standalone/backbone-events-standalone":132}],119:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42993,7 +43014,7 @@ WebsocketSyncEvent.prototype.returnChangesArray = false;
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
 
 
-},{"./client-utils":82}],119:[function(require,module,exports){
+},{"./client-utils":83}],120:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43999,7 +44020,7 @@ Root.initClass(SyncManager);
 module.exports = SyncManager;
 
 
-},{"./client-utils":82,"./logger":89,"./root":117,"./sync-event":118,"./xhr":130}],120:[function(require,module,exports){
+},{"./client-utils":83,"./logger":90,"./root":118,"./sync-event":119,"./xhr":131}],121:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -44512,7 +44533,7 @@ module.exports = TelemetryMonitor;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":82,"./root":117,"./xhr":130}],121:[function(require,module,exports){
+},{"./client-utils":83,"./root":118,"./xhr":131}],122:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44842,7 +44863,7 @@ Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingI
 module.exports = TypingIndicatorListener;
 
 
-},{"../client-registry":81,"../root":117,"./typing-indicators":122}],122:[function(require,module,exports){
+},{"../client-registry":82,"../root":118,"./typing-indicators":123}],123:[function(require,module,exports){
 'use strict';
 
 /**
@@ -44879,7 +44900,7 @@ module.exports = {
 };
 
 
-},{}],123:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45101,7 +45122,7 @@ var TypingListener = function () {
 module.exports = TypingListener;
 
 
-},{"./typing-indicators":122,"./typing-publisher":124}],124:[function(require,module,exports){
+},{"./typing-indicators":123,"./typing-publisher":125}],125:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45369,7 +45390,7 @@ var TypingPublisher = function () {
 module.exports = TypingPublisher;
 
 
-},{"../client-registry":81,"./typing-indicators":122}],125:[function(require,module,exports){
+},{"../client-registry":82,"./typing-indicators":123}],126:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -45471,7 +45492,7 @@ if (setImmediate) {
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 /**
@@ -45559,7 +45580,7 @@ module.exports = function (request) {
 };
 
 
-},{"layer-patch":135}],127:[function(require,module,exports){
+},{"layer-patch":136}],128:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45664,8 +45685,7 @@ var WebsocketChangeManager = function () {
     key: '_handleCreate',
     value: function _handleCreate(msg) {
       msg.data.fromWebsocket = true;
-      var obj = this.client._createObject(msg.data);
-      if (obj) obj._loadType = 'websocket';
+      this.client._createObject(msg.data);
     }
 
     /**
@@ -45772,7 +45792,7 @@ WebsocketChangeManager.prototype.client = null;
 module.exports = WebsocketChangeManager;
 
 
-},{"../client-utils":82,"../logger":89,"../models/channel":98,"../models/conversation":102,"../models/message":106}],128:[function(require,module,exports){
+},{"../client-utils":83,"../logger":90,"../models/channel":99,"../models/conversation":103,"../models/message":107}],129:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46143,7 +46163,7 @@ WebsocketRequestManager.prototype.socketManager = null;
 module.exports = WebsocketRequestManager;
 
 
-},{"../client-utils":82,"../layer-error":86,"../logger":89}],129:[function(require,module,exports){
+},{"../client-utils":83,"../layer-error":87,"../logger":90}],130:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -47082,7 +47102,7 @@ Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
 
 
-},{"../client-utils":82,"../const":84,"../layer-error":86,"../logger":89,"../root":117,"websocket":70}],130:[function(require,module,exports){
+},{"../client-utils":83,"../const":85,"../layer-error":87,"../logger":90,"../root":118,"websocket":71}],131:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -47320,7 +47340,7 @@ module.exports.trigger = function (evt) {
 };
 
 
-},{"xhr2":70}],131:[function(require,module,exports){
+},{"xhr2":71}],132:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -47598,7 +47618,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],132:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 var pad_string_1 = require("./pad-string");
@@ -47639,7 +47659,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = base64url;
 
 }).call(this,require("buffer").Buffer)
-},{"./pad-string":133,"buffer":71}],133:[function(require,module,exports){
+},{"./pad-string":134,"buffer":72}],134:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 function padString(input) {
@@ -47663,11 +47683,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = padString;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":71}],134:[function(require,module,exports){
+},{"buffer":72}],135:[function(require,module,exports){
 module.exports = require('./dist/base64url').default;
 module.exports.default = module.exports;
 
-},{"./dist/base64url":132}],135:[function(require,module,exports){
+},{"./dist/base64url":133}],136:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -47902,7 +47922,7 @@ module.exports.default = module.exports;
   }
 })();
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -47937,7 +47957,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -48122,5 +48142,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":136}]},{},[43])(43)
+},{"./rng":137}]},{},[44])(44)
 });

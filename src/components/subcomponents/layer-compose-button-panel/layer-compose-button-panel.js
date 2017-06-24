@@ -24,6 +24,7 @@
  *
  * @class layerUI.components.subcomponents.ComposeButtonPanel
  * @extends layerUI.components.Component
+ * @removed
  */
 import { registerComponent } from '../../../components/component';
 

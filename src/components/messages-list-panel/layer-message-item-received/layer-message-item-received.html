@@ -18,7 +18,7 @@
       align-items: flex-end;
     }
 
-    layer-message-item-received .layer-replacable-content {
+    layer-message-item-received .layer-replaceable-content {
       display: flex;
       flex-direction: row;
     }
@@ -37,20 +37,16 @@
   <div class='layer-list-item' layer-id='innerNode'>
 
     <!-- Header -->
-    <div class='layer-message-header' layer-id='headerRow' layer-has-replaceable='true'>
-      <div class='layer-replacable-content'>
-        <div class='layer-sender-name' layer-id='sender'></div>
-      </div>
+    <div class='layer-message-header' layer-id='messageRowHeader' layer-has-replaceable='true'>
+      <div class='layer-replaceable-content'></div>
     </div>
 
     <!-- Body -->
     <div class='layer-message-row' layer-id='messageRow'>
 
-      <!-- Body: Near Side -->
-      <div class='layer-message-near-side' layer-id='messageRowNearSide' layer-has-replaceable='true'>
-        <div class='layer-replacable-content'>
-          <layer-avatar layer-id='avatar' show-presence='false' size='small'></layer-avatar>
-        </div>
+      <!-- Body: Left Side -->
+      <div class='layer-message-left-side' layer-id='messageRowLeftSide' layer-has-replaceable='true'>
+        <div class='layer-replaceable-content'></div>
       </div>
 
       <!-- Body: Message Contents -->
@@ -58,19 +54,15 @@
         <div class='layer-message-item-content' layer-id='content'></div>
       </div>
 
-      <!-- Body: Far Side -->
-      <div class='layer-message-far-side' layer-id='messageRowFarSide' layer-has-replaceable='true'>
-        <div class='layer-replacable-content'>
-          <layer-menu-button class='layer-templated-menu' layer-id='menuButton'></layer-menu-button>
-        </div>
+      <!-- Body: Right Side -->
+      <div class='layer-message-right-side' layer-id='messageRowRightSide' layer-has-replaceable='true'>
+        <div class='layer-replaceable-content'></div>
       </div>
     </div>
 
     <!-- Footer -->
-    <div class='layer-message-footer' layer-id='footerRow' layer-has-replaceable='true'>
-      <div class='layer-replacable-content'>
-        <layer-date layer-id='date' show-year="never" today-format='{"hour": "numeric", "minute": "numeric"}' format='{"hour": "numeric", "minute": "numeric"}'></layer-date>
-      </div>
+    <div class='layer-message-footer' layer-id='messageRowFooter' layer-has-replaceable='true'>
+      <div class='layer-replaceable-content'></div>
     </div>
   </div>
 </template>

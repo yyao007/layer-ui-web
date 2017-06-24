@@ -191,7 +191,8 @@ layerUI.addListItemSeparator = function addListItemSeparator(listItemNode, conte
 
   if (content) {
     node = document.createElement('div');
-    node.classList.add(contentClass);
+    if (contentClass) node.classList.add(contentClass);
+    node.classList.add('layer-list-item-separator');
   }
 
   if (content) {

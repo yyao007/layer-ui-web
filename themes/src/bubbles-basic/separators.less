@@ -1,12 +1,37 @@
 .layer-list-item-separator-parent {
-  & > *:first-child {
+  .layer-list-item-separator {
+    &:first-child {
+      margin-top: 12px;
+    }
+    &:last-child {
+      margin-bottom: 12px;
+    }
     margin-top: 4px;
-  }
-  & > * {
     margin-bottom: 4px;
+    color: @color-separator-text;
   }
+
   .layer-list-item-separator-date {
-    text-align: center;
-    color: @color-date-separator;
+    height: 25px;
   }
+
+  .layer-list-item-separator-date-inner {
+    border-bottom: solid 1px @color-date-separator-border;
+    text-align: center;
+    height: 12px;
+
+    layer-date {
+      display: inline-block;
+      color: @color-date-separator;
+      font-size: 12px;
+      background-color: white;
+      padding: 2px 15px;
+      border: solid 1px @color-date-separator-border;
+      border-radius: 8px;
+    }
+  }
+}
+
+.layer-first-message-of-conversation .layer-list-item-separator-date {
+  display: none;
 }

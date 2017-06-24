@@ -158,14 +158,7 @@ module.exports = {
      */
     dateRenderer: {},
 
-    dateFormat: {
-      value: {
-        today: { hour: 'numeric', minute: 'numeric' },
-        week: { weekday: 'short', hour: 'numeric', minute: 'numeric' },
-        older: { month: 'short', year: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' },
-        default: { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
-      },
-    },
+    dateFormat: {},
 
     /**
      * Provide a function that returns the menu items for the given Conversation.
@@ -191,11 +184,7 @@ module.exports = {
      */
     getMenuOptions: {
       type: Function,
-      set() {
-        if (this.nodes.menuButton) {
-          this.nodes.menuButton.getMenuOptions = this.properties.getMenuOptions;
-        }
-      },
+      propagateToChildren: true,
     },
 
     /**

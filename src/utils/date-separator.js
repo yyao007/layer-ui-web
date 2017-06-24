@@ -29,9 +29,15 @@ module.exports = utils.dateSeparator = (widget, messages, index) => {
   const needsBoundary = index === 0 || message.sentAt.toDateString() !== messages[index - 1].sentAt.toDateString();
 
   if (needsBoundary) {
-    const options = { weekday: 'long', year: 'numeric', month: 'short', day: '2-digit' };
-    const dateStr = messages[index].sentAt.toLocaleDateString(undefined, options);
-    LayerUI.addListItemSeparator(widget, `<span>${dateStr}</span>`, dateClassName, true);
+    const dateWidget = document.createElement('layer-date');
+    dateWidget.weekFormat = {weekday: 'long'};
+    dateWidget.defaultFormat = {month: 'long', day: 'numeric'};
+    dateWidget.olderFormat = {month: 'long', day: 'numeric', year: 'numeric'};
+    dateWidget.date = messages[index].sentAt;
+    const parent = document.createElement('div');
+    parent.appendChild(dateWidget);
+    parent.classList.add(dateClassName + '-inner');
+    LayerUI.addListItemSeparator(widget, parent, dateClassName, true);
   } else {
     LayerUI.addListItemSeparator(widget, '', dateClassName, true);
   }

@@ -16,7 +16,21 @@ layer-typing-indicator.layer-typing-occuring span {
   .layer-text-fine-print();
 }
 
-layer-conversation-panel .layer-end-of-results-indicator, layer-conversation-panel .layer-load-indicator {
-    border-bottom: solid 1px #ccc;
-    font-style: italic;
+layer-conversation-panel .layer-end-of-results-indicator {
+    padding: 4px 0px;
+    margin: 8px 0px;
+    color: @color-separator-text;
 }
+
+layer-conversation-panel .layer-conversation-loading-indicator {
+  height: 0px;
+}
+
+// layer-conversation-panel .layer-conversation-loading-indicator .layer-replaceable-content {
+//   text-align: center;
+//   padding: 8px 0px;
+//   font-size: 12px;
+//   color: @color-loading-indicator;
+//   background-color: @color-loading-indicator-background;
+//   opacity: 0.5;
+// }

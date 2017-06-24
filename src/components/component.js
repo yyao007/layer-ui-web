@@ -552,6 +552,10 @@ function setupMixin(classDef, mixin) {
           classDef.properties[name].propagateToChildren === undefined) {
         classDef.properties[name].propagateToChildren = mixin.properties[name].propagateToChildren;
       }
+      // if (mixin.properties[name].mixinWithChildren !== undefined &&
+      //     classDef.properties[name].mixinWithChildren === undefined) {
+      //   classDef.properties[name].mixinWithChildren = mixin.properties[name].mixinWithChildren;
+      // }
     }
   });
 
@@ -678,6 +682,7 @@ function getPropArray(classDef) {
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
       propagateToChildren: classDef.properties[propertyName].propagateToChildren,
+      //mixinWithChildren: classDef.properties[propertyName].mixinWithChildren,
       value: classDef.properties[propertyName].value,
     };
   }).sort((a, b) => {
@@ -787,6 +792,9 @@ function setupProperty(classDef, prop, propertyDefHash) {
           }
         }
       }
+
+      const listeners = this.properties._internalState.propertyListeners[name];
+      if (listeners) listeners.forEach(fn => fn(value, wasInit ? null : oldValue, this));
     }
   };
 
@@ -969,6 +977,8 @@ function _registerComponent(tagName) {
       // Happens during unit tests
       if (this.properties._internalState.onDestroyCalled) return;
 
+      if (!this.properties._internalState.onProcessReplaceableContentCalled) this._onProcessReplaceableContent();
+
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
       this.properties._internalState.disableSetters = false;
@@ -980,7 +990,7 @@ function _registerComponent(tagName) {
         const value = this.properties[prop.propertyName];
         // UNIT TEST: This line is primarily to keep unit tests from throwing errors
         if (value instanceof Layer.Root && value.isDestroyed) return;
-        if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null && prop.propertyName !== 'replaceableContent') {
           // Force the setter to trigger; this will force the value to be converted to the correct type,
           // and call all setters
           this[prop.propertyName] = value;
@@ -994,7 +1004,7 @@ function _registerComponent(tagName) {
         // If there is no value, but the parent component has the same property name, presume it to also be
         // propagateToChildren, and copy its value; useful for allowing list-items to automatically grab
         // all parent propagateToChildren properties.
-        else if (prop.propagateToChildren && this.parentComponent) {
+        else if ((prop.propagateToChildren/* || prop.mixinWithChildren*/) && this.parentComponent) {
           const parentValue = this.parentComponent.properties[prop.propertyName];
           if (parentValue) this[prop.propertyName] = parentValue;
         }
@@ -1004,54 +1014,6 @@ function _registerComponent(tagName) {
       // Warning: these listeners may miss events triggered while initializing properties
       // only way around this is to add another Layer.Util.defer() to our lifecycle
       this._setupListeners();
-
-      Object.keys(this.properties.replaceableContent || {}).forEach((nodeName) => {
-        const oldNode = this.nodes[nodeName];
-        let newNode;
-
-        // Transform a function into a node if we've been given a function...
-        // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
-        // in which case it should handle turning it into a node; lists in particular need to manage
-        // creation of the node once per list-item
-        if (oldNode) {
-          if (typeof this.properties.replaceableContent[nodeName] === 'function') {
-            oldNode.innerHTML = '';
-            newNode = this.properties.replaceableContent[nodeName](this, oldNode);
-            // let a = document.createElement('div');
-            // let b = document.createElement('div');
-            // b.innerHTML = "hello!!";
-            // b.addEventListener('click', function() {alert("223");});
-            // oldNode.parentNode.appendChild(b);
-          } else {
-            newNode = this.properties.replaceableContent[nodeName];
-          }
-
-          if (newNode) {
-            // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
-            if (!this.contains(newNode)) {
-              let docFragment;
-              if (newNode.tagName === 'TEMPLATE') {
-                docFragment = document.importNode(newNode.content, true);
-                newNode = docFragment.firstChild;
-              }
-
-              const oldClasses = oldNode.classList;
-              for (let i = 0; i < oldClasses.length; i++) {
-                newNode.classList.add(oldClasses[i]);
-              }
-              newNode.setAttribute('layer-id', nodeName);
-
-              const parent = oldNode.parentNode;
-              const replaceIndex = Array.prototype.indexOf.call(parent.childNodes, oldNode);
-              if (!this.contains(newNode)) {
-                parent.replaceChild(newNode, oldNode);
-              }
-              this.nodes[nodeName] = parent.childNodes[replaceIndex];
-            }
-            this.onReplaceableContentAdded(nodeName, this.nodes[nodeName]);
-          }
-        }
-      });
 
       this.onAfterCreate();
     },
@@ -1139,12 +1101,14 @@ function _registerComponent(tagName) {
       this.properties._internalState = {
         onCreateCalled: false,
         onAfterCreateCalled: false,
+        onProcessReplaceableContentCalled: false,
         onRenderCalled: false,
         onAttachCalled: false,
         onDetachCalled: false,
         disableSetters: true,
         disableGetters: true,
         inPropInit: [],
+        propertyListeners: {},
       };
 
       // props.forEach((prop) => {
@@ -1322,15 +1286,13 @@ registerComponent.MODES = {
 
 const standardClassProperties = {
   replaceableContent: {
-    noGetterFromSetter: true,
-    propagateToChildren: true,
-    order: 4,
-    get() {
-
-      if (this.mainComponent && this.mainComponent.properties.replaceableContent !== this.properties.replaceableContent) {
-        return this.mainComponent.replaceableContent;
-      }
-      return this.properties.replaceableContent;
+    set() {
+      // TODO: Investigate allowing this to update, which involves:
+      // 1. Propagating to all children
+      // 2. Detecting when a subproperty/function has changed so we don't have to rip out all nodes and replace them with identical nodes
+      // 3. Reapplying setup commonly done in onAfterCreate and onRender
+      // Um.
+      if (this.properties._internalState.onProcessReplaceableContentCalled) throw new Error('replaceableContent can only be set during initialization');
     },
   },
   _layerEventSubscriptions: {
@@ -1359,22 +1321,18 @@ const standardClassProperties = {
 
 const standardClassMethods = {
   onReplaceableContentAdded: function onReplaceableContentAdded(name, node) {
-    let index = 0;
-    // Setup each node added this way as a full part of this component
-    const nodeIterator = document.createNodeIterator(
-      node,
-      NodeFilter.SHOW_ELEMENT,
-      () => true,
-      false
-    );
-    let currentNode;
-    while (currentNode = nodeIterator.nextNode()) {
+    this._findNodesWithin(node, (currentNode) => {
       if (!currentNode.properties) currentNode.properties = {};
       currentNode.properties.parentComponent = this;
       if (!currentNode.id) currentNode.id = Layer.Util.generateUUID();
-      this.nodes[currentNode.id] = currentNode;
-      index++;
-    }
+      this.nodes[currentNode.getAttribute('layer-id') || currentNode.id] = currentNode;
+    });
+  },
+
+  addPropertyListener(name, fn) {
+    const propertyListeners = this.properties._internalState.propertyListeners;
+    if (!propertyListeners[name]) propertyListeners[name] = [];
+    propertyListeners[name].push(fn);
   },
 
   /**
@@ -1416,13 +1374,14 @@ const standardClassMethods = {
     const children = node.childNodes;
     for (let i = 0; i < children.length; i++) {
       const innerNode = children[i];
+      if (innerNode instanceof HTMLElement) {
+        const isLUIComponent = Boolean(layerUI.components[innerNode.tagName.toLowerCase()]);
+        callback(innerNode, isLUIComponent);
 
-      const isLUIComponent = Boolean(innerNode instanceof HTMLElement && layerUI.components[innerNode.tagName.toLowerCase()]);
-      callback(innerNode, isLUIComponent);
-
-      // If its not a custom webcomponent with children that it manages and owns, iterate on it
-      if (!isLUIComponent) {
-        this._findNodesWithin(innerNode, callback);
+        // If its not a custom webcomponent with children that it manages and owns, iterate on it
+        if (!isLUIComponent) {
+          this._findNodesWithin(innerNode, callback);
+        }
       }
     }
   },
@@ -1556,6 +1515,70 @@ const standardClassMethods = {
   },
 
   /**
+   * As part of the lifecycle, this must fire before onAfterCreate because onAfterCreate assumes that all dom have loaded via templates/elsewhere.
+   *
+   * TODO: Need to test against raw JS and various frameworks to insure we always have a css class 'layer-replaceable-content' div
+   * @method
+   * @private
+   */
+  _onProcessReplaceableContent() {
+    this.properties._internalState.onProcessReplaceableContentCalled = true;
+
+    // Make sure that the parent component has processed its replaceable content, and passed its values on to this component.
+    // Parent component will in turn call this on its parent until we reach the Main Component
+    const parent = this.parentComponent;
+    if (parent) {
+      if (!parent.properties._internalState.onProcessReplaceableContentCalled) parent._onProcessReplaceableContent();
+      this.replaceableContent = Object.assign({}, parent.properties.replaceableContent, this.properties.replaceableContent);
+    }
+
+    Object.keys(this.properties.replaceableContent || {}).forEach((nodeName) => {
+      const parentNode = this.nodes[nodeName];
+      let newNode;
+
+      // Transform a function into a node if we've been given a function...
+      // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
+      // in which case it should handle turning it into a node; lists in particular need to manage
+      // creation of the node once per list-item
+      if (parentNode) {
+        if (typeof this.properties.replaceableContent[nodeName] === 'function') {
+          const oldChild = parentNode.firstChild;
+          parentNode.removeChild(oldChild);
+          newNode = this.properties.replaceableContent[nodeName](this, parentNode);
+          if (!newNode) parentNode.appendChild(oldChild); // lame... but handles case where callback returns null
+        } else {
+          newNode = this.properties.replaceableContent[nodeName];
+        }
+
+        if (newNode) {
+          const alreadyInWidget = this.contains(newNode);
+
+          // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
+          if (!alreadyInWidget && (newNode.tagName !== 'DIV' || !newNode.classList.contains('layer-replaceable-content') && !newNode.firstChild)) {
+            const tmpNode = document.createElement('div');
+            tmpNode.appendChild(newNode);
+            newNode = tmpNode;
+          }
+
+          if (!newNode.classList.contains('layer-replaceable-content')) newNode.classList.add('layer-replaceable-content');
+
+          if (!alreadyInWidget) {
+            let docFragment;
+            if (newNode.tagName === 'TEMPLATE') {
+              docFragment = document.importNode(newNode.content, true);
+              newNode = docFragment.firstChild;
+            }
+
+            parentNode.appendChild(newNode);
+          }
+          this.onReplaceableContentAdded(nodeName, newNode);
+        }
+      }
+    });
+  },
+
+
+  /**
    * MIXIN HOOK: Each time a Component is initialized, its onAfterCreate methods will be called.
    *
    * While one could use layerUI.Components.Component.onCreate, this handler allows you to wait for all
@@ -1659,6 +1682,7 @@ const standardClassMethods = {
    * @private
    */
   onDestroy: function onDestroy() {
+    this.properties._internalState.propertyListeners = null;
     this.properties._internalState.onDestroyCalled = true;
     this.properties._internalState.disableSetters = true;
     this.properties._layerEventSubscriptions

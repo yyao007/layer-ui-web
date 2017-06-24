@@ -20,21 +20,25 @@
     layer-identity-item.layer-identity-item-empty {
       display: none;
     }
-    layer-identity-item layer-presence {
+    layer-identity-item layer-presence.presence-without-avatar {
       display: none;
     }
-    layer-identity-item.layer-size-small layer-presence {
+    layer-identity-item.layer-size-tiny layer-presence {
       display: block;
     }
-    layer-identity-item.layer-size-small layer-avatar {
+    layer-identity-item.layer-size-tiny layer-avatar {
+      display: none;
+    }
+    layer-identity-item.layer-size-tiny layer-age {
       display: none;
     }
 
   </style>
   <div class='layer-list-item' layer-id='listItem'>
-    <layer-avatar layer-id='avatar'></layer-avatar>
+    <layer-avatar layer-id='avatar' show-presence='true'></layer-avatar>
     <layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence>
     <label class='layer-identity-name' layer-id='title'></label>
+    <layer-age layer-id='age'></layer-age>
     <input type='checkbox' layer-id='checkbox'></input>
   </div>
 </template>

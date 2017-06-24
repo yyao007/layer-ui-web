@@ -27,19 +27,25 @@ layer-identity-item {
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      color: @color-identity-item-title;
+    }
+
+    layer-age {
+      font-size: 12px;
+      color: @color-identity-item-age;
     }
   }
 
   /*
    * Manage the different sizes
    */
-  &.layer-size-large .layer-list-item {
+  &.layer-size-medium .layer-list-item {
     padding-top: 10px;
     padding-bottom: 10px;
     min-height: 60px;
 
     .layer-identity-name {
-      font-size: 16px;
+      font-size: 14px;
     }
 
     layer-avatar {
@@ -47,7 +53,7 @@ layer-identity-item {
     }
   }
 
-  &.layer-size-medium .layer-list-item {
+  &.layer-size-small .layer-list-item {
     padding-top: 8px;
     padding-bottom: 8px;
     min-height: 48px;
@@ -61,7 +67,7 @@ layer-identity-item {
     }
   }
 
-  &.layer-size-small .layer-list-item {
+  &.layer-size-tiny .layer-list-item {
     padding-top: 8px;
     padding-bottom: 8px;
     min-height: 32px;

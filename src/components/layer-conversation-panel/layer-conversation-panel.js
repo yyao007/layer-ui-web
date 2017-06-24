@@ -670,14 +670,6 @@ registerComponent('layer-conversation-panel', {
     },
   },
   methods: {
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onAfterCreate() {
-    },
 
     /**
      * When a key is pressed and text is not focused, focus on the composer
@@ -738,6 +730,7 @@ registerComponent('layer-conversation-panel', {
         return;
       }
 
+      this.nodes.list.conversation = conversation;
       this.nodes.composer.conversation = conversation;
       this.nodes.typingIndicators.conversation = conversation;
       if (this.hasGeneratedQuery) {

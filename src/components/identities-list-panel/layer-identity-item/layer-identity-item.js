@@ -14,6 +14,7 @@ import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import SizeProperty from '../../../mixins/size-property';
 import '../../subcomponents/layer-avatar/layer-avatar';
+import '../../subcomponents/layer-age/layer-age';
 
 registerComponent('layer-identity-item', {
   mixins: [ListItem, SizeProperty],
@@ -40,21 +41,14 @@ registerComponent('layer-identity-item', {
     },
 
     size: {
-      value: 'large',
+      value: 'medium',
       set(size) {
-        switch (size) {
-          case 'large':
-            this.nodes.avatar.size = 'medium';
-            break;
-          case 'medium':
-            this.nodes.avatar.size = 'small';
-            break;
-        }
+        if (size !== 'tiny') this.nodes.avatar.size = size;
       },
     },
 
     supportedSizes: {
-      value: ['small', 'medium', 'large'],
+      value: ['tiny', 'small', 'medium'],
     },
   },
   methods: {
@@ -123,6 +117,7 @@ registerComponent('layer-identity-item', {
     onRerender() {
       this.nodes.avatar.users = [this.item];
       this.nodes.title.innerHTML = this.item.displayName;
+      this.nodes.age.date = this.item.lastSeenAt;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);
     },
 

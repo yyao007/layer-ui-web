@@ -1,0 +1,23 @@
+layer-menu {
+  background-color: @color-menu-background;
+  border: solid 1px @color-menu-border;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+  padding: 8px 0px;
+
+  .layer-menu-button-menu-item {
+    padding: 8px 32px 8px 16px;
+    min-height: 32px;
+    box-sizing: border-box;
+    cursor: pointer;
+    border-bottom: solid 1px @color-menu-border;
+    color: @color-menu-item-text;
+    font-size: 13px;
+    &:hover {
+      background-color: @color-menu-item-background-hover;
+    }
+
+    &:last-child {
+      border-bottom-width: 0px;
+    }
+  }
+}

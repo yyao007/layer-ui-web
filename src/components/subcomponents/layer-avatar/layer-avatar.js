@@ -145,6 +145,7 @@ registerComponent('layer-avatar', {
       this.classList[this.users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
       if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
         this.nodes.presence = document.createElement('layer-presence');
+        this.nodes.presence.classList.add('layer-presence-within-avatar');
         this.nodes.presence.item = this.users[0];
         this.nodes.presence.size = this.size === 'larger' ? 'large' : this.size;
         this.appendChild(this.nodes.presence);

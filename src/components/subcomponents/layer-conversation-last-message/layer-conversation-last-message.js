@@ -57,8 +57,8 @@ registerComponent('layer-conversation-last-message', {
      * ```
      *
      * @property {Function} [canFullyRenderLastMessage=null]
+     * @removed
      */
-    canFullyRenderLastMessage: {},
   },
   methods: {
 
@@ -96,8 +96,9 @@ registerComponent('layer-conversation-last-message', {
           const handler = layerUI.getHandler(message, this);
           if (handler) {
             this.classList.add(handler.tagName);
+            const conversationItem = this.parentComponent;
             // Create the element specified by the handler and add it as a childNode.
-            if (!this.canFullyRenderLastMessage || this.canFullyRenderLastMessage(message)) {
+            if (!conversationItem || !conversationItem.canFullyRenderLastMessage || conversationItem.canFullyRenderLastMessage(message)) {
               const messageHandler = document.createElement(handler.tagName);
               messageHandler.parentComponent = this;
               messageHandler.message = message;

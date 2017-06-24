@@ -111,15 +111,13 @@ module.exports = {
      * @property {layer.Root} [item=null]
      */
     item: {
+      propagateToChildren: true,
       set(newItem, oldItem) {
         // Disconnect from any previous Message we were rendering; not currently used.
         if (oldItem) oldItem.off(null, null, this);
 
         // Any changes to the Message should trigger a rerender
         if (newItem) newItem.on(newItem.constructor.eventPrefix + ':change', this.onRerender, this);
-        Object.keys(this.nodes).forEach((nodeName) => {
-          this.nodes[nodeName].item = newItem;
-        });
         this.onRender();
       },
     },
@@ -138,6 +136,8 @@ module.exports = {
     onReplaceableContentAdded: {
       mode: registerComponent.MODES.AFTER,
       value: function onReplaceableContentAdded(name, node) {
+        const props = components[this.tagName.toLowerCase()].properties.filter(propDef => propDef.propagateToChildren || propDef.mixinWithChildren);
+
         // Setup each node added this way as a full part of this component
         const nodeIterator = document.createNodeIterator(
           node,
@@ -147,15 +147,17 @@ module.exports = {
         );
         let currentNode;
         while (currentNode = nodeIterator.nextNode()) {
-          if (components[currentNode.tagName.toLowerCase()]) {
-            if (!currentNode.properties._internalState) {
-              // hit using polyfil
-              currentNode.properties.item = this.item;
-            } else {
-              // hit using real webcomponents
-              currentNode.item = this.item;
+          props.forEach(propDef => {
+            if (components[currentNode.tagName.toLowerCase()]) {
+              if (!currentNode.properties._internalState) {
+                // hit using polyfil
+                currentNode.properties[propDef.propertyName] = this[propDef.propertyName];
+              } else {
+                // hit using real webcomponents
+                currentNode[propDef.propertyName] = this[propDef.propertyName];
+              }
             }
-          }
+          });
         }
       },
     },

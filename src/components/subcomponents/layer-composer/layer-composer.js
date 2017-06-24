@@ -18,7 +18,6 @@
 import Layer from 'layer-websdk';
 import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
-import '../layer-compose-button-panel/layer-compose-button-panel';
 
 const ENTER = 13;
 const TAB = 9;
@@ -35,6 +34,7 @@ registerComponent('layer-composer', {
       set(value) {
         if (value) this.client = value.getClient();
         this._setTypingListenerConversation();
+        if (this.manageDisabledState) this.disabled = !Boolean(value);
       },
     },
 
@@ -57,23 +57,16 @@ registerComponent('layer-composer', {
      * Custom buttons to put in the panel, on the right side.
      *
      * @property {HTMLElement[]} [buttons=[]]
+     * @removed
      */
-    buttons: {
-      set(value) {
-        this.nodes.buttonPanel.buttons = value;
-      },
-    },
+
 
     /**
      * Custom buttons to put in the panel, on the left side.
      *
      * @property {HTMLElement[]} [buttonsLeft=[]]
+     * @removed
      */
-    buttonsLeft: {
-      set(value) {
-        this.nodes.buttonPanelLeft.buttons = value;
-      },
-    },
 
     /**
      * The text shown in the editor; this is the editor's value.
@@ -105,7 +98,30 @@ registerComponent('layer-composer', {
         return this.nodes.input.placeholder;
       },
     },
+
+    isEmpty: {
+      value: true,
+      type: Boolean,
+      set(value) {
+        this.toggleClass('layer-is-empty', value);
+      },
+    },
+
+    disabled: {
+      type: Boolean,
+      value: false,
+      set(value) {
+        this.toggleClass('layer-is-disabled', value);
+        this.nodes.input.disabled = value;
+      },
+    },
+
+    manageDisabledState: {
+      type: Boolean,
+      value: true,
+    },
   },
+
   methods: {
     /**
      * Constructor.
@@ -115,7 +131,6 @@ registerComponent('layer-composer', {
      */
     onCreate() {
       this.classList.add('layer-composer-one-line-of-text');
-      this.properties.buttons = [];
 
       // Setting this in the template causes errors in IE 11.
       this.nodes.input.placeholder = 'Enter a message';
@@ -157,6 +172,8 @@ registerComponent('layer-composer', {
        * @param {String} evt.detail.oldValue
        */
       this.trigger('layer-composer-change-value', { value, oldValue });
+
+      this.isEmpty = !Boolean(this.value);
     },
 
     /**

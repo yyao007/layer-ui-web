@@ -28,9 +28,4 @@ module.exports = {
      * @removed See replaceableContent instead
      */
   },
-  methods: {
-    onRender() {
-      if (this.dataLoadingNode) this.nodes.loadIndicator.appendChild(this.dataLoadingNode);
-    },
-  }
 };

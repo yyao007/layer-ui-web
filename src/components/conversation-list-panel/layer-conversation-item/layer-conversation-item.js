@@ -27,13 +27,7 @@ registerComponent('layer-conversation-item', {
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
-    item: {
-      set(newConversation, oldConversation) {
-        if (this.nodes.lastMessage) {
-          this.nodes.lastMessage.canFullyRenderLastMessage = this.canFullyRenderLastMessage;
-        }
-      },
-    },
+    item: {},
 
     /**
      * Enable deletion of this Conversation.
