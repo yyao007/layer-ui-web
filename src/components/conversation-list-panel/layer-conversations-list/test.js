@@ -110,20 +110,6 @@ describe('layer-conversations-list', function() {
     });
   });
 
-  describe("The canFullyRenderLastMessage property", function() {
-    it("Should default to only rendering text", function(){
-      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/plain", body: "hey"}]}))).toBe(true);
-      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/javascript", body: "hey"}]}))).toBe(false);
-    });
-
-    it("Should call any method you give it", function() {
-      el.canFullyRenderLastMessage = function(message) {
-        return message.parts[0].mimeType == "text/javascript";
-      };
-      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/plain", body: "hey"}]}))).toBe(false);
-      expect(el.canFullyRenderLastMessage(query.data[0].createMessage({parts: [{mimeType: "text/javascript", body: "hey"}]}))).toBe(true);
-    });
-  });
 
   describe("The created() method", function() {
     it("Should call _updateQuery if there is a queryId passed into the innerHTML", function() {

@@ -763,6 +763,7 @@ function setupProperty(classDef, prop, propertyDefHash) {
   // This means that the setter does NOT need to write to this.properties, but can handle side effects, transformations, etc...
   newDef.set = function propertySetter(value) {
     if (layerUI.debug) console.log(`Set property ${this.tagName}.${name} to `, value);
+    if (this.properties._internalState.onDestroyCalled) return;
 
     if (propDef.type) value = castProperty(propDef.type, value);
 
@@ -1694,11 +1695,13 @@ const standardClassMethods = {
 
 function registerMessageComponent(tagName, componentDefinition) {
   const handlesMessage = componentDefinition.methods.handlesMessage;
+  const canRenderConcise = componentDefinition.methods.canRenderConcise;
   const label = componentDefinition.properties.label.value;
   const order = componentDefinition.properties.order;
   registerComponent(tagName, componentDefinition);
   layerUI.registerMessageHandler({
     handlesMessage,
+    canRenderConcise,
     tagName,
     label,
     order,

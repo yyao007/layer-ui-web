@@ -555,7 +555,10 @@ layerUI.settings = {
   disableTabAsWhiteSpace: false,
   markReadDelay: 2500,
   defaultHandler: {
-    tagName: 'layer-message-unknown'
+    tagName: 'layer-message-unknown',
+    canRenderConcise: function canRenderConcise() {
+      return true;
+    }
   },
   textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
   maxSizes: { width: 512, height: 512 },
@@ -1886,6 +1889,7 @@ function setupProperty(classDef, prop, propertyDefHash) {
     var _this2 = this;
 
     if (_base2.default.debug) console.log('Set property ' + this.tagName + '.' + name + ' to ', value);
+    if (this.properties._internalState.onDestroyCalled) return;
 
     if (propDef.type) value = castProperty(propDef.type, value);
 
@@ -2847,11 +2851,13 @@ var standardClassMethods = {
 
 function registerMessageComponent(tagName, componentDefinition) {
   var handlesMessage = componentDefinition.methods.handlesMessage;
+  var canRenderConcise = componentDefinition.methods.canRenderConcise;
   var label = componentDefinition.properties.label.value;
   var order = componentDefinition.properties.order;
   registerComponent(tagName, componentDefinition);
   _base2.default.registerMessageHandler({
     handlesMessage: handlesMessage,
+    canRenderConcise: canRenderConcise,
     tagName: tagName,
     label: label,
     order: order
@@ -2893,13 +2899,16 @@ var _listItemSelection = require('../../../mixins/list-item-selection');
 
 var _listItemSelection2 = _interopRequireDefault(_listItemSelection);
 
+var _sizeProperty = require('../../../mixins/size-property');
+
+var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
+
 require('../../subcomponents/layer-delete/layer-delete');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-channel-item', {
-  mixins: [_listItem2.default, _listItemSelection2.default],
+  mixins: [_listItem2.default, _listItemSelection2.default, _sizeProperty2.default],
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
@@ -2918,12 +2927,25 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * This property does nothing if you remove the `delete` node from the template.
      *
      * @property {Boolean} [deleteConversationEnabled=false]
+     * @removed
      */
-    deleteConversationEnabled: {
-      type: Boolean,
-      set: function set(value) {
-        if (this.nodes.delete) this.nodes.delete.enabled = value;
+
+    size: {
+      value: 'large',
+      set: function set(size) {
+        var _this = this;
+
+        Object.keys(this.nodes).forEach(function (nodeName) {
+          var node = _this.nodes[nodeName];
+          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
+            node.size = size;
+          }
+        });
       }
+    },
+
+    supportedSizes: {
+      value: ['tiny', 'small', 'medium', 'large']
     }
   },
   methods: {
@@ -2957,14 +2979,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-channel-item", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-channel-item-content'><div layer-id='title' class='layer-channel-title'></div></div><layer-delete layer-id='delete'></layer-delete></div>", "");
   layerUI.buildStyle("layer-channel-item", "layer-channel-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-channel-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-channel-item  .layer-list-item .layer-channel-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-channel-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/list-item-selection":49,"../../subcomponents/layer-delete/layer-delete":25}],7:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/list-item-selection":49,"../../../mixins/size-property":57,"../../subcomponents/layer-delete/layer-delete":25}],7:[function(require,module,exports){
 /**
  * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
  * conversation within a list of conversations.
@@ -3490,13 +3513,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * TODO: Should test to see what handler is returned rather than testing the mimeType
      *
      * @property {Function} canFullyRenderLastMessage
+     * @removed
      */
-    canFullyRenderLastMessage: {
-      type: Function,
-      value: function value(message) {
-        return message.parts[0].mimeType === 'text/plain';
-      }
-    },
 
     /**
      * Provide a function that returns the menu items for the given Conversation.
@@ -3638,8 +3656,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div></div></div>", "");
-  layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-conversations-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div></div>", "");
+  layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/list-selection":52,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":80}],9:[function(require,module,exports){
 /**
@@ -3864,6 +3882,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     _queryModel: {
       value: _layerWebsdk2.default.Query.Identity
+    },
+
+    replaceableContent: {
+      value: {
+        identityRowRightSide: function identityRowRightSide(widget) {
+          var div = document.createElement('div');
+          var checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.setAttribute('layer-id', 'checkbox');
+          div.appendChild(checkbox);
+          return div;
+        }
+      }
     }
   },
   methods: {
@@ -4007,8 +4038,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div></div></div>", "");
-  layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-identities-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div></div>", "");
+  layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":48,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/main-component":54,"../../../mixins/size-property":57,"../layer-identity-item/layer-identity-item":10,"layer-websdk":80}],10:[function(require,module,exports){
 /**
@@ -4090,7 +4121,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onCreate: function onCreate() {
       if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
       this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
-      this.nodes.checkbox.id = this.id + '-checkbox';
     },
 
 
@@ -4191,7 +4221,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><input type='checkbox' layer-id='checkbox'></input></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><div class='layer-identity-right-side' layer-id='identityRowRightSide' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":50,"../../../mixins/size-property":57,"../../subcomponents/layer-age/layer-age":19,"../../subcomponents/layer-avatar/layer-avatar":20,"layer-websdk":80}],11:[function(require,module,exports){
@@ -5490,19 +5520,23 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
       var handler = (0, _base.getHandler)(message, this);
 
       if (handler) {
-        if (placeholder) this.nodes.container.removeChild(placeholder);
         this.nodes.avatar.users = [message.sender];
         this.nodes.title.innerHTML = message.sender.displayName;
 
         if (this.properties._toastTimeout) clearTimeout(this.properties._toastTimeout);
         this.classList.add(handler.tagName);
 
-        var messageHandler = document.createElement(handler.tagName);
-        messageHandler.parentComponent = this;
-        messageHandler.message = message;
+        if (handler.canRenderConcise(message)) {
+          if (placeholder) this.nodes.container.removeChild(placeholder);
+          var messageHandler = document.createElement(handler.tagName);
+          messageHandler.parentComponent = this;
+          messageHandler.message = message;
 
-        messageHandler.classList.add('layer-message-item-placeholder');
-        this.nodes.container.appendChild(messageHandler);
+          messageHandler.classList.add('layer-message-item-placeholder');
+          this.nodes.container.appendChild(messageHandler);
+        } else {
+          placeholder.innerHTML = '<div class="layer-custom-mime-type layer-message-item-placeholder">' + handler.label + '</div>';
+        }
         this.classList.add('layer-notifier-toast-fade');
         this.classList.add('layer-notifier-toast');
         this.properties._toastTimeout = setTimeout(this.closeToast.bind(this), this.timeoutSeconds * 1000);
@@ -7084,8 +7118,8 @@ var PAGING_DELAY = 2000;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replaceable-content'>          Loading messages...        </div></div></div></div>", "");
-  layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-header-toggle {\nmin-height: 20px;\nmargin-bottom: 2px;\n}\nlayer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {\ntext-align: center;\ndisplay: none;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator,\nlayer-messages-list.layer-end-of-results .layer-end-of-results-indicator {\ndisplay: block;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div><!-- Rendered when waiting for server data --><div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'><div class='layer-replaceable-content'></div></div></div></div>", "");
+  layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list .layer-header-toggle {\nmin-height: 20px;\nmargin-bottom: 2px;\n}\nlayer-messages-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-messages-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}\nlayer-messages-list.layer-loading-data .layer-load-indicator,\nlayer-messages-list.layer-end-of-results .layer-end-of-results-indicator {\ntext-align: center;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":46,"../../../mixins/has-query":48,"../../../mixins/list":53,"../../../mixins/list-load-indicator":51,"../../../mixins/query-end-indicator":56,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":32,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":80}],19:[function(require,module,exports){
 /**
@@ -7343,25 +7377,28 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     onRender: function onRender() {
+      var users = this.users.length === 1 ? this.users : this.users.filter(function (user) {
+        return !user.sessionOwner;
+      });
       // Clear the innerHTML if we have rendered something before
       if (this.users.length) {
         this.innerHTML = '';
       }
 
       // Render each user
-      if (this.users.length === 1) {
-        this._renderUser(this.users[0]);
+      if (users.length === 1) {
+        this._renderUser(users[0]);
       } else {
         this._sortMultiAvatars().forEach(this._renderUser.bind(this));
       }
 
       // Add the "cluster" css if rendering multiple users
       // No classList.toggle due to poor IE11 support
-      this.classList[this.users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
-      if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
+      this.classList[users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
+      if (users.length === 1 && this.showPresence && users[0].getClient().isPresenceEnabled) {
         this.nodes.presence = document.createElement('layer-presence');
         this.nodes.presence.classList.add('layer-presence-within-avatar');
-        this.nodes.presence.item = this.users[0];
+        this.nodes.presence.item = users[0];
         this.nodes.presence.size = this.size === 'larger' ? 'large' : this.size;
         this.appendChild(this.nodes.presence);
       }
@@ -7952,8 +7989,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * Rerender this widget whenever the layer.Conversation has a change event reporting on a
      * new `lastMessage` property.
      *
-     * Lookup a handler for the Message, and if one is found, see if `canFullyRenderLastMessage` allows it to be rendered.
-     * If its allowed, append the Renderer as a child of this node; else set innerHTML to match the Handler's label.
+     * Lookup a handler for the Message, and if one is found, see if it can render a concise version of its contents.
+     * If it can, append the Renderer as a child of this node; else set innerHTML to match the Handler's label.
      *
      * @method
      * @private
@@ -7969,9 +8006,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           var handler = _base2.default.getHandler(message, this);
           if (handler) {
             this.classList.add(handler.tagName);
-            var conversationItem = this.parentComponent;
             // Create the element specified by the handler and add it as a childNode.
-            if (!conversationItem || !conversationItem.canFullyRenderLastMessage || conversationItem.canFullyRenderLastMessage(message)) {
+            if (handler.canRenderConcise(message)) {
               var messageHandler = document.createElement(handler.tagName);
               messageHandler.parentComponent = this;
               messageHandler.message = message;
@@ -8662,8 +8698,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-menu-button", "&#8285;", "");
-  layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
+  layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":54,"../layer-menu/layer-menu":28,"layer-websdk":80}],28:[function(require,module,exports){
 /**
@@ -9493,6 +9529,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
     /**
+     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
+     *
+     * @method
+     */
+    canRenderConcise: function canRenderConcise(message) {
+      return false;
+    },
+
+
+    /**
      * Constructor.
      *
      * @method onCreate
@@ -9668,6 +9714,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
     /**
+     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
+     *
+     * @method
+     */
+    canRenderConcise: function canRenderConcise(message) {
+      return true;
+    },
+
+
+    /**
      * Replaces any html tags with escaped html tags so that the recipient
      * sees tags rather than rendered html.
      *
@@ -9794,6 +9850,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         return part.mimeType;
       }).join(', ');
       this.innerHTML = 'Message with mimeTypes ' + mimeTypes + ' has been received but has no renderer';
+    },
+
+
+    /**
+     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
+     *
+     * @method
+     */
+    canRenderConcise: function canRenderConcise(message) {
+      return true;
     }
   }
 });
@@ -9882,6 +9948,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         return part.mimeType === 'application/json+imageSize';
       }).length;
       return message.parts.length === 1 && videoParts || message.parts.length === 3 && videoParts === 1 && previewParts === 1 && metaParts === 1;
+    },
+
+
+    /**
+     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
+     *
+     * @method
+     */
+    canRenderConcise: function canRenderConcise(message) {
+      return false;
     },
 
 
@@ -26918,7 +26994,7 @@ Client.prototype.telemetryMonitor = null;
  * @static
  * @type {String}
  */
-Client.version = '3.3.2';
+Client.version = '3.3.3';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -34637,7 +34713,7 @@ var Identity = function (_Syncable) {
     } else if (!options.id && options.userId) {
       options.id = Identity.prefixUUID + encodeURIComponent(options.userId);
     } else if (options.id && !options.userId) {
-      options.userId = options.id.substring(Identity.prefixUUID.length);
+      options.userId = decodeURIComponent(options.id.substring(Identity.prefixUUID.length));
     }
 
     // Make sure we have an clientId property

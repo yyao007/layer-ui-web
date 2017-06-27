@@ -195,6 +195,19 @@ registerComponent('layer-identities-list', {
     _queryModel: {
       value: Layer.Query.Identity,
     },
+
+    replaceableContent: {
+      value: {
+        identityRowRightSide(widget) {
+          const div = document.createElement('div');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.setAttribute('layer-id', 'checkbox');
+          div.appendChild(checkbox);
+          return div;
+        },
+      },
+    },
   },
   methods: {
 

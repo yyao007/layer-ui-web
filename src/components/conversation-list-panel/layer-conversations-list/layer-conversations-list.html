@@ -4,18 +4,20 @@
       overflow-y: auto;
       display: block;
     }
-    layer-conversations-list .layer-load-indicator {
+    layer-conversations-list:not(.layer-loading-data) .layer-load-indicator {
       display: none;
-    }
-    layer-conversations-list.layer-loading-data .layer-load-indicator {
-      display: block;
     }
   </style>
   <div class='layer-list-meta' layer-id='listMeta'>
     <div class='layer-empty-list' layer-id='emptyNode'></div>
     <div class='layer-header-toggle'>
       <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div>
-      <div class='layer-load-indicator' layer-id='loadIndicator'>Loading conversations...</div>
+
+       <!-- Rendered when waiting for server data -->
+      <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
+        <div class='layer-replaceable-content'>
+        </div>
+      </div>
     </div>
   </div>
 </template>

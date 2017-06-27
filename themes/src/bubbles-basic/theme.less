@@ -1,33 +1,3 @@
 @import "variables";
-@import "layer-message-item";
-@import "layer-avatar";
-@import "layer-presence";
-@import "layer-composer";
-@import "layer-conversations-list";
-@import "layer-conversation-item";
-@import "layer-channel-item";
-@import "layer-identities-list";
-@import "layer-identity-item";
-@import "layer-membership-list";
-@import "layer-membership-item";
-@import "layer-notifier";
-@import "layer-conversation-panel";
-@import "separators";
-@import "layer-menu";
-@import "layer-menu-button";
+@import "../common/theme";
 
-/* Visual indication that this node is no longer valid;
-primarily used for debugging... if you see this, your using the tools wrong.
-*/
-.layer-node-destroyed {
-  background-color: black;
-  color: black;
-  opacity: 0.7;
-}
-
-.layer-load-indicator {
-  text-align: center;
-  padding: 8px 0px;
-  font-size: 12px;
-  color: @color-loading-indicator;
-}

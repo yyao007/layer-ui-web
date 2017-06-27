@@ -2,156 +2,140 @@
  * Avatar widget theme
  */
 layer-avatar {
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-
-  /* Every avatar has a span that contains text (initials) or an Image tag. If text, it will have a layer-text-avatar css class */
-  span {
-    border: solid 1px @color-avatar-border;
-    display: block;
-    align-items: center;
-    border-radius: 50%;
+    position: relative;
     overflow: hidden;
-
-    /* Text customizations */
-    &.layer-text-avatar {
-      display: flex;
-      justify-content: center;
-      background-color: @color-avatar-background;
-      color: @color-avatar-text;
-    }
-
-    /* Image customizations */
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  /*
-   * Handle the layout of each size of Avatar
-   */
-  &.layer-size-small {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-    font-size: 14px;
-
+    text-align: center;
+    /* Every avatar has a span that contains text (initials) or an Image tag. If text, it will have a layer-text-avatar css class */
     span {
-      height: 30px;
-      width: 30px;
-    }
-  }
-
-  &.layer-size-medium {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    font-size: 16px;
-
-    span {
-      height: 38px;
-      width: 38px;
-    }
-  }
-
-  &.layer-size-large {
-    width: 48px;
-    height: 48px;
-    line-height: 48px;
-    font-size: 18px;
-
-    span {
-      height: 46px;
-      width: 46px;
-    }
-  }
-
-  &.layer-size-larger {
-    width: 72px;
-    height: 72px;
-    line-height: 72px;
-    font-size: 20px;
-
-    span {
-      height: 70px;
-      width: 70px;
-    }
-  }
-
-  /*
-   * Presence is not a required part of the Avatar widget.  If you do not want it,
-   * you should set the Avatar.showPresence property to false rather than setting
-   * display: none.  Why? Because if showPresence is false, the presence widget is not created,
-   * which is more efficient.
-   */
-  layer-presence {
-    &.layer-presence-invisible {
-      background-color: @color-avatar-presence-invisible-inside;
-    }
-    &:before {
-      content: " ";
-      border: solid 2px @color-avatar-presence-border;
-      position: absolute;
-      border-radius: 16px;
-      top: -2px;
-      bottom: -2px;
-      left: -2px;
-      right: -2px;
-    }
-    &.layer-presence-invisible:before {
-      top: -4px;
-      bottom: -4px;
-      left: -4px;
-      right: -4px;
-    }
-  }
-
-    &.layer-avatar-cluster > span {
-    position: absolute;
-
-    &:nth-child(n+2) {
-      border: solid 1px @color-white;
-    }
-  }
-
-  /*
-   * Clustered Avatars for Group Chats have size and layout adjustments
-   */
-  &.layer-avatar-cluster {
-    &.layer-size-small, &.layer-size-medium, &.layer-size-large, &.layer-size-larger {
-      & > *:nth-child(1) {
+        border: solid 1px @color-avatar-border;
         display: block;
-      }
-      & > *:nth-child(2) {
-        margin-left: 25%;
-        margin-top: 25%;
-        z-index: 2;
-        display: block;
-      }
-      & > * {
-        height: 70%;
-        width: 70%;
-        font-size: 0.7em;
-        display: none;
-      }
+        align-items: center;
+        border-radius: 50%;
+        overflow: hidden;
+        /* Text customizations */
+        &.layer-text-avatar {
+            display: flex;
+            justify-content: center;
+            background-color: @color-avatar-background;
+            color: @color-avatar-text;
+        }
+        /* Image customizations */
+        img {
+            width: 100%;
+            height: 100%;
+        }
     }
-
-    &.layer-size-small > span {
-      line-height: 22px;
+    /*
+     * Handle the layout of each size of Avatar
+     */
+    &.layer-size-small {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 14px;
+        span {
+            height: 30px;
+            width: 30px;
+        }
     }
-
-    &.layer-size-medium > span {
-      line-height: 28px;
+    &.layer-size-medium {
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 16px;
+        span {
+            height: 38px;
+            width: 38px;
+        }
     }
-
-    &.layer-size-large > span {
-      line-height: 33px;
+    &.layer-size-large {
+        width: 48px;
+        height: 48px;
+        line-height: 48px;
+        font-size: 18px;
+        span {
+            height: 46px;
+            width: 46px;
+        }
     }
-
-    &.layer-size-larger > span {
-      line-height: 50px;
+    &.layer-size-larger {
+        width: 72px;
+        height: 72px;
+        line-height: 72px;
+        font-size: 20px;
+        span {
+            height: 70px;
+            width: 70px;
+        }
     }
-  }
+    /*
+     * Presence is not a required part of the Avatar widget.  If you do not want it,
+     * you should set the Avatar.showPresence property to false rather than setting
+     * display: none.  Why? Because if showPresence is false, the presence widget is not created,
+     * which is more efficient.
+     */
+    layer-presence {
+        &.layer-presence-invisible {
+            background-color: @color-avatar-presence-invisible-inside;
+        }
+        &:before {
+            content: " ";
+            border: solid 2px @color-avatar-presence-border;
+            position: absolute;
+            border-radius: 16px;
+            top: -2px;
+            bottom: -2px;
+            left: -2px;
+            right: -2px;
+        }
+        &.layer-presence-invisible:before {
+            top: -4px;
+            bottom: -4px;
+            left: -4px;
+            right: -4px;
+        }
+    }
+    &.layer-avatar-cluster>span {
+        position: absolute;
+        &:nth-child(n+2) {
+            border: solid 1px @color-white;
+        }
+    }
+    /*
+     * Clustered Avatars for Group Chats have size and layout adjustments
+     */
+    &.layer-avatar-cluster {
+        &.layer-size-small,
+        &.layer-size-medium,
+        &.layer-size-large,
+        &.layer-size-larger {
+            &>*:nth-child(1) {
+                display: block;
+            }
+            &>*:nth-child(2) {
+                margin-left: 25%;
+                margin-top: 25%;
+                z-index: 2;
+                display: block;
+            }
+            &>* {
+                height: 70%;
+                width: 70%;
+                font-size: 0.7em;
+                display: none;
+            }
+        }
+        &.layer-size-small>span {
+            line-height: 22px;
+        }
+        &.layer-size-medium>span {
+            line-height: 28px;
+        }
+        &.layer-size-large>span {
+            line-height: 33px;
+        }
+        &.layer-size-larger>span {
+            line-height: 50px;
+        }
+    }
 }

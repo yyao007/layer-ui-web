@@ -12,14 +12,14 @@
       min-height: 20px;
       margin-bottom: 2px;
     }
-    layer-messages-list .layer-load-indicator, layer-messages-list .layer-end-of-results-indicator {
-      text-align: center;
+    layer-messages-list:not(.layer-loading-data) .layer-load-indicator,
+    layer-messages-list:not(.layer-end-of-results) .layer-end-of-results-indicator {
       display: none;
     }
 
     layer-messages-list.layer-loading-data .layer-load-indicator,
     layer-messages-list.layer-end-of-results .layer-end-of-results-indicator {
-      display: block;
+        text-align: center;
     }
   </style>
   <!-- The List Header contains a collection of special nodes that may render at the top of the list for
@@ -42,7 +42,6 @@
       <!-- Rendered when waiting for server data -->
       <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
         <div class='layer-replaceable-content'>
-          Loading messages...
         </div>
       </div>
     </div>

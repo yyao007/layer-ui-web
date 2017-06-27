@@ -6,7 +6,7 @@ layer-messages-list {
    * Layout of the List itself
    */
   padding-top: 8px;
-  padding-bottom: 8px;
+  padding-bottom: 16px;
 
   /*
    * Layout for the Header and Footer
@@ -183,13 +183,13 @@ layer-messages-list {
     .layer-message-left-side, .layer-message-right-side {
       layer-menu-button {
         display: none;
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        padding-right: 4px;
-
+        left: 2px;
+        margin-left: 2px;
         &.layer-has-menu {
           display: block;
+          span {
+            padding-right: 3px;
+          }
         }
       }
     }

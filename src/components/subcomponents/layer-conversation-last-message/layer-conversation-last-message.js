@@ -79,8 +79,8 @@ registerComponent('layer-conversation-last-message', {
      * Rerender this widget whenever the layer.Conversation has a change event reporting on a
      * new `lastMessage` property.
      *
-     * Lookup a handler for the Message, and if one is found, see if `canFullyRenderLastMessage` allows it to be rendered.
-     * If its allowed, append the Renderer as a child of this node; else set innerHTML to match the Handler's label.
+     * Lookup a handler for the Message, and if one is found, see if it can render a concise version of its contents.
+     * If it can, append the Renderer as a child of this node; else set innerHTML to match the Handler's label.
      *
      * @method
      * @private
@@ -96,9 +96,8 @@ registerComponent('layer-conversation-last-message', {
           const handler = layerUI.getHandler(message, this);
           if (handler) {
             this.classList.add(handler.tagName);
-            const conversationItem = this.parentComponent;
             // Create the element specified by the handler and add it as a childNode.
-            if (!conversationItem || !conversationItem.canFullyRenderLastMessage || conversationItem.canFullyRenderLastMessage(message)) {
+            if (handler.canRenderConcise(message)) {
               const messageHandler = document.createElement(handler.tagName);
               messageHandler.parentComponent = this;
               messageHandler.message = message;

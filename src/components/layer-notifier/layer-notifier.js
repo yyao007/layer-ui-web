@@ -451,19 +451,23 @@ registerComponent('layer-notifier', {
       const handler = GetHandler(message, this);
 
       if (handler) {
-        if (placeholder) this.nodes.container.removeChild(placeholder);
         this.nodes.avatar.users = [message.sender];
         this.nodes.title.innerHTML = message.sender.displayName;
 
         if (this.properties._toastTimeout) clearTimeout(this.properties._toastTimeout);
         this.classList.add(handler.tagName);
 
-        const messageHandler = document.createElement(handler.tagName);
-        messageHandler.parentComponent = this;
-        messageHandler.message = message;
+        if (handler.canRenderConcise(message)) {
+          if (placeholder) this.nodes.container.removeChild(placeholder);
+          const messageHandler = document.createElement(handler.tagName);
+          messageHandler.parentComponent = this;
+          messageHandler.message = message;
 
-        messageHandler.classList.add('layer-message-item-placeholder');
-        this.nodes.container.appendChild(messageHandler);
+          messageHandler.classList.add('layer-message-item-placeholder');
+          this.nodes.container.appendChild(messageHandler);
+        } else {
+          placeholder.innerHTML = `<div class="layer-custom-mime-type layer-message-item-placeholder">${handler.label}</div>`;
+        }
         this.classList.add('layer-notifier-toast-fade');
         this.classList.add('layer-notifier-toast');
         this.properties._toastTimeout = setTimeout(this.closeToast.bind(this), this.timeoutSeconds * 1000);

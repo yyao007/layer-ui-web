@@ -1,10 +1,10 @@
 /* Styles for the Toast Popup that notifies users of new Messages */
 layer-notifier {
-  background-color: #fff;
+  background-color: @color-toast-background;
   border-radius: 8px;
   padding: 10px 20px 10px 20px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
-	border: solid 1px #e4e9ec;
+	border: solid 1px @color-toast-border;
   align-items: center;
 
   layer-avatar {
@@ -13,7 +13,6 @@ layer-notifier {
   }
 
   .layer-notifier-title {
-    .layer-text-list-heading();
     margin-bottom: 5px;
   }
   .layer-notifier-title:after {
@@ -28,7 +27,6 @@ layer-notifier {
   }
 
   .layer-message-item-main {
-    .layer-text-plain-deemphasized();
     width: 320px;
   }
 }

@@ -261,13 +261,9 @@ registerComponent('layer-conversations-list', {
      * TODO: Should test to see what handler is returned rather than testing the mimeType
      *
      * @property {Function} canFullyRenderLastMessage
+     * @removed
      */
-    canFullyRenderLastMessage: {
-      type: Function,
-      value(message) {
-        return message.parts[0].mimeType === 'text/plain';
-      },
-    },
+
 
     /**
      * Provide a function that returns the menu items for the given Conversation.

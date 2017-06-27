@@ -51,9 +51,6 @@
 @color-message-item-bubble-text-sent: @color-white;
 @color-message-item-border-radius: 16px;
 
-/* Loading Indicator */
-@color-loading-indicator: @color-darknavy;
-
 /* Composer */
 @color-composer-bottom-border-focus: @color-lightblue;
 @color-send-button-empty: @color-g3;
@@ -63,6 +60,10 @@
 /* Menu Button */
 @color-menu-button: @color-g3;
 @color-menu-button-hover: @color-black;
+
+/* Generic Button */
+@color-button: @color-g3;
+@color-button-border: @color-g3;
 
 /* Menu */
 @color-menu-background: @color-white;
@@ -75,95 +76,19 @@
 @color-date-separator-border: @color-g2;
 @color-date-separator: @color-g3;
 @color-separator-text: @color-g3;
+@color-end-of-results-text: @color-g3;
+
+/* Loading Indicator */
+@color-loading-indicator-shade1: @color-g2;
+@color-loading-indicator-shade2: @color-g1;
 
 /* Misc Stuff */
+@color-list-background: @color-white;
 
+/* Toast */
+@color-toast-background: @color-white;
+@color-toast-border: @color-g1;
 
 /* Non color Stuff */
 @border-list-item: solid 1px @color-g1;
 
-
-/** OLD STUFF **/
-
-
-/* Customize bubbling look */
-
-@chatownerbubbletextcolor: white;
-@chatownerbubblebackground: #19a5e4;
-@chatparticipantbubbletextcolor: black;
-@chatparticipantbubblebackground: #eceff1;
-
-@border-lightest: solid 1px rgba(0, 0, 0, 0.1);
-@border-highlight: solid 3px #19a5e4;
-
-/* Customize identities-list and conversation-list */
-@listbackground: white;
-
-@fontsize-large: 1.1rem;
-@fontsize-normal: 1.0rem;
-@fontsize-small: 0.9rem;
-
-@fontcolor-normal: #313f48;
-@fontcolor-lighter: #8798a4;
-@fontcolor-lightest: #adb9c1;
-@fontcolor-inverted: #fafbfc;
-@fontcolor-emphasized: #19A5E4;
-@fontcolor-button: #C3CDD4;
-
-@fontweight-normal: 400;
-@fontweight-semibold: 500; // may not show for many fonts
-@fontweight-bold: 700;
-
-.layer-text-list-heading() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-semibold;
-}
-
-.layer-text-list-heading-emphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-emphasized;
-  font-weight: @fontweight-bold;
-}
-
-.layer-text-plain() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-normal;
-}
-
-.layer-text-plain-emphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-bold;
-}
-
-.layer-text-plain-deemphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-lighter;
-  font-weight: @fontweight-normal;
-}
-
-.layer-text-fine-print() {
-  font-size: @fontsize-small;
-  color: @fontcolor-lightest;
-  font-weight: @fontweight-semibold;
-}
-
-.layer-text-composer() {
-  /* Before tinkering with font-size, see http://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone/6394497#6394497 */
-  font-size: 16px;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-normal;
-}
-
-.layer-avatar-emphasized() {
-  width: 44px;
-  height: 44px;
-  color: @fontcolor-normal;
-  border: @border-highlight;
-}
-
-.layer-identity-selected() {
-  background-color: #f4f5f6;
-}

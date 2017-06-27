@@ -81,6 +81,7 @@ layerUI.settings = {
   markReadDelay: 2500,
   defaultHandler: {
     tagName: 'layer-message-unknown',
+    canRenderConcise: () => true,
   },
   textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
   maxSizes: { width: 512, height: 512 },

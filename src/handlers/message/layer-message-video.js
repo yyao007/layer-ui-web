@@ -57,7 +57,16 @@ registerMessageComponent('layer-message-video', {
       const metaParts = message.parts.filter(part => part.mimeType === 'application/json+imageSize').length;
       return (message.parts.length === 1 && videoParts ||
         message.parts.length === 3 && videoParts === 1 && previewParts === 1 && metaParts === 1);
-    },
+      },
+
+      /**
+       * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
+       *
+       * @method
+       */
+      canRenderConcise(message) {
+        return false;
+      },
 
     /**
      * Render the Message.

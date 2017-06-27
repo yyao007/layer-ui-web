@@ -128,25 +128,26 @@ registerComponent('layer-avatar', {
      * @private
      */
     onRender() {
+      const users = this.users.length === 1 ? this.users : this.users.filter(user => !user.sessionOwner);
       // Clear the innerHTML if we have rendered something before
       if (this.users.length) {
         this.innerHTML = '';
       }
 
       // Render each user
-      if (this.users.length === 1) {
-        this._renderUser(this.users[0]);
+      if (users.length === 1) {
+        this._renderUser(users[0]);
       } else {
         this._sortMultiAvatars().forEach(this._renderUser.bind(this));
       }
 
       // Add the "cluster" css if rendering multiple users
       // No classList.toggle due to poor IE11 support
-      this.classList[this.users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
-      if (this.users.length === 1 && this.showPresence && this.users[0].getClient().isPresenceEnabled) {
+      this.classList[users.length > 1 ? 'add' : 'remove']('layer-avatar-cluster');
+      if (users.length === 1 && this.showPresence && users[0].getClient().isPresenceEnabled) {
         this.nodes.presence = document.createElement('layer-presence');
         this.nodes.presence.classList.add('layer-presence-within-avatar');
-        this.nodes.presence.item = this.users[0];
+        this.nodes.presence.item = users[0];
         this.nodes.presence.size = this.size === 'larger' ? 'large' : this.size;
         this.appendChild(this.nodes.presence);
       }

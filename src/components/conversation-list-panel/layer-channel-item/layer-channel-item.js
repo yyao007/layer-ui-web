@@ -17,10 +17,11 @@
 import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import ListItemSelection from '../../../mixins/list-item-selection';
+import SizeProperty from '../../../mixins/size-property';
 import '../../subcomponents/layer-delete/layer-delete';
 
 registerComponent('layer-channel-item', {
-  mixins: [ListItem, ListItemSelection],
+  mixins: [ListItem, ListItemSelection, SizeProperty],
   properties: {
 
     // Every List Item has an item property, here it represents the Conversation to render
@@ -39,12 +40,24 @@ registerComponent('layer-channel-item', {
      * This property does nothing if you remove the `delete` node from the template.
      *
      * @property {Boolean} [deleteConversationEnabled=false]
+     * @removed
      */
-    deleteConversationEnabled: {
-      type: Boolean,
-      set(value) {
-        if (this.nodes.delete) this.nodes.delete.enabled = value;
+
+
+    size: {
+      value: 'large',
+      set(size) {
+        Object.keys(this.nodes).forEach((nodeName) => {
+          const node = this.nodes[nodeName];
+          if (node.supportedSizes && node.supportedSizes.indexOf(size) !== -1) {
+            node.size = size;
+          }
+        });
       },
+    },
+
+    supportedSizes: {
+      value: ['tiny', 'small', 'medium', 'large'],
     },
   },
   methods: {

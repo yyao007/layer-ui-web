@@ -81,10 +81,8 @@ module.exports = function (grunt) {
     less: {
       themes: {
         files: [
-          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'},
-          {src: ['themes/src/bubbles-basic/theme-compact.less'], dest: 'themes/build/bubbles-compact.css'},
-          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'},
-          {src: ['themes/src/layerblue/theme.less'], dest: 'themes/build/layerblue.css'}
+          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'}/*,
+          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'}*/
         ]
       }
     },

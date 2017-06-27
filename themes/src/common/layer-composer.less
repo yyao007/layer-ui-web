@@ -1,113 +1,102 @@
 /* Theming for the Composer panel and its buttons */
 layer-composer {
-  border-top: @border-list-item;
-  padding: 8px 4px;
-
-  /* Any layout or size (or font/font-weight or other size allocation changes) change you make to textarea MUST be made to .hidden-resizer and .hidden-lineheighter as well!!! */
-  textarea, .hidden-resizer, .hidden-lineheighter {
-    padding: 0px 4px;
-    border-width: 0px;
-    margin: 0px;
-    font-size: 14px;
-    font-family: sans-serif;
-  }
-  .layer-compose-edit-panel {
-    padding: 0px !important; /* Do not change left/right values or things will break */
-    margin: 0px !important; /* Do not change left/right values or things will break */
-    border-width: 0px 0px 1px 0px; /* Do not change left/right values or things will break */
-    border-color: rgba(0, 0, 0, 0.42); // material design numbers
-  }
-
-  textarea {
-    color: rgba(0, 0, 0, 0.87);
-    border-bottom-width: 1px;
-    border-color: rgba(0, 0, 0, 0.42); // material design numbers
-  }
-
-  &.layer-is-disabled textarea, textarea:disabled {
-    border-style: dotted;
-  }
-
-  textarea:focus {
-    border-bottom-width: 2px;
-    border-color: @color-composer-bottom-border-focus;
-    color: rgba(0, 0, 0, 0.87);
-  }
-
-
-  &.layer-composer-one-line-of-text {
-    textarea, .hidden-resizer, .hidden-lineheighter {
-      line-height: 34px;
+    border-top: @border-list-item;
+    padding: 8px 4px;
+    /* Any layout or size (or font/font-weight or other size allocation changes) change you make to textarea MUST be made to .hidden-resizer and .hidden-lineheighter as well!!! */
+    textarea,
+    .hidden-resizer,
+    .hidden-lineheighter {
+        padding: 0px 4px;
+        border-width: 0px;
+        margin: 0px;
+        /* Before tinkering with font-size, see http://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone/6394497#6394497 */
+        font-size: 16px;
+        font-family: sans-serif;
     }
-  }
-
-  .layer-button-panel {
-    /* Force all layer-replaceable-content to stay at the bottom of the panel */
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-
-
-    /* Layout of buttons */
-    .layer-replaceable-content {
-      &:empty {
-        display: none;
-      }
-
-      & > * {
-        margin: 0px 8px;
-      }
+    .layer-compose-edit-panel {
+        padding: 0px !important;
+        /* Do not change left/right values or things will break */
+        margin: 0px !important;
+        /* Do not change left/right values or things will break */
+        border-width: 0px 0px 1px 0px;
+        /* Do not change left/right values or things will break */
+        border-color: rgba(0, 0, 0, 0.42); // material design numbers
     }
-
-    /* The SEND button */
-    layer-send-button, button {
-      font-size: 14px;
-      padding: 8px 8px;
-      font-weight: bold;
-      color: @color-send-button-non-empty;
-      cursor: pointer;
-      border-width: 0px;
-      background-color: transparent;
-
-      /* TODO: Disable the send button when there's no text to send */
-      &.layer-send-button-has-value {
-        color: @color-send-button-non-empty;
-      }
-      /* TODO: Have a fuller version of disabled for when the compose bar itself is disabled */
-      &:disabled {
-        color: @color-send-button-disabled;
-      }
+    textarea {
+        color: rgba(0, 0, 0, 0.87);
+        border-bottom-width: 1px;
+        border-color: rgba(0, 0, 0, 0.42); // material design numbers
     }
-
-    /* The upload button */
-    layer-file-upload-button {
-      label {
-        padding: 2px;
-        border: solid 2px @fontcolor-button;
-        color: @fontcolor-button;
-        border-radius: 20px;
-        width: 24px;
-        height: 24px;
-        font-size: 30px;
-        line-height: 22px;
-
-        &:hover {
-          color: @fontcolor-normal;
+    &.layer-is-disabled textarea,
+    textarea:disabled {
+        border-style: dotted;
+    }
+    textarea:focus {
+        border-bottom-width: 2px;
+        border-color: @color-composer-bottom-border-focus;
+        color: rgba(0, 0, 0, 0.87);
+    }
+    &.layer-composer-one-line-of-text {
+        textarea,
+        .hidden-resizer,
+        .hidden-lineheighter {
+            line-height: 34px;
         }
-      }
     }
-
-    /* Generic buttons */
-    button:hover {
-        color: @color-send-button-non-empty;
+    .layer-button-panel {
+        /* Force all layer-replaceable-content to stay at the bottom of the panel */
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        /* Layout of buttons */
+        .layer-replaceable-content {
+            &:empty {
+                display: none;
+            }
+            &>* {
+                margin: 0px 8px;
+            }
+        }
+        /* The SEND button */
+        layer-send-button,
+        button {
+            font-size: 14px;
+            padding: 8px 8px;
+            font-weight: bold;
+            color: @color-send-button-non-empty;
+            cursor: pointer;
+            border-width: 0px;
+            background-color: transparent;
+            &.layer-send-button-has-value {
+                color: @color-send-button-non-empty;
+            }
+            &:disabled {
+                color: @color-send-button-disabled;
+            }
+        }
+        /* The upload button */
+        layer-file-upload-button {
+            label {
+                padding: 2px;
+                border: solid 2px @color-button-border;
+                color: @color-button;
+                border-radius: 20px;
+                width: 24px;
+                height: 24px;
+                font-size: 30px;
+                line-height: 22px;
+            }
+        }
+        /* Generic buttons */
+        button:hover {
+            color: @color-send-button-non-empty;
+        }
     }
-  }
-
-  &.layer-is-empty layer-send-button {
-    color: @color-send-button-empty;
-  }
-  &.layer-is-disabled layer-send-button, &.layer-is-disabled button {
-    color: @color-send-button-disabled;
-  }
-
+    &.layer-is-empty layer-send-button {
+        color: @color-send-button-empty;
+    }
+    &.layer-is-disabled layer-send-button,
+    &.layer-is-disabled button {
+        color: @color-send-button-disabled;
+    }
 }

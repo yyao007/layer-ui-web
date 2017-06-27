@@ -61,7 +61,6 @@ registerComponent('layer-identity-item', {
     onCreate() {
       if (!this.id) this.id = Layer.Util.generateUUID();
       this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
-      this.nodes.checkbox.id = `${this.id}-checkbox`;
     },
 
     /**
