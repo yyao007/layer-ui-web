@@ -453,16 +453,8 @@ registerComponent('layer-conversation-panel', {
      * ```
      *
      * @property {HTMLElement} [emptyMessageListNode=null]
+     * @removed
      */
-    emptyMessageListNode: {
-      type: HTMLElement,
-      set(value) {
-        this.nodes.list.emptyNode = value;
-      },
-      get(value) {
-        return this.nodes.list.emptyNode;
-      },
-    },
 
     /**
      * A dom node to render when there are no more messages in the Message List.
@@ -483,18 +475,11 @@ registerComponent('layer-conversation-panel', {
      * style height to be at least as tall as your custom node.
      *
      * @property {HTMLElement} [emptyMessageListNode=null]
+     * @removed
      */
-    endOfMessagesNode: {
-      type: HTMLElement,
-      set(value) {
-        this.nodes.list.endOfResultsNode = value;
-      },
-      get(value) {
-        return this.nodes.list.endOfResultsNode;
-      },
-    },
 
-/**
+
+    /**
      * Provide a function that returns the menu items for the given Conversation.
      *
      * Note that this is called each time the user clicks on a menu button to open the menu,
@@ -578,13 +563,8 @@ registerComponent('layer-conversation-panel', {
      * ```
      *
      * @property {HTMLElement[]} [composeButtons=[]]
+     * @removed
      */
-    composeButtons: {
-      type: HTMLElement,
-      set(value) {
-        this.nodes.composer.buttons = value;
-      },
-    },
 
     /**
      * An array of buttons (dom nodes) to be added to the Compose bar, left side.
@@ -597,13 +577,8 @@ registerComponent('layer-conversation-panel', {
      * ```
      *
      * @property {HTMLElement[]} [composeButtonsLeft=[]]
+     * @removed
      */
-    composeButtonsLeft: {
-      type: HTMLElement,
-      set(value) {
-        this.nodes.composer.buttonsLeft = value;
-      },
-    },
 
     /**
      * Use this to get/set the text in the Compose bar.

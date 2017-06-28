@@ -225,7 +225,7 @@ registerComponent('layer-composer', {
           body: this.nodes.input.value,
         }));
         this.nodes.input.value = '';
-        this._onInput(event);
+        this._onInput({});
       }
 
       if (parts.length === 0) return;

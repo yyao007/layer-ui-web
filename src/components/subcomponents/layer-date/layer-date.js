@@ -147,7 +147,8 @@ registerComponent('layer-date', {
             format = this.defaultFormat;
           }
 
-          this.value = value.toLocaleString('lookup', format);
+          // Note that the first parameter should be 'lookup' but not supported on edge v12
+          this.value = value.toLocaleString(navigator.language, format);
         }
       } else {
         this.value = '';
