@@ -8,10 +8,7 @@
       overflow-y: scroll; /* has to be scroll, not auto */
       -webkit-overflow-scrolling: touch;
     }
-    layer-messages-list .layer-header-toggle {
-      min-height: 20px;
-      margin-bottom: 2px;
-    }
+
     layer-messages-list:not(.layer-loading-data) .layer-load-indicator,
     layer-messages-list:not(.layer-end-of-results) .layer-end-of-results-indicator {
       display: none;
@@ -42,6 +39,7 @@
       <!-- Rendered when waiting for server data -->
       <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
         <div class='layer-replaceable-content'>
+            <layer-loading-indicator></layer-loading-indicator>
         </div>
       </div>
     </div>

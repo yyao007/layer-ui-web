@@ -27,10 +27,12 @@ layerUI.unregisterComponent = unregisterComponent;
 
 layerUI.init = function init(settings = {}) {
   Object.keys(settings).forEach((name) => {
-    layerUI.settings[name] = settings[name];
+    if (name !== 'mixins') {
+      layerUI.settings[name] = settings[name];
+    }
   });
 
-  if (!layerUI.settings.mixins) layerUI.settings.mixins = [];
+  layerUI.setupMixins(settings.mixins || {});
 
   // Register all widgets
   registerAll();
@@ -38,6 +40,13 @@ layerUI.init = function init(settings = {}) {
   // Enable the text handlers
   layerUI.settings.textHandlers.forEach((handlerName) => {
     layerUI.registerTextHandler({ name: handlerName });
+  });
+};
+
+layerUI.setupMixins = function setupMixins(mixins) {
+  if (!layerUI.settings.mixins) layerUI.settings.mixins = {};
+  Object.keys(mixins).forEach((componentName) => {
+    layerUI.settings.mixins[componentName] = Object.assign({}, layerUI.settings[componentName] || {}, mixins[componentName]);
   });
 };
 

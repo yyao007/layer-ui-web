@@ -1,5 +1,12 @@
 layer-messages-list {
     background-color: @color-list-background;
+    .layer-list-meta {
+        height: 40px;
+        border: solid 1px transparent; /* Fixes dumb chrome reflow bug */
+    }
+    .layer-header-toggle {
+        height: 40px;
+    }
 
     .layer-end-of-results-indicator {
         font-size: 11px;
@@ -7,4 +14,14 @@ layer-messages-list {
         margin: 8px 0px;
         color: @color-end-of-results-text;
     }
+
+    .layer-load-indicator {
+        max-height: 40px;
+
+        layer-loading-indicator {
+            position: relative;
+            top: -20px;
+        }
+    }
 }
+

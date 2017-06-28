@@ -81,8 +81,8 @@ module.exports = function (grunt) {
     less: {
       themes: {
         files: [
-          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'}/*,
-          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'}*/
+          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'},
+          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'}
         ]
       }
     },
@@ -90,7 +90,6 @@ module.exports = function (grunt) {
       build: {
         files: [
           {src: ['themes/build/bubbles-basic.css'], dest: 'themes/build/bubbles-basic.min.css'},
-          {src: ['themes/build/bubbles-compact.css'], dest: 'themes/build/bubbles-compact.min.css'},
           {src: ['themes/build/groups-basic.css'], dest: 'themes/build/groups-basic.min.css'}
         ]
       }

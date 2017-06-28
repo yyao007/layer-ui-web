@@ -545,7 +545,7 @@ function setupMixin(classDef, mixin) {
       if (mixin.properties[name].order !== undefined && classDef.properties[name].order === undefined) {
         classDef.properties[name].order = mixin.properties[name].order;
       }
-      if (mixin.properties[name].value !== undefined && classDef.properties[name].value === undefined) {
+      if ('value' in mixin.properties[name]) {
         classDef.properties[name].value = mixin.properties[name].value;
       }
       if (mixin.properties[name].propagateToChildren !== undefined &&
@@ -1530,7 +1530,7 @@ const standardClassMethods = {
     const parent = this.parentComponent;
     if (parent) {
       if (!parent.properties._internalState.onProcessReplaceableContentCalled) parent._onProcessReplaceableContent();
-      this.replaceableContent = Object.assign({}, parent.properties.replaceableContent, this.properties.replaceableContent);
+      this.replaceableContent = Object.assign({}, this.properties.replaceableContent, parent.properties.replaceableContent);
     }
 
     Object.keys(this.properties.replaceableContent || {}).forEach((nodeName) => {

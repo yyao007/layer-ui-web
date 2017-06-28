@@ -1,74 +1,97 @@
-/* Customize identities-list and conversation-list */
-@border-list-item: solid 1px rgb(221,228,231);
-@border-lightest: solid 1px rgba(0, 0, 0, 0.1);
-@listbackground: white;
+/** NEW STUFF **/
 
-@fontsize-large: 1.1rem;
-@fontsize-normal: 1.0rem;
-@fontsize-small: 0.9rem;
+/* Color Pallete */
+@color-white: #ffffff;
+@color-g1: #f3f3f3;
+@color-g2: #dbdee4;
+@color-g3: #a4a8b2;
+@color-black: #1b1c1d;
+@color-darknavy: #313f48;
+@color-lightblue: #1094d0;
+@color-yellow: #ffd624;
+@color-light-yellow: #FFEEA7;
+@color-green: #56bf46;
+@color-red: #eb3838;
 
-@fontcolor-normal: #313f48;
-@fontcolor-lighter: #8798a4;
-@fontcolor-lightest: #adb9c1;
-@fontcolor-emphasized: #47b7e9;
-@fontcolor-selected: #fff;
-@fontcolor-button: #C3CDD4;
+/* Color Definitions: Presence */
+@color-presence-busy: @color-red;
+@color-presence-away: @color-yellow;
+@color-presence-offline: @color-g2;
+@color-presence-invisible: @color-green;
+@color-presence-invisible-inside: transparent;
+@color-presence-available: @color-green;
 
-@fontweight-lighter: 300;
-@fontweight-normal: 400;
-@fontweight-semibold: 500;
-@fontweight-bold: 700;
+/* Color Definitions: Avatar */
+@color-avatar-background: @color-g2;
+@color-avatar-text: @color-white;
+@color-avatar-border: transparent;
+@color-avatar-multi-avatar-border: @color-white;
+@color-avatar-presence-border: @color-white;
+@color-avatar-presence-invisible-inside: @color-white; // Note that transparent does not work here; but this is currently a rare state to handle
 
-.layer-text-list-heading() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-semibold;
-}
+/* Color Definitions: Conversation Item */
+@color-conversation-item-title: @color-black;
+@color-conversation-item-read: @color-g3;
+@color-conversation-item-unread: @color-black;
+@color-conversation-item-selected-background: @color-g1;
 
-.layer-text-list-heading-emphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-emphasized;
-  font-weight: @fontweight-bold;
-}
+/* Group Counters are part of Conversation Item if using the Small size Items */
+@color-conversation-group-count: @color-g3;
+@color-conversation-group-count-border: @color-g3;
 
-.layer-text-plain() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-normal;
-}
+/* Color Definitions: Identity Item */
+@color-identity-item-title: @color-black;
+@color-identity-item-age: @color-g3;
 
-.layer-text-plain-emphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-bold;
-}
+/* Color Definitions: Message Item */
+@color-message-item-status: @color-g3;
+@color-message-item-bubble-received: @color-g1;
+@color-message-item-bubble-text-received: @color-black;
+@color-message-item-bubble-sent: @color-lightblue;
+@color-message-item-bubble-text-sent: @color-white;
+@color-message-item-border-radius: 16px;
+@color-message-item-sender: @color-black;
+@color-message-item-date: @color-g3;
+@color-message-item-status: @color-g2;
 
-.layer-text-plain-deemphasized() {
-  font-size: @fontsize-normal;
-  color: @fontcolor-lighter;
-  font-weight: @fontweight-normal;
-}
+/* Composer */
+@color-composer-bottom-border-focus: @color-lightblue;
+@color-send-button-empty: @color-g3;
+@color-send-button-non-empty: @color-lightblue;
+@color-send-button-disabled: @color-g2;
 
-.layer-text-fine-print() {
-  font-size: @fontsize-small;
-  color: @fontcolor-lightest;
-  font-weight: @fontweight-semibold;
-}
+/* Menu Button */
+@color-menu-button: @color-g3;
+@color-menu-button-hover: @color-black;
 
-.layer-text-composer() {
-  /* Before tinkering with font-size, see http://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone/6394497#6394497 */
-  font-size: 16px;
-  color: @fontcolor-normal;
-  font-weight: @fontweight-normal;
-}
+/* Generic Button */
+@color-button: @color-g3;
+@color-button-border: @color-g3;
 
-.layer-avatar-emphasized() {
-  width: 44px;
-  height: 44px;
-  color: @fontcolor-normal;
-  border: @border-highlight;
-}
+/* Menu */
+@color-menu-background: @color-white;
+@color-menu-border: @color-g1;
+@color-menu-item-text: @color-black;
+@color-menu-item-background-hover: @color-g1;
+@color-background-menu-button-hover: @color-g1;
 
-.layer-identity-selected() {
-  background-color: #f4f5f6;
-}
+/* Boundaries (optional components) */
+@color-date-separator-border: @color-g2;
+@color-date-separator: @color-g3;
+@color-separator-text: @color-g3;
+@color-end-of-results-text: @color-g3;
+
+/* Loading Indicator */
+@color-loading-indicator-shade1: @color-g2;
+@color-loading-indicator-shade2: @color-g1;
+
+/* Misc Stuff */
+@color-list-background: @color-white;
+
+/* Toast */
+@color-toast-background: @color-white;
+@color-toast-border: @color-g1;
+
+/* Non color Stuff */
+@border-list-item: solid 1px @color-g1;
+
