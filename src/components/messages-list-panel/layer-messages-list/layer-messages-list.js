@@ -250,7 +250,7 @@ registerComponent('layer-messages-list', {
             return null;
           } else {
             const div = document.createElement('div');
-            div.classList.add('layer-replaceable-content');
+            div.classList.add('layer-replaceable-inner');
             const avatar = document.createElement('layer-avatar');
             avatar.size = 'small';
             avatar.showPresence = false;
@@ -262,7 +262,7 @@ registerComponent('layer-messages-list', {
         messageRowRightSide: function messageRowRightSide(widget) {
           const item = widget.item;
           const div = document.createElement('div');
-          div.classList.add('layer-replaceable-content');
+          div.classList.add('layer-replaceable-inner');
           if (item.sender.sessionOwner) {
             const avatar = document.createElement('layer-avatar');
             avatar.size = 'small';
@@ -278,7 +278,7 @@ registerComponent('layer-messages-list', {
         messageRowFooter: function messageRowFooter(widget) {
           const item = widget.item;
           const parentNode = document.createElement('div');
-          parentNode.classList.add('layer-replaceable-content');
+          parentNode.classList.add('layer-replaceable-inner');
           if (item.sender.sessionOwner) {
             const status = document.createElement('layer-message-status');
             status.setAttribute('layer-id', 'status');

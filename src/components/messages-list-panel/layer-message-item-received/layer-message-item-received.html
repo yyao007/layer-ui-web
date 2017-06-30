@@ -18,12 +18,6 @@
       align-items: flex-end;
     }
 
-    layer-message-item-received .layer-replaceable-content {
-      display: flex;
-      flex-direction: row;
-    }
-
-
     layer-message-item-received  .layer-message-item-main {
       flex-grow: 1;
       overflow: hidden;
@@ -37,17 +31,14 @@
   <div class='layer-list-item' layer-id='innerNode'>
 
     <!-- Header -->
-    <div class='layer-message-header' layer-id='messageRowHeader' layer-has-replaceable='true'>
-      <div class='layer-replaceable-content'></div>
-    </div>
+    <layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content>
+
 
     <!-- Body -->
     <div class='layer-message-row' layer-id='messageRow'>
 
       <!-- Body: Left Side -->
-      <div class='layer-message-left-side' layer-id='messageRowLeftSide' layer-has-replaceable='true'>
-        <div class='layer-replaceable-content'></div>
-      </div>
+      <layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content>
 
       <!-- Body: Message Contents -->
       <div class='layer-message-item-main'>
@@ -55,15 +46,12 @@
       </div>
 
       <!-- Body: Right Side -->
-      <div class='layer-message-right-side' layer-id='messageRowRightSide' layer-has-replaceable='true'>
-        <div class='layer-replaceable-content'></div>
-      </div>
+      <layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content>
+
     </div>
 
     <!-- Footer -->
-    <div class='layer-message-footer' layer-id='messageRowFooter' layer-has-replaceable='true'>
-      <div class='layer-replaceable-content'></div>
-    </div>
+    <layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content>
   </div>
 </template>
 <script>

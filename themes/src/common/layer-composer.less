@@ -1,6 +1,6 @@
 /* Theming for the Composer panel and its buttons */
 layer-composer {
-    border-top: @border-list-item;
+    border-top: 1px solid @composer-top-border-color;
     padding: 8px 4px;
     /* Any layout or size (or font/font-weight or other size allocation changes) change you make to textarea MUST be made to .hidden-resizer and .hidden-lineheighter as well!!! */
     textarea,
@@ -10,7 +10,7 @@ layer-composer {
         border-width: 0px;
         margin: 0px;
         /* Before tinkering with font-size, see http://stackoverflow.com/questions/2989263/disable-auto-zoom-in-input-text-tag-safari-on-iphone/6394497#6394497 */
-        font-size: 16px;
+        font-size: @composer-font-size;
         font-family: sans-serif;
     }
     .layer-compose-edit-panel {
@@ -33,7 +33,7 @@ layer-composer {
     }
     textarea:focus {
         border-bottom-width: 2px;
-        border-color: @color-composer-bottom-border-focus;
+        border-color: @composer-bottom-border-focus-color;
         color: rgba(0, 0, 0, 0.87);
     }
     &.layer-composer-one-line-of-text {
@@ -49,7 +49,7 @@ layer-composer {
         flex-direction: row;
         align-items: flex-end;
         /* Layout of buttons */
-        .layer-replaceable-content {
+        .layer-replaceable-inner {
             &:empty {
                 display: none;
             }
@@ -60,26 +60,26 @@ layer-composer {
         /* The SEND button */
         layer-send-button,
         button {
-            font-size: 14px;
+            font-size: @composer-send-button-size;
             padding: 8px 8px;
             font-weight: bold;
-            color: @color-send-button-non-empty;
+            color: @composer-send-button-non-empty-color;
             cursor: pointer;
             border-width: 0px;
             background-color: transparent;
             &.layer-send-button-has-value {
-                color: @color-send-button-non-empty;
+                color: @composer-send-button-non-empty-color;
             }
             &:disabled {
-                color: @color-send-button-disabled;
+                color: @composer-send-button-disabled-color;
             }
         }
         /* The upload button */
         layer-file-upload-button {
             label {
                 padding: 2px;
-                border: solid 2px @color-button-border;
-                color: @color-button;
+                border: solid 2px @button-border;
+                color: @button-color;
                 border-radius: 20px;
                 width: 24px;
                 height: 24px;
@@ -89,14 +89,14 @@ layer-composer {
         }
         /* Generic buttons */
         button:hover {
-            color: @color-send-button-non-empty;
+            color: @composer-send-button-non-empty-color;
         }
     }
     &.layer-is-empty layer-send-button {
-        color: @color-send-button-empty;
+        color: @composer-send-button-non-empty-color;
     }
     &.layer-is-disabled layer-send-button,
     &.layer-is-disabled button {
-        color: @color-send-button-disabled;
+        color: @composer-send-button-disabled-color;
     }
 }

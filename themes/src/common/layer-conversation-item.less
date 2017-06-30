@@ -21,7 +21,7 @@ layer-conversation-item {
 
     /* Style the selected Conversation Item */
     &.layer-selected-item .layer-list-item {
-        background-color: @color-conversation-item-selected-background;
+        background-color: @conversation-item-color-selected-background;
     }
     /* Style for Size Large */
     &.layer-size-large .layer-list-item {
@@ -29,14 +29,14 @@ layer-conversation-item {
         padding-bottom: 12px;
         min-height: 72px;
         layer-conversation-title {
-            font-size: 16px;
+            font-size: @conversation-item-large-title-size;
         }
         layer-date {
-            font-size: 12px;
+            font-size: @conversation-item-large-date-size;
         }
         layer-conversation-last-message {
             margin-top: 6px;
-            font-size: 14px;
+            font-size: @conversation-item-large-last-message-size;
         }
     }
     /* Style for Size Medium */
@@ -45,13 +45,14 @@ layer-conversation-item {
         padding-bottom: 10px;
         min-height: 60px;
         layer-conversation-title {
-            font-size: 16px;
+            font-size: @conversation-item-medium-title-size;
         }
         layer-date {
-            font-size: 12px;
+            font-size: @conversation-item-medium-date-size;
         }
         layer-conversation-last-message {
             display: none;
+            font-size: @conversation-item-medium-last-message-size;
         }
     }
     /* Style for Size Small */
@@ -60,13 +61,14 @@ layer-conversation-item {
         padding-bottom: 8px;
         min-height: 48px;
         layer-conversation-title {
-            font-size: 14px;
+            font-size: @conversation-item-small-title-size;
         }
         layer-date {
-            font-size: 10px;
+            font-size: @conversation-item-small-date-size;
         }
         layer-conversation-last-message {
             display: none;
+            font-size: @conversation-item-small-last-message-size;
         }
     }
     /* Style for Size Tiny */
@@ -75,13 +77,15 @@ layer-conversation-item {
         padding-bottom: 8px;
         min-height: 32px;
         layer-conversation-title {
-            font-size: 14px;
+            font-size: @conversation-item-tiny-title-size;
         }
         layer-date {
             display: none;
+            font-size: @conversation-item-tiny-date-size;
         }
         layer-conversation-last-message {
             display: none;
+            font-size: @conversation-item-tiny-last-message-size;
         }
     }
 
@@ -102,11 +106,11 @@ layer-conversation-item {
     .layer-group-counter {
         font-size: 8px;
         font-weight: bold;
-        color: @color-conversation-group-count;
-        border: solid 1px @color-conversation-group-count-border;
+        color: @conversation-item-color-group-count;
+        border: solid 1px @conversation-item-color-group-count-border;
         border-radius: 4px;
-        width: 12px;
-        height: 12px;
+        width: @presence-size-large;
+        height: @presence-size-large;
         text-align: center;
     }
 
@@ -117,7 +121,7 @@ layer-conversation-item {
      * C. Selected
      */
     layer-conversation-title {
-        color: @color-conversation-item-title;
+        color: @conversation-item-color-title;
         font-weight: normal;
         margin-right: 10px;
         white-space: nowrap;
@@ -125,7 +129,7 @@ layer-conversation-item {
         overflow: hidden;
     }
     &.layer-conversation-unread-messages layer-conversation-title {
-        font-weight: bold;
+        font-weight: @conversation-item-unread-title-weight;
     }
 
     /*
@@ -135,10 +139,10 @@ layer-conversation-item {
      * C. Selected
      */
     layer-date {
-        color: @color-conversation-item-read;
+        color: @conversation-item-color-read;
     }
     &.layer-conversation-unread-messages layer-date {
-        color: @color-conversation-item-unread;
+        color: @conversation-item-color-unread;
     }
 
     /**
@@ -148,11 +152,11 @@ layer-conversation-item {
      * C. Selected
      */
     layer-conversation-last-message {
-        color: @color-conversation-item-read;
+        color: @conversation-item-color-read;
         overflow-y: hidden;
     }
     &.layer-conversation-unread-messages layer-conversation-last-message {
-        color: @color-conversation-item-unread;
+        color: @conversation-item-color-unread;
     }
 
     /**
@@ -163,7 +167,7 @@ layer-conversation-item {
         display: flex;
         flex-direction: row;
         align-items: stretch;
-        .layer-replaceable-content {
+        .layer-replaceable-inner {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -181,7 +185,7 @@ layer-conversation-item {
     &.layer-size-large .layer-conversation-title-row {
         align-items: flex-start;
     }
-    &.layer-size-large .layer-conversation-right-side .layer-replaceable-content {
+    &.layer-size-large .layer-conversation-right-side .layer-replaceable-inner {
         align-items: flex-start;
         layer-menu-button {
             margin-top: 2px;

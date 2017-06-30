@@ -14,34 +14,23 @@
       display: none;
     }
 
-    layer-messages-list.layer-loading-data .layer-load-indicator,
-    layer-messages-list.layer-end-of-results .layer-end-of-results-indicator {
-        text-align: center;
-    }
   </style>
   <!-- The List Header contains a collection of special nodes that may render at the top of the list for
     different conditions -->
   <div class='layer-list-meta' layer-id='listMeta'>
 
     <!-- Rendered when the list is empty -->
-    <div class='layer-empty-list' layer-id='emptyNode' layer-has-replaceable='true'>
-      <div class='layer-replaceable-content'></div>
-    </div>
+    <layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content>
 
     <div class='layer-header-toggle'>
 
       <!-- Rendered when there are no more results to page to -->
-      <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode' layer-has-replaceable='true'>
-        <div class='layer-replaceable-content'>
-        </div>
-      </div>
+      <layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content>
 
       <!-- Rendered when waiting for server data -->
-      <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
-        <div class='layer-replaceable-content'>
-            <layer-loading-indicator></layer-loading-indicator>
-        </div>
-      </div>
+      <layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'>
+        <layer-loading-indicator></layer-loading-indicator>
+      </layer-replaceable-content>
     </div>
   </div>
 </template>

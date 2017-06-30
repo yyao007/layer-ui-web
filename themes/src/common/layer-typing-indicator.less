@@ -24,19 +24,20 @@ layer-conversation-panel layer-typing-indicator {
   display: flex;
   flex-direction: column;
   align-content: stretch;
-  background-color: @color-list-background;
+  background-color: @typing-indicators-background;
 }
 
 layer-typing-indicator.layer-typing-occuring span {
   text-align: center;
-  font-size: 12px;
+  font-size: @typing-indicators-size;
+  color: @typing-indicators-color;
   top: -22px;
   height: 22px;
   display: block;
   line-height: 14px;
   position: relative;
   overflow: visible;
-  background-color: rgb(255,255,255);
+  background-color: @typing-indicators-background;
   padding: 2px 6px 0px 6px;
   margin: 0px 20px; // Do not cover scrollbars
 }

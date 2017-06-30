@@ -942,6 +942,10 @@ function _registerComponent(tagName) {
       // we don't need this hokey stuff here
       const templateNode = this.getTemplate();
       if (templateNode) {
+        if (this.childNodes.length) {
+          this.properties.originalChildNodes = Array.prototype.slice.call(this.childNodes);
+          while (this.firstChild) this.removeChild(this.firstChild);
+        }
         const clone = document.importNode(templateNode.content, true);
         this.appendChild(clone);
         this.setupDomNodes();
@@ -978,7 +982,7 @@ function _registerComponent(tagName) {
       // Happens during unit tests
       if (this.properties._internalState.onDestroyCalled) return;
 
-      if (!this.properties._internalState.onProcessReplaceableContentCalled) this._onProcessReplaceableContent();
+      this._onProcessReplaceableContent();
 
       // Allow Adapters to call _onAfterCreate... and then insure its not run a second time
       if (this.properties._internalState.onAfterCreateCalled) return;
@@ -1102,7 +1106,7 @@ function _registerComponent(tagName) {
       this.properties._internalState = {
         onCreateCalled: false,
         onAfterCreateCalled: false,
-        onProcessReplaceableContentCalled: false,
+        //onProcessReplaceableContentCalled: false,
         onRenderCalled: false,
         onAttachCalled: false,
         onDetachCalled: false,
@@ -1286,23 +1290,14 @@ registerComponent.MODES = {
 
 
 const standardClassProperties = {
-  replaceableContent: {
-    set() {
-      // TODO: Investigate allowing this to update, which involves:
-      // 1. Propagating to all children
-      // 2. Detecting when a subproperty/function has changed so we don't have to rip out all nodes and replace them with identical nodes
-      // 3. Reapplying setup commonly done in onAfterCreate and onRender
-      // Um.
-      if (this.properties._internalState.onProcessReplaceableContentCalled) throw new Error('replaceableContent can only be set during initialization');
-    },
-  },
+  replaceableContent: {},
   _layerEventSubscriptions: {
     value: [],
   },
   parentComponent: {},
   mainComponent: {
     get() {
-      if (!this.properties.parentComponent && this.properties._isMainComponent) return this;
+      if (!this.properties.parentComponent) return this;
       if (!this.properties.mainComponent) {
         this.properties.mainComponent = this.properties.parentComponent.mainComponent;
       }
@@ -1522,7 +1517,8 @@ const standardClassMethods = {
    * @method
    * @private
    */
-  _onProcessReplaceableContent() {
+  _onProcessReplaceableContent() {},
+  __onProcessReplaceableContent() {
     this.properties._internalState.onProcessReplaceableContentCalled = true;
 
     // Make sure that the parent component has processed its replaceable content, and passed its values on to this component.

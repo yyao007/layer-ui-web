@@ -21,11 +21,11 @@ layer-identity-item {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
-            color: @color-identity-item-title;
+            color: @identity-item-title-color;
         }
         layer-age {
             font-size: 12px;
-            color: @color-identity-item-age;
+            color: @identity-item-age-color;
         }
     }
 
@@ -37,7 +37,7 @@ layer-identity-item {
         padding-bottom: 10px;
         min-height: 60px;
         .layer-identity-name {
-            font-size: 14px;
+            font-size: @identity-item-medium-title-size;
         }
         layer-avatar {
             margin-right: 12px;
@@ -48,7 +48,7 @@ layer-identity-item {
         padding-bottom: 8px;
         min-height: 48px;
         .layer-identity-name {
-            font-size: 14px;
+            font-size: @identity-item-small-title-size;
         }
         layer-avatar {
             margin-right: 12px;
@@ -59,7 +59,7 @@ layer-identity-item {
         padding-bottom: 8px;
         min-height: 32px;
         .layer-identity-name {
-            font-size: 16px;
+            font-size: @identity-item-tiny-title-size;
         }
         layer-presence.presence-without-avatar {
             margin-right: 8px;

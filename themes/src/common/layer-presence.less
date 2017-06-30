@@ -2,43 +2,37 @@
  * Presence widget theme
  */
 layer-presence {
-  box-sizing: border-box;
+    box-sizing: border-box;
 
-  /* Styling for each presence state */
-  &.layer-presence-away {
-    background-color: @color-presence-away;
-  }
+    /* Styling for each presence state */
+    &.layer-presence-away {
+        background-color: @presence-color-away;
+    }
+    &.layer-presence-busy {
+        background-color: @presence-color-busy;
+    }
+    &.layer-presence-available {
+        background-color: @presence-color-available;
+    }
+    &.layer-presence-offline {
+        background-color: @presence-color-offline;
+    }
+    &.layer-presence-invisible {
+        background-color: @presence-color-invisible-inside;
+        border: solid 2px @presence-color-invisible;
+    }
 
-  &.layer-presence-busy {
-    background-color: @color-presence-busy;
-  }
-
-  &.layer-presence-available {
-    background-color: @color-presence-available;
-  }
-
-  &.layer-presence-offline {
-    background-color: @color-presence-offline;
-  }
-
-  &.layer-presence-invisible {
-    background-color: @color-presence-invisible-inside;
-    border: solid 2px @color-presence-invisible;
-  }
-
-  /* Styling for each presence size */
-  &.layer-size-small {
-    width: 8px;
-    height: 8px;
-  }
-
-  &.layer-size-medium {
-    width: 10px;
-    height: 10px;
-  }
-
-  &.layer-size-large {
-    width: 12px;
-    height: 12px;
-  }
+    /* Styling for each presence size */
+    &.layer-size-small {
+        width: @presence-size-small;
+        height: @presence-size-small;
+    }
+    &.layer-size-medium {
+        width: @presence-size-medium;
+        height: @presence-size-medium;
+    }
+    &.layer-size-large {
+        width: @presence-size-large;
+        height: @presence-size-large;
+    }
 }

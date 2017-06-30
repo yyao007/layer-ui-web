@@ -7,7 +7,7 @@ layer-avatar {
     text-align: center;
     /* Every avatar has a span that contains text (initials) or an Image tag. If text, it will have a layer-text-avatar css class */
     span {
-        border: solid 1px @color-avatar-border;
+        border: solid 1px @avatar-color-border;
         display: block;
         align-items: center;
         border-radius: 50%;
@@ -16,8 +16,8 @@ layer-avatar {
         &.layer-text-avatar {
             display: flex;
             justify-content: center;
-            background-color: @color-avatar-background;
-            color: @color-avatar-text;
+            background-color: @avatar-color-background;
+            color: @avatar-color-text;
         }
         /* Image customizations */
         img {
@@ -29,43 +29,43 @@ layer-avatar {
      * Handle the layout of each size of Avatar
      */
     &.layer-size-small {
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        font-size: 14px;
+        width: @avatar-size-small;
+        height: @avatar-size-small;
+        line-height: @avatar-size-small;
+        font-size: @avatar-font-small;
         span {
-            height: 30px;
-            width: 30px;
+            height: @avatar-size-small - 2px;
+            width: @avatar-size-small - 2px;
         }
     }
     &.layer-size-medium {
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        font-size: 16px;
+        width: @avatar-size-medium;
+        height: @avatar-size-medium;
+        line-height: @avatar-size-medium;
+        font-size: @avatar-font-medium;
         span {
-            height: 38px;
-            width: 38px;
+            height: @avatar-size-medium - 2px;
+            width: @avatar-size-medium - 2px;
         }
     }
     &.layer-size-large {
-        width: 48px;
-        height: 48px;
-        line-height: 48px;
-        font-size: 18px;
+        width: @avatar-size-large;
+        height: @avatar-size-large;
+        line-height: @avatar-size-large;
+        font-size: @avatar-font-large;
         span {
-            height: 46px;
-            width: 46px;
+            height: @avatar-size-large - 2px;
+            width: @avatar-size-large - 2px;
         }
     }
     &.layer-size-larger {
-        width: 72px;
-        height: 72px;
-        line-height: 72px;
-        font-size: 20px;
+        width: @avatar-size-larger;
+        height: @avatar-size-larger;
+        line-height: @avatar-size-larger;
+        font-size: @avatar-font-larger;
         span {
-            height: 70px;
-            width: 70px;
+            height: @avatar-size-larger - 2px;
+            width: @avatar-size-larger - 2px;
         }
     }
     /*
@@ -76,11 +76,11 @@ layer-avatar {
      */
     layer-presence {
         &.layer-presence-invisible {
-            background-color: @color-avatar-presence-invisible-inside;
+            background-color: @avatar-color-presence-invisible-inside;
         }
         &:before {
             content: " ";
-            border: solid 2px @color-avatar-presence-border;
+            border: solid 2px @avatar-color-presence-border;
             position: absolute;
             border-radius: 16px;
             top: -2px;
@@ -95,10 +95,10 @@ layer-avatar {
             right: -4px;
         }
     }
-    &.layer-avatar-cluster>span {
+    &.layer-avatar-cluster > span {
         position: absolute;
         &:nth-child(n+2) {
-            border: solid 1px @color-white;
+            border: solid 1px @avatar-color-multi-avatar-border;
         }
     }
     /*
@@ -125,17 +125,17 @@ layer-avatar {
                 display: none;
             }
         }
-        &.layer-size-small>span {
-            line-height: 22px;
+        &.layer-size-small > span {
+            line-height: @avatar-size-small * 0.7;
         }
-        &.layer-size-medium>span {
-            line-height: 28px;
+        &.layer-size-medium > span {
+            line-height: @avatar-size-medium * 0.7;
         }
-        &.layer-size-large>span {
-            line-height: 33px;
+        &.layer-size-large > span {
+            line-height: @avatar-size-large * 0.7;
         }
-        &.layer-size-larger>span {
-            line-height: 50px;
+        &.layer-size-larger > span {
+            line-height: @avatar-size-larger * 0.7;
         }
     }
 }

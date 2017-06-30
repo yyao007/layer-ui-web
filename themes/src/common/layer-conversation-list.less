@@ -1,11 +1,11 @@
 /* Styles for Conversation List widget. Note that most styling of the list is done in layer-conversation-item.less */
 layer-conversations-list {
-    background-color: @color-list-background;
+    background-color: @conversation-list-color-background;
     .layer-list-item {
         cursor: pointer;
-        border-bottom: @border-list-item;
+        border-bottom: solid 1px @conversation-list-item-border;
         &:not(:first-child) {
-            border-top: @border-list-item;
+            border-top: solid 1px @conversation-list-item-border;
         }
     }
 }

@@ -1,13 +1,16 @@
 layer-membership-item {
   .layer-list-item {
+    color: @membership-item-title-color;
+    font-size: @membership-item-title-size;
     line-height: 3.5rem;
     padding: 20px 5px;
     &:not(:first-child) {
-      border-top: @border-list-item;
+      border-top: @membership-list-item-border;
     }
   }
   /* Style the selected Membership Item; reusing conversation style */
   &.layer-selected-item  .layer-list-item {
-    background-color: @color-conversation-item-selected-background;
+    background-color: @membership-item-color-selected-background;
   }
 }
+

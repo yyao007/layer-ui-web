@@ -18,10 +18,10 @@ layer-messages-list {
     display: none;
     flex-direction: row;
 
-    .layer-replaceable-content:empty {
+    .layer-replaceable-inner:empty {
       display: none;
     }
-    .layer-replaceable-content {
+    .layer-replaceable-inner {
       width: 100%;
       margin-top: 2px;
       margin-bottom: 2px;
@@ -30,7 +30,7 @@ layer-messages-list {
   }
 
   .layer-message-left-side {
-    .layer-replaceable-content:empty {
+    .layer-replaceable-inner:empty {
       display: none;
     }
   }
@@ -116,21 +116,21 @@ layer-messages-list {
     }
 
     .layer-message-left-side {
-      .layer-replaceable-content {
+      .layer-replaceable-inner {
         position: relative;
         padding-left: 12px;
       }
-      .layer-replaceable-content:not(:empty) {
+      .layer-replaceable-inner:not(:empty) {
         padding-right: 8px;
       }
     }
 
     .layer-message-right-side {
-      .layer-replaceable-content {
+      .layer-replaceable-inner {
         position: relative;
         padding-right: 12px;
       }
-      .layer-replaceable-content:not(:empty) {
+      .layer-replaceable-inner:not(:empty) {
         padding-left: 8px;
       }
     }

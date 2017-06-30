@@ -176,6 +176,23 @@ registerComponent('layer-identities-list', {
       },
     },
 
+    /**
+     * Provide property to override the function used to render a name for each Identity Item.
+     *
+     * Note that changing this function will not rerender the list.
+     *
+     * ```javascript
+     * identitiesList.nameRenderer = function(identity) {
+     *    return 'Dark Lord ' + identity.firstName
+     * };
+     * ```
+     *
+     * @property {Function} [nameRenderer=null]
+     */
+    nameRenderer: {
+      type: Function,
+    },
+
     size: {
       value: 'medium',
       propagateToChildren: true,
@@ -287,6 +304,7 @@ registerComponent('layer-identities-list', {
       const identityWidget = document.createElement('layer-identity-item');
       identityWidget.item = identity;
       identityWidget.id = this._getItemId(identity.id);
+      identityWidget.nameRenderer = this.nameRenderer;
       identityWidget.selected = this.selectedIdentities.indexOf(identity) !== -1;
       identityWidget._runFilter(this.filter);
       return identityWidget;

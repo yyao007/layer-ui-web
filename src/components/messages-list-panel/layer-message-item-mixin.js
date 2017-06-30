@@ -98,6 +98,7 @@
  * @extends layerUI.components.Component
  */
 import Layer from 'layer-websdk';
+import '../subcomponents/layer-replaceable-content/layer-replaceable-content';
 
 module.exports = {
   properties: {

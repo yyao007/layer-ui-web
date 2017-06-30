@@ -8,7 +8,8 @@
     }
     margin-top: 4px;
     margin-bottom: 4px;
-    color: @color-separator-text;
+    color: @separator-text-color;
+    font-size: @separator-text-size;
   }
 
   .layer-list-item-separator-date {
@@ -16,17 +17,17 @@
   }
 
   .layer-list-item-separator-date-inner {
-    border-bottom: solid 1px @color-date-separator-border;
+    border-bottom: solid 1px @separator-date-border-color;
     text-align: center;
     height: 12px;
 
     layer-date {
       display: inline-block;
-      color: @color-date-separator;
-      font-size: 12px;
-      background-color: white;
+      color: @separator-date-color;
+      font-size: @separator-date-size;
+      background-color: @color-role-list-background;
       padding: 2px 15px;
-      border: solid 1px @color-date-separator-border;
+      border: solid 1px @separator-date-border-color;
       border-radius: 8px;
     }
   }

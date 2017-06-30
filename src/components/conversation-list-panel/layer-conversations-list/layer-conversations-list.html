@@ -14,11 +14,9 @@
       <div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div>
 
        <!-- Rendered when waiting for server data -->
-      <div class='layer-load-indicator' layer-id='loadIndicator' layer-has-replaceable='true'>
-        <div class='layer-replaceable-content'>
-          <layer-loading-indicator></layer-loading-indicator>
-        </div>
-      </div>
+      <layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'>
+        <layer-loading-indicator></layer-loading-indicator>
+      </layer-replaceable-content>
     </div>
   </div>
 </template>

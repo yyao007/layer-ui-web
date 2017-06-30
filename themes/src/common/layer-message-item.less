@@ -1,6 +1,3 @@
-@message-avatar-width: 12px + 12px + 32px;
-@message-bubble-indent: 8px;
-
 layer-messages-list {
   /*
    * Layout of the List itself
@@ -8,16 +5,31 @@ layer-messages-list {
   padding-top: 8px;
   padding-bottom: 16px;
 
+  layer-message-status {
+    color: @message-item-status-color;
+    font-size: @message-item-status-size;
+  }
+
+  layer-date {
+    color: @message-item-date-color;
+    font-size: @message-item-date-size;
+  }
+
+  .layer-sender-name {
+    color: @message-item-sender-color;
+    font-size: @message-item-sender-size;
+  }
+
   /*
    * Layout for the Header and Footer
    */
   .layer-message-header, .layer-message-footer {
     display: none;
     flex-direction: row;
-    .layer-replaceable-content:empty {
+    .layer-replaceable-inner:empty {
       display: none;
     }
-    .layer-replaceable-content {
+    .layer-replaceable-inner {
       width: 100%;
       margin-top: 2px;
       margin-bottom: 2px;
@@ -29,13 +41,13 @@ layer-messages-list {
     &.layer-list-item-last .layer-message-footer {
       display: flex;
       margin-right: 5px;
-      margin-left: @message-avatar-width + @message-bubble-indent;
+      margin-left: @message-item-avatar-width + @message-item-bubble-indent;
     }
   }
 
   layer-message-item-sent {
     &.layer-list-item-last .layer-message-footer {
-      .layer-replaceable-content {
+      .layer-replaceable-inner {
         justify-content: flex-end;
       }
     }
@@ -50,8 +62,8 @@ layer-messages-list {
 
     &.layer-list-item-first .layer-message-header, &.layer-list-item-last .layer-message-footer {
       display: flex;
-      .layer-replaceable-content {
-        margin-right: @message-avatar-width + @message-bubble-indent;
+      .layer-replaceable-inner {
+        margin-right: @message-item-avatar-width + @message-item-bubble-indent;
         margin-left: 5px;
         layer-date {
           display: inline-block;
@@ -67,10 +79,6 @@ layer-messages-list {
 
   /* Styling for Message header and footer contents */
   .layer-message-item {
-    .layer-message-header, .layer-message-footer {
-      color: @color-message-item-status;
-      font-size: 0.8em;
-    }
     layer-message-status:after {
       content: '-';
       margin-left: 5px;
@@ -94,7 +102,7 @@ layer-messages-list {
    * Common layout for all types of messages
    */
   .layer-list-item {
-    font-size: 14px;
+    font-size: @message-item-font-size;
 
     .layer-message-row {
       margin-bottom: 2px;
@@ -115,7 +123,7 @@ layer-messages-list {
 
     /* Give all messages the basic bubble treatment */
     layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
-      border-radius: @color-message-item-border-radius;
+      border-radius: @message-item-border-radius;
     }
 
     .layer-message-text-plain-after-text {
@@ -141,11 +149,11 @@ layer-messages-list {
   layer-message-item-received {
     /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
     layer-message-text-plain .layer-message-text {
-      color: @color-message-item-bubble-text-received;
-      background-color: @color-message-item-bubble-received;
+      color: @message-item-bubble-received-color;
+      background-color: @message-item-bubble-received-background-color;
 
       a, a:visited, a:focus, a:active {
-        color: @color-message-item-bubble-text-received;
+        color: @message-item-bubble-received-color;
       }
     }
   }
@@ -158,21 +166,21 @@ layer-messages-list {
     }
 
     .layer-message-left-side {
-      .layer-replaceable-content {
+      .layer-replaceable-inner {
         position: relative;
         padding-left: 12px;
       }
-      .layer-replaceable-content:not(:empty) {
+      .layer-replaceable-inner:not(:empty) {
         padding-right: 8px;
       }
     }
 
     .layer-message-right-side {
-      .layer-replaceable-content {
+      .layer-replaceable-inner {
         position: relative;
         padding-right: 12px;
       }
-      .layer-replaceable-content:not(:empty) {
+      .layer-replaceable-inner:not(:empty) {
         padding-left: 8px;
       }
     }
@@ -201,17 +209,17 @@ layer-messages-list {
   */
   layer-message-item-sent .layer-list-item {
     layer-message-text-plain .layer-message-text, layer-message-image canvas, layer-message-video video {
-      color: @color-message-item-bubble-text-sent;
+      color: @message-item-bubble-text-sent-color;
       margin: 0px;
     }
 
     .layer-message-text {
       margin-left: 20px;
-      color: @color-message-item-bubble-text-sent;
-      background-color: @color-message-item-bubble-sent;
+      color: @message-item-bubble-text-sent-color;
+      background-color: @message-item-bubble-sent-background-color;
 
       a, a:visited, a:focus, a:active {
-        color: @color-message-item-bubble-text-sent;
+        color: @message-item-bubble-text-sent-color;
       }
     }
     .layer-message-footer {

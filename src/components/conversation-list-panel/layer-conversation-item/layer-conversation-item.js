@@ -143,7 +143,7 @@ registerComponent('layer-conversation-item', {
       const users = this.item.participants.filter(user => !user.sessionOwner);
       const isRead = !this.item.lastMessage || this.item.lastMessage.isRead;
 
-      this.nodes.groupCounter.innerHTML = users.length;
+      if (this.nodes.groupCounter) this.nodes.groupCounter.innerHTML = users.length;
       this.toggleClass('layer-group-conversation', users.length > 1);
       this.toggleClass('layer-direct-message-conversation', users.length <= 1);
       if (!this.item.lastMessage) {
@@ -159,8 +159,8 @@ registerComponent('layer-conversation-item', {
         this.item.lastMessage.off('messages:change', this.onRerender, this);
         this.nodes.date.date = this.item.lastMessage.sentAt;
       }
-      this.nodes.avatar.users = users;
-      this.nodes.presence.item = users.length === 1 ? users[0] : null;
+      if (this.nodes.avatar) this.nodes.avatar.users = users;
+      if (this.nodes.presence) this.nodes.presence.item = users.length === 1 ? users[0] : null;
       this.classList[isRead ? 'remove' : 'add']('layer-conversation-unread-messages');
     },
 

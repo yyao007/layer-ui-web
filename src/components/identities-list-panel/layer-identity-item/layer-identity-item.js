@@ -40,6 +40,21 @@ registerComponent('layer-identity-item', {
       },
     },
 
+    /**
+     * Provide property to override the function used to render a name for each Identity Item.
+     *
+     * Note that changing this will not regenerate the list; this should be set when initializing a new List.
+     *
+     * ```javascript
+     * identityItem.nameRenderer = function(identity) {
+     *    return 'Dark Lord ' + identity.firstName;
+     * };
+     * ```
+     *
+     * @property {Function}
+     */
+    nameRenderer: {},
+
     size: {
       value: 'medium',
       set(size) {
@@ -115,7 +130,7 @@ registerComponent('layer-identity-item', {
      */
     onRerender() {
       this.nodes.avatar.users = [this.item];
-      this.nodes.title.innerHTML = this.item.displayName;
+      this.nodes.title.innerHTML = this.nameRenderer ? this.nameRenderer(this.item) : this.item.displayName;
       this.nodes.age.date = this.item.lastSeenAt;
       this.toggleClass('layer-identity-item-empty', !this.item.displayName);
     },
