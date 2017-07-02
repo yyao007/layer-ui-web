@@ -28,10 +28,10 @@ describe("List Mixin", function() {
       });
       client._clientAuthenticated();
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
       testRoot = document.createElement('div');
       document.body.appendChild(testRoot);
-      el = document.createElement('layer-identities-list');
+      el = document.createElement('layer-identity-list');
       testRoot.appendChild(el);
       query = client.createQuery({
         model: layer.Query.Identity
@@ -68,7 +68,7 @@ describe("List Mixin", function() {
     });
     describe("Properties", function() {
       it("Should set the query given a queryId and then a client", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         layer.Util.defer.flush();
         el.queryId = query.id;
         expect(el.client).toBe(null);
@@ -79,7 +79,7 @@ describe("List Mixin", function() {
       });
 
       it("Should set the query given a client and then a queryId", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         el.useGeneratedQuery = false;
         layer.Util.defer.flush();
         el.appId = client.appId;
@@ -91,7 +91,7 @@ describe("List Mixin", function() {
       });
 
       it("Should call render on setting the query", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         spyOn(el, "onRender");
         layer.Util.defer.flush();
         el.query = query;
@@ -101,7 +101,7 @@ describe("List Mixin", function() {
 
       // Tests call to onRerender as rerender has already been bound to an event before we can test it
       it("Should wire up rerender on setting the query", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         layer.Util.defer.flush();
         spyOn(el, "_processQueryEvt");
 
@@ -113,7 +113,7 @@ describe("List Mixin", function() {
       });
 
       it("Should create a query if there is no query AND its a MainComponent and useGeneratedQuery is unset", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         el.client = client;
         expect(el.properties.query).toBe(null);
 
@@ -182,7 +182,7 @@ describe("List Mixin", function() {
       });
 
       it("Should initialize listData", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         expect(el.properties.listData).toEqual([]);
       });
 
@@ -240,7 +240,7 @@ describe("List Mixin", function() {
       });
 
       it("Should do nothing if its already scheduled", function() {
-        var el = document.createElement('layer-identities-list');
+        var el = document.createElement('layer-identity-list');
         el.query = query;
         var spy = jasmine.createSpy("hello");
         el._throttler(spy);

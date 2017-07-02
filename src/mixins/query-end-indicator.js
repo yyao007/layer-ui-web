@@ -10,6 +10,7 @@
  *
  * @class layerUI.mixins.QueryEndIndicator
  */
+import { Util } from 'layer-websdk';
 module.exports = {
   properties: {
     /**
@@ -54,8 +55,10 @@ module.exports = {
       if (this.query.isDestroyed) {
         this.isEndOfResults = false;
       } else {
-        this.isEndOfResults = this.query.pagedToEnd;
+        Util.defer(() => {
+          this.isEndOfResults = this.query.pagedToEnd;
+        });
       }
     },
-  }
+  },
 };

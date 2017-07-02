@@ -22,7 +22,7 @@ describe("Text Plain Handler", function() {
     });
     message = conversation.createMessage({parts: [{mimeType: "text/plain", body: "howdy ho"}]});
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
 
     textHandler = layerUI.handlers.filter(function(handler) {
       return handler.tagName === 'layer-message-text-plain';

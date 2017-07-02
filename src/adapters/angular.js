@@ -8,8 +8,8 @@ import layerUI from '../base';
  *
  * ```
  *    <layer-notifier notify-in-foreground="toast"></layer-notifier>
- *    <layer-conversation-panel ng-query="myscopeProp.query"></layer-conversation-panel>
- *    <layer-conversations-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversations-list>
+ *    <layer-conversation-view ng-query="myscopeProp.query"></layer-conversation-view>
+ *    <layer-conversation-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversation-list>
  *    <layer-send-button></layer-send-button>
  *    <layer-file-upload-button></layer-file-upload-button>
  * ```
@@ -21,7 +21,7 @@ import layerUI from '../base';
  * angular.module('MyApp', ['layerUIControllers']);
  * ```
  *
- *   Now you can put `<layer-conversation-panel>` and other widgets into angular templates and expect them to work.
+ *   Now you can put `<layer-conversation-view>` and other widgets into angular templates and expect them to work.
  *   Prefix ALL property names with `ng-` to insure that scope is evaluated prior to passing the value on to the webcomponent.
  *
  * @class layerUI.adapters.angular
@@ -88,12 +88,8 @@ function initAngular(angular) {
     });
   }
 
-  // Gather all UI Components flagged as Main Components; other components don't require special wrappers that allow properties
-  // embedded in Angular's Templates to correctly handle values.
-  Object.keys(layerUI.components).filter((componentName) => {
-    const component = layerUI.components[componentName];
-    return component.properties.filter(prop => prop.propertyName === '_isMainComponent').length;
-  })
+  // Gather all UI Components
+  Object.keys(layerUI.components)
   .forEach((componentName) => {
     const component = layerUI.components[componentName];
 

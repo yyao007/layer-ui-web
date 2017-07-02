@@ -17,10 +17,10 @@ describe("List Selection Mixin", function() {
     client._clientAuthenticated();
 
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
-    el = document.createElement('layer-conversations-list');
+    el = document.createElement('layer-conversation-list');
     testRoot.appendChild(el);
     query = client.createQuery({
       model: layer.Query.Conversation

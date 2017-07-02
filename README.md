@@ -163,9 +163,9 @@ UI assuming some CSS to size and position the widgets:
     </script>
   </head>
   <body>
-    <layer-identities-list></layer-identities-list>
-    <layer-conversations-list></layer-conversations-list>
-    <layer-conversation-panel ></layer-conversation-panel>
+    <layer-identity-list></layer-identity-list>
+    <layer-conversation-list></layer-conversation-list>
+    <layer-conversation-view ></layer-conversation-view>
   </body>
 </html>
 ```
@@ -173,7 +173,7 @@ UI assuming some CSS to size and position the widgets:
 Using a Webcomponent Polyfill and implementation means that you can _also_ create an element simply with:
 
 ```javascript
-var conversationWidget = document.createElement('layer-conversation-panel');
+var conversationWidget = document.createElement('layer-conversation-view');
 document.body.appendChild(conversationWidget);
 ```
 
@@ -181,12 +181,12 @@ document.body.appendChild(conversationWidget);
 
 There are many widgets in this framework, but mostly you only need to work with the Main Components; these are high level widgets that wrap and manage a set of subcomponents.  Typically you would not directly interact with the subcomponents.
 
-* `<layer-conversation-panel />`: Manages a message list, a typing indicator panel, and a compose bar for typing a message
+* `<layer-conversation-view />`: Manages a message list, a typing indicator panel, and a compose bar for typing a message
   * This could be your entire UI, a single `layer-conversation` widget hardcoded to a single conversation with a customer support user; no other widgets needed.
   * The key property for this widget is `conversationId` (or used as an attribute: `conversation-id`), which lets you configure which Conversation its being used to interact with.
-* `<layer-conversations-list />`: Manages a Conversation List
+* `<layer-conversation-list />`: Manages a Conversation List
   * Use this to present a list of Conversations, and use the `layer-conversation-selected` event to set the `layer-conversation` `conversationId` property to render the selected Conversation.
-* `<layer-identities-list />`: Manages a User list
+* `<layer-identity-list />`: Manages a User list
   * Use this to present a list of users to create a Conversation with, and when your user selection is done, you can call `var conversation = myLayerClient.createConversation({ participants: [list.selectedUsers] }); myConversationPanel.conversationId = conversation.id;`
 * `<layer-notifier />`: Creates desktop and toast notifications for new messages
 

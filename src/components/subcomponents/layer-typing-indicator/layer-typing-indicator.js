@@ -130,18 +130,29 @@ registerComponent('layer-typing-indicator', {
 
         // If the app lets us handle the event, set the value of this widget to something appropriate
         if (customEvtResult) {
-          const names = evt.typing.map(user => user.displayName);
-          switch (names.length) {
-            case 0:
-              this.value = '';
-              break;
-            case 1:
-              this.value = names.join(', ') + ' is typing';
-              break;
-            default:
-              this.value = names.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' are typing';
-          }
+          this.showAsTyping(evt.typing);
         }
+      }
+    },
+
+    showAsTyping(identities) {
+      const names = identities.map(user => user.firstName || user.displayName || user.lastName).filter(name => name);
+      switch (names.length) {
+        case 0:
+          if (identities.length) {
+            this.value = 'User is typing';
+          } else {
+            this.value = '';
+          }
+          break;
+        case 1:
+          this.value = names.join(', ') + ' is typing';
+          break;
+        case 2:
+          this.value = `${names[0]} and ${names[1]} are typing`;
+          break;
+        default:
+          this.value = `${names[0]}, ${names[1]} and ${names.length - 2} others are typing`;
       }
     },
   },

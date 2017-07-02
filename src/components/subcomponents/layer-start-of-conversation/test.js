@@ -2,12 +2,12 @@ describe('layer-start-of-conversation', function() {
   var el;
 
   beforeAll(function(done) {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     setTimeout(done, 1000);
   });
 
   beforeEach(function() {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     el = document.createElement('layer-start-of-conversation');
     layer.Util.defer.flush();
   });

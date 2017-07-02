@@ -7,8 +7,8 @@
  *
  * ```
  *    <layer-notifier notify-in-foreground="toast"></layer-notifier>
- *    <layer-conversation-panel ng-query="myscopeProp.query"></layer-conversation-panel>
- *    <layer-conversations-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversations-list>
+ *    <layer-conversation-view ng-query="myscopeProp.query"></layer-conversation-view>
+ *    <layer-conversation-list ng-conversation-selected="myscope.handleSelectionFunc"></layer-conversation-list>
  *    <layer-send-button></layer-send-button>
  *    <layer-file-upload-button></layer-file-upload-button>
  * ```
@@ -20,7 +20,7 @@
  * angular.module('MyApp', ['layerUIControllers']);
  * ```
  *
- *   Now you can put `<layer-conversation-panel>` and other widgets into angular templates and expect them to work.
+ *   Now you can put `<layer-conversation-view>` and other widgets into angular templates and expect them to work.
  *   Prefix ALL property names with `ng-` to insure that scope is evaluated prior to passing the value on to the webcomponent.
  *
  * @class layerUI.adapters.angular
@@ -94,14 +94,8 @@ function initAngular(angular) {
     });
   }
 
-  // Gather all UI Components flagged as Main Components; other components don't require special wrappers that allow properties
-  // embedded in Angular's Templates to correctly handle values.
-  Object.keys(_base2.default.components).filter(function (componentName) {
-    var component = _base2.default.components[componentName];
-    return component.properties.filter(function (prop) {
-      return prop.propertyName === '_isMainComponent';
-    }).length;
-  }).forEach(function (componentName) {
+  // Gather all UI Components
+  Object.keys(_base2.default.components).forEach(function (componentName) {
     var component = _base2.default.components[componentName];
 
     // Get the camel case controller name
@@ -159,7 +153,7 @@ _base2.default.addAdapter('angular', initAngular);
  * < layer-notifier notify-in-foreground="toast"></layer-notifier>
  *
  * < !-- Associated with the ConversationView -->
- * < layer-conversation-panel conversation-id="layer:///conversations/UUID"></layer-conversation-panel>
+ * < layer-conversation-view conversation-id="layer:///conversations/UUID"></layer-conversation-view>
  * ```
  *
  * @class layerUI.adapters.backbone
@@ -180,13 +174,8 @@ function initBackbone(backbone) {
   if (libraryResult) return libraryResult;
   libraryResult = {};
 
-  // Gather all UI Components flagged as Main Components; other components don't require special wrappers for direct use by Apps.
-  Object.keys(_base2.default.components).filter(function (componentName) {
-    var component = _base2.default.components[componentName];
-    return component.properties.filter(function (prop) {
-      return prop.propertyName === '_isMainComponent';
-    }).length;
-  }).forEach(function (componentName) {
+  // Gather all UI Components
+  Object.keys(_base2.default.components).forEach(function (componentName) {
     var component = _base2.default.components[componentName];
 
     // Get the camel case Component name
@@ -1308,7 +1297,7 @@ module.exports = layerUI;
  *
  * An app can modify an existing component by adding custom mixins to it using `layerUI.init()`.  The `mixins` parameter
  * takes as keys, the tag-name for any widget you want to customize;
- * (e.g `layer-messages-item`, `layer-messages-list`, `layer-conversation-panel`, etc...)
+ * (e.g `layer-message-item`, `layer-message-list`, `layer-conversation-view`, etc...)
  *
  * The following example adds a search bar to the Message List:
  *
@@ -2466,7 +2455,13 @@ var standardClassMethods = {
       if (!currentNode.properties) currentNode.properties = {};
       currentNode.properties.parentComponent = _this8;
       if (!currentNode.id) currentNode.id = _layerWebsdk2.default.Util.generateUUID();
-      _this8.nodes[currentNode.getAttribute('layer-id') || currentNode.id] = currentNode;
+      var layerId = currentNode.getAttribute('layer-id');
+      var camelName = _base2.default.camelCase(currentNode.tagName.toLowerCase().replace(/^layer-/, ''));
+
+      if (!layerId && currentNode.tagName.indexOf('LAYER') === 0 && !_this8.nodes[camelName]) {
+        layerId = camelName;
+      }
+      _this8.nodes[layerId || currentNode.id] = currentNode;
     });
   },
 
@@ -2666,63 +2661,6 @@ var standardClassMethods = {
    * @private
    */
   _onProcessReplaceableContent: function _onProcessReplaceableContent() {},
-  __onProcessReplaceableContent: function __onProcessReplaceableContent() {
-    var _this10 = this;
-
-    this.properties._internalState.onProcessReplaceableContentCalled = true;
-
-    // Make sure that the parent component has processed its replaceable content, and passed its values on to this component.
-    // Parent component will in turn call this on its parent until we reach the Main Component
-    var parent = this.parentComponent;
-    if (parent) {
-      if (!parent.properties._internalState.onProcessReplaceableContentCalled) parent._onProcessReplaceableContent();
-      this.replaceableContent = Object.assign({}, this.properties.replaceableContent, parent.properties.replaceableContent);
-    }
-
-    Object.keys(this.properties.replaceableContent || {}).forEach(function (nodeName) {
-      var parentNode = _this10.nodes[nodeName];
-      var newNode = void 0;
-
-      // Transform a function into a node if we've been given a function...
-      // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
-      // in which case it should handle turning it into a node; lists in particular need to manage
-      // creation of the node once per list-item
-      if (parentNode) {
-        if (typeof _this10.properties.replaceableContent[nodeName] === 'function') {
-          var oldChild = parentNode.firstChild;
-          parentNode.removeChild(oldChild);
-          newNode = _this10.properties.replaceableContent[nodeName](_this10, parentNode);
-          if (!newNode) parentNode.appendChild(oldChild); // lame... but handles case where callback returns null
-        } else {
-          newNode = _this10.properties.replaceableContent[nodeName];
-        }
-
-        if (newNode) {
-          var alreadyInWidget = _this10.contains(newNode);
-
-          // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
-          if (!alreadyInWidget && (newNode.tagName !== 'DIV' || !newNode.classList.contains('layer-replaceable-content') && !newNode.firstChild)) {
-            var tmpNode = document.createElement('div');
-            tmpNode.appendChild(newNode);
-            newNode = tmpNode;
-          }
-
-          if (!newNode.classList.contains('layer-replaceable-content')) newNode.classList.add('layer-replaceable-content');
-
-          if (!alreadyInWidget) {
-            var docFragment = void 0;
-            if (newNode.tagName === 'TEMPLATE') {
-              docFragment = document.importNode(newNode.content, true);
-              newNode = docFragment.firstChild;
-            }
-
-            parentNode.appendChild(newNode);
-          }
-          _this10.onReplaceableContentAdded(nodeName, newNode);
-        }
-      }
-    });
-  },
 
 
   /**
@@ -2829,13 +2767,13 @@ var standardClassMethods = {
    * @private
    */
   onDestroy: function onDestroy() {
-    var _this11 = this;
+    var _this10 = this;
 
     this.properties._internalState.propertyListeners = null;
     this.properties._internalState.onDestroyCalled = true;
     this.properties._internalState.disableSetters = true;
     this.properties._layerEventSubscriptions.forEach(function (subscribedObject) {
-      return subscribedObject.off(null, null, _this11);
+      return subscribedObject.off(null, null, _this10);
     });
     this.properties._layerEventSubscriptions = [];
     this.classList.add('layer-node-destroyed');
@@ -3225,19 +3163,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * This Component can be added to your project directly in the HTML file:
  *
  * ```
- * <layer-conversations-list></layer-conversations-list>
+ * <layer-conversation-list></layer-conversation-list>
  * ```
  *
  * Or via DOM Manipulation:
  *
  * ```javascript
- * var conversation = document.createElement('layer-conversations-list');
+ * var conversation = document.createElement('layer-conversation-list');
  * ```
  *
  * And then its properties can be set as:
  *
  * ```javascript
- * var list = document.querySelector('layer-conversations-list');
+ * var list = document.querySelector('layer-conversation-list');
  * list.onConversationSelected = function(evt) {
  *    alert(evt.detail.item.id + ' has been selected');
  * }
@@ -3268,6 +3206,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @mixin layerUI.mixins.MainComponent
  * @mixin layerUI.mixins.ListSelection
  * @mixin layerUI.mixins.ListLoadIndicator
+ * @mixin layerUI.mixins.EmptyList
  */
 'use strict';
 
@@ -3297,14 +3236,22 @@ var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
+var _emptyList = require('../../../mixins/empty-list');
+
+var _emptyList2 = _interopRequireDefault(_emptyList);
+
+var _queryEndIndicator = require('../../../mixins/query-end-indicator');
+
+var _queryEndIndicator2 = _interopRequireDefault(_queryEndIndicator);
+
 require('../layer-conversation-item/layer-conversation-item');
 
 require('../layer-channel-item/layer-channel-item');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-(0, _component.registerComponent)('layer-conversations-list', {
-  mixins: [_list2.default, _listSelection2.default, _mainComponent2.default, _listLoadIndicator2.default, _sizeProperty2.default],
+(0, _component.registerComponent)('layer-conversation-list', {
+  mixins: [_list2.default, _listSelection2.default, _mainComponent2.default, _listLoadIndicator2.default, _sizeProperty2.default, _emptyList2.default, _queryEndIndicator2.default],
 
   /**
    * Configure a custom action when a Conversation is selected;
@@ -3403,7 +3350,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * Or if using a templating engine:
      *
      * ```html
-     * <layer-conversations-list selected-conversation-id={{selectedConversation.id}}></layer-conversations-list>
+     * <layer-conversation-list selected-conversation-id={{selectedConversation.id}}></layer-conversation-list>
      * ```
      *
      * The above code will set the selected Conversation and render the conversation as selected.
@@ -3649,10 +3596,208 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversations-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-header-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
-  layerUI.buildStyle("layer-conversations-list", "layer-conversations-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversations-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-list", "<div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>      No Conversations yet    </layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
+  layerUI.buildStyle("layer-conversation-list", "layer-conversation-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversation-list:not(\nlayer-conversation-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-conversation-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list":55,"../../../mixins/list-load-indicator":53,"../../../mixins/list-selection":54,"../../../mixins/main-component":56,"../../../mixins/size-property":59,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":78}],9:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":48,"../../../mixins/list":55,"../../../mixins/list-load-indicator":53,"../../../mixins/list-selection":54,"../../../mixins/main-component":56,"../../../mixins/query-end-indicator":58,"../../../mixins/size-property":59,"../layer-channel-item/layer-channel-item":6,"../layer-conversation-item/layer-conversation-item":7,"layer-websdk":78}],9:[function(require,module,exports){
+/**
+ * The Layer User Item represents a single user within a User List.
+ *
+ * This widget could be used to represent a User elsewhere, in places where a `<layer-avatar />` is insufficient.
+ *
+ * This widget includes a checkbox for selection.
+ *
+ * @class layerUI.components.IdentitiesListPanel.Item
+ * @mixin layerUI.mixins.ListItem
+ * @extends layerUI.components.Component
+ */
+'use strict';
+
+var _layerWebsdk = require('layer-websdk');
+
+var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
+
+var _component = require('../../../components/component');
+
+var _listItem = require('../../../mixins/list-item');
+
+var _listItem2 = _interopRequireDefault(_listItem);
+
+var _sizeProperty = require('../../../mixins/size-property');
+
+var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
+
+require('../../subcomponents/layer-avatar/layer-avatar');
+
+require('../../subcomponents/layer-age/layer-age');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
+(0, _component.registerComponent)('layer-identity-item', {
+  mixins: [_listItem2.default, _sizeProperty2.default],
+  properties: {
+
+    /**
+     * Is this user item currently selected?
+     *
+     * Setting this to true will set the checkbox to checked, and add a
+     * `layer-identity-item-selected` css class.
+     *
+     * @property {Boolean} [selected=false]
+     */
+    selected: {
+      type: Boolean,
+      noGetterFromSetter: true,
+      set: function set(value) {
+        if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
+        this.innerNode.classList[value ? 'add' : 'remove']('layer-identity-item-selected');
+      },
+      get: function get() {
+        return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.properties.selected);
+      }
+    },
+
+    /**
+     * Provide property to override the function used to render a name for each Identity Item.
+     *
+     * Note that changing this will not regenerate the list; this should be set when initializing a new List.
+     *
+     * ```javascript
+     * identityItem.nameRenderer = function(identity) {
+     *    return 'Dark Lord ' + identity.firstName;
+     * };
+     * ```
+     *
+     * @property {Function}
+     */
+    nameRenderer: {},
+
+    size: {
+      value: 'medium',
+      set: function set(size) {
+        if (size !== 'tiny') this.nodes.avatar.size = size;
+      }
+    },
+
+    supportedSizes: {
+      value: ['tiny', 'small', 'medium']
+    }
+  },
+  methods: {
+    /**
+     * Constructor.
+     *
+     * @method onCreate
+     * @private
+     */
+    onCreate: function onCreate() {
+      if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
+      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
+    },
+
+
+    /**
+     * If the checkbox state changes, make sure that the class is updated.
+     *
+     * If the custom event is canceled, roll back the change.
+     *
+     * @method onClick
+     * @param {Event} evt
+     * @private
+     */
+    onClick: function onClick(evt) {
+      evt.stopPropagation();
+      var checked = evt.target === this.nodes.checkbox ? this.selected : !this.selected; // toggle
+      var identity = this.item;
+
+      // Trigger the event and see if evt.preventDefault() was called
+      var customEventResult = this.trigger('layer-identity-item-' + (checked ? 'selected' : 'deselected'), { item: identity });
+
+      if (customEventResult) {
+        this.selected = checked;
+      } else {
+        evt.preventDefault();
+      }
+      this.onSelection(evt);
+    },
+
+
+    /**
+     * MIXIN HOOK: Each time a an item's selection state changes, this will be called.
+     *
+     * @method onSelection
+     */
+    onSelection: function onSelection(evt) {
+      // No-op
+    },
+
+
+    /**
+     * Render/rerender the user, showing the avatar and user's name.
+     *
+     * @method _render
+     * @private
+     */
+    onRender: function onRender() {
+      this.onRerender();
+    },
+
+
+    /**
+     * Update the rendering of the avatar/username
+     *
+     * @method _render
+     * @private
+     */
+    onRerender: function onRerender() {
+      this.nodes.avatar.users = [this.item];
+      this.nodes.title.innerHTML = this.nameRenderer ? this.nameRenderer(this.item) : this.item.displayName;
+      this.nodes.age.date = this.item.lastSeenAt;
+      this.toggleClass('layer-identity-item-empty', !this.item.displayName);
+    },
+
+
+    /**
+     * Mixin Hook: Override this to use an alternate title.
+     *
+     * @method onRenderTitle
+     */
+    onRenderTitle: function onRenderTitle() {
+      this.nodes.title.innerHTML = this.item.displayName;
+    },
+
+
+    /**
+     * Run a filter on this item, and hide it if it doesn't match the filter.
+     *
+     * @method _runFilter
+     * @param {String|Regex|Function} filter
+     */
+    _runFilter: function _runFilter(filter) {
+      var identity = this.properties.item;
+      var match = false;
+      if (!filter) {
+        match = true;
+      } else if (filter instanceof RegExp) {
+        match = filter.test(identity.displayName) || filter.test(identity.firstName) || filter.test(identity.lastName) || filter.test(identity.emailAddress);
+      } else if (typeof filter === 'function') {
+        match = filter(identity);
+      } else {
+        filter = filter.toLowerCase();
+        match = identity.displayName.toLowerCase().indexOf(filter) !== -1 || identity.firstName.toLowerCase().indexOf(filter) !== -1 || identity.lastName.toLowerCase().indexOf(filter) !== -1 || identity.emailAddress.toLowerCase().indexOf(filter) !== -1;
+      }
+      this.classList[match ? 'remove' : 'add']('layer-item-filtered');
+    }
+  }
+});
+
+(function () {
+  var layerUI = require('../../../base');
+  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
+  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
+})();
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":52,"../../../mixins/size-property":59,"../../subcomponents/layer-age/layer-age":19,"../../subcomponents/layer-avatar/layer-avatar":20,"layer-websdk":78}],10:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -3661,19 +3806,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * This Component can be added to your project directly in the HTML file:
  *
  * ```
- * <layer-identities-list></layer-identities-list>
+ * <layer-identity-list></layer-identity-list>
  * ```
  *
  * Or via DOM Manipulation:
  *
  * ```javascript
- * var identitylist = document.createElement('layer-identities-list');
+ * var identitylist = document.createElement('layer-identity-list');
  * ```
  *
  * And then its properties can be set as:
  *
  * ```javascript
- * var identityList = document.querySelector('layer-identities-list');
+ * var identityList = document.querySelector('layer-identity-list');
  * identityList.selectedIdentities = [identity3, identity6];
  * identityList.onIdentitySelected = identityList.onIdentityDeselected = function(evt) {
  *    log("The new selected users are: ", identityList.selectedIdentities);
@@ -3717,6 +3862,14 @@ var _listLoadIndicator = require('../../../mixins/list-load-indicator');
 
 var _listLoadIndicator2 = _interopRequireDefault(_listLoadIndicator);
 
+var _emptyList = require('../../../mixins/empty-list');
+
+var _emptyList2 = _interopRequireDefault(_emptyList);
+
+var _queryEndIndicator = require('../../../mixins/query-end-indicator');
+
+var _queryEndIndicator2 = _interopRequireDefault(_queryEndIndicator);
+
 var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
@@ -3726,8 +3879,8 @@ require('../layer-identity-item/layer-identity-item');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 
-(0, _component.registerComponent)('layer-identities-list', {
-  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default, _sizeProperty2.default],
+(0, _component.registerComponent)('layer-identity-list', {
+  mixins: [_list2.default, _mainComponent2.default, _hasQuery2.default, _listLoadIndicator2.default, _sizeProperty2.default, _emptyList2.default, _queryEndIndicator2.default],
 
   /**
    * The user has clicked to select an Identity in the Identities List.
@@ -4049,208 +4202,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identities-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><div class='layer-end-of-results-indicator' layer-id='endOfResultsNode'></div><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
-  layerUI.buildStyle("layer-identities-list", "layer-identities-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identities-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-identity-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>        No Users yet      </layer-replaceable-content><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
+  layerUI.buildStyle("layer-identity-list", "layer-identity-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identity-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-identity-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/has-query":50,"../../../mixins/list":55,"../../../mixins/list-load-indicator":53,"../../../mixins/main-component":56,"../../../mixins/size-property":59,"../layer-identity-item/layer-identity-item":10,"layer-websdk":78}],10:[function(require,module,exports){
-/**
- * The Layer User Item represents a single user within a User List.
- *
- * This widget could be used to represent a User elsewhere, in places where a `<layer-avatar />` is insufficient.
- *
- * This widget includes a checkbox for selection.
- *
- * @class layerUI.components.IdentitiesListPanel.Item
- * @mixin layerUI.mixins.ListItem
- * @extends layerUI.components.Component
- */
-'use strict';
-
-var _layerWebsdk = require('layer-websdk');
-
-var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
-
-var _component = require('../../../components/component');
-
-var _listItem = require('../../../mixins/list-item');
-
-var _listItem2 = _interopRequireDefault(_listItem);
-
-var _sizeProperty = require('../../../mixins/size-property');
-
-var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
-
-require('../../subcomponents/layer-avatar/layer-avatar');
-
-require('../../subcomponents/layer-age/layer-age');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-
-(0, _component.registerComponent)('layer-identity-item', {
-  mixins: [_listItem2.default, _sizeProperty2.default],
-  properties: {
-
-    /**
-     * Is this user item currently selected?
-     *
-     * Setting this to true will set the checkbox to checked, and add a
-     * `layer-identity-item-selected` css class.
-     *
-     * @property {Boolean} [selected=false]
-     */
-    selected: {
-      type: Boolean,
-      noGetterFromSetter: true,
-      set: function set(value) {
-        if (this.nodes.checkbox) this.nodes.checkbox.checked = value;
-        this.innerNode.classList[value ? 'add' : 'remove']('layer-identity-item-selected');
-      },
-      get: function get() {
-        return this.nodes.checkbox ? this.nodes.checkbox.checked : Boolean(this.properties.selected);
-      }
-    },
-
-    /**
-     * Provide property to override the function used to render a name for each Identity Item.
-     *
-     * Note that changing this will not regenerate the list; this should be set when initializing a new List.
-     *
-     * ```javascript
-     * identityItem.nameRenderer = function(identity) {
-     *    return 'Dark Lord ' + identity.firstName;
-     * };
-     * ```
-     *
-     * @property {Function}
-     */
-    nameRenderer: {},
-
-    size: {
-      value: 'medium',
-      set: function set(size) {
-        if (size !== 'tiny') this.nodes.avatar.size = size;
-      }
-    },
-
-    supportedSizes: {
-      value: ['tiny', 'small', 'medium']
-    }
-  },
-  methods: {
-    /**
-     * Constructor.
-     *
-     * @method onCreate
-     * @private
-     */
-    onCreate: function onCreate() {
-      if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
-      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
-    },
-
-
-    /**
-     * If the checkbox state changes, make sure that the class is updated.
-     *
-     * If the custom event is canceled, roll back the change.
-     *
-     * @method onClick
-     * @param {Event} evt
-     * @private
-     */
-    onClick: function onClick(evt) {
-      evt.stopPropagation();
-      var checked = evt.target === this.nodes.checkbox ? this.selected : !this.selected; // toggle
-      var identity = this.item;
-
-      // Trigger the event and see if evt.preventDefault() was called
-      var customEventResult = this.trigger('layer-identity-item-' + (checked ? 'selected' : 'deselected'), { item: identity });
-
-      if (customEventResult) {
-        this.selected = checked;
-      } else {
-        evt.preventDefault();
-      }
-      this.onSelection(evt);
-    },
-
-
-    /**
-     * MIXIN HOOK: Each time a an item's selection state changes, this will be called.
-     *
-     * @method onSelection
-     */
-    onSelection: function onSelection(evt) {
-      // No-op
-    },
-
-
-    /**
-     * Render/rerender the user, showing the avatar and user's name.
-     *
-     * @method _render
-     * @private
-     */
-    onRender: function onRender() {
-      this.onRerender();
-    },
-
-
-    /**
-     * Update the rendering of the avatar/username
-     *
-     * @method _render
-     * @private
-     */
-    onRerender: function onRerender() {
-      this.nodes.avatar.users = [this.item];
-      this.nodes.title.innerHTML = this.nameRenderer ? this.nameRenderer(this.item) : this.item.displayName;
-      this.nodes.age.date = this.item.lastSeenAt;
-      this.toggleClass('layer-identity-item-empty', !this.item.displayName);
-    },
-
-
-    /**
-     * Mixin Hook: Override this to use an alternate title.
-     *
-     * @method onRenderTitle
-     */
-    onRenderTitle: function onRenderTitle() {
-      this.nodes.title.innerHTML = this.item.displayName;
-    },
-
-
-    /**
-     * Run a filter on this item, and hide it if it doesn't match the filter.
-     *
-     * @method _runFilter
-     * @param {String|Regex|Function} filter
-     */
-    _runFilter: function _runFilter(filter) {
-      var identity = this.properties.item;
-      var match = false;
-      if (!filter) {
-        match = true;
-      } else if (filter instanceof RegExp) {
-        match = filter.test(identity.displayName) || filter.test(identity.firstName) || filter.test(identity.lastName) || filter.test(identity.emailAddress);
-      } else if (typeof filter === 'function') {
-        match = filter(identity);
-      } else {
-        filter = filter.toLowerCase();
-        match = identity.displayName.toLowerCase().indexOf(filter) !== -1 || identity.firstName.toLowerCase().indexOf(filter) !== -1 || identity.lastName.toLowerCase().indexOf(filter) !== -1 || identity.emailAddress.toLowerCase().indexOf(filter) !== -1;
-      }
-      this.classList[match ? 'remove' : 'add']('layer-item-filtered');
-    }
-  }
-});
-
-(function () {
-  var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
-  layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
-})();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/list-item":52,"../../../mixins/size-property":59,"../../subcomponents/layer-age/layer-age":19,"../../subcomponents/layer-avatar/layer-avatar":20,"layer-websdk":78}],11:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":48,"../../../mixins/has-query":50,"../../../mixins/list":55,"../../../mixins/list-load-indicator":53,"../../../mixins/main-component":56,"../../../mixins/query-end-indicator":58,"../../../mixins/size-property":59,"../layer-identity-item/layer-identity-item":9,"layer-websdk":78}],11:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -4269,19 +4224,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * or if using a templating engine, something like this would also work for setting the `conversationId`:
  *
  * ```
- * <layer-conversation-panel conversation-id={selectedConversationId}></layer-conversation-panel>
+ * <layer-conversation-view conversation-id={selectedConversationId}></layer-conversation-view>
  * ```
  *
  * This Component can be added to your project directly in the HTML file:
  *
  * ```
- * <layer-conversation-panel></layer-conversation-panel>
+ * <layer-conversation-view></layer-conversation-view>
  * ```
  *
  * Or via DOM Manipulation:
  *
  * ```javascript
- * var conversation = document.createElement('layer-conversation-panel');
+ * var conversation = document.createElement('layer-conversation-view');
  * ```
  *
  * ## Key Properties
@@ -4323,16 +4278,16 @@ var _focusOnKeydown = require('../../mixins/focus-on-keydown');
 
 var _focusOnKeydown2 = _interopRequireDefault(_focusOnKeydown);
 
-require('../messages-list-panel/layer-messages-list/layer-messages-list');
+require('../message-list/layer-message-list/layer-message-list');
 
-require('../subcomponents/layer-composer/layer-composer');
+require('../subcomponents/layer-compose-bar/layer-compose-bar');
 
 require('../subcomponents/layer-typing-indicator/layer-typing-indicator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 
-(0, _component.registerComponent)('layer-conversation-panel', {
+(0, _component.registerComponent)('layer-conversation-view', {
   mixins: [_mainComponent2.default, _hasQuery2.default, _focusOnKeydown2.default],
 
   /**
@@ -4503,7 +4458,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
    * @param {String} evt.detail.value
    * @param {String} evt.detail.oldValue
    */
-  events: ['layer-send-message', 'layer-typing-indicator-change', 'layer-composer-change-value'],
+  events: ['layer-send-message', 'layer-typing-indicator-change', 'layer-compose-bar-change-value'],
 
   properties: {
 
@@ -5038,10 +4993,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../base');
-  layerUI.buildAndRegisterTemplate("layer-conversation-panel", "<layer-messages-list layer-id='list'></layer-messages-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-composer layer-id='composer'></layer-composer>", "");
-  layerUI.buildStyle("layer-conversation-panel", "layer-conversation-panel {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-messages-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-composer {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-conversation-view", "<layer-message-list layer-id='list'></layer-message-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-compose-bar layer-id='composer'></layer-compose-bar>", "");
+  layerUI.buildStyle("layer-conversation-view", "layer-conversation-view {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-message-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-compose-bar {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":49,"../../mixins/has-query":50,"../../mixins/main-component":56,"../messages-list-panel/layer-messages-list/layer-messages-list":18,"../subcomponents/layer-composer/layer-composer":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":35,"layer-websdk":78}],12:[function(require,module,exports){
+},{"../../base":4,"../../components/component":5,"../../mixins/focus-on-keydown":49,"../../mixins/has-query":50,"../../mixins/main-component":56,"../message-list/layer-message-list/layer-message-list":18,"../subcomponents/layer-compose-bar/layer-compose-bar":21,"../subcomponents/layer-typing-indicator/layer-typing-indicator":35,"layer-websdk":78}],12:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -6128,7 +6083,7 @@ module.exports = {
         }
 
         // Setup the layer-date
-        if (this.nodes.date) {
+        if (this.nodes.date && this.item.isSaved()) {
           if (this.dateRenderer) this.nodes.date.dateRenderer = this.dateRenderer;
           this.nodes.date.date = this.item.sentAt;
         }
@@ -6287,7 +6242,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *   appId: 'my-app-id',
  *   layer: window.layer,
  *   mixins: {
- *     'layer-messages-list': {
+ *     'layer-message-list': {
  *       properties: {
  *         searchText: {
  *           value: '',
@@ -6388,7 +6343,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var PAGING_DELAY = 2000; 
 
 
-(0, _component.registerComponent)('layer-messages-list', {
+(0, _component.registerComponent)('layer-message-list', {
   mixins: [_list2.default, _hasQuery2.default, _emptyList2.default, _listLoadIndicator2.default, _queryEndIndicator2.default],
   properties: {
 
@@ -6528,6 +6483,12 @@ var PAGING_DELAY = 2000;
       value: 2.0
     },
 
+    /**
+     * Note that we provide default definitions of replaceable content here rather than in the
+     * message item where it would have to be generated and then removed for each message item.
+     *
+     * @property
+     */
     replaceableContent: {
       value: {
         messageRowLeftSide: function messageRowLeftSide(widget) {
@@ -6583,11 +6544,6 @@ var PAGING_DELAY = 2000;
             div.classList.add('layer-sender-name');
             return div;
           }
-        },
-        endOfResultsNode: function endOfResultsNode(widget) {
-          var result = document.createElement('layer-start-of-conversation');
-          result.setAttribute('layer-id', 'startOfConversation');
-          return result;
         }
       }
     }
@@ -7121,8 +7077,8 @@ var PAGING_DELAY = 2000;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-messages-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
-  layerUI.buildStyle("layer-messages-list", "layer-messages-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-messages-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-messages-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-message-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'><layer-start-of-conversation layer-id='startOfConversation'></layer-start-of-conversation></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
+  layerUI.buildStyle("layer-message-list", "layer-message-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-message-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-message-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"../../../mixins/empty-list":48,"../../../mixins/has-query":50,"../../../mixins/list":55,"../../../mixins/list-load-indicator":53,"../../../mixins/query-end-indicator":58,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":34,"../layer-message-item-received/layer-message-item-received":16,"../layer-message-item-sent/layer-message-item-sent":17,"layer-websdk":78}],19:[function(require,module,exports){
 /**
@@ -7518,7 +7474,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *
  * Special behaviors to know about:
  *
- * * CSS Class `layer-composer-one-line-of-text`: If there is only a single line's worth of text, then this CSS class is applied to
+ * * CSS Class `layer-compose-bar-one-line-of-text`: If there is only a single line's worth of text, then this CSS class is applied to
  *   help center the text
  * * Event `layer-file-selected`: This widget listens for this event, and if it receives it, uses that event to retrieve a file to send in
  *   the Conversation.  Event comes from layerUI.components.subcomponents.FileUploadButton or from your custom widgets.
@@ -7546,7 +7502,7 @@ var ENTER = 13;
 
 var TAB = 9;
 
-(0, _component.registerComponent)('layer-composer', {
+(0, _component.registerComponent)('layer-compose-bar', {
   properties: {
 
     /**
@@ -7653,7 +7609,7 @@ var TAB = 9;
      * @private
      */
     onCreate: function onCreate() {
-      this.classList.add('layer-composer-one-line-of-text');
+      this.classList.add('layer-compose-bar-one-line-of-text');
 
       // Setting this in the template causes errors in IE 11.
       this.nodes.input.placeholder = 'Enter a message';
@@ -7667,7 +7623,7 @@ var TAB = 9;
 
 
     /**
-     * Whenever the value changes, trigger a `layer-composer-change-value` event.
+     * Whenever the value changes, trigger a `layer-compose-bar-change-value` event.
      *
      * @method
      * @private
@@ -7684,18 +7640,18 @@ var TAB = 9;
        * This is not a cancelable event.
        *
        * ```javascript
-       * document.body.addEventListener('layer-composer-change-value', function(evt) {
+       * document.body.addEventListener('layer-compose-bar-change-value', function(evt) {
        *   this.setState({composerValue: evt.detail.value});
        * }
        * ```
        *
-       * @event layer-composer-change-value
+       * @event layer-compose-bar-change-value
        * @param {Event} evt
        * @param {Object} evt.detail
        * @param {String} evt.detail.value
        * @param {String} evt.detail.oldValue
        */
-      this.trigger('layer-composer-change-value', { value: value, oldValue: oldValue });
+      this.trigger('layer-compose-bar-change-value', { value: value, oldValue: oldValue });
 
       this.isEmpty = !Boolean(this.value);
     },
@@ -7896,7 +7852,7 @@ var TAB = 9;
         }
 
         // Note that classList.toggle doesn't work right in IE11
-        _this.classList[willBeOneLine ? 'add' : 'remove']('layer-composer-one-line-of-text');
+        _this.classList[willBeOneLine ? 'add' : 'remove']('layer-compose-bar-one-line-of-text');
       }, 10);
     },
 
@@ -7915,8 +7871,8 @@ var TAB = 9;
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-composer", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'></layer-replaceable-content>", "");
-  layerUI.buildStyle("layer-composer", "layer-composer {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-composer .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-composer textarea, layer-composer .hidden-resizer, layer-composer .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 0px;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-composer textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-composer.layer-composer-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-composer .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-composer .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-composer .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-compose-bar", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'><layer-send-button></layer-send-button></layer-replaceable-content>", "");
+  layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 0px;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":5,"layer-websdk":78}],22:[function(require,module,exports){
 /**
@@ -8507,17 +8463,11 @@ var _base = require('../../../base');
 
 var _base2 = _interopRequireDefault(_base);
 
-var _mainComponent = require('../../../mixins/main-component');
-
-var _mainComponent2 = _interopRequireDefault(_mainComponent);
-
 var _component = require('../../../components/component');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-file-upload-button', {
-  mixins: [_mainComponent2.default],
   properties: {
     /**
      * Set the `accept` attribute of the file upload widget.
@@ -8591,14 +8541,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":56,"layer-websdk":78}],27:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"layer-websdk":78}],27:[function(require,module,exports){
 /**
  * The Layer Loading Spinner/indicator
  *
@@ -8653,18 +8604,13 @@ var _component = require('../../../components/component');
 
 require('../layer-menu/layer-menu');
 
-var _mainComponent = require('../../../mixins/main-component');
-
-var _mainComponent2 = _interopRequireDefault(_mainComponent);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-menu-button', {
-  mixins: [_mainComponent2.default],
   properties: {
     getMenuOptions: {
       type: Function,
+      noGetterFromSetter: true,
       get: function get() {
         return this.properties.getMenuOptions || this.parentComponent.getMenuOptions;
       },
@@ -8723,14 +8669,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":56,"../layer-menu/layer-menu":29,"layer-websdk":78}],29:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../layer-menu/layer-menu":29,"layer-websdk":78}],29:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -8963,6 +8910,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           this.innerHTML = this.messageStatusRenderer(message);
         } else {
           var text = '';
+          var isOneOnOne = message.getConversation().participants.length === 2;
           if (message.isNew()) {
             text = '';
           } else if (message.isSaving() || message.isNew()) {
@@ -8971,15 +8919,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             text = 'sent';
           } else if (message.readStatus === _layerWebsdk2.default.Constants.RECIPIENT_STATE.NONE) {
             text = 'delivered';
-          } else if (message.readStatus === _layerWebsdk2.default.Constants.RECIPIENT_STATE.ALL) {
-            text = 'read';
+            if (!isOneOnOne) {
+              var count = Object.keys(message.recipientStatus).filter(function (id) {
+                return message.recipientStatus[id] === _layerWebsdk2.default.Constants.RECEIPT_STATE.DELIVERED || message.recipientStatus[id] === _layerWebsdk2.default.Constants.RECEIPT_STATE.READ;
+              }).length;
+              text += ' to ' + (count - 1) + ' participants';
+            }
           } else {
-            var sessionOwnerId = message.getClient().user.id;
-            var status = message.recipientStatus;
-            var count = Object.keys(status).filter(function (identityId) {
-              return identityId !== sessionOwnerId && status[identityId] === _layerWebsdk2.default.Constants.RECEIPT_STATE.READ;
-            }).length;
-            text = 'read by ' + count + ' participants';
+            text = 'read';
+            if (!isOneOnOne) {
+              var _count = Object.keys(message.recipientStatus).filter(function (id) {
+                return message.recipientStatus[id] === _layerWebsdk2.default.Constants.RECEIPT_STATE.READ;
+              }).length;
+              text += ' by ' + (_count - 1) + ' participants';
+            }
           }
           this.innerHTML = text;
         }
@@ -9046,10 +8999,6 @@ var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
 
 var _component = require('../../../components/component');
 
-var _mainComponent = require('../../../mixins/main-component');
-
-var _mainComponent2 = _interopRequireDefault(_mainComponent);
-
 var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
@@ -9057,7 +9006,7 @@ var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-presence', {
-  mixins: [_mainComponent2.default, _sizeProperty2.default],
+  mixins: [_sizeProperty2.default],
 
   /**
    * The user has clicked on the `<layer-presence />` widget
@@ -9175,9 +9124,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":56,"../../../mixins/size-property":59,"layer-websdk":78}],32:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5,"../../../mixins/size-property":59,"layer-websdk":78}],32:[function(require,module,exports){
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
+ *
+ * TODO: Should be able to access mainComponent's originalChildNodes and find matching children
  *
  * @class layerUI.components.subcomponents.ReplaceableContent
  * @extends layerUI.components.Component
@@ -9197,7 +9148,6 @@ var _component = require('../../../components/component');
       if (!this.name) throw new Error('Unnamed replaceable content detected');
 
       var processed = false;
-      //this.properties._internalState.onProcessReplaceableContentCalled = true;
       var parents = [];
       var node = this;
       while (node.parentComponent) {
@@ -9221,6 +9171,15 @@ var _component = require('../../../components/component');
           return _this.nodes.content.appendChild(item);
         });
         delete this.properties.originalChildNodes;
+        this._findNodesWithin(this, function (node, isComponent) {
+          var layerId = node.getAttribute && node.getAttribute('layer-id');
+          if (layerId) _this.parentComponent.nodes[layerId] = node;
+
+          if (isComponent) {
+            if (!node.properties) node.properties = {};
+            node.properties.parentComponent = _this.parentComponent;
+          }
+        });
       }
     },
     loadContent: function loadContent(parent, generator) {
@@ -9292,15 +9251,7 @@ var _component = require('../../../components/component');
 
 var _component = require('../../../components/component');
 
-var _mainComponent = require('../../../mixins/main-component');
-
-var _mainComponent2 = _interopRequireDefault(_mainComponent);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-
 (0, _component.registerComponent)('layer-send-button', {
-  mixins: [_mainComponent2.default],
   properties: {
     text: {
       value: 'SEND',
@@ -9331,14 +9282,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.trigger('layer-send-click');
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-send-button", "<div></div>", "");
   layerUI.buildStyle("layer-send-button", "layer-send-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-send-button div {\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":5,"../../../mixins/main-component":56}],34:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":5}],34:[function(require,module,exports){
 /**
  * The Start of Conversation which renders some customizable welcome message based on the Conversation
  *
@@ -9477,20 +9429,32 @@ var _component = require('../../../components/component');
 
         // If the app lets us handle the event, set the value of this widget to something appropriate
         if (customEvtResult) {
-          var names = evt.typing.map(function (user) {
-            return user.displayName;
-          });
-          switch (names.length) {
-            case 0:
-              this.value = '';
-              break;
-            case 1:
-              this.value = names.join(', ') + ' is typing';
-              break;
-            default:
-              this.value = names.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' are typing';
-          }
+          this.showAsTyping(evt.typing);
         }
+      }
+    },
+    showAsTyping: function showAsTyping(identities) {
+      var names = identities.map(function (user) {
+        return user.firstName || user.displayName || user.lastName;
+      }).filter(function (name) {
+        return name;
+      });
+      switch (names.length) {
+        case 0:
+          if (identities.length) {
+            this.value = 'User is typing';
+          } else {
+            this.value = '';
+          }
+          break;
+        case 1:
+          this.value = names.join(', ') + ' is typing';
+          break;
+        case 2:
+          this.value = names[0] + ' and ' + names[1] + ' are typing';
+          break;
+        default:
+          this.value = names[0] + ', ' + names[1] + ' and ' + (names.length - 2) + ' others are typing';
       }
     }
   }
@@ -10381,10 +10345,10 @@ require('./adapters/backbone');
 require('./adapters/react');
 
 // Load Main Components
-require('./components/conversation-list-panel/layer-conversations-list/layer-conversations-list');
-require('./components/identities-list-panel/layer-identities-list/layer-identities-list');
+require('./components/conversation-list/layer-conversation-list/layer-conversation-list');
+require('./components/identity-list/layer-identity-list/layer-identity-list');
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
-require('./components/layer-conversation-panel/layer-conversation-panel');
+require('./components/layer-conversation-view/layer-conversation-view');
 require('./components/layer-notifier/layer-notifier');
 require('./components/subcomponents/layer-presence/layer-presence');
 
@@ -10427,10 +10391,10 @@ require('./adapters/backbone');
 require('./adapters/react');
 
 // Load Main Components
-require('./components/conversation-list-panel/layer-conversations-list/layer-conversations-list');
-require('./components/identities-list-panel/layer-identities-list/layer-identities-list');
+require('./components/conversation-list/layer-conversation-list/layer-conversation-list');
+require('./components/identity-list/layer-identity-list/layer-identity-list');
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
-require('./components/layer-conversation-panel/layer-conversation-panel');
+require('./components/layer-conversation-view/layer-conversation-view');
 require('./components/layer-notifier/layer-notifier');
 require('./components/subcomponents/layer-presence/layer-presence');
 
@@ -10465,7 +10429,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list-panel/layer-conversations-list/layer-conversations-list":8,"./components/identities-list-panel/layer-identities-list/layer-identities-list":9,"./components/layer-conversation-panel/layer-conversation-panel":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-presence/layer-presence":31,"./components/subcomponents/layer-send-button/layer-send-button":33,"./handlers/message/layer-message-image/layer-message-image":36,"./handlers/message/layer-message-text-plain":37,"./handlers/message/layer-message-video":39,"./handlers/text/autolinker":40,"./handlers/text/code-blocks":41,"./handlers/text/emoji":42,"./handlers/text/images":43,"./handlers/text/newline":44,"./handlers/text/youtube":45,"./layer-ui":47,"./mixins/focus-on-keydown":49,"./mixins/has-query":50,"./mixins/list":55,"./mixins/list-item":52,"./mixins/list-item-selection":51,"./mixins/list-selection":54,"./mixins/main-component":56,"./mixins/message-handler":57,"./utils/date-separator":61,"./utils/files":62,"animated-scrollto":65}],47:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./components/conversation-list/layer-conversation-list/layer-conversation-list":8,"./components/identity-list/layer-identity-list/layer-identity-list":10,"./components/layer-conversation-view/layer-conversation-view":11,"./components/layer-notifier/layer-notifier":12,"./components/membership-list-panel/layer-membership-list/layer-membership-list":14,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":26,"./components/subcomponents/layer-presence/layer-presence":31,"./components/subcomponents/layer-send-button/layer-send-button":33,"./handlers/message/layer-message-image/layer-message-image":36,"./handlers/message/layer-message-text-plain":37,"./handlers/message/layer-message-video":39,"./handlers/text/autolinker":40,"./handlers/text/code-blocks":41,"./handlers/text/emoji":42,"./handlers/text/images":43,"./handlers/text/newline":44,"./handlers/text/youtube":45,"./layer-ui":47,"./mixins/focus-on-keydown":49,"./mixins/has-query":50,"./mixins/list":55,"./mixins/list-item":52,"./mixins/list-item-selection":51,"./mixins/list-selection":54,"./mixins/main-component":56,"./mixins/message-handler":57,"./utils/date-separator":61,"./utils/files":62,"animated-scrollto":65}],47:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -11141,7 +11105,7 @@ module.exports = {
      * Or if using a templating engine:
      *
      * ```html
-     * <layer-conversations-list selected-id={{selectedConversation.id}}></layer-conversations-list>
+     * <layer-conversation-list selected-id={{selectedConversation.id}}></layer-conversation-list>
      * ```
      *
      * The above code will set the selected Conversation and render the conversation as selected.
@@ -11792,6 +11756,7 @@ module.exports = {
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);
       this.isDataLoading = this.properties.query.isFiring;
       if (!evt.inRender) this.onRerender();
+      if (this._renderPagedDataDone) this._renderPagedDataDone();
     },
 
 
@@ -12090,6 +12055,7 @@ module.exports = {
  */
 'use strict';
 
+var _layerWebsdk = require('layer-websdk');
 
 module.exports = {
   properties: {
@@ -12121,17 +12087,21 @@ module.exports = {
      * @param {Event} evt
      */
     _renderPagedDataDone: function _renderPagedDataDone() {
+      var _this = this;
+
       var evt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       if (this.query.isDestroyed) {
         this.isEndOfResults = false;
       } else {
-        this.isEndOfResults = this.query.pagedToEnd;
+        _layerWebsdk.Util.defer(function () {
+          _this.isEndOfResults = _this.query.pagedToEnd;
+        });
       }
     }
   }
-};
-},{}],59:[function(require,module,exports){
+}; 
+},{"layer-websdk":78}],59:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -12154,7 +12124,7 @@ module.exports = {
 
         if (this.supportedSizes.indexOf(newValue) === -1) {
           this.properties.size = oldValue;
-          throw new Error(this.tagName + ' does not support a size value of ' + newValue);
+          console.info(this.tagName + ' does not support a size value of ' + newValue);
         } else {
           this.supportedSizes.forEach(function (size) {
             return _this.classList[size === newValue ? 'add' : 'remove']('layer-size-' + size);

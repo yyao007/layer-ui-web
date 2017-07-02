@@ -2,12 +2,12 @@ describe('layer-file-upload-button', function() {
   var el, testRoot;
 
   beforeAll(function(done) {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     setTimeout(done, 1000);
   });
 
   beforeEach(function() {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     el = document.createElement('layer-file-upload-button');
     testRoot.appendChild(el);

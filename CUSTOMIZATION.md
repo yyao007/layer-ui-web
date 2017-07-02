@@ -12,7 +12,7 @@ your design goals.  The main customization mechanisms include:
 Most widgets have some custom events that they generate.  A typical event is typically followed by some default handling:
 
 * User clicks on the Conversation Delete button.  User is asked to confirm deletion using `window.confirm`, and then the Conversation is deleted (or not)
-* User clicks to select a Conversation in the `<layer-conversations-list />` and the `selectedConversationId` property value is updated
+* User clicks to select a Conversation in the `<layer-conversation-list />` and the `selectedConversationId` property value is updated
 * User types in a message to send and hits ENTER; and then the Message is sent.
 
 Wherever there is a default behavior baked in, the component will also respond to `evt.preventDefault()`, causing the default behavior NOT to execute.
@@ -69,7 +69,7 @@ If building themes within this repository, using the grunt build, The Gruntfile.
 
 Most Components of this library come with a Template, and this Template can be replaced without changing the Component code.  This is useful if you want to style, arrange and layout a component differently from the default, but the basic behaviors remain unchanged.  If you need to change the behaviors, then see [Custom Components](#custom-components).
 
-A basic customization can be shown by customizing the way a Conversation is rendered in the `<layer-conversations-list />`.  Our task: remove `last_message` and the delete button, and put a menu button in its place.
+A basic customization can be shown by customizing the way a Conversation is rendered in the `<layer-conversation-list />`.  Our task: remove `last_message` and the delete button, and put a menu button in its place.
 
 The original template:
 
@@ -136,8 +136,8 @@ A common customization task is to customize the templates for how a Message is r
 
 The `<layer-message-item />` is a Component that uses two templates:
 
-* `src/conversation-panel/layer-message-item/layer-message-item-received.html`: Renders Messages sent by other users
-* `src/conversation-panel/layer-message-item/layer-message-item-sent.html`: Renders Messages sent by the current user
+* `src/conversation-view/layer-message-item/layer-message-item-received.html`: Renders Messages sent by other users
+* `src/conversation-view/layer-message-item/layer-message-item-sent.html`: Renders Messages sent by the current user
 
 The default design for these components allows us to differentiate between these two types of messages in the following ways:
 

@@ -53,7 +53,7 @@ describe("Video Handler", function() {
       ]
     });
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
 
     el = document.createElement('layer-message-video');
     layer.Util.defer.flush();

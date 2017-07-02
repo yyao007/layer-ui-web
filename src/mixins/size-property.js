@@ -16,7 +16,8 @@ module.exports = {
       set(newValue, oldValue) {
         if (this.supportedSizes.indexOf(newValue) === -1) {
           this.properties.size = oldValue;
-          throw new Error(this.tagName + ' does not support a size value of ' + newValue);
+          console.info(this.tagName + ' does not support a size value of ' + newValue);
+
         } else {
           this.supportedSizes.forEach(size =>
             this.classList[size === newValue ? 'add' : 'remove']('layer-size-' + size));

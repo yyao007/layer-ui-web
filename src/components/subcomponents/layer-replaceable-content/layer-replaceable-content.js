@@ -1,6 +1,8 @@
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
  *
+ * TODO: Should be able to access mainComponent's originalChildNodes and find matching children
+ *
  * @class layerUI.components.subcomponents.ReplaceableContent
  * @extends layerUI.components.Component
  */
@@ -15,7 +17,6 @@ registerComponent('layer-replaceable-content', {
       if (!this.name) throw new Error('Unnamed replaceable content detected');
 
       let processed = false;
-      //this.properties._internalState.onProcessReplaceableContentCalled = true;
       const parents = [];
       let node = this;
       while (node.parentComponent) {
@@ -37,6 +38,15 @@ registerComponent('layer-replaceable-content', {
       if (!processed && this.properties.originalChildNodes) {
         this.properties.originalChildNodes.forEach(item => this.nodes.content.appendChild(item));
         delete this.properties.originalChildNodes;
+        this._findNodesWithin(this, (node, isComponent) => {
+          const layerId = node.getAttribute && node.getAttribute('layer-id');
+          if (layerId) this.parentComponent.nodes[layerId] = node;
+
+          if (isComponent) {
+            if (!node.properties) node.properties = {};
+            node.properties.parentComponent = this.parentComponent;
+          }
+        });
       }
     },
     loadContent(parent, generator) {

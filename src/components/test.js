@@ -2,7 +2,7 @@ describe('Components', function() {
   var el, testRoot, client, query;
 
   beforeAll(function(done) {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     setTimeout(done, 1000);
   });
 
@@ -747,7 +747,7 @@ describe('Components', function() {
     });
 
     it("Should propagate propagateToChildren properties", function() {
-      var el1 = document.createElement('layer-conversation-panel');
+      var el1 = document.createElement('layer-conversation-view');
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -756,7 +756,7 @@ describe('Components', function() {
       el1.client = client
 
       // Posttest
-      expect(layerUI.components['layer-conversation-panel'].properties.filter(function(prop) {
+      expect(layerUI.components['layer-conversation-view'].properties.filter(function(prop) {
         return prop.propertyName === 'client'
       })[0].propagateToChildren).toBe(true);
       expect(el1.nodes.composer.client).toBe(client);
@@ -770,7 +770,7 @@ describe('Components', function() {
       el1.client = client2;
 
       // Posttest 2
-      expect(layerUI.components['layer-conversation-panel'].properties.filter(function(prop) {
+      expect(layerUI.components['layer-conversation-view'].properties.filter(function(prop) {
         return prop.propertyName === 'client'
       })[0].propagateToChildren).toBe(true);
       expect(el1.nodes.composer.client).toBe(client2);
@@ -792,7 +792,7 @@ describe('Components', function() {
       client._clientAuthenticated();
       client._clientReady();
       var query = client.createQuery({model: layer.Query.Conversation});
-      var el = document.createElement('layer-conversations-list');
+      var el = document.createElement('layer-conversation-list');
       query.data = [
         client.createConversation({participants: ["a"]}),
         client.createConversation({participants: ["b"]}),
@@ -828,7 +828,7 @@ describe('Components', function() {
 
   describe("The mainComponent property", function() {
     it("Should return itself if is a main component", function() {
-      var el1 = document.createElement('layer-conversation-panel');
+      var el1 = document.createElement('layer-conversation-view');
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -836,7 +836,7 @@ describe('Components', function() {
     });
 
     it("Should return its parent main component", function() {
-      var el1 = document.createElement('layer-conversation-panel');
+      var el1 = document.createElement('layer-conversation-view');
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -846,7 +846,7 @@ describe('Components', function() {
 
   describe("The parentComponent property", function() {
     it("Should return null if no parent component", function() {
-      var el1 = document.createElement('layer-conversation-panel');
+      var el1 = document.createElement('layer-conversation-view');
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -854,7 +854,7 @@ describe('Components', function() {
     });
 
     it("Should return its parent component", function() {
-      var el1 = document.createElement('layer-conversation-panel');
+      var el1 = document.createElement('layer-conversation-view');
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 

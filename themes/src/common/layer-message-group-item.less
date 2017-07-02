@@ -1,7 +1,7 @@
 @margin-left: 12px;
 @margin-right: 12px;
 
-layer-messages-list {
+layer-message-list {
   /*
    * Layout of the List itself
    */
@@ -12,7 +12,7 @@ layer-messages-list {
    * Layout for the Header and Footer
    */
   .layer-message-header, .layer-message-footer {
-    margin-left: @margin-left;
+    margin-left: @margin-left + @message-item-text-indent;
     margin-right: @margin-right;
 
     display: none;
@@ -33,6 +33,7 @@ layer-messages-list {
     .layer-replaceable-inner:empty {
       display: none;
     }
+    width: @message-item-text-indent;
   }
 
   .layer-list-item-last {
@@ -43,6 +44,11 @@ layer-messages-list {
     &.layer-list-item-first .layer-message-header,
     &.layer-list-item-last .layer-message-footer {
       display: flex;
+    }
+    &.layer-list-item-first layer-avatar {
+      display: block;
+      position: absolute;
+      top: -@avatar-size-small;
     }
   }
 
@@ -97,15 +103,9 @@ layer-messages-list {
     }
   }
 
-
-  /*
-   * Custom formatting for Messages received by the session owner.
-   */
-  layer-message-item-received {
-    /* Apply the chat participant text colors, and assign that color to any links to avoid blue-on-blue type scenarios. */
-    layer-message-text-plain .layer-message-text {
-      color: @color-black;
-    }
+  .layer-message-item .layer-message-item-content {
+    color: @message-item-color;
+    font-size: @message-item-size;
   }
 
   /* Left/Right panel layout */
@@ -118,31 +118,22 @@ layer-messages-list {
     .layer-message-left-side {
       .layer-replaceable-inner {
         position: relative;
-        padding-left: 12px;
-      }
-      .layer-replaceable-inner:not(:empty) {
-        padding-right: 8px;
       }
     }
 
     .layer-message-right-side {
       .layer-replaceable-inner {
         position: relative;
-        padding-right: 12px;
-      }
-      .layer-replaceable-inner:not(:empty) {
-        padding-left: 8px;
       }
     }
   }
 
   /* Menu Button in Left/Right Panel; note that this will render within the 12px margin between the Replaceable Content div and the right edge of the Message Item */
   .layer-message-item {
-
-    .layer-message-left-side, .layer-message-right-side {
+    .layer-message-right-side {
       layer-menu-button {
         display: none;
-        left: 12px;
+        left: 3px;
         margin-left: 2px;
         &.layer-has-menu {
           display: block;
@@ -157,10 +148,14 @@ layer-messages-list {
 
 
 .layer-message-item {
+    layer-avatar {
+      display: none;
+    }
+
     layer-message-status {
       display: none;
-      color: @color-message-item-status;
-      font-size: 12px;
+      color: @message-item-status-color;
+      font-size: @message-item-status-size;
       &:before {
         content: "(";
       }
@@ -175,19 +170,25 @@ layer-messages-list {
 
     .layer-sender-name {
       font-weight: bold;
-      color: @color-message-item-sender;
-      font-size: 16px;
+      color: @message-item-sender-color;
+      font-size: @message-item-sender-size;
     }
     layer-date {
-      color: @color-message-item-date;
+      color: @message-item-date-color;
+      font-size: @message-item-date-size;
       margin-left: 15px;
-      font-size: 12px;
     }
 }
 
+layer-message-list .layer-message-item  .layer-message-item-main {
+  text-align: left;
+}
 
-layer-message-item-sent {
-  .layer-message-item-main {
-    text-align: left;
-  }
+
+.layer-message-status-pending .layer-message-item-content {
+  opacity: 0.5;
+}
+
+.layer-message-preview .layer-message-item-content {
+  opacity: 0.5;
 }

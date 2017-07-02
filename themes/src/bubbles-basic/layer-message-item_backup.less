@@ -1,14 +1,14 @@
-layer-messages-list .layer-message-item:first {
+layer-message-list .layer-message-item:first {
   margin-top: 8px;
 }
 
-layer-messages-list .layer-message-item:last {
+layer-message-list .layer-message-item:last {
   margin-bottom: 8px;
 }
 
 
 /* Styles for Message Items that appear within the Message List Widget */
-layer-messages-list .layer-message-item.layer-list-item-first .layer-list-item {
+layer-message-list .layer-message-item.layer-list-item-first .layer-list-item {
   margin-top: 8px;
   margin-bottom: 8px;
 }
@@ -68,7 +68,7 @@ layer-message-item-received {
   }
 }
 
-layer-messages-list {
+layer-message-list {
 
   /* Do not show the avatar if there is no user associated with the avatar
    * (only happens with messages sent via via Server API 1.0 using a bot name)
@@ -132,7 +132,7 @@ layer-messages-list {
 }
 
 /* Custom formating for Messages received by the sesson owner when menus are showing */
-layer-messages-list.layer-has-menu layer-message-item-received {
+layer-message-list.layer-has-menu layer-message-item-received {
   .layer-list-item {
     /* Position the participant's avatar */
     layer-avatar {
@@ -154,7 +154,7 @@ layer-messages-list.layer-has-menu layer-message-item-received {
 /*
  * Custom formatting for Messages received by the session owner.
  */
-layer-messages-list layer-message-item-received {
+layer-message-list layer-message-item-received {
     layer-avatar {
       margin-right: 8px;
       margin-left: 12px;
@@ -177,7 +177,7 @@ layer-messages-list layer-message-item-received {
 
 
 /* Custom formating for Messages sent by the sesson owner when menus are showing */
-layer-messages-list.layer-has-menu layer-message-item-sent .layer-list-item {
+layer-message-list.layer-has-menu layer-message-item-sent .layer-list-item {
   /* Position the participant's avatar */
   layer-avatar {
     margin-right: 4px;
@@ -195,7 +195,7 @@ layer-messages-list.layer-has-menu layer-message-item-sent .layer-list-item {
 /*
  * Custom formatting for Messages sent by the session owner.
  */
-layer-messages-list layer-message-item-sent .layer-list-item {
+layer-message-list layer-message-item-sent .layer-list-item {
   /* Position the participant's avatar */
   layer-avatar {
     margin-right: 12px;

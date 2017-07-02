@@ -18,7 +18,7 @@ module.exports = {
      * Or if using a templating engine:
      *
      * ```html
-     * <layer-conversations-list selected-id={{selectedConversation.id}}></layer-conversations-list>
+     * <layer-conversation-list selected-id={{selectedConversation.id}}></layer-conversation-list>
      * ```
      *
      * The above code will set the selected Conversation and render the conversation as selected.

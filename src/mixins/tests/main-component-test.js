@@ -16,10 +16,10 @@ describe("Main Component Mixin", function() {
     });
     client._clientAuthenticated();
 
-  if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+  if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
-    el = document.createElement('layer-identities-list');
+    el = document.createElement('layer-identity-list');
     testRoot.appendChild(el);
     query = client.createQuery({
       model: layer.Query.Identity
@@ -57,7 +57,7 @@ describe("Main Component Mixin", function() {
 
   describe("Common Properties", function() {
     it("Should setup the client from the appId property", function() {
-      testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
+      testRoot.innerHTML = '<layer-identity-list></layer-identity-list>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
 
@@ -68,7 +68,7 @@ describe("Main Component Mixin", function() {
     });
 
     it("Should setup the client from the app-id attribute", function() {
-      testRoot.innerHTML = '<layer-identities-list app-id="' + client.appId + '"></layer-identities-list>';
+      testRoot.innerHTML = '<layer-identity-list app-id="' + client.appId + '"></layer-identity-list>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
       var el = testRoot.firstChild;
@@ -77,7 +77,7 @@ describe("Main Component Mixin", function() {
 
     it("Should setup the client from the layerUI.appId property", function() {
       layerUI.settings.appId = client.appId;
-      testRoot.innerHTML = '<layer-identities-list></layer-identities-list>';
+      testRoot.innerHTML = '<layer-identity-list></layer-identity-list>';
       CustomElements.takeRecords();
       layer.Util.defer.flush();
       var el = testRoot.firstChild;

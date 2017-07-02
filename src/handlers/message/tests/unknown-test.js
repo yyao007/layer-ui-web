@@ -22,7 +22,7 @@ describe("Unknown Handler", function() {
     });
     message = conversation.createMessage({parts: [{mimeType: "text/hat", body: "howdy ho"}]});
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({layer: layer});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({layer: layer});
 
     el = document.createElement('layer-message-unknown');
     el._contentTag = 'layer-message-unknown';

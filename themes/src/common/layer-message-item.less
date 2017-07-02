@@ -1,4 +1,4 @@
-layer-messages-list {
+layer-message-list {
   /*
    * Layout of the List itself
    */
@@ -41,7 +41,7 @@ layer-messages-list {
     &.layer-list-item-last .layer-message-footer {
       display: flex;
       margin-right: 5px;
-      margin-left: @message-item-avatar-width + @message-item-bubble-indent;
+      margin-left: @message-item-text-indent + @message-item-bubble-indent;
     }
   }
 
@@ -63,7 +63,7 @@ layer-messages-list {
     &.layer-list-item-first .layer-message-header, &.layer-list-item-last .layer-message-footer {
       display: flex;
       .layer-replaceable-inner {
-        margin-right: @message-item-avatar-width + @message-item-bubble-indent;
+        margin-right: @message-item-text-indent + @message-item-bubble-indent;
         margin-left: 5px;
         layer-date {
           display: inline-block;
@@ -225,5 +225,13 @@ layer-messages-list {
     .layer-message-footer {
       text-align: right;
     }
+  }
+
+  .layer-message-status-pending .layer-message-item-content {
+    opacity: 0.5;
+  }
+
+  .layer-message-preview .layer-message-item-content {
+    opacity: 0.5;
   }
 }

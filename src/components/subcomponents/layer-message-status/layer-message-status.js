@@ -97,6 +97,7 @@ registerComponent('layer-message-status', {
           this.innerHTML = this.messageStatusRenderer(message);
         } else {
           let text = '';
+          const isOneOnOne = message.getConversation().participants.length === 2;
           if (message.isNew()) {
             text = '';
           } else if (message.isSaving() || message.isNew()) {
@@ -106,14 +107,18 @@ registerComponent('layer-message-status', {
             text = 'sent';
           } else if (message.readStatus === Layer.Constants.RECIPIENT_STATE.NONE) {
             text = 'delivered';
-          } else if (message.readStatus === Layer.Constants.RECIPIENT_STATE.ALL) {
-            text = 'read';
+            if (!isOneOnOne) {
+              const count = Object.keys(message.recipientStatus)
+                .filter(id => message.recipientStatus[id] === Layer.Constants.RECEIPT_STATE.DELIVERED || message.recipientStatus[id] === Layer.Constants.RECEIPT_STATE.READ).length;
+              text += ` to ${count - 1} participants`;
+            }
           } else {
-            const sessionOwnerId = message.getClient().user.id;
-            const status = message.recipientStatus;
-            const count = Object.keys(status).filter(identityId =>
-              identityId !== sessionOwnerId && status[identityId] === Layer.Constants.RECEIPT_STATE.READ).length;
-            text = `read by ${count} participants`;
+            text = 'read';
+            if (!isOneOnOne) {
+              const count = Object.keys(message.recipientStatus)
+                  .filter(id => message.recipientStatus[id] === Layer.Constants.RECEIPT_STATE.READ).length;
+              text += ` by ${count - 1} participants`;
+            }
           }
           this.innerHTML = text;
         }

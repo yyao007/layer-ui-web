@@ -81,8 +81,8 @@ module.exports = function (grunt) {
     less: {
       themes: {
         files: [
-          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'}/*,
-          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'}*/
+          {src: ['themes/src/bubbles-basic/theme.less'], dest: 'themes/build/bubbles-basic.css'},
+          {src: ['themes/src/groups-basic/theme.less'], dest: 'themes/build/groups-basic.css'}
         ]
       }
     },
@@ -97,7 +97,7 @@ module.exports = function (grunt) {
     /* TODO: This is a crap copy routine as multiple themes using the same template name will overwrite eachother. */
     copy: {
       themes: {
-        src: ["themes/src/*/**.html"],
+        src: ["themes/src/*/**.html", "themes/src/*/**.js"],
         dest: "themes/build/",
         flatten: true,
         expand: true

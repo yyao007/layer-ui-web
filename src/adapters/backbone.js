@@ -35,7 +35,7 @@ import layerUI from '../base';
  * < layer-notifier notify-in-foreground="toast"></layer-notifier>
  *
  * < !-- Associated with the ConversationView -->
- * < layer-conversation-panel conversation-id="layer:///conversations/UUID"></layer-conversation-panel>
+ * < layer-conversation-view conversation-id="layer:///conversations/UUID"></layer-conversation-view>
  * ```
  *
  * @class layerUI.adapters.backbone
@@ -47,11 +47,8 @@ function initBackbone(backbone) {
   if (libraryResult) return libraryResult;
   libraryResult = {};
 
-  // Gather all UI Components flagged as Main Components; other components don't require special wrappers for direct use by Apps.
-  Object.keys(layerUI.components).filter((componentName) => {
-    const component = layerUI.components[componentName];
-    return component.properties.filter(prop => prop.propertyName === '_isMainComponent').length;
-  })
+  // Gather all UI Components
+  Object.keys(layerUI.components)
   .forEach((componentName) => {
     const component = layerUI.components[componentName];
 

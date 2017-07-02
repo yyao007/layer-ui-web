@@ -507,6 +507,7 @@ module.exports = {
       this._gatherAndProcessAffectedItems(affectedItems, evt.data.length === this.properties.query.data.length);
       this.isDataLoading = this.properties.query.isFiring;
       if (!evt.inRender) this.onRerender();
+      if (this._renderPagedDataDone) this._renderPagedDataDone();
     },
 
     /**

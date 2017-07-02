@@ -3,7 +3,7 @@ describe("Date Separator Utility", function() {
   var el, testRoot, client, conversation, query, user1;
 
   beforeAll(function(done) {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     setTimeout(done, 1000);
   });
 
@@ -26,10 +26,10 @@ describe("Date Separator Utility", function() {
       participants: ['layer:///identities/FrodoTheDodo', 'layer:///identities/SaurumanTheMildlyAged']
     });
 
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
-    el = document.createElement('layer-messages-list');
+    el = document.createElement('layer-message-list');
     el.onRenderListItem = layerUI.utils.dateSeparator;
 
     testRoot.appendChild(el);

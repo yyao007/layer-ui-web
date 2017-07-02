@@ -1,5 +1,5 @@
-window.layerUI.setupMixins({
-  'layer-messages-list': {
+var config = {
+  'layer-message-list': {
     properties: {
       replaceableContent: {
         value: {
@@ -7,6 +7,13 @@ window.layerUI.setupMixins({
             var menu = document.createElement('layer-menu-button');
             return menu;
           },
+          messageRowLeftSide: function() {
+            var avatar = document.createElement('layer-avatar');
+            avatar.setAttribute('layer-id', 'avatar');
+            avatar.size = 'small';
+            return avatar;
+          },
+
           messageRowHeader: function(messageWidget) {
             var sender = messageWidget.item.sender;
             var parent = document.createElement('div');
@@ -31,4 +38,12 @@ window.layerUI.setupMixins({
       }
     }
   }
-});
+};
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = config;
+} else if (typeof layerUI !== 'undefined') {
+  layerUI.setupMixins(config);
+} else {
+  window.layerUIConfig = config;
+  console.log('Customization.js results stashed in window.layerUIConfig but you must apply it using layerUI.setupMixins(layerUIConfig)');
+}

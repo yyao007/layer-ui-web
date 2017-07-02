@@ -1,5 +1,3 @@
-/** NEW STUFF **/
-
 /* Color Pallete */
 @color-white: #ffffff;
 @color-g1: #f3f3f3;
@@ -25,10 +23,10 @@
 @color-role-list-item-border: @color-role-border;
 
 /* Font Size Definitions */
-@font-larger: 1.2em;
-@font-large: 1.1em;
-@font-medium: 1.0em;
-@font-small: 0.8em;
+@font-larger: 1.2rem;
+@font-large: 1.1rem;
+@font-medium: 1.0rem;
+@font-small: 0.8rem;
 
 /* Presence Widget */
 @presence-color-busy: @color-red;
@@ -78,7 +76,6 @@
 @conversation-item-small-last-message-size: @font-small;
 @conversation-item-tiny-last-message-size: @font-small;
 
-
 // Group Counters are part of Conversation Item if using the Small size Items
 @conversation-item-color-group-count: @color-role-font-light;
 @conversation-item-color-group-count-border: @color-role-font-light;
@@ -87,6 +84,9 @@
 /* Conversation List */
 @conversation-list-color-background: @color-role-list-background;
 @conversation-list-item-border: @color-role-list-item-border;
+@conversation-list-empty-color: @color-role-font-light;
+@conversation-list-empty-size: @font-larger;
+@conversation-list-end-of-query-color: @color-role-font-light;
 
 /* Identity Item */
 @identity-item-title-color: @color-role-font-standard;
@@ -98,6 +98,9 @@
 /* Identity List */
 @identity-list-color-background: @color-role-list-background;
 @identity-list-item-border: @color-role-list-item-border;
+@identity-list-empty-color: @color-role-font-light;
+@identity-list-empty-size: @font-larger;
+@identity-list-end-of-query-color: @color-role-font-light;
 
 /* Membership Item */
 @membership-item-title-color: @color-role-font-standard;
@@ -134,7 +137,7 @@
 @message-item-bubble-text-sent-color: @color-white;
 @message-item-border-radius: 16px;
 @message-item-font-size: @font-medium;
-@message-item-avatar-width: 12px + 12px + 32px;
+@message-item-text-indent: 12px + 12px + 32px;
 @message-item-bubble-indent: 8px;
 
 /* Messages List */

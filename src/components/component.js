@@ -210,7 +210,7 @@
  *
  * An app can modify an existing component by adding custom mixins to it using `layerUI.init()`.  The `mixins` parameter
  * takes as keys, the tag-name for any widget you want to customize;
- * (e.g `layer-messages-item`, `layer-messages-list`, `layer-conversation-panel`, etc...)
+ * (e.g `layer-message-item`, `layer-message-list`, `layer-conversation-view`, etc...)
  *
  * The following example adds a search bar to the Message List:
  *
@@ -1321,7 +1321,13 @@ const standardClassMethods = {
       if (!currentNode.properties) currentNode.properties = {};
       currentNode.properties.parentComponent = this;
       if (!currentNode.id) currentNode.id = Layer.Util.generateUUID();
-      this.nodes[currentNode.getAttribute('layer-id') || currentNode.id] = currentNode;
+      let layerId = currentNode.getAttribute('layer-id');
+      const camelName = layerUI.camelCase(currentNode.tagName.toLowerCase().replace(/^layer-/, ''));
+
+      if (!layerId && currentNode.tagName.indexOf('LAYER') === 0 && !this.nodes[camelName]) {
+        layerId = camelName;
+      }
+      this.nodes[layerId || currentNode.id] = currentNode;
     });
   },
 
@@ -1518,62 +1524,6 @@ const standardClassMethods = {
    * @private
    */
   _onProcessReplaceableContent() {},
-  __onProcessReplaceableContent() {
-    this.properties._internalState.onProcessReplaceableContentCalled = true;
-
-    // Make sure that the parent component has processed its replaceable content, and passed its values on to this component.
-    // Parent component will in turn call this on its parent until we reach the Main Component
-    const parent = this.parentComponent;
-    if (parent) {
-      if (!parent.properties._internalState.onProcessReplaceableContentCalled) parent._onProcessReplaceableContent();
-      this.replaceableContent = Object.assign({}, this.properties.replaceableContent, parent.properties.replaceableContent);
-    }
-
-    Object.keys(this.properties.replaceableContent || {}).forEach((nodeName) => {
-      const parentNode = this.nodes[nodeName];
-      let newNode;
-
-      // Transform a function into a node if we've been given a function...
-      // and if there is a node of that name (i.e. this could be intended to be passed to a subcomponent
-      // in which case it should handle turning it into a node; lists in particular need to manage
-      // creation of the node once per list-item
-      if (parentNode) {
-        if (typeof this.properties.replaceableContent[nodeName] === 'function') {
-          const oldChild = parentNode.firstChild;
-          parentNode.removeChild(oldChild);
-          newNode = this.properties.replaceableContent[nodeName](this, parentNode);
-          if (!newNode) parentNode.appendChild(oldChild); // lame... but handles case where callback returns null
-        } else {
-          newNode = this.properties.replaceableContent[nodeName];
-        }
-
-        if (newNode) {
-          const alreadyInWidget = this.contains(newNode);
-
-          // React only works well if React inserts the node itself (event handlers such as <div onclick={handler} /> get lost otherwise)
-          if (!alreadyInWidget && (newNode.tagName !== 'DIV' || !newNode.classList.contains('layer-replaceable-content') && !newNode.firstChild)) {
-            const tmpNode = document.createElement('div');
-            tmpNode.appendChild(newNode);
-            newNode = tmpNode;
-          }
-
-          if (!newNode.classList.contains('layer-replaceable-content')) newNode.classList.add('layer-replaceable-content');
-
-          if (!alreadyInWidget) {
-            let docFragment;
-            if (newNode.tagName === 'TEMPLATE') {
-              docFragment = document.importNode(newNode.content, true);
-              newNode = docFragment.firstChild;
-            }
-
-            parentNode.appendChild(newNode);
-          }
-          this.onReplaceableContentAdded(nodeName, newNode);
-        }
-      }
-    });
-  },
-
 
   /**
    * MIXIN HOOK: Each time a Component is initialized, its onAfterCreate methods will be called.

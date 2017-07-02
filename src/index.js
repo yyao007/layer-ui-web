@@ -23,10 +23,10 @@ require('./adapters/backbone');
 require('./adapters/react');
 
 // Load Main Components
-require('./components/conversation-list-panel/layer-conversations-list/layer-conversations-list');
-require('./components/identities-list-panel/layer-identities-list/layer-identities-list');
+require('./components/conversation-list/layer-conversation-list/layer-conversation-list');
+require('./components/identity-list/layer-identity-list/layer-identity-list');
 require('./components/membership-list-panel/layer-membership-list/layer-membership-list');
-require('./components/layer-conversation-panel/layer-conversation-panel');
+require('./components/layer-conversation-view/layer-conversation-view');
 require('./components/layer-notifier/layer-notifier');
 require('./components/subcomponents/layer-presence/layer-presence');
 

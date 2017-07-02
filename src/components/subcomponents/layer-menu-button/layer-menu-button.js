@@ -20,13 +20,12 @@
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import '../layer-menu/layer-menu';
-import MainComponent from '../../../mixins/main-component';
 
 registerComponent('layer-menu-button', {
-  mixins: [MainComponent],
   properties: {
     getMenuOptions: {
       type: Function,
+      noGetterFromSetter: true,
       get() {
         return this.properties.getMenuOptions || this.parentComponent.getMenuOptions;
       },

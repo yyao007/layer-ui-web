@@ -2,7 +2,7 @@ describe('layer-membership-list', function() {
   var el, testRoot, client, query, channel;
 
   beforeAll(function(done) {
-    if (layerUI.components['layer-conversation-panel'] && !layerUI.components['layer-conversation-panel'].classDef) layerUI.init({});
+    if (layerUI.components['layer-conversation-view'] && !layerUI.components['layer-conversation-view'].classDef) layerUI.init({});
     setTimeout(done, 1000);
   });
 
@@ -25,7 +25,7 @@ describe('layer-membership-list', function() {
     });
     channel.syncState = layer.Constants.SYNC_STATE.SYCNED;
 
-    if (!layerUI.components['layer-conversation-panel']) layerUI.init({layer: layer});
+    if (!layerUI.components['layer-conversation-view']) layerUI.init({layer: layer});
     testRoot = document.createElement('div');
     document.body.appendChild(testRoot);
     el = document.createElement('layer-membership-list');

@@ -41,11 +41,10 @@
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
-import MainComponent from '../../../mixins/main-component';
 import SizeProperty from '../../../mixins/size-property';
 
 registerComponent('layer-presence', {
-  mixins: [MainComponent, SizeProperty],
+  mixins: [SizeProperty],
 
   /**
    * The user has clicked on the `<layer-presence />` widget
