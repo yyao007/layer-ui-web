@@ -23,6 +23,7 @@ registerComponent('layer-replaceable-content', {
         node = node.parentComponent;
         parents.unshift(node);
       }
+      const mainComponent = parents[0];
 
       // TODO: Check for HTML content ShadowDOM style in the top component and load it into this component
       for (let parentIndex = 0; parentIndex < parents.length; parentIndex++) {
@@ -34,6 +35,28 @@ registerComponent('layer-replaceable-content', {
           break;
         }
       }
+
+      if (!processed) {
+        const originalNodes = mainComponent.properties.originalChildNodes || [];
+        originalNodes.forEach((parentNode) => {
+          if (processed) return;
+          const name = parentNode.getAttribute('layer-replaceable-name') || parentNode.getAttribute('data-replaceable-name');
+          if (name === this.name) {
+            this.loadContent(mainComponent, parentNode);
+            processed = true;
+          } else {
+            this._findNodesWithin(parentNode, (node, isComponent) => {
+              if (processed) return;
+              const name = node.getAttribute('layer-replaceable-name') || node.getAttribute('data-replaceable-name');
+              if (name === this.name) {
+                this.loadContent(mainComponent, node);
+                processed = true;
+              }
+            });
+          }
+        });
+      }
+
 
       if (!processed && this.properties.originalChildNodes) {
         this.properties.originalChildNodes.forEach(item => this.nodes.content.appendChild(item));

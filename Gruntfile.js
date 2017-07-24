@@ -218,7 +218,7 @@ module.exports = function (grunt) {
       projectFolders.forEach(function(project) {
         grunt.file.copy('package.json', project + '/node_modules/layer-ui-web/package.json');
         grunt.file.copy('lib-es5', project + '/node_modules/layer-ui-web/lib-es5');
-        grunt.file.copy('themes/build', project + '/node_modules/layer-ui-web/themes/build');
+        grunt.file.copy('themes', project + '/node_modules/layer-ui-web/themes');
       });
     }
   });

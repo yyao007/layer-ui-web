@@ -205,6 +205,7 @@ function initReact(React, ReactDom) {
         return React.createElement(componentName, {
           ref: (node) => { this.node = node; },
           id: this.props.id,
+          children: this.props.children,
         });
       },
     });

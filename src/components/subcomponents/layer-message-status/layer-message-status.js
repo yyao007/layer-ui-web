@@ -100,7 +100,7 @@ registerComponent('layer-message-status', {
           const isOneOnOne = message.getConversation().participants.length === 2;
           if (message.isNew()) {
             text = '';
-          } else if (message.isSaving() || message.isNew()) {
+          } else if (message.isSaving()) {
             text = 'pending';
           } else if (message instanceof Layer.Message.ChannelMessage ||
             message.deliveryStatus === Layer.Constants.RECIPIENT_STATE.NONE) {

@@ -10,9 +10,13 @@ layer-message-list {
     font-size: @message-item-status-size;
   }
 
-  layer-date {
+  .layer-message-item .layer-list-item layer-date {
     color: @message-item-date-color;
     font-size: @message-item-date-size;
+    display: none;
+  }
+  .layer-message-item:last-child .layer-list-item layer-date {
+    display: inline-block;
   }
 
   .layer-sender-name {
@@ -35,6 +39,11 @@ layer-message-list {
       margin-bottom: 2px;
     }
   }
+
+  .layer-message-item.layer-list-item-first {
+      margin-top: 14px;
+  }
+
 
   layer-message-item-received {
     &.layer-list-item-first .layer-message-header,
@@ -65,9 +74,6 @@ layer-message-list {
       .layer-replaceable-inner {
         margin-right: @message-item-text-indent + @message-item-bubble-indent;
         margin-left: 5px;
-        layer-date {
-          display: inline-block;
-        }
         layer-message-status {
           margin-right: 5px;
         }
@@ -233,5 +239,15 @@ layer-message-list {
 
   .layer-message-preview .layer-message-item-content {
     opacity: 0.5;
+  }
+
+  layer-message-item-status {
+    .layer-message-item-main {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      color: @message-item-status-color;
+      font-size: @message-item-status-size;
+    }
   }
 }

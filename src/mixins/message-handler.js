@@ -126,8 +126,8 @@ module.exports = {
      * @method _onChange
      * @private
      */
-    _onChange() {
-      if (this.message.isNew()) {
+    _onChange(evt) {
+      if (this.message.isNew() || evt.hasProperty('parts.body')) {
         this.onRender();
       } else {
         this.onRerender();

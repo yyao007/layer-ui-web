@@ -45,7 +45,7 @@ registerComponent('layer-menu', {
       value: 100,
       type: Number,
       set(value) {
-        this.style.width = value + 'px';
+        this.style.minWidth = value + 'px';
       },
     },
 
@@ -99,7 +99,7 @@ registerComponent('layer-menu', {
       // TODO: May have to fix issues with this showing too low or high
       this.style.bottom = '';
       this.style.top = bounds.bottom + 'px';
-      this.style.width = this.menuWidth + 'px';
+      this.style.minWidth = this.menuWidth + 'px';
       setTimeout(() => {
         if (this.offsetTop + this.clientHeight > document.body.clientHeight) {
           this.style.top = '';

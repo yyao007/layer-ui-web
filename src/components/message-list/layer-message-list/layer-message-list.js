@@ -97,6 +97,7 @@ import ListLoadIndicator from '../../../mixins/list-load-indicator';
 import QueryEndIndicator from '../../../mixins/query-end-indicator';
 import '../layer-message-item-sent/layer-message-item-sent';
 import '../layer-message-item-received/layer-message-item-received';
+import '../layer-message-item-status/layer-message-item-status';
 import '../../subcomponents/layer-start-of-conversation/layer-start-of-conversation';
 
 // Mandatory delay between loading one page and the next.  If user is scrolling too fast, they'll have to wait at least (2) seconds.

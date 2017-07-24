@@ -523,7 +523,7 @@ layerUI.buildStyle = function buildStyles(className, styleStr) {
  * @returns {String} aCamelCasedString
  */
 layerUI.camelCase = str =>
-  str.replace(/-(.)/g, (match, value) => value.toUpperCase());
+  str.replace(/[-_](.)/g, (match, value) => value.toUpperCase());
 
 /**
  * Turn a camel case name into a hyphenated name

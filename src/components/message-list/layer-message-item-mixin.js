@@ -228,7 +228,7 @@ module.exports = {
         }
 
         // Setup the layer-date
-        if (this.nodes.date && this.item.isSaved()) {
+        if (this.nodes.date && !this.item.isNew()) {
           if (this.dateRenderer) this.nodes.date.dateRenderer = this.dateRenderer;
           this.nodes.date.date = this.item.sentAt;
         }
