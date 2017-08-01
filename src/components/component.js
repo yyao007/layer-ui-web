@@ -1294,6 +1294,23 @@ const standardClassProperties = {
   _layerEventSubscriptions: {
     value: [],
   },
+  cssClassList: {
+    set(newValue, oldValue) {
+      if (newValue) {
+        if (!Array.isArray(newValue)) newValue = [newValue];
+        newValue.forEach(cssClass => this.classList.add(cssClass));
+        this.properties.cssClassList = newValue;
+      } else {
+        this.properties.cssClassList = oldValue;
+      }
+
+      if (oldValue) {
+        oldValue.forEach((cssClass) => {
+          if (!newValue || newValue.indexOf(cssClass) === -1) this.classList.remove(cssClass);
+        });
+      }
+    },
+  },
   parentComponent: {},
   mainComponent: {
     get() {
@@ -1499,6 +1516,23 @@ const standardClassMethods = {
     const cssClass = args[0];
     const enable = (args.length === 2) ? args[1] : !this.classList.contains(cssClass);
     this.classList[enable ? 'add' : 'remove'](cssClass);
+  },
+
+  createElement: function createElement(tagName, properties) {
+    const node = document.createElement(tagName);
+    node.parentComponent = this;
+    const ignore = ['parentNode', 'name', 'classList'];
+
+    Object.keys(properties).forEach((propName) => {
+      if (ignore.indexOf(propName) === -1) node[propName] = properties[propName];
+    });
+    if (properties.classList) properties.classList.forEach(className => node.classList.add(className));
+    if (properties.parentNode) properties.parentNode.appendChild(node);
+    if (properties.name) this.nodes[properties.name] = node;
+
+    CustomElements.takeRecords();
+    if (node._onAfterCreate) node._onAfterCreate();
+    return node;
   },
 
   /**

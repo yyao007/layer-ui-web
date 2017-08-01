@@ -534,9 +534,9 @@ layerUI.camelCase = str =>
  * @returns {String} a-hyphenated-string
  */
 const regexHyphenate = /([a-z])([A-Z])/g;
-layerUI.hyphenate = str =>
+layerUI.hyphenate = (str, separator = '-') =>
   str.replace(regexHyphenate, (match, part1, part2) =>
-    part1 + '-' + part2.toLowerCase());
+    part1 + separator + part2.toLowerCase());
 
 
 /**
