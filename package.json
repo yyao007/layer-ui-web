@@ -1,6 +1,6 @@
 {
   "name": "layer-ui-web",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.",
   "main": "lib-es5/index.js",
   "scripts": {
@@ -47,3 +47,4 @@
     "strictify": "^0.2.0"
   }
 }
+

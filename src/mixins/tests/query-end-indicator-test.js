@@ -63,8 +63,12 @@ describe("Query End Mixin", function() {
 
   describe("The isEndOfResults property", function() {
       it("Should initialize to hidden/false", function() {
+        var el = document.createElement('layer-messages-list');
+        el.query = query;
+        el.style.height = '300px';
         expect(el.isEndOfResults).toBe(false);
         expect(el.nodes.endOfResultsNode.classList.contains('layer-end-of-results')).toBe(false);
+        el.onDestroy();
       });
       it("Should toggle the layer-end-of-results class", function() {
         el.isEndOfResults = true;

@@ -1,5 +1,9 @@
 # Layer UI for Web Change Log
 
+## 1.0.5
+
+* Attempts to fix special case where message list fails to scroll to the bottom in some environments that we are unable to actually replicate.
+
 ## 1.0.4
 
 * Fixes bug where SEND button, on sending, fails to trigger a Composer resize

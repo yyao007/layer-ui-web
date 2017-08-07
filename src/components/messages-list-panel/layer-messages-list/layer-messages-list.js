@@ -283,13 +283,14 @@ registerComponent('layer-messages-list', {
      */
     scrollTo: {
       mode: registerComponent.MODES.OVERWRITE,
-      value(position) {
+      value(position, callback) {
         if (position === this.scrollTop) return;
         this.properties.isSelfScrolling = true;
         this.scrollTop = position;
         setTimeout(() => {
           this.properties.isSelfScrolling = false;
           this._checkVisibility();
+          if (callback) callback();
         }, 200);
       },
     },
@@ -313,10 +314,12 @@ registerComponent('layer-messages-list', {
         if (position === this.scrollTop) return;
         this.properties.isSelfScrolling = true;
         if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
-        const cancel = this.properties.cancelAnimatedScroll = LayerUI.animatedScrollTo(this, position, animateSpeed, () => {
+        const cancelAnim = this.properties.cancelAnimatedScroll = LayerUI.animatedScrollTo(this, position, animateSpeed, () => {
+          clearTimeout(cancelFallbackTimeoutId);
+
           // Wait for any onScroll events to trigger before we clear isSelfScrolling and procede
           setTimeout(() => {
-            if (cancel !== this.properties.cancelAnimatedScroll) return;
+            if (cancelAnim !== this.properties.cancelAnimatedScroll) return;
             this.properties.cancelAnimatedScroll = null;
 
             this.properties.isSelfScrolling = false;
@@ -324,6 +327,14 @@ registerComponent('layer-messages-list', {
             if (animateCallback) animateCallback();
           }, 100);
         });
+
+        // Some environments are failing to process the animated scroll some of the time.
+        // Add a fallback to force the issue should the scroll fail to have occurred
+        const cancelFallbackTimeoutId = setTimeout(() => {
+          if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
+          this.properties.cancelAnimatedScroll = null;
+          this.scrollTo(position, animateCallback);
+        }, animateSpeed + 20);
       },
     },
 
