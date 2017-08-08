@@ -4,9 +4,7 @@
       overflow-y: auto;
       display: block;
     }
-    layer-conversation-list:not(
-    layer-conversation-list:not(.layer-loading-data) .layer-load-indicator,
-    layer-conversation-list:not(.layer-end-of-results) .layer-end-of-results-indicator {
+    layer-conversation-list:not(.layer-loading-data) .layer-load-indicator {
       display: none;
     }
   </style>
@@ -31,4 +29,3 @@
 <script>
   window.layerUI.registerTemplate('layer-conversation-list');
 </script>
-
