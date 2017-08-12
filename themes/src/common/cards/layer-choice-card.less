@@ -1,0 +1,93 @@
+layer-choice-card .layer-choice-card-question {
+  background-color: @color-g1;
+  color: @color-black;
+  padding: 12px;
+}
+
+layer-choice-card .layer-choice-card-answers layer-action-button button {
+  background-color: @color-white;
+  padding: 12px;
+  margin: 0px;
+  color: @color-lightblue;
+  border-color: @color-g2;
+  border-width: 1px 0px 0px 0px;
+  border-radius: 0px;
+  font-size: @font-larger;
+  outline: none;
+}
+
+layer-action-button button:disabled, layer-choice-card .layer-choice-card-answers layer-action-button button:disabled {
+  background-color: @color-g2;
+  color: @color-g3;
+}
+
+layer-choice-card.layer-choice-card-complete .layer-choice-card-answers layer-action-button button:not(:disabled) {
+  background-color: @color-lightblue;
+  color: @color-g2;
+}
+
+.layer-receipt-card .layer-card-top {
+  background-color: white;
+  color: @color-black;
+}
+
+layer-receipt-card-item {
+  border-bottom: solid 1px @color-g3;
+  background-color: @color-g2;
+  .layer-card-title {
+    font-size: @font-medium;
+    color: @color-black;
+  }
+  .layer-card-description {
+    font-size: @font-small;
+    color: @color-black;
+  }
+  .layer-card-footer {
+    font-size: @font-small;
+    color: @color-g3;
+  }
+}
+
+layer-receipt-card {
+  min-width: 192px;
+  .layer-receipt-details {
+
+    .layer-card-description {
+      color: @color-black;
+      font-size: @font-medium;
+    }
+    label {
+      font-size: @font-small;
+      color: @color-g3;
+      padding-bottom: 4px;
+      display: block;
+    }
+  }
+  layer-card-view.layer-location-card {
+    border-width: 0px;
+    padding: 0px;
+    margin: 0px;
+
+    .layer-card-body {
+      margin: 0px;
+    }
+
+    .layer-card-body .layer-card-description {
+      color: @color-black;
+    }
+  }
+
+  .layer-receipt-detail-item:not(:last-child) {
+    border-bottom: solid 1px @color-g2;
+  }
+  .layer-receipt-detail-item {
+    padding: 8px 12px;
+  }
+  .layer-receipt-detail-item.layer-receipt-summary {
+    padding: 12px 12px;
+    align-items: flex-end;
+    label {
+      padding-bottom: 0px;
+    }
+  }
+}

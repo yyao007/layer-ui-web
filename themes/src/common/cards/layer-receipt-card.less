@@ -1,0 +1,69 @@
+layer-receipt-card-item {
+  padding: 12px;
+  & > img {
+    max-width: 50px;
+    max-height: 50px;
+    margin-right: 12px;
+    align-self: center;
+  }
+}
+layer-receipt-card {
+  min-width: 192px;
+  .layer-receipt-details {
+
+    .layer-card-description {
+      color: @color-black;
+      font-size: @font-medium;
+    }
+    label {
+      font-size: @font-small;
+      color: @color-g3;
+      padding-bottom: 4px;
+      display: block;
+    }
+  }
+  layer-card-view.layer-location-card {
+    border-width: 0px;
+    padding: 0px;
+    margin: 0px;
+
+    .layer-card-body {
+      margin: 0px;
+    }
+
+    .layer-card-body .layer-card-description {
+      color: @color-black;
+    }
+  }
+
+  .layer-receipt-detail-item:not(:last-child) {
+    border-bottom: solid 1px @color-g2;
+  }
+  .layer-receipt-detail-item {
+    padding: 8px 12px;
+  }
+  .layer-receipt-detail-item.layer-receipt-summary {
+    padding: 12px 12px;
+    align-items: flex-end;
+    label {
+      padding-bottom: 0px;
+    }
+  }
+
+  .layer-location-card > layer-standard-card-container {
+    min-height: 0px;
+  }
+  layer-standard-card-container:not(.layer-card-no-metadata) .layer-card-body-outer {
+    padding-bottom: 0px;
+  }
+
+  .layer-receipt-summary {
+    display: flex;
+    flex-direction: row;
+  }
+  .layer-receipt-price {
+    flex-grow: 1;
+    text-align: right;
+    font-size: @font-larger
+  }
+}

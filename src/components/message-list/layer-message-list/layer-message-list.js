@@ -519,8 +519,16 @@ registerComponent('layer-message-list', {
     _generateItem(message) {
       const handler = LayerUI.getHandler(message, this);
       if (handler) {
-        const messageWidget = document.createElement(message.sender.sessionOwner ?
-          'layer-message-item-sent' : 'layer-message-item-received');
+        const rootPart = message.getPartsMatchingAttribute({role: 'root'})[0];
+        let type;
+        if (rootPart && rootPart.mimeType === 'application/vnd.layer.card.response+json') {
+          type = 'layer-message-item-status';
+        } else if (message.sender.sessionOwner) {
+          type = 'layer-message-item-sent';
+        } else {
+          type = 'layer-message-item-received';
+        }
+        const messageWidget = document.createElement(type);
         messageWidget.id = this._getItemId(message.id);
         messageWidget.dateRenderer = this.dateRenderer;
         messageWidget.messageStatusRenderer = this.messageStatusRenderer;

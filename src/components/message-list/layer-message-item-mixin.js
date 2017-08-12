@@ -277,12 +277,19 @@ module.exports = {
      * @private
      */
     _applyContentTag() {
-      const messageHandler = document.createElement(this._contentTag);
-      messageHandler.parentComponent = this;
-      messageHandler.message = this.item;
-      this.nodes.messageHandler = messageHandler;
-
-      this.nodes.content.appendChild(messageHandler);
+      let messageHandler;
+      if (this._contentTag === 'layer-card-view') {
+        messageHandler = this.nodes.cardView;
+        if (this.nodes.content) this.nodes.content.parentNode.removeChild(this.nodes.content);
+        this.nodes.cardView.message = this.item;
+      } else {
+        messageHandler = document.createElement(this._contentTag);
+        messageHandler.parentComponent = this;
+        messageHandler.message = this.item;
+        this.nodes.messageHandler = messageHandler;
+        this.nodes.cardView.parentNode.removeChild(this.nodes.cardView);
+        this.nodes.content.appendChild(messageHandler);
+      }
       Layer.Util.defer(() => {
         if (messageHandler.style.height) {
           this.nodes.content.style.height = messageHandler.style.height;

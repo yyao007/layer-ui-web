@@ -16,8 +16,8 @@
  * @extends layerUI.components.Component
  */
 import Layer from 'layer-websdk';
-import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
+import { settings } from '../../../base';
 
 const ENTER = 13;
 const TAB = 9;
@@ -219,18 +219,19 @@ registerComponent('layer-compose-bar', {
       let parts = [];
       if (optionalParts) {
         parts = optionalParts;
+        const message = this.conversation ? this.conversation.createMessage({ parts }) : null;
+        this._send(message, parts);
       } else if (this.nodes.input.value) {
-        parts.push(new Layer.MessagePart({
-          type: 'text/plain',
-          body: this.nodes.input.value,
-        }));
+        const TextModel = Layer.Client.getCardModelClass('TextModel');
+        new TextModel({
+          text: this.nodes.input.value,
+        }).generateMessage(this.conversation, message => this._send(message, message.parts));
         this.nodes.input.value = '';
         this._onInput({});
       }
-
+    },
+    _send(message, parts) {
       if (parts.length === 0) return;
-
-      const message = this.conversation ? this.conversation.createMessage({ parts }) : null;
 
       /**
        * This event is triggered before any Message is sent; used to control notifications and override sending.
@@ -280,9 +281,18 @@ registerComponent('layer-compose-bar', {
        * @param {String} evt.detail.notification.title
        * @param {String} evt.detail.notification.sound
        */
-      const textPart = parts.filter(part => part.mimeType === 'text/plain')[0];
+      let textPart = parts.filter(part => part.mimeType === 'text/plain')[0];
+      let textValue;
+      if (textPart) {
+        textValue = textPart.body;
+      } else {
+        let textModel = parts.filter(part => part.mimeAttributes.role === 'root')
+          .map(part => this.client.getCardModel(part.id))
+          .filter(model => model.text && !model.getTitle() && !model.getFooter());
+        if (textModel) textValue = textModel.text;
+      }
       const notification = {
-        text: textPart ? textPart.body : 'File received',
+        text: textPart ? textValue : 'File received',
         title: `New Message from ${this.client.user.displayName}`,
       };
 
@@ -330,7 +340,7 @@ registerComponent('layer-compose-bar', {
           event.target.value += '\n';
           this._onInput(event);
         }
-      } else if (!layerUI.settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
+      } else if (!settings.disableTabAsWhiteSpace && event.keyCode === TAB && !event.shiftKey) {
         event.preventDefault();
         event.target.value += '\t  ';
         this._onInput(event);

@@ -1,0 +1,29 @@
+layer-card-view.layer-carousel-card {
+  border-width: 0px;
+  border-radius: 0px;
+}
+
+layer-carousel-card {
+  .layer-next-icon {
+    background-color: @carousel-next-button-background;
+    border: solid 1px @carousel-next-button-border-color;
+    border-radius: 6px 0px 0px 6px;
+    height: 40px;
+    width: 40px;
+    background-size: 32px;
+    right: 6px;
+  }
+
+  .layer-next-icon.layer-previous-icon {
+    left: 6px;
+  }
+
+  .layer-carousel-card-items > * {
+    margin: 0px 4px;
+  }
+
+  & > .layer-carousel-card-items > layer-card-view.layer-image-card {
+    min-width: 250px;
+  }
+}
+

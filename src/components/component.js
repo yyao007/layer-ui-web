@@ -477,7 +477,7 @@
  * @param {Mixed} template     A `<template />` node or a template string such as `<div><button /></div>`
  * @param {String} style       A String with CSS styles for this widget
  */
-import Layer from 'layer-websdk';
+import Layer, { Util } from 'layer-websdk';
 import layerUI from '../base';
 import stateManagerMixin from '../mixins/state-manager';
 
@@ -575,7 +575,7 @@ function finalizeMixinMerge(classDef) {
     if (classDef['__' + name]) {
 
       // NOTE: Modes are currently applied to properties, but we do not yet support OVERWRITE mode.
-      const setters = Layer.Util.sortBy(classDef['__' + name].filter(def => def.set), (setter) => {
+      const setters = Util.sortBy(classDef['__' + name].filter(def => def.set), (setter) => {
         switch (setter.mode) {
           case registerComponent.MODES.BEFORE:
             return 1;
@@ -646,7 +646,7 @@ function setupEvents(classDef) {
  * @param {String} eventName
  */
 function setupEvent(classDef, eventName) {
-  const camelEventName = layerUI.camelCase(eventName.replace(/^layer-/, ''));
+  const camelEventName = Util.camelCase(eventName.replace(/^layer-/, ''));
   const callbackName = 'on' + camelEventName.charAt(0).toUpperCase() + camelEventName.substring(1);
   if (!classDef.properties[callbackName]) {
     classDef.properties[callbackName] = {
@@ -677,7 +677,7 @@ function getPropArray(classDef) {
   return Object.keys(classDef.properties).map((propertyName) => {
     return {
       propertyName,
-      attributeName: layerUI.hyphenate(propertyName),
+      attributeName: Util.hyphenate(propertyName),
       type: classDef.properties[propertyName].type,
       order: classDef.properties[propertyName].order,
       noGetterFromSetter: classDef.properties[propertyName].noGetterFromSetter,
@@ -957,7 +957,7 @@ function _registerComponent(tagName) {
 
       // Call the Component's onAfterCreate method which can handle any setup
       // that requires all properties to be set, dom nodes initialized, etc...
-      Layer.Util.defer(() => this._onAfterCreate());
+      Util.defer(() => this._onAfterCreate());
     },
   };
 
@@ -1215,7 +1215,7 @@ function _registerComponent(tagName) {
   classDef.attributeChangedCallback = {
     value: function attributeChangedCallback(name, oldValue, newValue) {
       if (layerUI.debug) console.log(`Attribute Change on ${this.tagName}.${name} from ${oldValue} to `, newValue);
-      this[layerUI.camelCase(name)] = newValue;
+      this[Util.camelCase(name)] = newValue;
     },
   };
 
@@ -1337,9 +1337,9 @@ const standardClassMethods = {
     this._findNodesWithin(node, (currentNode) => {
       if (!currentNode.properties) currentNode.properties = {};
       currentNode.properties.parentComponent = this;
-      if (!currentNode.id) currentNode.id = Layer.Util.generateUUID();
+      if (!currentNode.id) currentNode.id = Util.generateUUID();
       let layerId = currentNode.getAttribute('layer-id');
-      const camelName = layerUI.camelCase(currentNode.tagName.toLowerCase().replace(/^layer-/, ''));
+      const camelName = Util.camelCase(currentNode.tagName.toLowerCase().replace(/^layer-/, ''));
 
       if (!layerId && currentNode.tagName.indexOf('LAYER') === 0 && !this.nodes[camelName]) {
         layerId = camelName;

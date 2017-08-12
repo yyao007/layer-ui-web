@@ -1,0 +1,45 @@
+
+layer-card-view {
+  &.layer-card-border-standard,
+  &.layer-card-border-rounded-top,
+  &.layer-card-border-rounded-bottom {
+    border-style: solid;
+    border-width: 1px;
+    border-color: @card-outer-border-color;
+    overflow: hidden;
+  }
+  &.layer-card-border-standard {
+    border-radius: 18px;
+  }
+
+  &.layer-card-border-list {
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: @card-outer-border-color;
+  }
+
+  &.layer-card-border-rounded-top {
+    border-radius: 18px 18px 0px 0px;
+  }
+
+  &.layer-card-border-rounded-bottom {
+    border-radius: 0px 0px 18px 18px;
+  }
+
+  text-align: left;
+
+  & > * {
+    max-width: 100%;
+    width: 100%;
+  }
+  &.layer-root-card {
+    max-width: 60%;
+    &.layer-carousel-card {
+      max-width: 85%;
+    }
+  }
+
+  &.layer-card-primitive:not(.layer-raw-primitive-content) {
+    min-width: 192px;
+  }
+}

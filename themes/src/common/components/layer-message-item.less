@@ -55,6 +55,11 @@ layer-message-list {
   }
 
   layer-message-item-sent {
+    .layer-message-item-main {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
     &.layer-list-item-last .layer-message-footer {
       .layer-replaceable-inner {
         justify-content: flex-end;
@@ -239,5 +244,26 @@ layer-message-list {
 
   .layer-message-preview .layer-message-item-content {
     opacity: 0.5;
+  }
+
+  layer-message-item-status {
+    .layer-list-item {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+    layer-card-view {
+      background-color: transparent;
+      color: @message-item-status-color;
+      font-size: @message-item-status-size;
+
+      .layer-card-top {
+        background-color: transparent;
+      }
+
+      layer-text-card {
+        padding: 4px 0px;
+      }
+    }
   }
 }

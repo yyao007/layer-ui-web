@@ -1,0 +1,77 @@
+
+layer-standard-card-container {
+  &:not(.layer-card-no-metadata) .layer-card-body-outer {
+    padding-bottom: 8px;
+  }
+  &.layer-card-no-metadata {
+    .layer-card-top {
+        border-radius: 16px;
+    }
+  }
+
+  .layer-card-top {
+    overflow: hidden; // prevent images from spilling out of bounds
+    border-radius: 16px 16px 0px 0px;
+    max-height: 350px;
+    width: auto;
+    background-color: @card-container-core-ui-background;
+
+    .layer-top-content-for-border-radius {
+      border-radius: 16px 16px 0px 0px;
+    }
+  }
+
+  .layer-card-body-outer {
+    .layer-card-body {
+      margin: 8px 12px 0px 12px;
+    }
+  }
+}
+
+layer-standard-card-container, layer-list-item-container {
+  .layer-has-author > .layer-card-body-outer > .layer-card-body > .layer-card-description:not(:empty),
+  .layer-has-subtitle > .layer-card-body-outer > .layer-card-body > .layer-card-description:not(:empty),
+  .layer-has-title > .layer-card-body-outer > .layer-card-body > .layer-card-description:not(:empty) {
+    padding-top: 4px;
+  }
+
+  .layer-card-title:not(:empty) {
+    padding: 2px 0px;
+  }
+  .layer-card-title {
+    color: @card-container-title-color;
+  }
+
+  .layer-card-description:not(:empty) {
+    padding: 2px 0px;
+  }
+  .layer-card-description {
+    color: @card-container-description-color;
+    font-size: 0.8rem;
+  }
+
+  .layer-card-footer:not(:empty) {
+    padding: 2px 0px;
+  }
+  .layer-card-footer {
+    color: @card-container-footer-color;
+    font-size: 0.75rem;
+  }
+}
+
+
+
+layer-standard-card-container:not(.layer-arrow-next-container) .layer-next-icon {
+  display: none;
+}
+layer-standard-card-container.layer-arrow-next-container {
+  cursor: pointer;
+  .layer-next-icon {
+	  width: 30px;
+    margin-top: 8px;
+  }
+}
+
+layer-standard-card-container.layer-arrow-next-container .layer-card-body {
+  margin-right: 16px;
+}

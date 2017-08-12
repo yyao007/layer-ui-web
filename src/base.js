@@ -515,17 +515,6 @@ layerUI.buildStyle = function buildStyles(className, styleStr) {
 };
 
 /**
- * Turn a hyphenated name into a camel case name.
- *
- * @method camelCase
- * @static
- * @param {String} str  a-hyphenated-string
- * @returns {String} aCamelCasedString
- */
-layerUI.camelCase = str =>
-  str.replace(/[-_](.)/g, (match, value) => value.toUpperCase());
-
-/**
  * Turn a camel case name into a hyphenated name
  *
  * @method hyphenate
@@ -533,11 +522,7 @@ layerUI.camelCase = str =>
  * @param {String} aCamelCasedString
  * @returns {String} a-hyphenated-string
  */
-const regexHyphenate = /([a-z])([A-Z])/g;
-layerUI.hyphenate = (str, separator = '-') =>
-  str.replace(regexHyphenate, (match, part1, part2) =>
-    part1 + separator + part2.toLowerCase());
-
+layerUI.hyphenate = Layer.Util.hyphenate;
 
 /**
  * Utility returns whether or not the window is in the background.

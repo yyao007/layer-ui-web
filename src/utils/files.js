@@ -3,13 +3,17 @@ import 'blueimp-load-image/js/load-image-orientation';
 import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
 import Layer from 'layer-websdk';
-import layerUI from '../base';
+import { settings } from '../base';
 import normalizeSize from './sizing';
+import ImageModel from '../cards/image/image-model';
+import FileModel from '../cards/file/file-model';
+import CarouselModel from '../cards/carousel/carousel-model';
 
 const Files = {};
 module.exports = Files;
 
 window.loadImage = ImageManager;
+
 
 /**
  * This is a utility class which you can use to watch for user dragging and dropping
@@ -18,7 +22,6 @@ window.loadImage = ImageManager;
  * ```
  * var dropWatcher = new layerUI.files.DragAndDropFileWatcher({
  *   node: dropBoxNode,
- *   callback: sendAttachment,
  *   allowDocumentDrop: false
  * });
  * function sendAttachment(messageParts) {
@@ -32,14 +35,11 @@ window.loadImage = ImageManager;
  * @class layerUI.utils.files.DragAndDropFileWatcher
  * @param {Object} options
  * @param {HTMLElement|String} options.node - The dom node (or dom node ID) to watch for files/file-drag events
- * @param {Function} options.callback - The function to call when a file is dropped
- * @param {layer.MessagePart[]} options.callback.parts - The MessageParts representing the dropped files, which you can modify and send.
  * @param {Boolean} [options.allowDocumentDrop=false] - By default, this utility adds an event handler to prevent the browser from navigating away from your
  *         app to view a file dropped in some other part of your app. If you need to handle this event yourself, set this to true.
  */
 Files.DragAndDropFileWatcher = function DragAndDropFileWatcher(options) {
   this.node = typeof options.node === 'string' ? document.getElementById(options.node) : options.node;
-  this.callback = options.callback;
   this.allowDocumentDrop = Boolean(options.allowDocumentDrop);
 
   this.onDragOverBound = this.onDragOver.bind(this);
@@ -84,7 +84,6 @@ Files.DragAndDropFileWatcher.prototype.destroy = function destroy() {
     document.removeEventListener('dragover', this.ignoreDropBound, false);
   }
   delete this.node;
-  delete this.callback;
 };
 
 /**
@@ -134,6 +133,7 @@ Files.DragAndDropFileWatcher.prototype.onDragEnd = function onDragEnd(evt) {
  */
 Files.DragAndDropFileWatcher.prototype.onFileDrop = function onFileDrop(evt) {
   this.onDragEnd();
+  const conversation = evt.currentTarget.conversation
 
   // stops the browser from redirecting off to the image.
   if (evt.preventDefault) {
@@ -142,9 +142,21 @@ Files.DragAndDropFileWatcher.prototype.onFileDrop = function onFileDrop(evt) {
   }
 
   const dt = evt.dataTransfer;
-  const parts = Array.prototype.map.call(dt.files, file => new Layer.MessagePart(file));
+  const files = Array.prototype.filter.call(dt.files, file => file.type);
 
-  Files.processAttachments(parts, this.callback);
+  if (files.length === 1) {
+    const model = Files.processAttachment(files[0]);
+    model.generateMessage(conversation, message => message.send({
+      text: 'File received',
+      title: `New Message from ${model.getClient().user.displayName}`,
+    }));
+  } else {
+    const model = Files.processAttachments(files);
+    model.generateMessage(conversation, message => message.send({
+      text: 'Carousel received',
+      title: `New Message from ${model.getClient().user.displayName}`,
+    }));
+  }
   return false;
 };
 
@@ -152,96 +164,31 @@ Files.DragAndDropFileWatcher.prototype.onFileDrop = function onFileDrop(evt) {
  * Adds data to your message.
  *
  * Given an array of Message Parts, determines if it needs to generate image or video
- * previews and metadata message parts before calling your callback.
+ * previews and metadata message parts
  *
  * @method processAttachments
- * @param {layer.MessagePart[]} parts    Input MessagParts, presumably an array of one element
- * @param {Function} callback            Callback on completion; may be called synchronously
- * @param {layer.MessagePart[]} callback.parts  The MessageParts to send in your Message
+ * @param {layer.MessagePart[]} files    File Objects to turn into a carousel
  */
-Files.processAttachments = function processAttachments(parts, callback) {
-  // TODO: Need a way to register additional handlers; currently relies on the callback for additional handling.
-  parts.forEach((part) => {
-    if (['image/gif', 'image/png', 'image/jpeg'].indexOf(part.mimeType) !== -1) {
-      Files.generateImageMessageParts(part, callback);
-    } else if (part.mimeType === 'video/mp4') {
-      Files.generateVideoMessageParts(part, callback);
-    } else if (callback) {
-      callback([part]);
-    }
+Files.processAttachments = function processAttachments(files) {
+  const imageTypes = ['image/gif', 'image/png', 'image/jpeg', 'image/svg'];
+  const nonImageParts = files.filter(file => imageTypes.indexOf(file.type) === -1);
+  return new CarouselModel({
+    items: nonImageParts.length ? files.map(file => new FileModel({ source: file })) : files.map(file => new ImageModel({ source: file })),
   });
 };
 
-Files.generateImageMessageParts = function generateImageMessageParts(part, callback) {
-  // First part is the original image; the rest of the code is for generating the other 2 parts of the 3 part Image
-  const parts = [part];
-  let orientation = 0;
-
-  // STEP 1: Determine the correct orientation for the image
-  ImageManager.parseMetaData(part.body, onParseMetadata);
-
-
-  function onParseMetadata(data) {
-    const options = {
-      canvas: true,
-    };
-
-    if (data.imageHead && data.exif) {
-      orientation = options.orientation = data.exif[0x0112] || orientation;
-    }
-
-    // STEP 2: Write the image to a canvas with the specified orientation
-    ImageManager(part.body, onWriteImage, options);
-  }
-
-  function onWriteImage(srcCanvas) {
-    // STEP 3: Scale the image down to Preview Size
-    const originalSize = {
-      width: srcCanvas.width,
-      height: srcCanvas.height,
-    };
-
-    const size = normalizeSize(originalSize, layerUI.settings.maxSizes);
-    const canvas = document.createElement('canvas');
-    canvas.width = size.width;
-    canvas.height = size.height;
-    const context = canvas.getContext('2d');
-
-    // context.scale(size.width, size.height);
-    context.fillStyle = context.strokeStyle = 'white';
-    context.fillRect(0, 0, size.width, size.height);
-    context.drawImage(srcCanvas, 0, 0, size.width, size.height);
-
-    // STEP 4: Turn the canvas into a jpeg image for our Preview Image
-    const binStr = atob(canvas.toDataURL('image/jpeg').split(',')[1]);
-    const len = binStr.length;
-    const arr = new Uint8Array(len);
-
-    for (let i = 0; i < len; i++) {
-      arr[i] = binStr.charCodeAt(i);
-    }
-    const blob = new Blob([arr], { type: 'image/jpeg' });
-
-    // STEP 5: Create our Preview Message Part
-    parts.push(new Layer.MessagePart({
-      body: blob,
-      mimeType: 'image/jpeg+preview',
-    }));
-
-    // STEP 6: Create the Metadata Message Part
-    parts.push(new Layer.MessagePart({
-      mimeType: 'application/json+imageSize',
-      body: JSON.stringify({
-        orientation,
-        width: originalSize.width,
-        height: originalSize.height,
-        previewWidth: canvas.width,
-        previewHeight: canvas.height,
-      }),
-    }));
-    callback(parts);
+Files.processAttachment = function processAttachment(file, conversation, parent, callback) {
+  if (['image/gif', 'image/png', 'image/jpeg', 'image/svg'].indexOf(file.type) !== -1) {
+    return new ImageModel({
+      source: file,
+    });
+  } else {
+    return new FileModel({
+      source: file,
+    });
   }
 };
+
 
 Files.generateVideoMessageParts = function generateVideoMessageParts(part, callback) {
   const parts = [part];
@@ -253,7 +200,7 @@ Files.generateVideoMessageParts = function generateVideoMessageParts(part, callb
       height: video.videoHeight,
     };
 
-    const size = normalizeSize(originalSize, layerUI.settings.maxSizes);
+    const size = normalizeSize(originalSize, settings.maxSizes);
 
     const canvas = document.createElement('canvas');
     canvas.width = size.width;

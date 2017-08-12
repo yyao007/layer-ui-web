@@ -24,6 +24,18 @@ module.exports = function (grunt) {
           standalone: 'layerUI'
         }
       },
+      cardtest: {
+        files: [
+          {
+            dest: 'build/layer-ui-web-cards-test.js',
+            src: 'card-test.js'
+          }
+        ],
+        options: {
+          transform: [['babelify', {
+            presets: ['es2015']}]],
+        }
+      },
       build: {
         files: [
           {
@@ -157,9 +169,10 @@ module.exports = function (grunt) {
       }
     },
 
+
     watch: {
       debug: {
-        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js', 'node_modules/layer-websdk/lib'],
+        files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js'],
         tasks: ['debug', 'make-npm-link-safe', 'notify:watch'],
         options: {
           interrupt: true
@@ -176,8 +189,8 @@ module.exports = function (grunt) {
     notify: {
       watch: {
         options: {
-          title: 'Watch Build',  // optional
-          message: 'Build Complete', //required
+          title: 'Watch Build LUI',  // optional
+          message: 'LUI Complete', //required
         }
       }
     },
@@ -222,6 +235,7 @@ module.exports = function (grunt) {
       });
     }
   });
+
 
   /* There is some path of using expose and external that should allow us to do a require('layer-websdk')
      without it being in this build, but I do not see it.  So, brute force:
@@ -493,7 +507,7 @@ module.exports = function (grunt) {
   grunt.registerTask('theme', ['less', 'copy']),
 
   grunt.registerTask('docs', ['debug', 'jsducktemplates', 'jsduck', 'jsduckfixes']);
-  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
+  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:cardtest', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
   grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
 
   grunt.registerTask('default', ['build', 'docs']);

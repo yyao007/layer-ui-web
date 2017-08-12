@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <script>
+  window.mapboxUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    </script>
+    <script src='build/layer-ui-web-cards-test.js'></script>
+
+    <link rel="stylesheet" href="themes/build/bubbles-basic.css">
+    <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0px;
+      padding: 0px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .header {
+      height: 40px;
+    }
+    .content, .header {
+      display: flex;
+      flex-direction: row;
+    }
+    .header {
+      border-bottom: solid 1px black;
+    }
+    .content {
+      flex-grow: 1;
+    }
+    layer-conversation-list, .layer-conversation-list-header {
+      width: 250px;
+      border-right: solid 1px black;
+    }
+    layer-conversation-view, .layer-conversation-header {
+      flex-grow: 1;
+      width: 500px; /* flexbox bug workaround */
+    }
+    </style>
+  </head>
+  <body>
+    <div class='header'>
+      <div class='layer-conversation-list-header'>
+        <layer-presence></layer-presence>
+        Logged in as User <span class='user-name'></span>
+      </div>
+      <div class='layer-conversation-header'>
+      </div>
+      <div class='layer-membership-list-header'>
+      </div>
+    </div>
+    <div class='content'>
+      <layer-notifier id="notifier"></layer-notifier>
+      <layer-conversation-list selected-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" id="list"></layer-conversation-list>
+      <layer-conversation-view conversation-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" listen-to="notifier,list"></layer-conversation-view>
+    </div>
+  </body>
+</html>

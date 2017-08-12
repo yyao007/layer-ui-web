@@ -34,6 +34,7 @@ require('./components/subcomponents/layer-presence/layer-presence');
 // Load standard utilities
 require('./components/subcomponents/layer-file-upload-button/layer-file-upload-button');
 require('./components/subcomponents/layer-send-button/layer-send-button');
+require('./handlers/message/layer-card-view');
 require('./handlers/message/layer-message-text-plain');
 require('./handlers/message/layer-message-image/layer-message-image');
 require('./handlers/message/layer-message-video');
@@ -45,8 +46,58 @@ require('./handlers/text/newline');
 require('./handlers/text/youtube');
 require('./utils/date-separator');
 
+// Load standard cards
+require('./cards/text/text-model');
+require('./cards/text/layer-text-card');
+
+import './cards/response/response-model';
+import './cards/response/layer-response-card';
+
+import './cards/receipt/receipt-model';
+import './cards/receipt/layer-receipt-card';
+
+import './cards/choice/choice-model';
+import './cards/choice/layer-choice-card';
+
+import './cards/layer-standard-card-container';
+import './cards/layer-titled-card-container';
+//import './cards/layer-list-item-container';
+import './cards/text/layer-text-card';
+import './cards/text/text-model';
+
+import './cards/image/image-model';
+import './cards/image/layer-image-card';
+
+// import './cards/list/list-model';
+// import './cards/list/layer-list-card';
+
+import './cards/carousel/carousel-model';
+import './cards/carousel/layer-carousel-card';
+
+import './cards/buttons/buttons-model';
+import './cards/buttons/layer-buttons-card';
+
+import './cards/file/file-model';
+import './cards/file/layer-file-card';
+
+import './cards/link/link-model';
+import './cards/link/layer-link-card';
+
+import './cards/location/location-model';
+import './cards/location/layer-location-card';
+
+// import './cards/address/address-model';
+// import './cards/address/layer-address-card';
+
+import './cards/product/product-model';
+import './cards/product/layer-product-card';
+
+import './cards/models/person-model';
+import './cards/models/organization-model';
+
 LayerUI.files = require('./utils/files');
-LayerUI.animatedScrollTo = require('animated-scrollto');
+LayerUI.animatedScrollTo = require('./utils/animated-scroll').animatedScrollTo;
+LayerUI.animatedScrollLeftTo = require('./utils/animated-scroll').animatedScrollLeftTo;
 
 LayerUI.mixins = {
   MessageHandler: require('./mixins/message-handler'),
