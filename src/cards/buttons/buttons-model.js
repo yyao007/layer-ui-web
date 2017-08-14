@@ -106,6 +106,7 @@ class ButtonsModel extends CardModel {
   }
 
   _parseMessage() {
+    super._parseMessage();
     this.buttons = JSON.parse(this.part.body).buttons;
     const contentPart = this.childParts.filter(part => part.mimeAttributes.role === 'content')[0];
     if (contentPart) this.contentModel = this.getClient().createCardModel(this.message, contentPart);

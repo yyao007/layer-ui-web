@@ -62,6 +62,8 @@ class FileModel extends CardModel {
   }
 
   _parseMessage() {
+    super._parseMessage();
+
     const payload = JSON.parse(this.part.body);
     Object.keys(payload).forEach((propertyName) => {
       this[Util.camelCase(propertyName)] = payload[propertyName];

@@ -1,18 +1,9 @@
-// with title
-// m = $("layer-conversation-view").conversation.createMessage({parts: [{mimeType: "application/vnd.layer.card.text+json; role=root", body: JSON.stringify({"text": 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.', "author": "King Arthur", "title": "The Holy Hand Grenade"})}]});m.send();
 
-// without title
-// m = $("layer-conversation-view").conversation.createMessage({parts: [{mimeType: "application/vnd.layer.card.text+json; role=root", body: JSON.stringify({"text": 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'})}]});m.send();
 import Layer from 'layer-websdk';
 import CardModel from 'layer-websdk/lib/models/card-model';
 import { Client, MessagePart, Util }  from 'layer-websdk';
 
 class ResponseModel extends CardModel {
-  // constructor(options = {}) {
-  //   super(options);
-  //   this._parseMessage();
-  // }
-
   _generateParts(callback) {
     if (this.responseTo && !this.responseToMessage) {
       this.responseToMessage = this.getClient().getMessage(this.responseTo, true);
@@ -22,7 +13,7 @@ class ResponseModel extends CardModel {
 
     const body = this._initBodyWithMetadata(['responseTo', 'participantData', 'sharedData']);
 
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
@@ -40,6 +31,8 @@ class ResponseModel extends CardModel {
 
   // Reads identity_id and data out of the MessagePart.body and into this model
   _parseMessage() {
+    super._parseMessage();
+
     const payload = JSON.parse(this.part.body);
     Object.keys(payload).forEach((propertyName) => {
       this[Util.camelCase(propertyName)] = payload[propertyName];

@@ -5,7 +5,12 @@
   "main": "lib-es5/index.js",
   "scripts": {
     "prepublish": "grunt prepublish",
-    "test": "grunt test"
+    "test": "grunt test",
+
+    "aws:html": "aws s3 cp cards.html s3://static.layer.com/carddemo/index.html",
+    "aws:build": "aws s3 cp build s3://static.layer.com/carddemo/build --recursive",
+    "aws:layer-ui-web-theme": "aws s3 cp themes/build s3://static.layer.com/carddemo/themes/build --recursive",
+    "release": "npm run build; npm run aws:html; npm run aws:build; npm run aws:layer-ui-web-theme"
   },
   "author": "Layer developers <helpdesk@layer.com> (https://layer.com)",
   "license": "Apache-2.0",

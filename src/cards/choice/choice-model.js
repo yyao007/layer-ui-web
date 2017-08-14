@@ -31,24 +31,32 @@ class ChoiceModel extends CardModel {
   }
 
   _parseMessage() {
+    super._parseMessage();
+
     const payload = JSON.parse(this.part.body);
     Object.keys(payload).forEach((propertyName) => {
       this[Util.camelCase(propertyName)] = payload[propertyName];
     });
 
-    if (!this.responses) this.responses = {};
     this._buildActionModels();
   }
 
   _buildActionModels() {
-    this.actionModels = this.choices.map(item => ({"type": "action", "text": item.text, "event": "layer-choice-select", data: {id: item.id}}));
+    this.actionModels = this.choices.map(item => ({
+      type: 'action',
+      text: item.text,
+      event: 'layer-choice-select',
+      data: { id: item.id },
+    }));
   }
 
   selectAnswer(answerData) {
     if (!this.selectedAnswer) {
       const responseModel = new ResponseModel({
         responseToMessage: this.message,
-        participantData: answerData.id,
+        participantData: {
+          selection: answerData.id,
+        },
         messageModel: new TextModel({ text: this.generateResponseMessageText() }),
       });
       responseModel.send();
@@ -57,10 +65,13 @@ class ChoiceModel extends CardModel {
     }
   }
 
-  __updateResponses() {
-    if (!this.responses) this.__responses = {};
-    this.selectedAnswer = this.responses[this.getClient().user.id];
-    this.trigger('change');
+  _processNewResponses() {
+    const responseObject = Object.keys(this.responses).filter(response => response.selection);
+    this.selectedAnswer = responseObject ? responseObject.selection : null;
+  }
+
+  __updateSelectedAnswer(newValue) {
+    this._triggerAsync('change');
   }
 }
 

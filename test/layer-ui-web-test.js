@@ -1071,6 +1071,8 @@ module.exports = layerUI;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -1173,6 +1175,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -1305,6 +1309,7 @@ var ButtonsModel = function (_CardModel) {
   }, {
     key: '_parseMessage',
     value: function _parseMessage() {
+      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this);
       this.buttons = JSON.parse(this.part.body).buttons;
       var contentPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'content';
@@ -1376,6 +1381,7 @@ var ButtonsModel = function (_CardModel) {
   }, {
     key: '_parseMessage',
     value: function _parseMessage() {
+      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this);
       this.buttons = JSON.parse(this.part.body).buttons;
       var contentPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'content';
@@ -1563,6 +1569,8 @@ module.exports = {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -1663,6 +1671,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -1891,6 +1901,8 @@ var CarouselModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this3 = this;
 
+      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this);
+
       // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
       // Exclucde our main list part that defines the list rather than its list items
       var parts = this.childParts.filter(function (part) {
@@ -2055,6 +2067,8 @@ var CarouselModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this);
 
       // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
       // Exclucde our main list part that defines the list rather than its list items
@@ -2215,6 +2229,8 @@ var _base = require('../../base');
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -2255,6 +2271,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -2322,19 +2340,25 @@ var ChoiceModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this2 = this;
 
+      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this);
+
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
         _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
       });
 
-      if (!this.responses) this.responses = {};
       this._buildActionModels();
     }
   }, {
     key: '_buildActionModels',
     value: function _buildActionModels() {
       this.actionModels = this.choices.map(function (item) {
-        return { "type": "action", "text": item.text, "event": "layer-choice-select", data: { id: item.id } };
+        return {
+          type: 'action',
+          text: item.text,
+          event: 'layer-choice-select',
+          data: { id: item.id }
+        };
       });
     }
   }, {
@@ -2343,7 +2367,9 @@ var ChoiceModel = function (_CardModel) {
       if (!this.selectedAnswer) {
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
-          participantData: answerData.id,
+          participantData: {
+            selection: answerData.id
+          },
           messageModel: new _textModel2.default({ text: this.generateResponseMessageText() })
         });
         responseModel.send();
@@ -2352,11 +2378,17 @@ var ChoiceModel = function (_CardModel) {
       }
     }
   }, {
-    key: '__updateResponses',
-    value: function __updateResponses() {
-      if (!this.responses) this.__responses = {};
-      this.selectedAnswer = this.responses[this.getClient().user.id];
-      this.trigger('change');
+    key: '_processNewResponses',
+    value: function _processNewResponses() {
+      var responseObject = Object.keys(this.responses).filter(function (response) {
+        return response.selection;
+      });
+      this.selectedAnswer = responseObject ? responseObject.selection : null;
+    }
+  }, {
+    key: '__updateSelectedAnswer',
+    value: function __updateSelectedAnswer(newValue) {
+      this._triggerAsync('change');
     }
   }]);
 
@@ -2405,19 +2437,25 @@ var ChoiceModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this2 = this;
 
+      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this);
+
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
         _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
       });
 
-      if (!this.responses) this.responses = {};
       this._buildActionModels();
     }
   }, {
     key: '_buildActionModels',
     value: function _buildActionModels() {
       this.actionModels = this.choices.map(function (item) {
-        return { "type": "action", "text": item.text, "event": "layer-choice-select", data: { id: item.id } };
+        return {
+          type: 'action',
+          text: item.text,
+          event: 'layer-choice-select',
+          data: { id: item.id }
+        };
       });
     }
   }, {
@@ -2426,7 +2464,9 @@ var ChoiceModel = function (_CardModel) {
       if (!this.selectedAnswer) {
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
-          participantData: answerData.id,
+          participantData: {
+            selection: answerData.id
+          },
           messageModel: new _textModel2.default({ text: this.generateResponseMessageText() })
         });
         responseModel.send();
@@ -2435,11 +2475,17 @@ var ChoiceModel = function (_CardModel) {
       }
     }
   }, {
-    key: '__updateResponses',
-    value: function __updateResponses() {
-      if (!this.responses) this.__responses = {};
-      this.selectedAnswer = this.responses[this.getClient().user.id];
-      this.trigger('change');
+    key: '_processNewResponses',
+    value: function _processNewResponses() {
+      var responseObject = Object.keys(this.responses).filter(function (response) {
+        return response.selection;
+      });
+      this.selectedAnswer = responseObject ? responseObject.selection : null;
+    }
+  }, {
+    key: '__updateSelectedAnswer',
+    value: function __updateSelectedAnswer(newValue) {
+      this._triggerAsync('change');
     }
   }]);
 
@@ -2550,6 +2596,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -2594,6 +2642,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -2678,6 +2728,8 @@ var FileModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -2808,6 +2860,8 @@ var FileModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -2969,6 +3023,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _loadImage = require('blueimp-load-image/js/load-image');
 
 var _loadImage2 = _interopRequireDefault(_loadImage);
@@ -3022,6 +3078,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _loadImage = require('blueimp-load-image/js/load-image');
 
@@ -3136,6 +3194,8 @@ var ImageModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -3358,6 +3418,8 @@ var ImageModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -3861,6 +3923,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _layerWebsdk = require('layer-websdk');
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
@@ -3929,6 +3993,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4026,6 +4092,8 @@ var LinkModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(LinkModel.prototype.__proto__ || Object.getPrototypeOf(LinkModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4146,6 +4214,8 @@ var LinkModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(LinkModel.prototype.__proto__ || Object.getPrototypeOf(LinkModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4354,6 +4424,8 @@ _leaflet2.default.Icon.Default.imagePath = 'node_modules/leaflet/dist/images/'; 
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _layerWebsdk = require('layer-websdk');
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
@@ -4413,6 +4485,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4497,6 +4571,8 @@ var LocationModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this2 = this;
 
+      _get(LocationModel.prototype.__proto__ || Object.getPrototypeOf(LocationModel.prototype), '_parseMessage', this).call(this);
+
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
         _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
@@ -4570,6 +4646,8 @@ var LocationModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this2 = this;
 
+      _get(LocationModel.prototype.__proto__ || Object.getPrototypeOf(LocationModel.prototype), '_parseMessage', this).call(this);
+
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
         _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
@@ -4621,6 +4699,8 @@ module.exports = LocationModel;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _layerWebsdk = require('layer-websdk');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4633,6 +4713,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4657,6 +4739,8 @@ var OrganizationModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4697,6 +4781,8 @@ var OrganizationModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4728,6 +4814,8 @@ module.exports = OrganizationModel;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _layerWebsdk = require('layer-websdk');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4740,6 +4828,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4764,6 +4854,8 @@ var PersonModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4806,6 +4898,8 @@ var PersonModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -4894,6 +4988,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -4924,6 +5020,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -4990,6 +5088,8 @@ var ProductModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -5088,6 +5188,8 @@ var ProductModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -5250,6 +5352,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -5319,6 +5423,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -5432,6 +5538,8 @@ var ReceiptModel = function (_CardModel) {
     value: function _parseMessage() {
       var _this3 = this;
 
+      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this);
+
       var payload = JSON.parse(this.part.body);
       var summary = payload.summary;
       delete payload.summary;
@@ -5527,6 +5635,8 @@ var ReceiptModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this3 = this;
+
+      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       var summary = payload.summary;
@@ -5636,6 +5746,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _layerWebsdk = require('layer-websdk');
 
 var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
@@ -5650,12 +5762,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // with title
-// m = $("layer-conversation-view").conversation.createMessage({parts: [{mimeType: "application/vnd.layer.card.text+json; role=root", body: JSON.stringify({"text": 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.', "author": "King Arthur", "title": "The Holy Hand Grenade"})}]});m.send();
-
-// without title
-// m = $("layer-conversation-view").conversation.createMessage({parts: [{mimeType: "application/vnd.layer.card.text+json; role=root", body: JSON.stringify({"text": 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'})}]});m.send();
-
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ResponseModel = function (_CardModel) {
   _inherits(ResponseModel, _CardModel);
@@ -5668,12 +5775,6 @@ var ResponseModel = function (_CardModel) {
 
   _createClass(ResponseModel, [{
     key: '_generateParts',
-
-    // constructor(options = {}) {
-    //   super(options);
-    //   this._parseMessage();
-    // }
-
     value: function _generateParts(callback) {
       if (this.responseTo && !this.responseToMessage) {
         this.responseToMessage = this.getClient().getMessage(this.responseTo, true);
@@ -5683,7 +5784,7 @@ var ResponseModel = function (_CardModel) {
 
       var body = this._initBodyWithMetadata(['responseTo', 'participantData', 'sharedData']);
 
-      this.part = new layer.MessagePart({
+      this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
       });
@@ -5707,6 +5808,8 @@ var ResponseModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(ResponseModel.prototype.__proto__ || Object.getPrototypeOf(ResponseModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -5776,7 +5879,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
 (0, _component.registerComponent)('layer-text-card', {
-  style: 'layer-text-card {\n    display: block;\n  }\n  layer-card-view.layer-text-card {\n    padding-bottom: 0px;\n  }\n  ',
+  style: 'layer-text-card {\n    display: block;\n  }\n  ',
   mixins: [_cardMixin2.default, _cardPrimitiveMixin2.default],
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -5890,6 +5993,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
 var _cardModel2 = _interopRequireDefault(_cardModel);
@@ -5926,6 +6031,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _cardModel = require('layer-websdk/lib/models/card-model');
 
@@ -5986,6 +6093,8 @@ var TextModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(TextModel.prototype.__proto__ || Object.getPrototypeOf(TextModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -6050,6 +6159,8 @@ var TextModel = function (_CardModel) {
     key: '_parseMessage',
     value: function _parseMessage() {
       var _this2 = this;
+
+      _get(TextModel.prototype.__proto__ || Object.getPrototypeOf(TextModel.prototype), '_parseMessage', this).call(this);
 
       var payload = JSON.parse(this.part.body);
       Object.keys(payload).forEach(function (propertyName) {
@@ -43642,6 +43753,7 @@ var ErrorDictionary = require('./layer-error').dictionary;
 var ConversationMessage = require('./models/conversation-message');
 var ChannelMessage = require('./models/channel-message');
 var Announcement = require('./models/announcement');
+var MessagePart = require('./models/message-part');
 var Identity = require('./models/identity');
 var Membership = require('./models/membership');
 var TypingIndicatorListener = require('./typing-indicators/typing-indicator-listener');
@@ -43793,6 +43905,8 @@ var Client = function (_ClientAuth) {
         case 'messages':
         case 'announcements':
           return this.getMessage(id, canLoad);
+        case 'parts':
+          return this.getMessagePart(id);
         case 'conversations':
           return this.getConversation(id, canLoad);
         case 'channels':
@@ -43825,6 +43939,10 @@ var Client = function (_ClientAuth) {
         return item;
       } else {
         switch (Util.typeFromID(obj.id)) {
+          case 'parts':
+            {
+              return MessagePart._createFromServer(obj);
+            }
           case 'messages':
             if (obj.conversation) {
               return ConversationMessage._createFromServer(obj, this);
@@ -44335,7 +44453,7 @@ Client._supportedEvents = [
 Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/client-card-models')];
 Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
-},{"./client-authenticator":112,"./client-registry":113,"./client-utils":114,"./layer-error":118,"./logger":121,"./mixins/client-card-models":122,"./mixins/client-channels":123,"./mixins/client-conversations":124,"./mixins/client-identities":125,"./mixins/client-members":126,"./mixins/client-messages":127,"./mixins/client-queries":128,"./models/announcement":129,"./models/channel":132,"./models/channel-message":131,"./models/conversation":136,"./models/conversation-message":135,"./models/identity":137,"./models/membership":138,"./root":151,"./telemetry-monitor":154,"./typing-indicators/typing-indicator-listener":155,"./typing-indicators/typing-listener":157,"./typing-indicators/typing-publisher":158}],116:[function(require,module,exports){
+},{"./client-authenticator":112,"./client-registry":113,"./client-utils":114,"./layer-error":118,"./logger":121,"./mixins/client-card-models":122,"./mixins/client-channels":123,"./mixins/client-conversations":124,"./mixins/client-identities":125,"./mixins/client-members":126,"./mixins/client-messages":127,"./mixins/client-queries":128,"./models/announcement":129,"./models/channel":132,"./models/channel-message":131,"./models/conversation":136,"./models/conversation-message":135,"./models/identity":137,"./models/membership":138,"./models/message-part":139,"./root":151,"./telemetry-monitor":154,"./typing-indicators/typing-indicator-listener":155,"./typing-indicators/typing-listener":157,"./typing-indicators/typing-publisher":158}],116:[function(require,module,exports){
 'use strict';
 
 /**
@@ -44399,7 +44517,7 @@ module.exports = {
     SESSIONDATA: 'layer-session-data-'
   },
   ACCEPT: 'application/vnd.layer+json; version=2.0',
-  WEBSOCKET_PROTOCOL: 'layer-2.0',
+  WEBSOCKET_PROTOCOL: 'layer-3.0',
 
   /**
    * Log levels
@@ -48805,10 +48923,10 @@ var CardModel = function (_Root) {
         'parent-node-id': this.nodeId
       });
 
-      // This should be called on any message edits
-      this.part.on('messageparts:change', this._handleMessageChanges, this);
+      // Call handlePartChanges any message edits that update a part.
+      this.part.on('messageparts:change', this._handlePartChanges, this);
       this.childParts.forEach(function (part) {
-        return part.on('messageparts:change', _this4._handleMessageChanges, _this4);
+        return part.on('messageparts:change', _this4._handlePartChanges, _this4);
       });
       this.message.on('messages:part-added', this._handlePartAdded, this);
 
@@ -48836,12 +48954,17 @@ var CardModel = function (_Root) {
 
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {}
+    value: function _parseMessage() {
+      var responses = this.childParts.filter(function (part) {
+        return part.mimeAttributes.role === 'response_summary';
+      })[0];
+      if (responses) this.responses = responses;
+    }
   }, {
-    key: '_handleMessageChanges',
-    value: function _handleMessageChanges(evt) {
+    key: '_handlePartChanges',
+    value: function _handlePartChanges(evt) {
       this._parseMessage();
-      this.trigger('change');
+      this._triggerAsync('change');
     }
   }, {
     key: '_handlePartAdded',
@@ -48849,9 +48972,9 @@ var CardModel = function (_Root) {
       var part = evt.part;
       if (part.mimeAttributes['parent-node-id'] === this.nodeId) {
         this.childParts.push(part);
-        part.on('messageparts:change', this._handleMessageChanges, this);
+        part.on('messageparts:change', this._handlePartChanges, this);
         this._parseMessage();
-        this.trigger('change');
+        this._triggerAsync('change');
       }
     }
   }, {
@@ -48873,52 +48996,6 @@ var CardModel = function (_Root) {
     key: 'generateResponseMessageText',
     value: function generateResponseMessageText() {
       return this.getClient().user.displayName + ' has responded' + (this.title ? ' to ' + this.title : '');
-    }
-  }, {
-    key: 'addUserResponse',
-    value: function addUserResponse(_ref) {
-      var data = _ref.data,
-          messageText = _ref.messageText,
-          renderedParts = _ref.renderedParts;
-
-      if (this.locked) {
-        console.warn('unable to respond to locked card');
-        return;
-      }
-
-      // Generate a textual message if one wasn't provided (ignored if renderedParts is provided instead)
-      if (!messageText) messageText = this.getClient().user.displayName + ' has responded' + (this.title ? ' to ' + this.title : '');
-
-      // Generate the Message Parts for the Response
-      var parts = [new MessagePart({
-        mimeType: 'application/vnd.layer.card.response+json; role=root; node-id=root',
-        body: JSON.stringify({ 'response_to': this.message.id })
-      }), new MessagePart({
-        mimeType: 'application/vnd.layer.card.patch+json; role=patch; parent-node-id=root',
-        body: JSON.stringify({ response: data })
-      })];
-
-      // Rendered Parts concept lets Card provide a collection of Parts representing a Status Card to render
-      // Won't work as-is; so just a placeholder
-      if (renderedParts) {
-        parts = parts.concat(renderedParts);
-      } else {
-        // Add the text card
-        parts.push(new MessagePart({
-          mimeType: 'application/vnd.layer.card.text+json; role=message; parent-node-id=root',
-          body: JSON.stringify({ text: messageText })
-        }));
-      }
-
-      // Send the message
-      this.message.getConversation().createMessage({ parts: parts }).send();
-
-      // Update our local message part with the change
-      // This will trigger _handleMessageChange method which will reparse the body, apply it and trigger events for the UI
-      var partBody = JSON.parse(this.part.body);
-      if (!partBody.responses) partBody.responses = {};
-      partBody.responses[this.getClient().user.id] = data;
-      this.part.body = JSON.stringify(partBody);
     }
   }, {
     key: 'getModelFromPart',
@@ -49006,6 +49083,18 @@ var CardModel = function (_Root) {
         if (!(propertyName in currentData)) currentData[propertyName] = newData[propertyName];
       });
     }
+
+    // If triggered by a message change, trigger('change') is called above
+
+  }, {
+    key: '__updateResponses',
+    value: function __updateResponses() {
+      if (!this.responses) this.__responses = {};
+      this._processNewResponses();
+    }
+  }, {
+    key: '_processNewResponses',
+    value: function _processNewResponses() {}
   }, {
     key: '__getActionEvent',
     value: function __getActionEvent() {
@@ -49024,9 +49113,26 @@ var CardModel = function (_Root) {
       }
     }
   }, {
-    key: 'nodeId',
-    get: function get() {
-      return this.part.mimeAttributes['node-id'];
+    key: '_processDelayedTriggers',
+    value: function _processDelayedTriggers() {
+      if (this.isDestroyed) return;
+      var changes = this._delayedTriggers.filter(function (evt) {
+        return evt[0] === 'change';
+      });
+      if (changes.length > 1) {
+        var hasOne = false;
+        this._delayedTriggers = this._delayedTriggers.filter(function (evt) {
+          if (evt[0] === 'change' && !hasOne) {
+            hasOne = true;
+            return true;
+          } else if (evt[0] === 'change') {
+            return false;
+          } else {
+            return true;
+          }
+        });
+      }
+      _get(CardModel.prototype.__proto__ || Object.getPrototypeOf(CardModel.prototype), '_processDelayedTriggers', this).call(this);
     }
 
     /**
@@ -49040,6 +49146,11 @@ var CardModel = function (_Root) {
      * @return {boolean}
      */
 
+  }, {
+    key: 'nodeId',
+    get: function get() {
+      return this.part.mimeAttributes['node-id'];
+    }
   }], [{
     key: 'isSupportedMessage',
     value: function isSupportedMessage(message, cardRenderer) {
@@ -49118,6 +49229,13 @@ CardModel.prototype.role = null;
  * @type {Boolean}
  */
 CardModel.prototype.locked = false;
+
+/**
+ * Stores all user responses indexed by Identity ID
+ *
+ * @type {Object}
+ */
+CardModel.prototype.responses = null;
 
 CardModel.prototype.currentCardRenderer = '';
 
@@ -54094,6 +54212,23 @@ var MessagePart = function (_Root) {
         oldValue: oldValue
       });
     }
+  }, {
+    key: '__adjustUpdatedAt',
+    value: function __adjustUpdatedAt(date) {
+      if (typeof date === 'string') return new Date(date);
+    }
+
+    /**
+     * Accepts json-patch operations for modifying recipientStatus.
+     *
+     * @method _handlePatchEvent
+     * @private
+     * @param  {Object[]} data - Array of operations
+     */
+
+  }, {
+    key: '_handlePatchEvent',
+    value: function _handlePatchEvent(newValue, oldValue, paths) {}
 
     /**
      * Creates a MessagePart from a server representation of the part
@@ -54119,7 +54254,8 @@ var MessagePart = function (_Root) {
         body: part.body || '',
         _content: content,
         hasContent: Boolean(content),
-        size: part.size || 0
+        size: part.size || 0,
+        updatedAt: part.updated_at ? new Date(part.updated_at) : null
       });
     }
   }]);
@@ -54214,6 +54350,16 @@ MessagePart.prototype.mimeType = 'text/plain';
  * @type {Object}
  */
 MessagePart.prototype.mimeAttributes = null;
+
+/**
+ * Time that the part was last updated.
+ *
+ * If the part was created after the message was sent, or the part was updated after the
+ * part was sent then this will have a value.
+ *
+ * @type {Date}
+ */
+MessagePart.prototype.updatedAt = null;
 
 /**
  * Size of the layer.MessagePart.body.
@@ -54447,22 +54593,27 @@ var Message = function (_Syncable) {
     return _this;
   }
 
-  /**
-   * Turn input into valid layer.MessageParts.
-   *
-   * This method is automatically called any time the parts
-   * property is set (including during intialization).  This
-   * is where we convert strings into MessageParts, and instances
-   * into arrays.
-   *
-   * @method __adjustParts
-   * @private
-   * @param  {Mixed} parts -- Could be a string, array, object or MessagePart instance
-   * @return {layer.MessagePart[]}
-   */
-
-
   _createClass(Message, [{
+    key: '__adjustUpdatedAt',
+    value: function __adjustUpdatedAt(date) {
+      if (typeof date === 'string') return new Date(date);
+    }
+
+    /**
+     * Turn input into valid layer.MessageParts.
+     *
+     * This method is automatically called any time the parts
+     * property is set (including during intialization).  This
+     * is where we convert strings into MessageParts, and instances
+     * into arrays.
+     *
+     * @method __adjustParts
+     * @private
+     * @param  {Mixed} parts -- Could be a string, array, object or MessagePart instance
+     * @return {layer.MessagePart[]}
+     */
+
+  }, {
     key: '__adjustParts',
     value: function __adjustParts(parts) {
       var _this2 = this;
@@ -54479,6 +54630,8 @@ var Message = function (_Syncable) {
           var result = void 0;
           if (part instanceof MessagePart) {
             result = part;
+          } else if (part.mime_type && !part.mimeType) {
+            result = MessagePart._createFromServer(part);
           } else {
             result = new MessagePart(part);
           }
@@ -54546,24 +54699,23 @@ var Message = function (_Syncable) {
       if (part) {
         var oldValue = this.parts ? [].concat(this.parts) : null;
         part.clientId = this.clientId;
-        if (part instanceof MessagePart) {
-          this.parts.push(part);
-        } else if ((typeof part === 'undefined' ? 'undefined' : _typeof(part)) === 'object') {
-          this.parts.push(new MessagePart(part));
+        var mPart = part instanceof MessagePart ? part : new MessagePart(part);
+        if (this.parts.indexOf(mPart) === -1) {
+          this.parts.push(mPart);
         }
         var index = this.parts.length - 1;
         var thePart = this.parts[index];
 
         thePart.off('messageparts:change', this._onMessagePartChange, this); // if we already subscribed, don't create a redundant subscription
         thePart.on('messageparts:change', this._onMessagePartChange, this);
-        if (!part.id) part.id = this.id + '/parts/' + index;
+        if (!part.id) part.id = this.id + '/parts/' + Util.generateUUID();
         this._addToMimeAttributesMap(thePart);
         this.trigger('messages:change', {
           property: 'parts',
           oldValue: oldValue,
           newValue: this.parts
         });
-        this.trigger('messages:part-added', { part: part });
+        this.trigger('messages:part-added', { mPart: mPart });
       }
       return this;
     }
@@ -54646,6 +54798,7 @@ var Message = function (_Syncable) {
       this._readAllBlobs(function () {
         client._addMessage(_this5);
       });
+      return this;
     }
 
     /**
@@ -54964,7 +55117,7 @@ var Message = function (_Syncable) {
       // Assign IDs to preexisting Parts so that we can call getPartById()
       if (parts) {
         parts.forEach(function (part, index) {
-          if (!part.id) part.id = _this9.id + '/parts/' + index;
+          if (!part.id) part.id = _this9.id + '/parts/' + Util.generateUUID();
         });
       }
     }
@@ -55009,6 +55162,9 @@ var Message = function (_Syncable) {
 
       this.sentAt = new Date(message.sent_at);
       this.receivedAt = message.received_at ? new Date(message.received_at) : undefined;
+      if (!this.updatedAt || this.updatedAt.toISOString() !== message.updated_at) {
+        this.updatedAt = message.updated_at ? new Date(message.updated_at) : null;
+      }
 
       var sender = void 0;
       if (message.sender.id) {
@@ -55132,9 +55288,23 @@ var Message = function (_Syncable) {
   }, {
     key: '_handlePatchEvent',
     value: function _handlePatchEvent(newValue, oldValue, paths) {
+      var _this12 = this;
+
       this._inLayerParser = false;
       if (paths[0].indexOf('recipient_status') === 0) {
         this.__updateRecipientStatus(this.recipientStatus, oldValue);
+      } else if (paths[0] === 'parts') {
+        var oldValueParts = oldValue.map(function (part) {
+          return _this12.getClient().getMessagePart(part.id);
+        }).filter(function (part) {
+          return part;
+        });
+        var addedParts = newValue.filter(function (part) {
+          return oldValueParts.indexOf(part) === -1;
+        });
+        addedParts.forEach(function (part) {
+          return _this12.addPart(part);
+        });
       }
       this._inLayerParser = true;
     }
@@ -55381,6 +55551,16 @@ Object.defineProperty(Message.prototype, 'isUnread', {
  * @private
  */
 Message.prototype._mimeAttributeMap = null;
+
+/**
+ * Time that the part was last updated.
+ *
+ * If the part was created after the message was sent, or the part was updated after the
+ * part was sent then this will have a value.
+ *
+ * @type {Date}
+ */
+Message.prototype.updatedAt = null;
 
 Message.prototype._toObject = null;
 
@@ -63578,6 +63758,11 @@ function createParser(request) {
       }
     },
     changeCallbacks: {
+      MessagePart: {
+        all: function all(updateObject, newValue, oldValue, paths) {
+          updateObject._handlePatchEvent(newValue, oldValue, paths);
+        }
+      },
       Message: {
         all: function all(updateObject, newValue, oldValue, paths) {
           updateObject._handlePatchEvent(newValue, oldValue, paths);

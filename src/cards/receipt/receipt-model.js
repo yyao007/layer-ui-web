@@ -80,6 +80,8 @@ class ReceiptModel extends CardModel {
   }
 
   _parseMessage() {
+    super._parseMessage();
+
     const payload = JSON.parse(this.part.body);
     const summary = payload.summary;
     delete payload.summary;

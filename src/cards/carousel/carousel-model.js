@@ -196,6 +196,7 @@ class CarouselModel extends CardModel {
   }
 
   _parseMessage() {
+    super._parseMessage();
 
     // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
     // Exclucde our main list part that defines the list rather than its list items
