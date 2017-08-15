@@ -1,6 +1,5 @@
 import LayerUI from './lib-es5/index.js';
 import Layer from 'layer-websdk';
-import Files from './lib-es5/utils/files';
 import TextModel from './lib-es5/cards/text/text-model';
 
 var APP_ID = "layer:///apps/staging/2f1707c0-fd2f-11e6-ae72-c27751092ce1";
@@ -57,33 +56,6 @@ var APP_ID = "layer:///apps/staging/2f1707c0-fd2f-11e6-ae72-c27751092ce1";
 
         var userNameDiv = document.querySelector('.user-name');
         userNameDiv.innerHTML = client.user.displayName || client.user.userId;
-      });
-
-      var dropWatcher = new Files.DragAndDropFileWatcher({
-        node: conversationPanel,
-        callback: (parts) => {
-          debugger;
-          const Model = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json');
-          new Model({
-            source: parts[1].body,
-            preview: parts[2].body,
-            metadata: {
-              artist: 'PNG Generator',
-              size: parts[1].body.size,
-              title: 'This is an image',
-              subtitle: 'A beautiful image full of many many glorious pixels',
-              width: JSON.parse(parts[0].body).width,
-              height: JSON.parse(parts[0].body).height,
-              orientation: JSON.parse(parts[0].body).orientation,
-            },
-          conversation: conversationPanel.conversation,
-        });
-
-          if (conversationPanel.trigger('sending', { parts })) {
-            model.message.send();
-          }
-        },
-        allowDocumentDrop: false
       });
 
       document.body.addEventListener('kill-arthur', function() {

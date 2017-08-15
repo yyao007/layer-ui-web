@@ -51,9 +51,7 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
-import { xhr } from 'layer-websdk';
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel, xhr }  from 'layer-websdk';
 
 const TitleRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:title['"].*?\/>/);
 const DescriptionRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:description['"].*?\/>/);
@@ -64,7 +62,7 @@ class LinkModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
 
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
@@ -124,7 +122,6 @@ class LinkModel extends CardModel {
     return '';
   }
 }
-
 
 LinkModel.prototype.imageUrl = '';
 LinkModel.prototype.author = '';

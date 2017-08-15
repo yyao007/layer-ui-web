@@ -22,7 +22,7 @@ new ReceiptModel({
     postal_code: '94107',
     state: 'CA',
     street1: '655 4th st',
-    presentation: 'address'
+    description: 'Description should not show'
   }),
   items: [
     {
@@ -52,8 +52,7 @@ new ReceiptModel({
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
 */
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 class ReceiptModel extends CardModel {
   _generateParts(callback) {
@@ -98,8 +97,8 @@ class ReceiptModel extends CardModel {
 
     this.billingAddressModel = this.getModelFromPart('billing-address');
     this.shippingAddressModel = this.getModelFromPart('shipping-address');
-    this.merchantModel = this.getModelFromPart('merchant');
-    this.recipientModel = this.getModelFromPart('recipient');
+    /*this.merchantModel = this.getModelFromPart('merchant');
+    this.recipientModel = this.getModelFromPart('recipient');*/
   }
 }
 
@@ -109,9 +108,12 @@ ReceiptModel.prototype.createdAt = null;
 ReceiptModel.prototype.currency = '';
 ReceiptModel.prototype.discounts = null;
 ReceiptModel.prototype.items = null;
-ReceiptModel.prototype.merchantModel = null;
 ReceiptModel.prototype.paymentMethod = '';
+
+/* For use in v2 with Full Screen receipts
+ReceiptModel.prototype.merchantModel = null;
 ReceiptModel.prototype.recipientModel = null;
+*/
 
 // Expected fields: number, url
 ReceiptModel.prototype.order = null;

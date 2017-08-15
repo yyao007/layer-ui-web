@@ -10,6 +10,7 @@ module.exports = {
     },
     cardBorderStyle: {
     },
+    container: {},
   },
   methods: {
     onRender: {
@@ -32,6 +33,7 @@ module.exports = {
       return child;
     },
     setupContainerClasses(container) {
+      this.container = container;
       container.classList[!this.model.getTitle() && !this.model.getDescription() && !this.model.getFooter() ? 'add' : 'remove']('layer-card-no-metadata');
     },
   },

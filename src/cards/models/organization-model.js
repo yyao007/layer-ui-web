@@ -20,7 +20,7 @@ class OrganizationModel extends CardModel {
 }
 
 OrganizationModel.prototype.addressModels = null;
-OrganizationModel.prototype.contacts = null;
+OrganizationModel.prototype.contactModels = null;
 OrganizationModel.prototype.type = '';
 
 OrganizationModel.MIMEType = 'application/vnd.layer.card.organization+json';

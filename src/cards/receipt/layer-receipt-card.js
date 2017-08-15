@@ -47,7 +47,7 @@ registerComponent('layer-receipt-card', {
     </div>
     <div class='layer-address layer-receipt-detail-item'>
       <label>Ship to</label>
-      <div class="layer-location-card" layer-id='shipTo'></div>
+      <layer-card-view layer-id='shipTo' hide-map='true'></layer-card-view>
     </div>
     <div class='layer-receipt-summary layer-receipt-detail-item'>
       <label>Total</label>
@@ -96,12 +96,16 @@ registerComponent('layer-receipt-card', {
       });
 
       if (this.model.shippingAddressModel) {
-        this.generateCardView({
-          model: this.model.shippingAddressModel,
-          parentNode: this.nodes.shipTo,
-          cssClassList: [],
-          cardBorderStyle: 'none',
-        });
+        const shipTo = this.nodes.shipTo;
+        this.model.shippingAddressModel.showAddress = true;
+        shipTo.rootPart = this.model.shippingAddressModel.part;
+        shipTo.model = this.model.shippingAddressModel;
+
+        shipTo.message = this.model.message;
+        shipTo.cardBorderStyle = 'none';
+        shipTo._onAfterCreate();
+
+        shipTo.nodes.ui.hideMap = true;
       }
     },
 
@@ -123,3 +127,4 @@ registerComponent('layer-receipt-card', {
     },
   },
 });
+

@@ -25,11 +25,21 @@
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
 
+
+model = new ButtonModel({
+  buttons: [
+    {"type": "url", "text": "Open Layer", "url": "https://layer.com"},
+    {"type": "action", "text": "Give Holy Grail", "event": "grant-grail"}
+  ]
+});
+model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+
 // Basic List
 message = conversation.createMessage({parts: [
   {
     mimeType: "application/vnd.layer.card.buttons+json; role=root; node-id=root",
-    body: '{"buttons": [{"type": "action", "text": "hello", "event": "doit"} ]}'
+    body: '{"buttons": [{"type": "action", "text": "hello", "event": "doit"}, {"type": "url", "text": "layer.com", "url": "https://layer.com"} ]}'
   },
   {
     mimeType: "application/vnd.layer.card.list+json; role=content; node-id=list; parent-node-id=root",
@@ -85,14 +95,13 @@ message = conversation.createMessage({parts: [
   }
 ]});
 */
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart }  from 'layer-websdk';
+import { Client, MessagePart, CardModel }  from 'layer-websdk';
 
 
 class ButtonsModel extends CardModel {
    _generateParts(callback) {
     const body = this._initBodyWithMetadata(['buttons']);
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });

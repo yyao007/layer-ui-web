@@ -49,19 +49,21 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
  * @mixin layerUI.mixins.HasQuery
+ * @mixin layerUI.mixins.FileDropTarget
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
 import HasQuery from '../../mixins/has-query';
 import FocusOnKeydown from '../../mixins/focus-on-keydown';
+import FileDropTarget from '../../mixins/file-drop-target';
 
 import '../message-list/layer-message-list/layer-message-list';
 import '../subcomponents/layer-compose-bar/layer-compose-bar';
 import '../subcomponents/layer-typing-indicator/layer-typing-indicator';
 
 registerComponent('layer-conversation-view', {
-  mixins: [MainComponent, HasQuery, FocusOnKeydown],
+  mixins: [MainComponent, HasQuery, FocusOnKeydown, FileDropTarget],
 
   /**
    * This event is triggered before any Message is sent.

@@ -167,15 +167,14 @@ client.getConversation($("layer-conversation-list").selectedId).createMessage({p
   },
 ]}).send();
 */
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 
 class CarouselModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['action']);
 
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });

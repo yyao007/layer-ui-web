@@ -35,7 +35,7 @@ require('./components/subcomponents/layer-presence/layer-presence');
 require('./components/subcomponents/layer-file-upload-button/layer-file-upload-button');
 require('./components/subcomponents/layer-send-button/layer-send-button');
 require('./handlers/message/layer-card-view');
-require('./handlers/message/layer-message-text-plain');
+//require('./handlers/message/layer-message-text-plain');
 require('./handlers/message/layer-message-image/layer-message-image');
 require('./handlers/message/layer-message-video');
 require('./handlers/text/autolinker');
@@ -95,7 +95,6 @@ import './cards/product/layer-product-card';
 import './cards/models/person-model';
 import './cards/models/organization-model';
 
-LayerUI.files = require('./utils/files');
 LayerUI.animatedScrollTo = require('./utils/animated-scroll').animatedScrollTo;
 LayerUI.animatedScrollLeftTo = require('./utils/animated-scroll').animatedScrollLeftTo;
 

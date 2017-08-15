@@ -6,6 +6,7 @@
   */
 
 /**
+ * You must set your Google Maps API key in `window.googleMapsAPIKey`
  *
  * @class ???
  * @extends layerUI.components.Component
@@ -13,23 +14,31 @@
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
 import CardPrimitiveMixin from '../card-primitive-mixin';
-import L from 'leaflet';
 import { addActionHandler } from '../../handlers/message/layer-card-view';
-
-L.Icon.Default.imagePath = 'node_modules/leaflet/dist/images/';
 
 registerComponent('layer-location-card', {
   mixins: [CardMixin, CardPrimitiveMixin],
-
+  template: '<img layer-id="img" />',
   style: `
-  .layer-location-card-address-only .layer-card-top {
+  layer-card-view.layer-location-card {
+    cursor: pointer;
+  }
+  .layer-location-card-address-only {
     display: none;
   }
   `,
   properties: {
-    cardBorderStyle: {
-      get() {
-        return this.model.presentation === 'map' ? 'rounded-bottom' : 'standard';
+    mapWidth: {
+      value: 288,
+    },
+    mapHeight: {
+      value: 300,
+    },
+    hideMap: {
+      value: false,
+      set(value) {
+        this.toggleClass('layer-location-card-address-only', value);
+        if (this.container) this.setupContainerClasses(this.container);
       },
     },
   },
@@ -45,19 +54,13 @@ registerComponent('layer-location-card', {
 
 
     onAfterCreate() {
-      this.classList.add('layer-location-presentation-' + this.model.presentation);
-      if (this.model.presentation === 'map') {
-        this.properties.map = L.map(this, {
-          center: [this.model.latitude, this.model.longitude],
-          zoom: 14,
-        });
+      if (!this.hideMap) this._updateImageSrc();
+    },
 
-        L.tileLayer(window.mapboxUrl, {
-          maxZoom: 18,
-          attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> with <a href="http://mapbox.com">Mapbox</a>',
-          id: 'mapbox.streets'
-        }).addTo(this.properties.map);
-      }
+    _updateImageSrc() {
+      const marker = this.model.latitude ? this.model.latitude + ',' + this.model.longitude : escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + ` ${this.model.city} ${this.model.administrativeArea}, ${this.model.postalCode} ${this.model.country}`);
+
+      this.nodes.img.src = `${location.protocol}//maps.googleapis.com/maps/api/staticmap?size=${this.mapWidth}x${this.mapHeight}&language=${navigator.language}&key=${window.googleMapsAPIKey}&zoom=${this.model.zoom}&markers=${marker}`;
     },
 
     onRender() {
@@ -69,31 +72,20 @@ registerComponent('layer-location-card', {
      * @method
      */
     onRerender() {
-      if (this.model.presentation === 'map') {
-        const position = L.latLng(this.model.latitude, this.model.longitude);
-        this.properties.map.setView(position, 14);
-        var marker = L.marker(position).addTo(this.properties.map);
-        this.properties.map.invalidateSize();
-      }
+      this._updateImageSrc();
     },
+
     setupContainerClasses(container) {
-      container.classList[this.model.presentation === 'address' ? 'add' : 'remove']('layer-arrow-next-container');
-      container.classList[this.model.presentation === 'address' ? 'add' : 'remove']('layer-location-card-address-only');
-    },
-    onAttach() {
-      if (this.model.presentation === 'map') {
-        setTimeout(() => this.properties.map.invalidateSize(), 1);
-      }
+      container.classList[this.hideMap ? 'add' : 'remove']('layer-arrow-next-container');
     },
   },
 });
 
 addActionHandler('open-map', function openMapHandler(customData) {
   let url;
-  if (this.model.presentation === 'map') return;
   if (this.model.street1) {
     url = 'http://www.google.com/maps/?q=' +
-      escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + ` ${this.model.city} ${this.model.state}, ${this.model.postalCode}`);
+      escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + ` ${this.model.city} ${this.model.state}, ${this.model.postalCode} ${this.model.country}`);
   } else if (this.model.latitude) {
     url = `https://www.google.com/maps/search/?api=1&query=${this.model.latitude},${this.model.longitude}&zoom=${this.model.zoom}`;
   }

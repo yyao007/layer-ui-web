@@ -18,10 +18,9 @@
   model = new LocationModel({
       city: 'San Francisco',
       title: 'Layer Inc',
-      postal_code: '94107',
-      state: 'CA',
-      street1: '655 4th st',
-      presentation: 'address'
+      postalCode: '94107',
+      administrativeArea: 'CA',
+      street1: '655 4th st'
     });
     model.generateMessage($("layer-conversation-view").conversation, message => message.send());
 
@@ -43,15 +42,14 @@
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
 import { xhr } from 'layer-websdk';
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 
 class LocationModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'action', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2', 'presentation']);
+    const body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'action', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
 
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
@@ -68,7 +66,7 @@ class LocationModel extends CardModel {
   }
 
   getDescription() {
-    if (this.presentation === 'map') {
+    if (this.description && this.showAddress !== true) {
       return this.description;
     } else {
       return this.street1 + (this.street2 ? ' ' + this.street2 : '') + `<br/> ${this.city} ${this.administrativeArea} ${this.postalCode ? ', ' + this.postalCode : ''}`;
@@ -78,7 +76,7 @@ class LocationModel extends CardModel {
 
 LocationModel.prototype.latitude = 0;
 LocationModel.prototype.longitude = 0;
-LocationModel.prototype.zoom = 17;
+LocationModel.prototype.zoom = 16;
 LocationModel.prototype.heading = 0;
 LocationModel.prototype.altitude = 0;
 LocationModel.prototype.title = '';
@@ -91,7 +89,7 @@ LocationModel.prototype.postalCode = '';
 LocationModel.prototype.administrativeArea = '';
 LocationModel.prototype.street1 = '';
 LocationModel.prototype.street2 = '';
-LocationModel.prototype.presentation = 'map'; // alt value is "address"
+LocationModel.prototype.showAddress = null; // 3 state: true: show the address; false: show the description, null: permit default behavior.  Set by Parent Card via API and NOT set via model
 
 LocationModel.defaultAction = 'open-map';
 LocationModel.cardRenderer = 'layer-location-card';
@@ -100,7 +98,7 @@ LocationModel.MIMEType = 'application/vnd.layer.card.location+json';
 MessagePart.TextualMimeTypes.push(LocationModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(LocationModel, "LocationModel");
+Client.registerCardModelClass(LocationModel, 'LocationModel');
 
 module.exports = LocationModel;
 

@@ -18,13 +18,12 @@
  * A Product model, typically used within a Recipt Model, but usable anywhere that you want to display simple product information.
  */
 
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Root, Util }  from 'layer-websdk';
+import { Client, MessagePart, Root, Util, CardModel }  from 'layer-websdk';
 
 class ProductModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['currency', 'price', 'quantity', 'url', 'subtitle', 'title', 'action']);
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });

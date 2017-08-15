@@ -29,8 +29,7 @@
 */
 
 
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 
 class FileModel extends CardModel {
@@ -47,13 +46,13 @@ class FileModel extends CardModel {
 
     if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, "$1");
     const body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
 
     if (source) {
-      sourcePart = new layer.MessagePart(this.source);
+      sourcePart = new MessagePart(this.source);
       sourcePart.mimeAttributes.role = 'source';
       sourcePart.mimeAttributes['parent-node-id'] = this.nodeId;
     }

@@ -1,7 +1,6 @@
 
 import Layer from 'layer-websdk';
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 class ResponseModel extends CardModel {
   _generateParts(callback) {

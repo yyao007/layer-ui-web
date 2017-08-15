@@ -13,8 +13,7 @@
 
 
  */
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util, Root }  from 'layer-websdk';
+import { Client, MessagePart, Util, Root, CardModel }  from 'layer-websdk';
 import ResponseModel from '../response/response-model';
 import TextModel from '../text/text-model';
 import ButtonsModel from '../buttons/buttons-model';
@@ -22,7 +21,7 @@ import ButtonsModel from '../buttons/buttons-model';
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['question', 'action', 'choices']);
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });

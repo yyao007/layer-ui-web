@@ -26,18 +26,17 @@ import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
 import normalizeSize from '../../utils/sizing';
 
-import CardModel from 'layer-websdk/lib/models/card-model';
-import Layer, { Root, Client, MessagePart, Util, xhr }  from 'layer-websdk';
+import Layer, { Root, Client, MessagePart, Util, xhr, CardModel }  from 'layer-websdk';
 
 class ImageModel extends CardModel {
   constructor(options = {}) {
     super(options);
     if (!this.message) {
       if (this.source) {
-        this.source = new layer.MessagePart(this.source);
+        this.source = new MessagePart(this.source);
       }
       if (this.preview) {
-        this.preview = new layer.MessagePart(this.preview);
+        this.preview = new MessagePart(this.preview);
       }
     }
   }
@@ -45,8 +44,8 @@ class ImageModel extends CardModel {
     if (this.source && !this.mimeType) this.mimeType = this.source.type;
     const body = this._initBodyWithMetadata(['sourceUrl','previewUrl', 'artist', 'fileName', 'orientation',
       'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
-    if (body.source) body.source = new layer.MessagePart(body.source);
-    this.part = new layer.MessagePart({
+    if (body.source) body.source = new MessagePart(body.source);
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
@@ -145,7 +144,7 @@ class ImageModel extends CardModel {
 
     ImageManager(file, (srcCanvas) => {
       const blob = this._postGeneratePreview(srcCanvas);
-      this.preview = new layer.MessagePart(blob);
+      this.preview = new MessagePart(blob);
       callback(this.preview);
     }, options);
   }

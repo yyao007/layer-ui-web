@@ -19,15 +19,14 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
-import CardModel from 'layer-websdk/lib/models/card-model';
-import { Client, MessagePart, Util, Root }  from 'layer-websdk';
+import { Client, MessagePart, Util, Root, CardModel }  from 'layer-websdk';
+import { registerMessageHandler } from '../../base';
 
 class TextModel extends CardModel {
-
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle', 'action']);
 
-    this.part = new layer.MessagePart({
+    this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
@@ -61,8 +60,20 @@ Root.initClass.apply(TextModel, [TextModel, 'TextModel']);
 MessagePart.TextualMimeTypes.push(TextModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(TextModel, "TextModel");
+Client.registerCardModelClass(TextModel, 'TextModel');
+
+registerMessageHandler({
+  tagName: 'layer-card-view',
+  canRenderConcise() { return true; },
+  handlesMessage(message, container) {
+    const isCard = Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
+    if (!isCard && message.parts[0].mimeType === 'text/plain') {
+      message.parts[0].body = `{"text": "${message.parts[0].body}"}`;
+      message.parts[0].mimeType = TextModel.MIMEType + '; role=root';
+      message._addToMimeAttributesMap(message.parts[0]);
+      return true;
+    }
+  },
+});
 
 module.exports = TextModel;
-
-

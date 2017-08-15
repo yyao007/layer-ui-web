@@ -1,5 +1,6 @@
 /**
  * TODO: Location Model should be able to use one of these
+ * TODO: Look at vcard fields
  */
 
 import { Client, MessagePart, CardModel, Util }  from 'layer-websdk';
@@ -23,7 +24,7 @@ PersonModel.prototype.phone = '';
 PersonModel.prototype.email = '';
 PersonModel.prototype.name = '';
 PersonModel.prototype.jobRole = ''; // Used for Person who is an Employee only, not for customers
-PersonModel.prototype.identity_id = '';
+PersonModel.prototype.identityId = '';
 
 PersonModel.MIMEType = 'application/vnd.layer.card.person+json';
 

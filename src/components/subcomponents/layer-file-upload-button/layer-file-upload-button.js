@@ -22,7 +22,7 @@
  * @class layerUI.components.subcomponents.FileUploadButton
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer, { MessagePart } from 'layer-websdk';
 import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
 
@@ -75,7 +75,7 @@ registerComponent('layer-file-upload-button', {
       const files = this.nodes.input.files;
 
       /* istanbul ignore next */
-      const inputParts = Array.prototype.map.call(files, file => new Layer.MessagePart(file));
+      const inputParts = Array.prototype.map.call(files, file => new MessagePart(file));
 
       /**
        * This widget triggers a `layer-file-selected` event when the user selects files.
