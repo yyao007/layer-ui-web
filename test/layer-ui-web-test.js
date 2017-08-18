@@ -450,7 +450,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":109}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":110}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -1066,7 +1066,7 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":109}],5:[function(require,module,exports){
+},{"layer-websdk":110}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1316,9 +1316,9 @@ var ButtonsModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this);
-      this.buttons = JSON.parse(this.part.body).buttons;
+    value: function _parseMessage(payload) {
+      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this, payload);
+
       var contentPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'content';
       })[0];
@@ -1388,9 +1388,9 @@ var ButtonsModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this);
-      this.buttons = JSON.parse(this.part.body).buttons;
+    value: function _parseMessage(payload) {
+      _get(ButtonsModel.prototype.__proto__ || Object.getPrototypeOf(ButtonsModel.prototype), '_parseMessage', this).call(this, payload);
+
       var contentPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'content';
       })[0];
@@ -1429,7 +1429,7 @@ _layerWebsdk.Client.registerCardModelClass(ButtonsModel, "ButtonsModel");
 module.exports = ButtonsModel;
 
 window.PollModel = ButtonsModel; // debug stuff
-},{"layer-websdk":109}],6:[function(require,module,exports){
+},{"layer-websdk":110}],6:[function(require,module,exports){
 /**
  *
  * @class
@@ -1524,7 +1524,7 @@ module.exports = {
       }
     },
     cardBorderStyle: {},
-    container: {}
+    cardView: {}
   },
   methods: {
     onRender: {
@@ -1552,9 +1552,11 @@ module.exports = {
 
       return child;
     },
-    setupContainerClasses: function setupContainerClasses(container) {
-      this.container = container;
-      container.classList[!this.model.getTitle() && !this.model.getDescription() && !this.model.getFooter() ? 'add' : 'remove']('layer-card-no-metadata');
+    setupContainerClasses: function setupContainerClasses() {
+      this.parentComponent.toggleClass('layer-card-no-metadata', !this.model.getTitle() && !this.model.getDescription() && !this.model.getFooter());
+    },
+    onDestroy: function onDestroy() {
+      delete this.properties.cardView;
     }
   }
 };
@@ -1600,8 +1602,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      new TextModel({text: "Carousel item 1", title: "Title 1"}),
@@ -1671,6 +1673,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }),
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   TextModel = layer.Client.getCardModelClass('TextModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new CarouselModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", title: "Title 1"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", title: "Title 2"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 3"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 5"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'})
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
  */
 'use strict';
 
@@ -1697,8 +1713,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      new TextModel({text: "Carousel item 1", title: "Title 1"}),
@@ -1766,6 +1782,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        title: "A pretty picture 6",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        subtitle: "Prettier than YOU deserve!"
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   TextModel = layer.Client.getCardModelClass('TextModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new CarouselModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", title: "Title 1"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", title: "Title 2"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 3"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 5"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'})
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
@@ -1896,10 +1926,10 @@ var CarouselModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this);
+      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this, payload);
 
       // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
       // Exclucde our main list part that defines the list rather than its list items
@@ -2063,10 +2093,10 @@ var CarouselModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this);
+      _get(CarouselModel.prototype.__proto__ || Object.getPrototypeOf(CarouselModel.prototype), '_parseMessage', this).call(this, payload);
 
       // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
       // Exclucde our main list part that defines the list rather than its list items
@@ -2103,7 +2133,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(CarouselModel, "CarouselModel");
 
 module.exports = CarouselModel;
-},{"layer-websdk":109}],10:[function(require,module,exports){
+},{"layer-websdk":110}],10:[function(require,module,exports){
 /**
  *
  * @class
@@ -2115,10 +2145,18 @@ var _component = require('../../components/component');
 
 var _base = require('../../base');
 
+var _cardMixin = require('../card-mixin');
+
+var _cardMixin2 = _interopRequireDefault(_cardMixin);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-carousel-card', {
   template: '\n    <span layer-id=\'prev\' class="layer-next-icon layer-previous-icon" ></span>\n    <div class="layer-carousel-card-items" layer-id="items"></div>\n    <span layer-id=\'next\' class="layer-next-icon" ></span>\n  ',
-  style: '\n  layer-carousel-card {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n    max-width: 100%;\n    position: relative;\n  }\n  layer-carousel-card .layer-next-icon {\n    display: inline-block;\n    z-index: 10;\n    position: absolute;\n    cursor: pointer;\n  }\n\n  layer-carousel-card.layer-carousel-end .layer-next-icon:not(.layer-previous-icon) {\n    display: none;\n  }\n  layer-carousel-card.layer-carousel-start .layer-previous-icon {\n    display: none;\n  }\n  .layer-carousel-card-items {\n    display: flex;\n    flex-direction: row;\n    align-items: stretch;\n    overflow-x: hidden;\n  }\n  .layer-carousel-card-items:after {\n    content: "";\n    flex: 0 0 5px;\n  }\n  .layer-carousel-card-items > * {\n    flex-grow: 1;\n  }\n  ',
+  style: '\n  layer-carousel-card {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n    max-width: 100%;\n    position: relative;\n  }\n  layer-carousel-card .layer-next-icon {\n    display: inline-block;\n    z-index: 10;\n    position: absolute;\n    cursor: pointer;\n  }\n\n  layer-carousel-card.layer-carousel-end .layer-next-icon:not(.layer-previous-icon) {\n    display: none;\n  }\n  layer-carousel-card.layer-carousel-start .layer-previous-icon {\n    display: none;\n  }\n  .layer-carousel-card-items {\n    display: flex;\n    flex-direction: row;\n    align-items: stretch;\n    overflow-x: hidden;\n  }\n  .layer-carousel-card-items:after {\n    content: "";\n    flex: 0 0 5px;\n  }\n  ',
+
+  mixins: [_cardMixin2.default],
+
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
     model: {}
@@ -2136,9 +2174,11 @@ var _base = require('../../base');
       this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
       this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
     },
-    onAfterCreate: function onAfterCreate() {
+    onRerender: function onRerender() {
       var _this = this;
 
+      // TODO: Assign items ids so we don't need to blow away and then recreate them
+      this.nodes.items.innerHTML = '';
       this.model.items.forEach(function (item) {
         _this.createElement('layer-card-view', {
           message: _this.model.message,
@@ -2148,6 +2188,9 @@ var _base = require('../../base');
         });
       });
       this.classList.add('layer-carousel-start');
+      if (this.clientWidth && this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
+        this.classList.add('layer-carousel-end');
+      }
     },
     onAttach: function onAttach() {
       if (this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
@@ -2221,8 +2264,8 @@ var _base = require('../../base');
      */
     onRender: function onRender() {}
   }
-});
-},{"../../base":4,"../../components/component":33}],11:[function(require,module,exports){
+}); 
+},{"../../base":4,"../../components/component":33,"../card-mixin":7}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2253,6 +2296,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Trivia Question",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     question: "what is the airspeed velocity of an unladen swallow?",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {text:  "Zero, it can not get off the ground!", id: "a"},
@@ -2292,6 +2336,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Trivia Question",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     question: "what is the airspeed velocity of an unladen swallow?",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {text:  "Zero, it can not get off the ground!", id: "a"},
@@ -2300,8 +2345,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
@@ -2327,16 +2370,8 @@ var ChoiceModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-
+    value: function _parseMessage(payload) {
+      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this, payload);
       this._buildActionModels();
     }
   }, {
@@ -2355,12 +2390,18 @@ var ChoiceModel = function (_CardModel) {
     key: 'selectAnswer',
     value: function selectAnswer(answerData) {
       if (!this.selectedAnswer) {
+        var selectedChoice = this.choices.filter(function (item) {
+          return item.id == answerData.id;
+        })[0];
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
+          responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
           participantData: {
             selection: answerData.id
           },
-          messageModel: new _textModel2.default({ text: this.generateResponseMessageText() })
+          messageModel: new _textModel2.default({
+            text: this.getClient().user.displayName + ' selected ' + selectedChoice.text
+          })
         });
         responseModel.send();
         this.selectedAnswer = answerData.id;
@@ -2370,10 +2411,18 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var responseObject = Object.keys(this.responses).filter(function (response) {
-        return response.selection;
+      var _this2 = this;
+
+      var senderId = this.message.sender.userId;
+      var responseIdentityIds = Object.keys(this.responses.participantData).filter(function (participantId) {
+        return _this2.responses.participantData[participantId].selection;
       });
-      this.selectedAnswer = responseObject ? responseObject.selection : null;
+      if (responseIdentityIds.length > 1) {
+        responseIdentityIds = responseIdentityIds.filter(function (id) {
+          return senderId !== id;
+        });
+      }
+      this.selectedAnswer = responseIdentityIds.length ? this.responses.participantData[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
@@ -2385,6 +2434,7 @@ var ChoiceModel = function (_CardModel) {
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
+ChoiceModel.prototype.title = 'Survey Question';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
 ChoiceModel.prototype.responses = null;
@@ -2424,16 +2474,8 @@ var ChoiceModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-
+    value: function _parseMessage(payload) {
+      _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this, payload);
       this._buildActionModels();
     }
   }, {
@@ -2452,12 +2494,18 @@ var ChoiceModel = function (_CardModel) {
     key: 'selectAnswer',
     value: function selectAnswer(answerData) {
       if (!this.selectedAnswer) {
+        var selectedChoice = this.choices.filter(function (item) {
+          return item.id == answerData.id;
+        })[0];
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
+          responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
           participantData: {
             selection: answerData.id
           },
-          messageModel: new _textModel2.default({ text: this.generateResponseMessageText() })
+          messageModel: new _textModel2.default({
+            text: this.getClient().user.displayName + ' selected ' + selectedChoice.text
+          })
         });
         responseModel.send();
         this.selectedAnswer = answerData.id;
@@ -2467,10 +2515,18 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var responseObject = Object.keys(this.responses).filter(function (response) {
-        return response.selection;
+      var _this2 = this;
+
+      var senderId = this.message.sender.userId;
+      var responseIdentityIds = Object.keys(this.responses.participantData).filter(function (participantId) {
+        return _this2.responses.participantData[participantId].selection;
       });
-      this.selectedAnswer = responseObject ? responseObject.selection : null;
+      if (responseIdentityIds.length > 1) {
+        responseIdentityIds = responseIdentityIds.filter(function (id) {
+          return senderId !== id;
+        });
+      }
+      this.selectedAnswer = responseIdentityIds.length ? this.responses.participantData[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
@@ -2482,6 +2538,7 @@ var ChoiceModel = function (_CardModel) {
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
+ChoiceModel.prototype.title = 'Survey Question';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
 ChoiceModel.prototype.responses = null;
@@ -2497,7 +2554,7 @@ _layerWebsdk.Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 _layerWebsdk.Client.registerCardModelClass(ChoiceModel, "ChoiceModel");
 
 module.exports = ChoiceModel;
-},{"../buttons/buttons-model":5,"../response/response-model":30,"../text/text-model":32,"layer-websdk":109}],12:[function(require,module,exports){
+},{"../buttons/buttons-model":5,"../response/response-model":30,"../text/text-model":32,"layer-websdk":110}],12:[function(require,module,exports){
 /**
  *
  *
@@ -2544,7 +2601,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       return 'layer-poll-card-icon';
     },
     getTitle: function getTitle() {
-      return 'Survey Question';
+      return this.model.title;
     },
     onAfterCreate: function onAfterCreate() {
       var _this = this;
@@ -2565,6 +2622,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         for (var i = 0; i < this.nodes.answers.childNodes.length; i++) {
           var child = this.nodes.answers.childNodes[i];
           child.disabled = this.model.selectedAnswer !== child.data.id;
+          child.selected = this.model.selectedAnswer === child.data.id;
         }
       }
     },
@@ -2597,7 +2655,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  var imgBase64 = "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAECElEQVR4Xu2ZO44TURREa0SAWBASKST8xCdDQMAq+OyAzw4ISfmLDBASISERi2ADEICEWrKlkYWny6+77fuqalJfz0zVOXNfv/ER8mXdwJF1+oRHBDCXIAJEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8waWjX8OwHcAv5f9Me3fPRugvbuxd14C8B7AVwA3q0oQAcYwtr2+hn969faPVSWIAG2AT3rXJvz17CcAN6ptgggwrwDb4JeVIALMJ8AY/JISRIB5BGDhr3/aZwDXKxwHEWC6AJcBvAOwfuBjvuNfABcBfGGGl5yJANPabYV/B8DLaT96nndHgPYeu4c/RI8AbQJIwO9FgDMAfrVxWuRdMvB7EOA+gHsALgD4uQjO3b6pFPzqAjwA8HTF5weA8weWQA5+ZQGOw1//jR5SAkn4VQV4CODJls18CAmuAHjbcM8vc9U76ZSrdgt4BODxyLG8Twla4P8BcLfKPX/sEaeSAAz8fR4H8vArHQHXAHwYs3Xj9SU3gQX8SgKcAvBitTp38WAJCWzgVxJg+F0qSGAFv5oAh5bADn5FAQ4lwVUAb3a86nX1tL/tXK10Czj+O+7zOLCFX3UDrEXYhwTW8KsLsPRx0Ap/+A/fq12uKpVnqx4BSx8Hgb9quAcB5t4EgX/sz6sXAeaSIPA3zqOeBJgqwTMAzxuuelJn/ubzSG8CTJFg12ex4Z4vDb+HW8A2aK1XRFYCC/g9C7DkJrCB37sAS0hgBV9BgDklGODfBvCaPScU5np8CPxf71OfCSzhq2yAqZ8d2MJXE6DlOLCGryjALhLYw1cVgJEg8Dv7MKjlgXvbg2Hgd/ph0BwSBH7nHwZNkeCW4z1/rDCV/wOM5RyOg7MAvo0Nur3uIoAbVzpvBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hz8BzIXtYE3VcPnAAAAAElFTkSuQmCC";
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 FileModel = client.getCardModelClassForMimeType('application/vnd.layer.card.file+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 FileModel = layer.Client.getCardModelClass('FileModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  new FileModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    source: layer.Util.base64ToBlob(imgBase64, 'image/png'),
@@ -2621,6 +2679,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    sourceUrl: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    mimeType: "image/png",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "This is a logo for someone in silicon valley"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new FileModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   sourceUrl: "",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   mimeType: "image/png",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
  */
 'use strict';
@@ -2638,7 +2702,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  var imgBase64 = "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAECElEQVR4Xu2ZO44TURREa0SAWBASKST8xCdDQMAq+OyAzw4ISfmLDBASISERi2ADEICEWrKlkYWny6+77fuqalJfz0zVOXNfv/ER8mXdwJF1+oRHBDCXIAJEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8waWjX8OwHcAv5f9Me3fPRugvbuxd14C8B7AVwA3q0oQAcYwtr2+hn969faPVSWIAG2AT3rXJvz17CcAN6ptgggwrwDb4JeVIALMJ8AY/JISRIB5BGDhr3/aZwDXKxwHEWC6AJcBvAOwfuBjvuNfABcBfGGGl5yJANPabYV/B8DLaT96nndHgPYeu4c/RI8AbQJIwO9FgDMAfrVxWuRdMvB7EOA+gHsALgD4uQjO3b6pFPzqAjwA8HTF5weA8weWQA5+ZQGOw1//jR5SAkn4VQV4CODJls18CAmuAHjbcM8vc9U76ZSrdgt4BODxyLG8Twla4P8BcLfKPX/sEaeSAAz8fR4H8vArHQHXAHwYs3Xj9SU3gQX8SgKcAvBitTp38WAJCWzgVxJg+F0qSGAFv5oAh5bADn5FAQ4lwVUAb3a86nX1tL/tXK10Czj+O+7zOLCFX3UDrEXYhwTW8KsLsPRx0Ap/+A/fq12uKpVnqx4BSx8Hgb9quAcB5t4EgX/sz6sXAeaSIPA3zqOeBJgqwTMAzxuuelJn/ubzSG8CTJFg12ex4Z4vDb+HW8A2aK1XRFYCC/g9C7DkJrCB37sAS0hgBV9BgDklGODfBvCaPScU5np8CPxf71OfCSzhq2yAqZ8d2MJXE6DlOLCGryjALhLYw1cVgJEg8Dv7MKjlgXvbg2Hgd/ph0BwSBH7nHwZNkeCW4z1/rDCV/wOM5RyOg7MAvo0Nur3uIoAbVzpvBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hz8BzIXtYE3VcPnAAAAAElFTkSuQmCC";
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 FileModel = client.getCardModelClassForMimeType('application/vnd.layer.card.file+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 FileModel = layer.Client.getCardModelClass('FileModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  new FileModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    source: layer.Util.base64ToBlob(imgBase64, 'image/png'),
@@ -2662,6 +2726,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    sourceUrl: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    mimeType: "image/png",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "This is a logo for someone in silicon valley"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new FileModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   sourceUrl: "",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   mimeType: "image/png",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
@@ -2704,15 +2774,10 @@ var FileModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this2 = this;
 
-      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this, payload);
 
       // setup this.source and any other roles that should be saved as properties
       this.childParts.forEach(function (part) {
@@ -2723,11 +2788,11 @@ var FileModel = function (_CardModel) {
 
       if (!this.fileExt) {
         if (this.sourceUrl) {
-          this.fileExt = this.sourceUrl.replace(/^.*\.(.*)$/, "$1");
+          this.fileExt = this.sourceUrl.replace(/^.*\.(.*)$/, '$1');
         } else if (this.title.match(/\.\w{2,4}$/)) {
           this.fileExt = this.title.replace(/^.*\./, '');
         } else if (this.source && this.source.url.indexOf('.') !== -1) {
-          this.fileExt = this.source.url.replace(/^.*\.(.*)$/, "$1");
+          this.fileExt = this.source.url.replace(/^.*\.(.*)$/, '$1');
         } else if (this.source) {
           this.fileExt = this.source.mimeType.replace(/^.*\./, '').substr(0, 3);
         }
@@ -2836,15 +2901,10 @@ var FileModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this2 = this;
 
-      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+      _get(FileModel.prototype.__proto__ || Object.getPrototypeOf(FileModel.prototype), '_parseMessage', this).call(this, payload);
 
       // setup this.source and any other roles that should be saved as properties
       this.childParts.forEach(function (part) {
@@ -2855,11 +2915,11 @@ var FileModel = function (_CardModel) {
 
       if (!this.fileExt) {
         if (this.sourceUrl) {
-          this.fileExt = this.sourceUrl.replace(/^.*\.(.*)$/, "$1");
+          this.fileExt = this.sourceUrl.replace(/^.*\.(.*)$/, '$1');
         } else if (this.title.match(/\.\w{2,4}$/)) {
           this.fileExt = this.title.replace(/^.*\./, '');
         } else if (this.source && this.source.url.indexOf('.') !== -1) {
-          this.fileExt = this.source.url.replace(/^.*\.(.*)$/, "$1");
+          this.fileExt = this.source.url.replace(/^.*\.(.*)$/, '$1');
         } else if (this.source) {
           this.fileExt = this.source.mimeType.replace(/^.*\./, '').substr(0, 3);
         }
@@ -2928,7 +2988,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(FileModel, "FileModel");
 
 module.exports = FileModel;
-},{"layer-websdk":109}],14:[function(require,module,exports){
+},{"layer-websdk":110}],14:[function(require,module,exports){
 /**
  * TODO: Verify that custom handling of "open-file" events are possible and documented
  * @class layerUI.handlers.message.CardView
@@ -3030,7 +3090,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   imgBase64 = "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAECElEQVR4Xu2ZO44TURREa0SAWBASKST8xCdDQMAq+OyAzw4ISfmLDBASISERi2ADEICEWrKlkYWny6+77fuqalJfz0zVOXNfv/ER8mXdwJF1+oRHBDCXIAJEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8waWjX8OwHcAv5f9Me3fPRugvbuxd14C8B7AVwA3q0oQAcYwtr2+hn969faPVSWIAG2AT3rXJvz17CcAN6ptgggwrwDb4JeVIALMJ8AY/JISRIB5BGDhr3/aZwDXKxwHEWC6AJcBvAOwfuBjvuNfABcBfGGGl5yJANPabYV/B8DLaT96nndHgPYeu4c/RI8AbQJIwO9FgDMAfrVxWuRdMvB7EOA+gHsALgD4uQjO3b6pFPzqAjwA8HTF5weA8weWQA5+ZQGOw1//jR5SAkn4VQV4CODJls18CAmuAHjbcM8vc9U76ZSrdgt4BODxyLG8Twla4P8BcLfKPX/sEaeSAAz8fR4H8vArHQHXAHwYs3Xj9SU3gQX8SgKcAvBitTp38WAJCWzgVxJg+F0qSGAFv5oAh5bADn5FAQ4lwVUAb3a86nX1tL/tXK10Czj+O+7zOLCFX3UDrEXYhwTW8KsLsPRx0Ap/+A/fq12uKpVnqx4BSx8Hgb9quAcB5t4EgX/sz6sXAeaSIPA3zqOeBJgqwTMAzxuuelJn/ubzSG8CTJFg12ex4Z4vDb+HW8A2aK1XRFYCC/g9C7DkJrCB37sAS0hgBV9BgDklGODfBvCaPScU5np8CPxf71OfCSzhq2yAqZ8d2MJXE6DlOLCGryjALhLYw1cVgJEg8Dv7MKjlgXvbg2Hgd/ph0BwSBH7nHwZNkeCW4z1/rDCV/wOM5RyOg7MAvo0Nur3uIoAbVzpvBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hz8BzIXtYE3VcPnAAAAAElFTkSuQmCC";
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ImageModel = layer.Client.getCardModelClass('ImageModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  new ImageModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    source: layer.Util.base64ToBlob(imgBase64, 'image/png'),
@@ -3047,6 +3107,74 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    artist: "unknown photographer",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Source URL Test",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    subtitle: "Ooooh, Pretty..."
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: 'this is a long subtitle',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter and narrower than available space, but more wide than tall
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAAA4UlEQVR42u3TMQ0AAAjAMIIa/MvjAQO8fD1qYMmiKwe4hQhgEDAIGAQMAgYBg4BBwCBgEMAgYBAwCBgEDAIGAYOAQcAgYBAhwCBgEDAIGAQMAgYBg4BBwCCAQcAgYBAwCBgEDAIGAYOAQcAggEHAIGAQMAgYBAwCBgGDgEEAg4BBwCBgEDAIGAQMAgYBg4BBAIOAQcAgYBAwCBgEDAIGAYMABgGDgEHAIGAQMAgYBAwCBgGDAAYBg4BBwCBgEDAIGAQMAgYBg4gABgGDgEHAIGAQMAgYBAwCBgEMAgYBg8CnBfHt+BvKmDEFAAAAAElFTkSuQmCC', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 200,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Smaller than card but wider than tall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter and narrower than available space, but more tall than wide
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAGQAAACgCAYAAAD6m8n2AAAA+ElEQVR42u3RIREAAAgAMY409I+HgQhYxMQX+EVXjv4UJgARECACAkRAgAgIECOACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiAADEBiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAA0dUCqb+TTA4q67EAAAAASUVORK5CYII=', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 160,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Smaller than card but taller than wide"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is taller than available space and narrower than available space
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAGQAAAGQCAYAAABYlsXvAAACO0lEQVR42u3RIREAAAgAMY409I+HgQpIxMQX+EVXjv4UJgARECACAkRAgAgIECOACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiAADEBiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAICBATgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAAxAYiAABEQIAICRECAGAFEQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAQEiAlABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIbi0xKPBEOUSsQgAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Taller than card but narrower than card"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter than available space and wider than available space
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAZAAAABkCAYAAACoy2Z3AAABOUlEQVR42u3VIREAAAgAMY409I+HgQwI3MQKvPnoygGAqxABAAMBwEAAMBAADAQADAQAAwHAQAAwEAAMBAAMBAADAcBAADAQAAwEAAwEAAMBwEAAMBAADAQADAQAAwHAQAAwEAAMBAAMBAADAcBAADAQAAwEAAwEAAMBwEAAMBAADAQADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQADAQAAwEAAMBwEAAMBAAMBAADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQADAQAAwEAAMBwEAAMBAAMBAADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQEQAwEAAMBAADAcBAAMBAADAQAAwEAAMBwEAAwEAAMBAADAQAAwHAQADAQAAwEAAMBAADAcBAAMBAADAQAAwEAAMBwEAAwEAA+LFgd/BENFnevQAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider than card but shorter than card"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is wider and taller than available space, but much taller than wide
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAHJ0lEQVR42u3XIREAAAgAMY409I+HgRSgJlbg3UdXDgAAwIcQAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAA7i0k6IKC1Z+b/AAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 800,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider and taller than card but much taller than wide"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is wider and taller than available space, but much wider than tall
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAHJ0lEQVR42u3XIREAAAgAMY409I+HgRSgJlbg3UdXDgAAwIcQAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAA7i0k6IKC1Z+b/AAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 800,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider and taller than card but much wider than tall"
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
  */
 'use strict';
@@ -3082,7 +3210,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   imgBase64 = "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAECElEQVR4Xu2ZO44TURREa0SAWBASKST8xCdDQMAq+OyAzw4ISfmLDBASISERi2ADEICEWrKlkYWny6+77fuqalJfz0zVOXNfv/ER8mXdwJF1+oRHBDCXIAJEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8wbM42cDRADzBszjZwNEAPMGzONnA0QA8waWjX8OwHcAv5f9Me3fPRugvbuxd14C8B7AVwA3q0oQAcYwtr2+hn969faPVSWIAG2AT3rXJvz17CcAN6ptgggwrwDb4JeVIALMJ8AY/JISRIB5BGDhr3/aZwDXKxwHEWC6AJcBvAOwfuBjvuNfABcBfGGGl5yJANPabYV/B8DLaT96nndHgPYeu4c/RI8AbQJIwO9FgDMAfrVxWuRdMvB7EOA+gHsALgD4uQjO3b6pFPzqAjwA8HTF5weA8weWQA5+ZQGOw1//jR5SAkn4VQV4CODJls18CAmuAHjbcM8vc9U76ZSrdgt4BODxyLG8Twla4P8BcLfKPX/sEaeSAAz8fR4H8vArHQHXAHwYs3Xj9SU3gQX8SgKcAvBitTp38WAJCWzgVxJg+F0qSGAFv5oAh5bADn5FAQ4lwVUAb3a86nX1tL/tXK10Czj+O+7zOLCFX3UDrEXYhwTW8KsLsPRx0Ap/+A/fq12uKpVnqx4BSx8Hgb9quAcB5t4EgX/sz6sXAeaSIPA3zqOeBJgqwTMAzxuuelJn/ubzSG8CTJFg12ex4Z4vDb+HW8A2aK1XRFYCC/g9C7DkJrCB37sAS0hgBV9BgDklGODfBvCaPScU5np8CPxf71OfCSzhq2yAqZ8d2MJXE6DlOLCGryjALhLYw1cVgJEg8Dv7MKjlgXvbg2Hgd/ph0BwSBH7nHwZNkeCW4z1/rDCV/wOM5RyOg7MAvo0Nur3uIoAbVzpvBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hyMAJpc6VQRgK5KczACaHKlU0UAuirNwQigyZVOFQHoqjQHI4AmVzpVBKCr0hz8BzIXtYE3VcPnAAAAAElFTkSuQmCC";
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ImageModel = layer.Client.getCardModelClass('ImageModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  new ImageModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    source: layer.Util.base64ToBlob(imgBase64, 'image/png'),
@@ -3099,6 +3227,74 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    artist: "unknown photographer",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Source URL Test",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    subtitle: "Ooooh, Pretty..."
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: 'this is a long subtitle',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter and narrower than available space, but more wide than tall
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAAA4UlEQVR42u3TMQ0AAAjAMIIa/MvjAQO8fD1qYMmiKwe4hQhgEDAIGAQMAgYBg4BBwCBgEMAgYBAwCBgEDAIGAYOAQcAgYBAhwCBgEDAIGAQMAgYBg4BBwCCAQcAgYBAwCBgEDAIGAYOAQcAggEHAIGAQMAgYBAwCBgGDgEEAg4BBwCBgEDAIGAQMAgYBg4BBAIOAQcAgYBAwCBgEDAIGAYMABgGDgEHAIGAQMAgYBAwCBgGDAAYBg4BBwCBgEDAIGAQMAgYBg4gABgGDgEHAIGAQMAgYBAwCBgEMAgYBg8CnBfHt+BvKmDEFAAAAAElFTkSuQmCC', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 200,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Smaller than card but wider than tall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter and narrower than available space, but more tall than wide
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAGQAAACgCAYAAAD6m8n2AAAA+ElEQVR42u3RIREAAAgAMY409I+HgQhYxMQX+EVXjv4UJgARECACAkRAgAgIECOACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiAADEBiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAA0dUCqb+TTA4q67EAAAAASUVORK5CYII=', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 160,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Smaller than card but taller than wide"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is taller than available space and narrower than available space
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAGQAAAGQCAYAAABYlsXvAAACO0lEQVR42u3RIREAAAgAMY409I+HgQpIxMQX+EVXjv4UJgARECACAkRAgAgIECOACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiACAgQAQEiIEAEBIiAADEBiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAIiIAAERAgAgJEQIAICBATgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAgIEAEBIiBABASIgAAxAYiAABEQIAICRECAGAFEQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAREQIAICBABASIgQAQEiAlABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIgAARECACAkRABASIbi0xKPBEOUSsQgAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Taller than card but narrower than card"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is shorter than available space and wider than available space
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAZAAAABkCAYAAACoy2Z3AAABOUlEQVR42u3VIREAAAgAMY409I+HgQwI3MQKvPnoygGAqxABAAMBwEAAMBAADAQADAQAAwHAQAAwEAAMBAAMBAADAcBAADAQAAwEAAwEAAMBwEAAMBAADAQADAQAAwHAQAAwEAAMBAAMBAADAcBAADAQAAwEAAwEAAMBwEAAMBAADAQADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQADAQAAwEAAMBwEAAMBAAMBAADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQADAQAAwEAAMBwEAAMBAAMBAADAQAAwHAQAAwEAAwEAAMBAADAcBAADAQEQAwEAAMBAADAcBAAMBAADAQAAwEAAMBwEAAwEAAMBAADAQAAwHAQADAQAAwEAAMBAADAcBAAMBAADAQAAwEAAMBwEAAwEAA+LFgd/BENFnevQAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 100,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider than card but shorter than card"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is wider and taller than available space, but much taller than wide
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAHJ0lEQVR42u3XIREAAAgAMY409I+HgRSgJlbg3UdXDgAAwIcQAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAA7i0k6IKC1Z+b/AAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 800,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider and taller than card but much taller than wide"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 // Test image is wider and taller than available space, but much wider than tall
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAHJ0lEQVR42u3XIREAAAgAMY409I+HgRSgJlbg3UdXDgAAwIcQAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAAAABgQAADAgAAAABgQAADAgAAAAAYEAADAgAAAAAYEAADAgAAAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAgAERAQAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAADAgAAGBAAAAADAgAAGBAAAAAAwIAAGBAAAAAAwIAAGBAAAAAAwIAABgQAAAAAwIAABgQAAAAAwIAABgQAADAgAgBAAAYEAAAwIAAAAAYEAAAwIAAAAAYEAAAwIAAAAAGBAAAwIAAAAAGBAAAwIAAAAAGBAAAMCAAAAAGBAAAMCAAAAAGBAAAMCAAAIABAQAAMCAAAIABAQAAMCAAAIABAQAADAgAAIABAQAADAgAAIABAQAADAgAAGBAAAAA7i0k6IKC1Z+b/AAAAABJRU5ErkJggg==', 'image/png')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   source: img,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   size: img.size,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   width: 800,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   height: 400,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: "Wider and taller than card but much wider than tall"
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
@@ -3130,31 +3326,39 @@ var ImageModel = function (_CardModel) {
       var _this2 = this;
 
       if (this.source && !this.mimeType) this.mimeType = this.source.type;
-      var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
-      if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
-      this.part = new _layerWebsdk.MessagePart({
-        mimeType: this.constructor.MIMEType,
-        body: JSON.stringify(body)
-      });
+
       if (this.source && !this.preview && !this.previewUrl) {
         if (!this.fileName) this.fileName = this.source.name;
         this._gatherMetadataFromEXIF(this.source.body, function () {
           _this2._generatePreview(_this2.source.body, function () {
+            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+            // Replace the source blob with a source message part
+            if (_this2.source) _this2.source = new _layerWebsdk.MessagePart(_this2.source);
+            _this2.part = new _layerWebsdk.MessagePart({
+              mimeType: _this2.constructor.MIMEType,
+              body: JSON.stringify(body)
+            });
             var parts = [_this2.part];
             if (_this2.source) {
               parts.push(_this2.source);
               _this2.source.mimeAttributes.role = 'source';
-              _this2.source.mimeAttributes['parent-node-id'] = _this2.part.mimeAttributes['node-id'];
+              _this2.source.mimeAttributes['parent-node-id'] = _this2.nodeId;
             }
             if (_this2.preview) {
               parts.push(_this2.preview);
               _this2.preview.mimeAttributes.role = 'preview';
-              _this2.preview.mimeAttributes['parent-node-id'] = _this2.part.mimeAttributes['node-id'];
+              _this2.preview.mimeAttributes['parent-node-id'] = _this2.nodeId;
             }
             callback(parts);
           });
         });
       } else {
+        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+        if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
+        this.part = new _layerWebsdk.MessagePart({
+          mimeType: this.constructor.MIMEType,
+          body: JSON.stringify(body)
+        });
         if (!this.title && this.sourceUrl) this.title = this.sourceUrl.replace(/^.*\//, '');
         if (!this.title && this.previewUrl) this.title = this.previewUrl.replace(/^.*\//, '');
         callback([this.part]);
@@ -3162,15 +3366,10 @@ var ImageModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.childParts.forEach(function (part) {
         switch (part.mimeAttributes.role) {
@@ -3251,18 +3450,22 @@ var ImageModel = function (_CardModel) {
       };
 
       (0, _loadImage2.default)(file, function (srcCanvas) {
-        var blob = _this4._postGeneratePreview(srcCanvas);
-        _this4.preview = new _layerWebsdk.MessagePart(blob);
-        callback(_this4.preview);
+        _this4.width = srcCanvas.width;
+        _this4.height = srcCanvas.height;
+        if (srcCanvas.width > 350 || srcCanvas.height > 300) {
+          var blob = _this4._postGeneratePreview(srcCanvas);
+          _this4.preview = new _layerWebsdk.MessagePart(blob);
+          callback(_this4.preview);
+        } else {
+          callback();
+        }
       }, options);
     }
   }, {
     key: '_postGeneratePreview',
     value: function _postGeneratePreview(srcCanvas) {
-      this.width = srcCanvas.width;
-      this.height = srcCanvas.height;
 
-      var size = (0, _sizing2.default)({ width: this.width, height: this.height }, { width: 450, height: 450 });
+      var size = (0, _sizing2.default)({ width: this.width, height: this.height }, { width: 350, height: 350 });
       var canvas = document.createElement('canvas');
       this.previewWidth = canvas.width = size.width;
       this.previewHeight = canvas.height = size.height;
@@ -3311,8 +3514,8 @@ ImageModel.prototype.preview = null;
 ImageModel.prototype.source = null;
 ImageModel.prototype.width = 350;
 ImageModel.prototype.height = 350;
-ImageModel.prototype.previewWidth = 350;
-ImageModel.prototype.previewHeight = 350;
+ImageModel.prototype.previewWidth = 0;
+ImageModel.prototype.previewHeight = 0;
 ImageModel.prototype.url = '';
 
 ImageModel.defaultAction = 'open-url';
@@ -3354,31 +3557,39 @@ var ImageModel = function (_CardModel) {
       var _this2 = this;
 
       if (this.source && !this.mimeType) this.mimeType = this.source.type;
-      var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
-      if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
-      this.part = new _layerWebsdk.MessagePart({
-        mimeType: this.constructor.MIMEType,
-        body: JSON.stringify(body)
-      });
+
       if (this.source && !this.preview && !this.previewUrl) {
         if (!this.fileName) this.fileName = this.source.name;
         this._gatherMetadataFromEXIF(this.source.body, function () {
           _this2._generatePreview(_this2.source.body, function () {
+            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+            // Replace the source blob with a source message part
+            if (_this2.source) _this2.source = new _layerWebsdk.MessagePart(_this2.source);
+            _this2.part = new _layerWebsdk.MessagePart({
+              mimeType: _this2.constructor.MIMEType,
+              body: JSON.stringify(body)
+            });
             var parts = [_this2.part];
             if (_this2.source) {
               parts.push(_this2.source);
               _this2.source.mimeAttributes.role = 'source';
-              _this2.source.mimeAttributes['parent-node-id'] = _this2.part.mimeAttributes['node-id'];
+              _this2.source.mimeAttributes['parent-node-id'] = _this2.nodeId;
             }
             if (_this2.preview) {
               parts.push(_this2.preview);
               _this2.preview.mimeAttributes.role = 'preview';
-              _this2.preview.mimeAttributes['parent-node-id'] = _this2.part.mimeAttributes['node-id'];
+              _this2.preview.mimeAttributes['parent-node-id'] = _this2.nodeId;
             }
             callback(parts);
           });
         });
       } else {
+        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+        if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
+        this.part = new _layerWebsdk.MessagePart({
+          mimeType: this.constructor.MIMEType,
+          body: JSON.stringify(body)
+        });
         if (!this.title && this.sourceUrl) this.title = this.sourceUrl.replace(/^.*\//, '');
         if (!this.title && this.previewUrl) this.title = this.previewUrl.replace(/^.*\//, '');
         callback([this.part]);
@@ -3386,15 +3597,10 @@ var ImageModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+      _get(ImageModel.prototype.__proto__ || Object.getPrototypeOf(ImageModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.childParts.forEach(function (part) {
         switch (part.mimeAttributes.role) {
@@ -3475,18 +3681,22 @@ var ImageModel = function (_CardModel) {
       };
 
       (0, _loadImage2.default)(file, function (srcCanvas) {
-        var blob = _this4._postGeneratePreview(srcCanvas);
-        _this4.preview = new _layerWebsdk.MessagePart(blob);
-        callback(_this4.preview);
+        _this4.width = srcCanvas.width;
+        _this4.height = srcCanvas.height;
+        if (srcCanvas.width > 350 || srcCanvas.height > 300) {
+          var blob = _this4._postGeneratePreview(srcCanvas);
+          _this4.preview = new _layerWebsdk.MessagePart(blob);
+          callback(_this4.preview);
+        } else {
+          callback();
+        }
       }, options);
     }
   }, {
     key: '_postGeneratePreview',
     value: function _postGeneratePreview(srcCanvas) {
-      this.width = srcCanvas.width;
-      this.height = srcCanvas.height;
 
-      var size = (0, _sizing2.default)({ width: this.width, height: this.height }, { width: 450, height: 450 });
+      var size = (0, _sizing2.default)({ width: this.width, height: this.height }, { width: 350, height: 350 });
       var canvas = document.createElement('canvas');
       this.previewWidth = canvas.width = size.width;
       this.previewHeight = canvas.height = size.height;
@@ -3535,8 +3745,8 @@ ImageModel.prototype.preview = null;
 ImageModel.prototype.source = null;
 ImageModel.prototype.width = 350;
 ImageModel.prototype.height = 350;
-ImageModel.prototype.previewWidth = 350;
-ImageModel.prototype.previewHeight = 350;
+ImageModel.prototype.previewWidth = 0;
+ImageModel.prototype.previewHeight = 0;
 ImageModel.prototype.url = '';
 
 ImageModel.defaultAction = 'open-url';
@@ -3549,7 +3759,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ImageModel, "ImageModel");
 
 module.exports = ImageModel;
-},{"../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],16:[function(require,module,exports){
+},{"../../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101,"layer-websdk":110}],16:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -3588,7 +3798,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _component.registerComponent)('layer-image-card', {
   mixins: [_cardMixin2.default, _cardPrimitiveMixin2.default],
   style: 'layer-image-card {\n      display: block;\n      overflow: hidden;\n    }\n    layer-card-view.layer-image-card > * {\n      cursor: pointer;\n    }\n ',
-  properties: {},
+  properties: {
+    parentComponent: {
+      set: function set() {
+        this.onRerender();
+      }
+    }
+  },
   methods: {
 
     /**
@@ -3609,20 +3825,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @method
      * @private
      */
-    onRender: function onRender() {
+    onRerender: function onRerender() {
       var _this = this;
 
       // maxSizes should be removed
-      var maxSizes = _base.settings.maxSizes;
-      var isSmallImage = this.model.width < 350;
-      this.toggleClass('layer-image-card-small-image', isSmallImage);
+      var width = this.model.previewWidth || this.model.width;
+      var height = this.model.previewHeight || this.model.height;
 
-      // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
-      if (this.parentComponent && this.parentComponent.tagName === 'LAYER-NOTIFIER') {
-        maxSizes = { height: Math.min(maxSizes.height, 140), width: maxSizes.width };
-      };
-      this.properties.sizes = (0, _sizing2.default)({ width: this.model.width, height: this.model.height }, { width: maxSizes.width, height: maxSizes.height });
-      //this.style.height = (UISettings.verticalMessagePadding + this.properties.sizes.height) + 'px';
+      var isSmallImage = width < 350;
+      var isSmallAndWideImage = isSmallImage && width > height;
+      this.toggleClass('layer-image-card-small-image', isSmallImage && !isSmallAndWideImage);
+
+      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return; // wait until the parentComponent is a Card Container
+
+      var maxWidth = this.parentComponent.getPreferredMaxWidth();
+      var maxHeight = this.parentComponent.getPreferredMaxHeight();
+
       if (this.model.source || this.model.preview) {
         this.model.getBlob(function (blob) {
           return _this._renderCanvas(blob);
@@ -3635,14 +3853,32 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           src: this.model.previewUrl || this.model.sourceUrl,
           parentNode: this
         });
-        img.style.maxWidth = '350px';
-        img.style.maxHeight = this.properties.sizes.height + 'px';
+        img.style.maxWidth = maxWidth + 'px';
+        img.style.maxHeight = maxHeight + 'px';
       }
     },
+
+
+    /**
+     * Rendering Rules:
+     *
+     * * Images whose height is less than width and width is less than 192px are scaled to 192px
+     * * Images whose height is greater than width and width is less than 192px are scaled to height 192px?
+     * * Images whose width and height are equal, and less than 192px should be scaled up to 192px
+     * * Images between 192-350 are sized as-is
+     * * However, if there is metadata, scale images up to 350px
+     *
+     * @param {*} blob
+     */
     _renderCanvas: function _renderCanvas(blob) {
       var _this2 = this;
 
-      var isSmallImage = this.model.width < 350;
+      var width = this.model.previewWidth || this.model.width;
+      var height = this.model.previewHeight || this.model.height;
+      var minWidth = this.parentComponent.getPreferredWidth();
+      var minHeight = this.parentComponent.getPreferredMinHeight();
+      var maxWidth = this.parentComponent.getPreferredMaxWidth();
+      var maxHeight = this.parentComponent.getPreferredMaxHeight();
 
       // Read the EXIF data
       _loadImage2.default.parseMetaData(blob, function (data) {
@@ -3654,16 +3890,23 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         if (data.imageHead && data.exif) {
           options.orientation = data.exif.get('Orientation') || 1;
         }
-        options.maxWidth = _this2.model.width; //options.minWidth = this.properties.sizes.width + 1;
-        options.maxHeight = _this2.model.height; //options.minHeight = this.properties.sizes.height;
+        options.maxWidth = maxWidth;
+        options.maxHeight = maxHeight;
 
         // Write the image to a canvas with the specified orientation
         (0, _loadImage2.default)(blob, function (canvas) {
-          if (!isSmallImage) canvas.classList.add('layer-top-content-for-border-radius');
-          while (_this2.firstChild) {
-            _this2.removeChild(_this2.firstChild);
-          }if (canvas instanceof HTMLElement) {
-            _this2.appendChild(canvas);
+          if (canvas instanceof HTMLElement) {
+            if (width < minWidth && height < minHeight) {
+              if (width > height) {
+                canvas = _loadImage2.default.scale(canvas, { minWidth: minWidth });
+              } else {
+                canvas = _loadImage2.default.scale(canvas, { minHeight: minHeight });
+              }
+            }
+
+            while (_this2.firstChild) {
+              _this2.removeChild(_this2.firstChild);
+            }_this2.appendChild(canvas);
           } else {
             console.error(canvas);
           }
@@ -3682,7 +3925,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../base":4,"../../components/component":33,"../../utils/sizing":96,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],17:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../utils/sizing":97,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101}],17:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -3718,7 +3961,7 @@ var _component = require('../components/component');
     },
     footer: {
       set: function set(footer) {
-        this.nodes.footer.innerHTML = footer;
+        this.nodes.footer.innerHTML = typeof footer === 'string' ? footer : '';
       }
     },
     isShowingMetadata: {
@@ -3752,11 +3995,23 @@ var _component = require('../components/component');
       this.title = model.getTitle();
       this.description = model.getDescription();
       this.footer = model.getFooter();
-      this.ui.setupContainerClasses(this);
+      if (this.ui.parentComponent === this) this.ui.setupContainerClasses();
       this.toggleClass('layer-has-title', this.model.getTitle());
       this.toggleClass('layer-has-footer', this.model.getFooter());
       this.toggleClass('layer-has-description', this.model.getDescription());
       this.classList[!this.title && !this.description && !this.footer ? 'add' : 'remove']('layer-card-no-metadata');
+    },
+    getPreferredWidth: function getPreferredWidth() {
+      return this.isShowingMetadata ? 350 : 192;
+    },
+    getPreferredMaxWidth: function getPreferredMaxWidth() {
+      return 350;
+    },
+    getPreferredMaxHeight: function getPreferredMaxHeight() {
+      return 400;
+    },
+    getPreferredMinHeight: function getPreferredMinHeight() {
+      return 192;
     }
   }
 }); 
@@ -3873,13 +4128,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @method
      */
     onRerender: function onRerender() {
+      this.cardView.toggleClass('layer-card-as-chat-bubble', !this.model.title && !this.model.author && !this.model.imageUrl && !this.model.description);
       this.nodes.image.src = this.model.imageUrl || '';
       this.nodes.link.src = this.model.url;
       this.nodes.link.innerHTML = this.model.url;
       this.isLinkOnly = !(this.model.imageUrl || this.model.title || this.model.description || this.model.subtitle || this.model.author);
     },
-    setupContainerClasses: function setupContainerClasses(container) {
-      container.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
+    setupContainerClasses: function setupContainerClasses() {
+      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
+      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
     }
   }
 });
@@ -3892,8 +4149,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3911,6 +4166,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new LinkModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: ""
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new LinkModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "South Carolina inmate used drone, makeshift dummy to escape prison",
@@ -3953,12 +4216,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    description: "The Layer Web SDK is a JavaScript library for adding chat services to your web application. For detailed documentation, tutorials and guides please visit our Web SDK documentation. Supported Browsers: IE 11 and Edge, Safari 7, Chrome 42 and up, Firefox 40 and up.  Older versions of Chrome and Firefox will likely work.",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 LinkModel = layer.Client.getCardModelClass('LinkModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new LinkModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -3976,6 +4245,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new LinkModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: ""
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new LinkModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "South Carolina inmate used drone, makeshift dummy to escape prison",
@@ -4016,6 +4293,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Layer Web SDK",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    author: "Michael Kantor",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    description: "The Layer Web SDK is a JavaScript library for adding chat services to your web application. For detailed documentation, tutorials and guides please visit our Web SDK documentation. Supported Browsers: IE 11 and Edge, Safari 7, Chrome 42 and up, Firefox 40 and up.  Older versions of Chrome and Firefox will likely work.",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 LinkModel = layer.Client.getCardModelClass('LinkModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new LinkModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
@@ -4039,28 +4324,15 @@ var LinkModel = function (_CardModel) {
     key: '_generateParts',
     value: function _generateParts(callback) {
       var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+      ['image_url', 'author', 'title', 'description'].forEach(function (key) {
+        if (body[key] === null) delete body[key];
+      });
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
       });
       callback([this.part]);
-    }
-  }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(LinkModel.prototype.__proto__ || Object.getPrototypeOf(LinkModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-
-      // if (!this.title && !this.description) {
-      //   this._fetchArticle();
-      // }
     }
   }, {
     key: 'getFooter',
@@ -4087,19 +4359,19 @@ var LinkModel = function (_CardModel) {
   }, {
     key: 'gatherMetadata',
     value: function gatherMetadata(callback) {
-      var _this3 = this;
+      var _this2 = this;
 
       layer.xhr({
-        method: "GET",
+        method: 'GET',
         url: this.url
       }, function (result) {
         if (result.success) {
-          _this3.html = result.data;
-          if (!_this3.title) _this3.title = _this3._getArticleMeta(TitleRegEx);
-          if (!_this3.description) _this3.description = _this3._getArticleMeta(DescriptionRegEx);
-          if (!_this3.imageUrl) _this3.imageUrl = _this3._getArticleMeta(ImageRegEx);
-          if (!_this3.author) _this3.author = _this3._getArticleMeta(AuthorRegEx);
-          _this3.trigger('change');
+          _this2.html = result.data;
+          if (!_this2.title) _this2.title = _this2._getArticleMeta(TitleRegEx);
+          if (!_this2.description) _this2.description = _this2._getArticleMeta(DescriptionRegEx);
+          if (!_this2.imageUrl) _this2.imageUrl = _this2._getArticleMeta(ImageRegEx);
+          if (!_this2.author) _this2.author = _this2._getArticleMeta(AuthorRegEx);
+          _this2.trigger('change');
         }
         callback(result.success, result);
       });
@@ -4123,10 +4395,10 @@ var LinkModel = function (_CardModel) {
   return LinkModel;
 }(_layerWebsdk.CardModel);
 
-LinkModel.prototype.imageUrl = '';
-LinkModel.prototype.author = '';
-LinkModel.prototype.title = '';
-LinkModel.prototype.description = '';
+LinkModel.prototype.imageUrl = null;
+LinkModel.prototype.author = null;
+LinkModel.prototype.title = null;
+LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
@@ -4138,7 +4410,7 @@ LinkModel.MIMEType = 'application/vnd.layer.card.link+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(LinkModel, "LinkModel");
+_layerWebsdk.Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
 
@@ -4161,28 +4433,15 @@ var LinkModel = function (_CardModel) {
     key: '_generateParts',
     value: function _generateParts(callback) {
       var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+      ['image_url', 'author', 'title', 'description'].forEach(function (key) {
+        if (body[key] === null) delete body[key];
+      });
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
       });
       callback([this.part]);
-    }
-  }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(LinkModel.prototype.__proto__ || Object.getPrototypeOf(LinkModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-
-      // if (!this.title && !this.description) {
-      //   this._fetchArticle();
-      // }
     }
   }, {
     key: 'getFooter',
@@ -4209,19 +4468,19 @@ var LinkModel = function (_CardModel) {
   }, {
     key: 'gatherMetadata',
     value: function gatherMetadata(callback) {
-      var _this3 = this;
+      var _this2 = this;
 
       layer.xhr({
-        method: "GET",
+        method: 'GET',
         url: this.url
       }, function (result) {
         if (result.success) {
-          _this3.html = result.data;
-          if (!_this3.title) _this3.title = _this3._getArticleMeta(TitleRegEx);
-          if (!_this3.description) _this3.description = _this3._getArticleMeta(DescriptionRegEx);
-          if (!_this3.imageUrl) _this3.imageUrl = _this3._getArticleMeta(ImageRegEx);
-          if (!_this3.author) _this3.author = _this3._getArticleMeta(AuthorRegEx);
-          _this3.trigger('change');
+          _this2.html = result.data;
+          if (!_this2.title) _this2.title = _this2._getArticleMeta(TitleRegEx);
+          if (!_this2.description) _this2.description = _this2._getArticleMeta(DescriptionRegEx);
+          if (!_this2.imageUrl) _this2.imageUrl = _this2._getArticleMeta(ImageRegEx);
+          if (!_this2.author) _this2.author = _this2._getArticleMeta(AuthorRegEx);
+          _this2.trigger('change');
         }
         callback(result.success, result);
       });
@@ -4245,10 +4504,10 @@ var LinkModel = function (_CardModel) {
   return LinkModel;
 }(_layerWebsdk.CardModel);
 
-LinkModel.prototype.imageUrl = '';
-LinkModel.prototype.author = '';
-LinkModel.prototype.title = '';
-LinkModel.prototype.description = '';
+LinkModel.prototype.imageUrl = null;
+LinkModel.prototype.author = null;
+LinkModel.prototype.title = null;
+LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
@@ -4260,10 +4519,10 @@ LinkModel.MIMEType = 'application/vnd.layer.card.link+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(LinkModel, "LinkModel");
+_layerWebsdk.Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
-},{"layer-websdk":109}],21:[function(require,module,exports){
+},{"layer-websdk":110}],21:[function(require,module,exports){
 /**
  * You must set your Google Maps API key in `window.googleMapsAPIKey`
  *
@@ -4300,7 +4559,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   style: '\n  layer-card-view.layer-location-card {\n    cursor: pointer;\n  }\n  .layer-location-card-address-only {\n    display: none;\n  }\n  ',
   properties: {
     mapWidth: {
-      value: 288
+      value: 350
     },
     mapHeight: {
       value: 300
@@ -4309,7 +4568,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       value: false,
       set: function set(value) {
         this.toggleClass('layer-location-card-address-only', value);
-        if (this.container) this.setupContainerClasses(this.container);
+        this.setupContainerClasses();
       }
     }
   },
@@ -4342,8 +4601,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRerender: function onRerender() {
       this._updateImageSrc();
     },
-    setupContainerClasses: function setupContainerClasses(container) {
-      container.classList[this.hideMap ? 'add' : 'remove']('layer-arrow-next-container');
+    setupContainerClasses: function setupContainerClasses() {
+      this.parentComponent.toggleClass('layer-arrow-next-container', this.hideMap);
+      this.parentComponent.toggleClass('layer-no-core-ui', this.hideMap);
     }
   }
 });
@@ -4361,8 +4621,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4412,12 +4670,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    })
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 LocationModel = layer.Client.getCardModelClass('LocationModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new LocationModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     city: 'San Francisco',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: 'Layer Inc',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     postalCode: '94107',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     administrativeArea: 'CA',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     street1: '655 4th st',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     description:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }).generateMessage($("layer-conversation-view").conversation, message => message.send());;
  */
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -4467,6 +4734,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    })
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 LocationModel = layer.Client.getCardModelClass('LocationModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 new LocationModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     city: 'San Francisco',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: 'Layer Inc',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     postalCode: '94107',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     administrativeArea: 'CA',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     street1: '655 4th st',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     description:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }).generateMessage($("layer-conversation-view").conversation, message => message.send());;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
@@ -4491,18 +4770,6 @@ var LocationModel = function (_CardModel) {
       callback([this.part]);
     }
   }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(LocationModel.prototype.__proto__ || Object.getPrototypeOf(LocationModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-    }
-  }, {
     key: 'getDescription',
     value: function getDescription() {
       if (this.description && this.showAddress !== true) {
@@ -4566,18 +4833,6 @@ var LocationModel = function (_CardModel) {
       callback([this.part]);
     }
   }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(LocationModel.prototype.__proto__ || Object.getPrototypeOf(LocationModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-    }
-  }, {
     key: 'getDescription',
     value: function getDescription() {
       if (this.description && this.showAddress !== true) {
@@ -4618,7 +4873,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LocationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LocationModel, 'LocationModel');
 
 module.exports = LocationModel;
-},{"layer-websdk":109}],23:[function(require,module,exports){
+},{"layer-websdk":110}],23:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4661,15 +4916,8 @@ var OrganizationModel = function (_CardModel) {
 
   _createClass(OrganizationModel, [{
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.addressModels = this.getModelsFromPart('address');
       this.contactModels = this.getModelsFromPart('contact');
@@ -4703,15 +4951,8 @@ var OrganizationModel = function (_CardModel) {
 
   _createClass(OrganizationModel, [{
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(OrganizationModel.prototype.__proto__ || Object.getPrototypeOf(OrganizationModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.addressModels = this.getModelsFromPart('address');
       this.contactModels = this.getModelsFromPart('contact');
@@ -4733,7 +4974,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(OrganizationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(OrganizationModel, 'OrganizationModel');
 
 module.exports = OrganizationModel;
-},{"layer-websdk":109}],24:[function(require,module,exports){
+},{"layer-websdk":110}],24:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4778,15 +5019,8 @@ var PersonModel = function (_CardModel) {
 
   _createClass(PersonModel, [{
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.addressModels = this.getModelsFromPart('address');
     }
@@ -4822,15 +5056,8 @@ var PersonModel = function (_CardModel) {
 
   _createClass(PersonModel, [{
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(PersonModel.prototype.__proto__ || Object.getPrototypeOf(PersonModel.prototype), '_parseMessage', this).call(this, payload);
 
       this.addressModels = this.getModelsFromPart('address');
     }
@@ -4854,7 +5081,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(PersonModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(PersonModel, 'PersonModel');
 
 module.exports = PersonModel;
-},{"layer-websdk":109}],25:[function(require,module,exports){
+},{"layer-websdk":110}],25:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4888,7 +5115,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     canRenderConcise: function canRenderConcise(message) {
       return true;
     },
-    onAfterCreate: function onAfterCreate() {
+    onRerender: function onRerender() {
+      this.innerHTML = '';
       if (this.model.detailModel) {
         this.createElement('layer-card-view', {
           message: this.model.message,
@@ -5000,15 +5228,8 @@ var ProductModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this3 = this;
-
-      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this, payload);
 
       var detailPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'product-detail';
@@ -5100,15 +5321,8 @@ var ProductModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this3 = this;
-
-      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
+    value: function _parseMessage(payload) {
+      _get(ProductModel.prototype.__proto__ || Object.getPrototypeOf(ProductModel.prototype), '_parseMessage', this).call(this, payload);
 
       var detailPart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'product-detail';
@@ -5164,7 +5378,7 @@ _layerWebsdk.Client.registerCardModelClass(ProductModel, "ProductModel");
 
 _layerWebsdk.Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;
-},{"layer-websdk":109}],27:[function(require,module,exports){
+},{"layer-websdk":110}],27:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5226,9 +5440,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     getTitle: function getTitle() {
       return 'Order Confirmation';
     },
-    onAfterCreate: function onAfterCreate() {
+
+
+    /**
+     *
+     * @method
+     */
+    onRender: function onRender() {},
+    onRerender: function onRerender() {
       var _this = this;
 
+      this.nodes.products.innerHTML = '';
       this.model.items.forEach(function (item) {
         _this.createElement('layer-receipt-card-item', {
           item: item,
@@ -5248,18 +5470,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
         shipTo.nodes.ui.hideMap = true;
       }
-    },
 
-
-    /**
-     *
-     * @method
-     */
-    onRender: function onRender() {},
-    onRerender: function onRerender() {
       this.nodes.total.innerHTML = new Number(this.model.summary.totalCost).toLocaleString(navigator.language, {
         currency: this.model.currency,
-        style: "currency"
+        style: 'currency'
       });
       this.nodes.paidWith.innerHTML = this.model.paymentMethod || 'Unknown';
     }
@@ -5331,6 +5545,61 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }).generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ReceiptModel = client.getCardModelClassForMimeType('application/vnd.layer.card.receipt+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               LocationModel = client.getCardModelClassForMimeType('application/vnd.layer.card.location+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ListModel = client.getCardModelClassForMimeType('application/vnd.layer.card.list+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               new ReceiptModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 order: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   number: 'FRODO-DODO-ONE'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 paymentMethod: "VISA ****1234",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 summary: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle: 'Your Purchase is Complete',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   shipping_cost: 350.01,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   total_tax: 0.01,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   total_cost: 350.02
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 shippingAddressModel: new LocationModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   city: 'San Francisco',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   name: 'Layer Inc',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   postal_code: '94107',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   state: 'CA',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   street1: '655 4th st',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: 'Description should not show'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 50,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 3,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A pretty picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "Hang it on your wall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 50,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 1,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A boring picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "You hanging around near your wall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 150,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 1,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A terrifying picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }).generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
 'use strict';
 
@@ -5397,6 +5666,61 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }).generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ReceiptModel = client.getCardModelClassForMimeType('application/vnd.layer.card.receipt+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               LocationModel = client.getCardModelClassForMimeType('application/vnd.layer.card.location+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ListModel = client.getCardModelClassForMimeType('application/vnd.layer.card.list+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               new ReceiptModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 order: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   number: 'FRODO-DODO-ONE'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 paymentMethod: "VISA ****1234",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 summary: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle: 'Your Purchase is Complete',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   shipping_cost: 350.01,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   total_tax: 0.01,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   total_cost: 350.02
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 shippingAddressModel: new LocationModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   city: 'San Francisco',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   name: 'Layer Inc',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   postal_code: '94107',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   state: 'CA',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   street1: '655 4th st',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   description: 'Description should not show'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 50,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 3,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A pretty picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "Hang it on your wall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 50,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 1,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A boring picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "You hanging around near your wall"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 150,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 1,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A terrifying picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }).generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 
@@ -5441,19 +5765,16 @@ var ReceiptModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this);
+      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this, payload);
+      if (!this.items) this.items = [];
 
-      var payload = JSON.parse(this.part.body);
       var summary = payload.summary;
-      delete payload.summary;
-      if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-      this.summary = {};
+      this.summary = {
+        totalCost: 0
+      };
       if (summary) {
         Object.keys(summary).forEach(function (propertyName) {
           _this3.summary[_layerWebsdk.Util.camelCase(propertyName)] = summary[propertyName];
@@ -5473,7 +5794,7 @@ var ReceiptModel = function (_CardModel) {
 ReceiptModel.prototype.billingAddressModel = null;
 ReceiptModel.prototype.shippingAddressModel = null;
 ReceiptModel.prototype.createdAt = null;
-ReceiptModel.prototype.currency = '';
+ReceiptModel.prototype.currency = 'USD';
 ReceiptModel.prototype.discounts = null;
 ReceiptModel.prototype.items = null;
 ReceiptModel.prototype.paymentMethod = '';
@@ -5542,19 +5863,16 @@ var ReceiptModel = function (_CardModel) {
     }
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
       var _this3 = this;
 
-      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this);
+      _get(ReceiptModel.prototype.__proto__ || Object.getPrototypeOf(ReceiptModel.prototype), '_parseMessage', this).call(this, payload);
+      if (!this.items) this.items = [];
 
-      var payload = JSON.parse(this.part.body);
       var summary = payload.summary;
-      delete payload.summary;
-      if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this3[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-      this.summary = {};
+      this.summary = {
+        totalCost: 0
+      };
       if (summary) {
         Object.keys(summary).forEach(function (propertyName) {
           _this3.summary[_layerWebsdk.Util.camelCase(propertyName)] = summary[propertyName];
@@ -5574,7 +5892,7 @@ var ReceiptModel = function (_CardModel) {
 ReceiptModel.prototype.billingAddressModel = null;
 ReceiptModel.prototype.shippingAddressModel = null;
 ReceiptModel.prototype.createdAt = null;
-ReceiptModel.prototype.currency = '';
+ReceiptModel.prototype.currency = 'USD';
 ReceiptModel.prototype.discounts = null;
 ReceiptModel.prototype.items = null;
 ReceiptModel.prototype.paymentMethod = '';
@@ -5600,7 +5918,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ReceiptModel, 'ReceiptModel');
 
 module.exports = ReceiptModel;
-},{"layer-websdk":109}],29:[function(require,module,exports){
+},{"layer-websdk":110}],29:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5690,7 +6008,7 @@ var ResponseModel = function (_CardModel) {
         this.responseTo = this.responseToMessage.id;
       }
 
-      var body = this._initBodyWithMetadata(['responseTo', 'participantData', 'sharedData']);
+      var body = this._initBodyWithMetadata(['responseTo', 'responseToNodeId', 'participantData', 'sharedData']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -5714,15 +6032,9 @@ var ResponseModel = function (_CardModel) {
 
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
+    value: function _parseMessage(payload) {
+      _get(ResponseModel.prototype.__proto__ || Object.getPrototypeOf(ResponseModel.prototype), '_parseMessage', this).call(this, payload);
 
-      _get(ResponseModel.prototype.__proto__ || Object.getPrototypeOf(ResponseModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
       var messagePart = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'message';
       })[0];
@@ -5750,18 +6062,20 @@ var ResponseModel = function (_CardModel) {
 ResponseModel.prototype.participantData = null;
 ResponseModel.prototype.sharedData = null;
 ResponseModel.prototype.responseTo = null;
+ResponseModel.prototype.responseToNodeId = null;
 ResponseModel.prototype.responseToMessage = null;
 ResponseModel.prototype.messageModel = null;
 
 ResponseModel.cardRenderer = 'layer-response-card';
 ResponseModel.MIMEType = 'application/vnd.layer.card.response+json';
 _layerWebsdk2.default.MessagePart.TextualMimeTypes.push(ResponseModel.MIMEType);
+_layerWebsdk2.default.MessagePart.TextualMimeTypes.push('application/vnd.layer.card.responsesummary+json');
 
 // Register the Card Model Class with the Client
 _layerWebsdk.Client.registerCardModelClass(ResponseModel, 'ResponseModel');
 
 module.exports = ResponseModel;
-},{"layer-websdk":109}],31:[function(require,module,exports){
+},{"layer-websdk":110}],31:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5806,9 +6120,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     canRenderConcise: function canRenderConcise(message) {
       return true;
     },
-    onAfterCreate: function onAfterCreate() {
-      this._processText();
-    },
+    onAfterCreate: function onAfterCreate() {},
 
 
     /**
@@ -5817,9 +6129,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onRender: function onRender() {},
     onRerender: function onRerender() {
-      if (!this.model.title && !this.model.author) {
-        this.classList.remove('layer-standard-card');
-      }
+      this.cardView.toggleClass('layer-card-as-chat-bubble', !this.model.title && !this.model.author);
+      this._processText();
     },
 
 
@@ -5863,9 +6174,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
       var text = this.model.text;
       var textData = {
-        text: this._fixHtml(text),
-        afterText: [],
-        afterClasses: []
+        text: this._fixHtml(text)
       };
 
       // Iterate over each handler, calling each handler.
@@ -5874,25 +6183,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       // This is a cheap trick because a TextHandler could arbitrarily edit the `afterText` array,
       // removing previously added elements.  And this code would then break.
       _base2.default.textHandlersOrdered.forEach(function (handlerDef) {
-        var afterText = textData.afterText.concat([]);
-        // handlerDef.handler(textData, this.message, Boolean(this.parentComponent && this.parentComponent.isMessageListItem));
-        // const last = textData.afterText[textData.afterText.length - 1];
-        // if (afterText.indexOf(last) === -1) {
-        //   textData.afterClasses[textData.afterText.length - 1] = 'layer-message-text-plain-' + handlerDef.name;
-        // }
+        handlerDef.handler(textData, _this.message, _this.parentComponent && _this.parentComponent.tagName === 'LAYER-STANDARD-CARD-CONTAINER');
       });
       this.html = textData.text;
-
-      if (textData.afterText.length && this.parentComponent && this.parentComponent.isMessageListItem) {
-        textData.afterText.forEach(function (textItem, i) {
-          var div = document.createElement('div');
-          div.classList.add('layer-message-text-plain-after-text');
-          div.classList.add(textData.afterClasses[i]);
-          div.innerHTML = textItem;
-          if (div.firstChild.properties) div.firstChild.properties.parentComponent = _this;
-          _this.appendChild(div);
-        });
-      }
     }
   }
 });
@@ -5900,8 +6193,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -5931,12 +6222,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    subtitle: 'This quote totally blows'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 External Content:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   TextModel = layer.Client.getCardModelClass('TextModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle: 'This quote totally blows'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _layerWebsdk = require('layer-websdk');
 
@@ -5966,6 +6265,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    subtitle: 'This quote totally blows'
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 External Content:
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   TextModel = layer.Client.getCardModelClass('TextModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   subtitle: 'This quote totally blows'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
 
@@ -5990,18 +6299,6 @@ var TextModel = function (_CardModel) {
       callback([this.part]);
     }
   }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(TextModel.prototype.__proto__ || Object.getPrototypeOf(TextModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-    }
-  }, {
     key: 'getDescription',
     value: function getDescription() {
       return this.subtitle;
@@ -6072,18 +6369,6 @@ var TextModel = function (_CardModel) {
       callback([this.part]);
     }
   }, {
-    key: '_parseMessage',
-    value: function _parseMessage() {
-      var _this2 = this;
-
-      _get(TextModel.prototype.__proto__ || Object.getPrototypeOf(TextModel.prototype), '_parseMessage', this).call(this);
-
-      var payload = JSON.parse(this.part.body);
-      Object.keys(payload).forEach(function (propertyName) {
-        _this2[_layerWebsdk.Util.camelCase(propertyName)] = payload[propertyName];
-      });
-    }
-  }, {
     key: 'getDescription',
     value: function getDescription() {
       return this.subtitle;
@@ -6131,7 +6416,7 @@ _layerWebsdk.Client.registerCardModelClass(TextModel, 'TextModel');
 });
 
 module.exports = TextModel;
-},{"../../base":4,"layer-websdk":109}],33:[function(require,module,exports){
+},{"../../base":4,"layer-websdk":110}],33:[function(require,module,exports){
 /**
  * This is the base class for all UI classes in the Layer UI Framework.
  *
@@ -7888,7 +8173,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":92,"layer-websdk":109}],34:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":92,"layer-websdk":110}],34:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -8686,7 +8971,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-list", "<div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>      No Conversations yet    </layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-conversation-list", "layer-conversation-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversation-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-channel-item/layer-channel-item":34,"../layer-conversation-item/layer-conversation-item":35,"layer-websdk":109}],37:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-channel-item/layer-channel-item":34,"../layer-conversation-item/layer-conversation-item":35,"layer-websdk":110}],37:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -8884,7 +9169,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/size-property":91,"../../subcomponents/layer-age/layer-age":49,"../../subcomponents/layer-avatar/layer-avatar":50,"layer-websdk":109}],38:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/size-property":91,"../../subcomponents/layer-age/layer-age":49,"../../subcomponents/layer-avatar/layer-avatar":50,"layer-websdk":110}],38:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -9292,7 +9577,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>        No Users yet      </layer-replaceable-content><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-identity-list", "layer-identity-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identity-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-identity-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-identity-item/layer-identity-item":37,"layer-websdk":109}],39:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-identity-item/layer-identity-item":37,"layer-websdk":110}],39:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -9370,6 +9655,10 @@ var _fileDropTarget = require('../../mixins/file-drop-target');
 
 var _fileDropTarget2 = _interopRequireDefault(_fileDropTarget);
 
+var _throttler = require('../../mixins/throttler');
+
+var _throttler2 = _interopRequireDefault(_throttler);
+
 require('../message-list/layer-message-list/layer-message-list');
 
 require('../subcomponents/layer-compose-bar/layer-compose-bar');
@@ -9378,8 +9667,9 @@ require('../subcomponents/layer-typing-indicator/layer-typing-indicator');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-conversation-view', {
-  mixins: [_mainComponent2.default, _hasQuery2.default, _focusOnKeydown2.default, _fileDropTarget2.default],
+  mixins: [_mainComponent2.default, _hasQuery2.default, _focusOnKeydown2.default, _fileDropTarget2.default, _throttler2.default],
 
   /**
    * This event is triggered before any Message is sent.
@@ -9959,9 +10249,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     _queryModel: {
       value: _layerWebsdk2.default.Query.Message
+    },
+
+    width: {
+      set: function set(newValue, oldValue) {
+        this.toggleClass('layer-conversation-view-width-small', newValue < 460);
+        this.toggleClass('layer-conversation-view-width-medium', newValue >= 460 && newValue < 600);
+        this.toggleClass('layer-conversation-view-width-large', newValue >= 600);
+      }
     }
   },
   methods: {
+    onCreate: function onCreate() {
+      this.properties._handleResize = this._handleResize.bind(this);
+      window.addEventListener('resize', this.properties._handleResize);
+    },
+    onAttach: function onAttach() {
+      this.width = this.clientWidth;
+    },
+    onDestroy: function onDestroy() {
+      window.removeEventListener('resize', this.properties._handleResize);
+    },
+    _handleResize: function _handleResize() {
+      this.width = this.clientWidth;
+    },
+
 
     /**
      * When a key is pressed and text is not focused, focus on the composer
@@ -10080,15 +10392,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../base');
   layerUI.buildAndRegisterTemplate("layer-conversation-view", "<layer-message-list layer-id='list'></layer-message-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-compose-bar layer-id='composer'></layer-compose-bar>", "");
   layerUI.buildStyle("layer-conversation-view", "layer-conversation-view {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-message-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-compose-bar {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/file-drop-target":80,"../../mixins/focus-on-keydown":81,"../../mixins/has-query":82,"../../mixins/main-component":88,"../message-list/layer-message-list/layer-message-list":47,"../subcomponents/layer-compose-bar/layer-compose-bar":51,"../subcomponents/layer-typing-indicator/layer-typing-indicator":65,"layer-websdk":109}],40:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/file-drop-target":80,"../../mixins/focus-on-keydown":81,"../../mixins/has-query":82,"../../mixins/main-component":88,"../../mixins/throttler":93,"../message-list/layer-message-list/layer-message-list":47,"../subcomponents/layer-compose-bar/layer-compose-bar":51,"../subcomponents/layer-typing-indicator/layer-typing-indicator":65,"layer-websdk":110}],40:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -10637,7 +10948,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
   layerUI.buildAndRegisterTemplate("layer-notifier", "<layer-avatar layer-id='avatar'></layer-avatar><div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title' layer-id='title'></div><div class='layer-message-item-placeholder'></div></div>", "");
   layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\nmax-height: 250px;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/main-component":88,"../subcomponents/layer-avatar/layer-avatar":50,"notifyjs":104}],41:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/main-component":88,"../subcomponents/layer-avatar/layer-avatar":50,"notifyjs":105}],41:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -10931,7 +11242,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":87,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../component":33,"../layer-membership-item/layer-membership-item":41,"layer-websdk":109}],43:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":87,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../component":33,"../layer-membership-item/layer-membership-item":41,"layer-websdk":110}],43:[function(require,module,exports){
 /**
  * The Layer Message Item widget renders a single Message synopsis.
  *
@@ -11248,7 +11559,7 @@ module.exports = {
     }
   }
 };
-},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":62,"layer-websdk":109}],44:[function(require,module,exports){
+},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":62,"layer-websdk":110}],44:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -11273,7 +11584,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
   var layerUI = require('../../../base');
-  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
+  layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><layer-card-view layer-id='cardView'></layer-card-view><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
 },{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../subcomponents/layer-avatar/layer-avatar":50,"../../subcomponents/layer-date/layer-date":54,"../layer-message-item-mixin":43}],45:[function(require,module,exports){
@@ -12214,7 +12525,7 @@ var PAGING_DELAY = 2000;
   layerUI.buildAndRegisterTemplate("layer-message-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'><layer-start-of-conversation layer-id='startOfConversation'></layer-start-of-conversation></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-message-list", "layer-message-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-message-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-message-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/query-end-indicator":90,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":64,"../layer-message-item-received/layer-message-item-received":44,"../layer-message-item-sent/layer-message-item-sent":45,"../layer-message-item-status/layer-message-item-status":46,"layer-websdk":109}],48:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/query-end-indicator":90,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":64,"../layer-message-item-received/layer-message-item-received":44,"../layer-message-item-sent/layer-message-item-sent":45,"../layer-message-item-status/layer-message-item-status":46,"layer-websdk":110}],48:[function(require,module,exports){
 /**
  *
  * @class
@@ -12246,6 +12557,12 @@ var _component = require('../../component');
       set: function set(value) {
         this.nodes.button.disabled = value;
       }
+    },
+    selected: {
+      type: Boolean,
+      set: function set(value) {
+        this.toggleClass('layer-action-button-selected', value);
+      }
     }
   },
   methods: {
@@ -12270,6 +12587,7 @@ var _component = require('../../component');
         cardView = cardView.parentComponent;
       }
       if (cardView) cardView.runAction({ event: this.event, data: this.data });
+      evt.target.blur();
     }
   }
 }); 
@@ -12659,7 +12977,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/main-component":88,"../../../mixins/size-property":91,"../layer-presence/layer-presence":61,"layer-websdk":109}],51:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/main-component":88,"../../../mixins/size-property":91,"../layer-presence/layer-presence":61,"layer-websdk":110}],51:[function(require,module,exports){
 /**
  * The Layer Composer widget provides the textarea for layerUI.components.ConversationPanel.
  *
@@ -13082,9 +13400,9 @@ var TAB = 9;
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-compose-bar", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'><layer-send-button></layer-send-button></layer-replaceable-content>", "");
-  layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 0px;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
+  layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 1px;\nborder-color: transparent;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],52:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],52:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -13638,7 +13956,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],56:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],56:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -13759,7 +14077,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],57:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],57:[function(require,module,exports){
 /**
  * The Layer Loading Spinner/indicator
  *
@@ -13887,7 +14205,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../layer-menu/layer-menu":59,"layer-websdk":109}],59:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../layer-menu/layer-menu":59,"layer-websdk":110}],59:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -14013,7 +14331,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu", "", "");
   layerUI.buildStyle("layer-menu", "layer-menu {\ndisplay: none;\nposition: absolute;\n}\nlayer-menu.layer-menu-list-showing {\ndisplay: block;\nz-index: 10;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],60:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],60:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -14156,7 +14474,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],61:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],61:[function(require,module,exports){
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
@@ -14334,7 +14652,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/size-property":91,"layer-websdk":109}],62:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/size-property":91,"layer-websdk":110}],62:[function(require,module,exports){
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
  *
@@ -14796,7 +15114,7 @@ module.exports = {
 
 (0, _component.registerMessageComponent)('layer-card-view', {
   mixins: [_messageHandler2.default],
-  style: 'layer-card-view {\n    display: flex;\n    flex-direction: row;\n    align-items: stretch;\n    position: relative;\n  }\n  ',
+  style: 'layer-card-view {\n    display: inline-flex;\n    flex-direction: row;\n    align-items: stretch;\n    position: relative;\n  }\n  ',
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -14814,6 +15132,7 @@ module.exports = {
         }
       }
     },
+
     /**
      * This property primarily exists so that one can set/override the cardContainerTagName on
      * individual Card UIs.
@@ -14902,7 +15221,8 @@ module.exports = {
       var cardUIType = this.model.currentCardRenderer;
       this.classList.add(cardUIType);
       var cardUI = this.createElement(cardUIType, {
-        model: this.model
+        model: this.model,
+        cardView: this
       });
       this.nodes.ui = cardUI;
 
@@ -14917,9 +15237,9 @@ module.exports = {
         });
         cardContainer.ui = cardUI;
         cardUI.parentComponent = cardContainer;
+        cardUI.setupContainerClasses();
         this.cardBorderStyle = this.properties.cardBorderStyle || cardContainer.cardBorderStyle || 'standard';
       } else {
-        if (cardUI.isCardPrimitive) this.classList.add('layer-raw-primitive-content');
         this.appendChild(cardUI);
         this.cardBorderStyle = this.properties.cardBorderStyle || cardUI.cardBorderStyle || 'standard';
       }
@@ -14931,11 +15251,7 @@ module.exports = {
      * @method
      */
     onRender: function onRender() {},
-    onRerender: function onRerender() {
-      if (this.nodes.ui && this.nodes.ui.isCardPrimitive) {
-        this.toggleClass('layer-raw-primitive-content', !Boolean(this.nodes.cardContainer && this.nodes.cardContainer.isShowingMetadata));
-      }
-    },
+    onRerender: function onRerender() {},
     handleSelection: function handleSelection(evt) {
       evt.preventDefault();
       evt.stopPropagation();
@@ -15201,7 +15517,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/message-handler":89,"../../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],69:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/message-handler":89,"../../../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101}],69:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
@@ -15364,7 +15680,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":33,"../../mixins/message-handler":89,"../../utils/sizing":96}],71:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/message-handler":89,"../../utils/sizing":97}],71:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -15398,7 +15714,7 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":97}],72:[function(require,module,exports){
+},{"../../base":4,"autolinker":98}],72:[function(require,module,exports){
 /**
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
@@ -15479,7 +15795,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":106,"twemoji":107}],74:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":107,"twemoji":108}],74:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -15511,7 +15827,7 @@ _base2.default.registerTextHandler({
     }
   }
 });
-},{"../../base":4,"../../utils/is-url":95}],75:[function(require,module,exports){
+},{"../../base":4,"../../utils/is-url":96}],75:[function(require,module,exports){
 /**
  * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
  *
@@ -15606,58 +15922,6 @@ _base2.default.registerTextHandler({
 (function (global){
 'use strict';
 
-require('./cards/response/response-model');
-
-require('./cards/response/layer-response-card');
-
-require('./cards/receipt/receipt-model');
-
-require('./cards/receipt/layer-receipt-card');
-
-require('./cards/choice/choice-model');
-
-require('./cards/choice/layer-choice-card');
-
-require('./cards/layer-standard-card-container');
-
-require('./cards/layer-titled-card-container');
-
-require('./cards/text/layer-text-card');
-
-require('./cards/text/text-model');
-
-require('./cards/image/image-model');
-
-require('./cards/image/layer-image-card');
-
-require('./cards/carousel/carousel-model');
-
-require('./cards/carousel/layer-carousel-card');
-
-require('./cards/buttons/buttons-model');
-
-require('./cards/buttons/layer-buttons-card');
-
-require('./cards/file/file-model');
-
-require('./cards/file/layer-file-card');
-
-require('./cards/link/link-model');
-
-require('./cards/link/layer-link-card');
-
-require('./cards/location/location-model');
-
-require('./cards/location/layer-location-card');
-
-require('./cards/product/product-model');
-
-require('./cards/product/layer-product-card');
-
-require('./cards/models/person-model');
-
-require('./cards/models/organization-model');
-
 /*
  * This file is used to create a browserified build with the following properties:
  *
@@ -15675,58 +15939,6 @@ require('./cards/models/organization-model');
  * which we don't want; do not let JSDuck parse this file.
  */
 'use strict';
-
-require('./cards/response/response-model');
-
-require('./cards/response/layer-response-card');
-
-require('./cards/receipt/receipt-model');
-
-require('./cards/receipt/layer-receipt-card');
-
-require('./cards/choice/choice-model');
-
-require('./cards/choice/layer-choice-card');
-
-require('./cards/layer-standard-card-container');
-
-require('./cards/layer-titled-card-container');
-
-require('./cards/text/layer-text-card');
-
-require('./cards/text/text-model');
-
-require('./cards/image/image-model');
-
-require('./cards/image/layer-image-card');
-
-require('./cards/carousel/carousel-model');
-
-require('./cards/carousel/layer-carousel-card');
-
-require('./cards/buttons/buttons-model');
-
-require('./cards/buttons/layer-buttons-card');
-
-require('./cards/file/file-model');
-
-require('./cards/file/layer-file-card');
-
-require('./cards/link/link-model');
-
-require('./cards/link/layer-link-card');
-
-require('./cards/location/location-model');
-
-require('./cards/location/layer-location-card');
-
-require('./cards/product/product-model');
-
-require('./cards/product/layer-product-card');
-
-require('./cards/models/person-model');
-
-require('./cards/models/organization-model');
 
 /*
  * This file is used to create a browserified build with the following properties:
@@ -15778,14 +15990,51 @@ require('./utils/date-separator');
 // Load standard cards
 require('./cards/text/text-model');
 require('./cards/text/layer-text-card');
-//import './cards/layer-list-item-container';
 
+require('./cards/response/response-model');
+require('./cards/response/layer-response-card');
 
-// import './cards/list/list-model';
-// import './cards/list/layer-list-card';
+require('./cards/receipt/receipt-model');
+require('./cards/receipt/layer-receipt-card');
 
-// import './cards/address/address-model';
-// import './cards/address/layer-address-card';
+require('./cards/choice/choice-model');
+require('./cards/choice/layer-choice-card');
+
+require('./cards/layer-standard-card-container');
+require('./cards/layer-titled-card-container');
+//require('./cards/layer-list-item-container');
+require('./cards/text/layer-text-card');
+require('./cards/text/text-model');
+
+require('./cards/image/image-model');
+require('./cards/image/layer-image-card');
+
+// require('./cards/list/list-model');
+// require('./cards/list/layer-list-card');
+
+require('./cards/carousel/carousel-model');
+require('./cards/carousel/layer-carousel-card');
+
+require('./cards/buttons/buttons-model');
+require('./cards/buttons/layer-buttons-card');
+
+require('./cards/file/file-model');
+require('./cards/file/layer-file-card');
+
+require('./cards/link/link-model');
+require('./cards/link/layer-link-card');
+
+require('./cards/location/location-model');
+require('./cards/location/layer-location-card');
+
+// require('./cards/address/address-model');
+// require('./cards/address/layer-address-card');
+
+require('./cards/product/product-model');
+require('./cards/product/layer-product-card');
+
+require('./cards/models/person-model');
+require('./cards/models/organization-model');
 
 LayerUI.animatedScrollTo = require('./utils/animated-scroll').animatedScrollTo;
 LayerUI.animatedScrollLeftTo = require('./utils/animated-scroll').animatedScrollLeftTo;
@@ -15837,14 +16086,51 @@ require('./utils/date-separator');
 // Load standard cards
 require('./cards/text/text-model');
 require('./cards/text/layer-text-card');
-//import './cards/layer-list-item-container';
 
+require('./cards/response/response-model');
+require('./cards/response/layer-response-card');
 
-// import './cards/list/list-model';
-// import './cards/list/layer-list-card';
+require('./cards/receipt/receipt-model');
+require('./cards/receipt/layer-receipt-card');
 
-// import './cards/address/address-model';
-// import './cards/address/layer-address-card';
+require('./cards/choice/choice-model');
+require('./cards/choice/layer-choice-card');
+
+require('./cards/layer-standard-card-container');
+require('./cards/layer-titled-card-container');
+//require('./cards/layer-list-item-container');
+require('./cards/text/layer-text-card');
+require('./cards/text/text-model');
+
+require('./cards/image/image-model');
+require('./cards/image/layer-image-card');
+
+// require('./cards/list/list-model');
+// require('./cards/list/layer-list-card');
+
+require('./cards/carousel/carousel-model');
+require('./cards/carousel/layer-carousel-card');
+
+require('./cards/buttons/buttons-model');
+require('./cards/buttons/layer-buttons-card');
+
+require('./cards/file/file-model');
+require('./cards/file/layer-file-card');
+
+require('./cards/link/link-model');
+require('./cards/link/layer-link-card');
+
+require('./cards/location/location-model');
+require('./cards/location/layer-location-card');
+
+// require('./cards/address/address-model');
+// require('./cards/address/layer-address-card');
+
+require('./cards/product/product-model');
+require('./cards/product/layer-product-card');
+
+require('./cards/models/person-model');
+require('./cards/models/organization-model');
 
 LayerUI.animatedScrollTo = require('./utils/animated-scroll').animatedScrollTo;
 LayerUI.animatedScrollLeftTo = require('./utils/animated-scroll').animatedScrollLeftTo;
@@ -15863,7 +16149,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/file/file-model":13,"./cards/file/layer-file-card":14,"./cards/image/image-model":15,"./cards/image/layer-image-card":16,"./cards/layer-standard-card-container":17,"./cards/layer-titled-card-container":18,"./cards/link/layer-link-card":19,"./cards/link/link-model":20,"./cards/location/layer-location-card":21,"./cards/location/location-model":22,"./cards/models/organization-model":23,"./cards/models/person-model":24,"./cards/product/layer-product-card":25,"./cards/product/product-model":26,"./cards/receipt/layer-receipt-card":27,"./cards/receipt/receipt-model":28,"./cards/response/layer-response-card":29,"./cards/response/response-model":30,"./cards/text/layer-text-card":31,"./cards/text/text-model":32,"./components/conversation-list/layer-conversation-list/layer-conversation-list":36,"./components/identity-list/layer-identity-list/layer-identity-list":38,"./components/layer-conversation-view/layer-conversation-view":39,"./components/layer-notifier/layer-notifier":40,"./components/membership-list-panel/layer-membership-list/layer-membership-list":42,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":56,"./components/subcomponents/layer-presence/layer-presence":61,"./components/subcomponents/layer-send-button/layer-send-button":63,"./handlers/message/layer-card-view":67,"./handlers/message/layer-message-image/layer-message-image":68,"./handlers/message/layer-message-video":70,"./handlers/text/autolinker":71,"./handlers/text/code-blocks":72,"./handlers/text/emoji":73,"./handlers/text/images":74,"./handlers/text/newline":75,"./handlers/text/youtube":76,"./layer-ui":78,"./mixins/focus-on-keydown":81,"./mixins/has-query":82,"./mixins/list":87,"./mixins/list-item":84,"./mixins/list-item-selection":83,"./mixins/list-selection":86,"./mixins/main-component":88,"./mixins/message-handler":89,"./utils/animated-scroll":93,"./utils/date-separator":94}],78:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/file/file-model":13,"./cards/file/layer-file-card":14,"./cards/image/image-model":15,"./cards/image/layer-image-card":16,"./cards/layer-standard-card-container":17,"./cards/layer-titled-card-container":18,"./cards/link/layer-link-card":19,"./cards/link/link-model":20,"./cards/location/layer-location-card":21,"./cards/location/location-model":22,"./cards/models/organization-model":23,"./cards/models/person-model":24,"./cards/product/layer-product-card":25,"./cards/product/product-model":26,"./cards/receipt/layer-receipt-card":27,"./cards/receipt/receipt-model":28,"./cards/response/layer-response-card":29,"./cards/response/response-model":30,"./cards/text/layer-text-card":31,"./cards/text/text-model":32,"./components/conversation-list/layer-conversation-list/layer-conversation-list":36,"./components/identity-list/layer-identity-list/layer-identity-list":38,"./components/layer-conversation-view/layer-conversation-view":39,"./components/layer-notifier/layer-notifier":40,"./components/membership-list-panel/layer-membership-list/layer-membership-list":42,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":56,"./components/subcomponents/layer-presence/layer-presence":61,"./components/subcomponents/layer-send-button/layer-send-button":63,"./handlers/message/layer-card-view":67,"./handlers/message/layer-message-image/layer-message-image":68,"./handlers/message/layer-message-video":70,"./handlers/text/autolinker":71,"./handlers/text/code-blocks":72,"./handlers/text/emoji":73,"./handlers/text/images":74,"./handlers/text/newline":75,"./handlers/text/youtube":76,"./layer-ui":78,"./mixins/focus-on-keydown":81,"./mixins/has-query":82,"./mixins/list":87,"./mixins/list-item":84,"./mixins/list-item-selection":83,"./mixins/list-selection":86,"./mixins/main-component":88,"./mixins/message-handler":89,"./utils/animated-scroll":94,"./utils/date-separator":95}],78:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -15992,7 +16278,7 @@ _base2.default.setupMixins = function setupMixins(mixins) {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":33,"./handlers/message/layer-message-unknown":69,"webcomponents.js/webcomponents-lite":108}],79:[function(require,module,exports){
+},{"./base":4,"./components/component":33,"./handlers/message/layer-message-unknown":69,"webcomponents.js/webcomponents-lite":109}],79:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -16245,7 +16531,7 @@ module.exports = {
     processAttachment: function processAttachment(file) {
       if (['image/gif', 'image/png', 'image/jpeg', 'image/svg'].indexOf(file.type) !== -1) {
         return new _imageModel2.default({
-          source: file
+          source: file, title: 'hey ho'
         });
       } else {
         return new _fileModel2.default({
@@ -16255,7 +16541,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":13,"../cards/image/image-model":15,"../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],81:[function(require,module,exports){
+},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":13,"../cards/image/image-model":15,"../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101,"layer-websdk":110}],81:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to refocus when keyboard input is received.
  *
@@ -16461,7 +16747,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":109}],83:[function(require,module,exports){
+},{"layer-websdk":110}],83:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -16862,20 +17148,24 @@ var _hasQuery = require('./has-query');
 
 var _hasQuery2 = _interopRequireDefault(_hasQuery);
 
+var _throttler = require('./throttler');
+
+var _throttler2 = _interopRequireDefault(_throttler);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Shallow array comparison test
-
 function isEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
   for (var i = 0; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) return false;
   }
   return true;
-}
+} 
+
 
 module.exports = {
-  mixins: [_hasQuery2.default],
+  mixins: [_hasQuery2.default, _throttler2.default],
   properties: {
     /**
      * Lists have some special behaviors; its useful to be able to test if a component is in fact a list.
@@ -16939,18 +17229,6 @@ module.exports = {
       value: 50
     },
 
-    /**
-     * A throttler is used to prevent excessive scroll events.
-     *
-     * This timeout indicates how frequently scroll events are allowed to fire in miliseconds.
-     * This value should not need to be tinkered with.
-     *
-     * @property {Number} [throttlerTimeout=66]
-     */
-    throttlerTimeout: {
-      value: 66
-    },
-
     state: {
       set: function set(newState) {
         Array.prototype.slice.call(this.childNodes).forEach(function (node) {
@@ -16994,26 +17272,6 @@ module.exports = {
         evt.preventDefault();
       } else {
         this._throttler(this._handleScroll.bind(this));
-      }
-    },
-
-
-    /**
-     * Simple throttler to avoid too many events while scrolling.
-     *
-     * Not at this time safe for handling multiple types of events at the same time.
-     *
-     * @method _throttler
-     * @private
-     */
-    _throttler: function _throttler(callback) {
-      var _this = this;
-
-      if (!this.properties.throttleTimeout) {
-        this.properties.throttleTimeout = setTimeout(function () {
-          _this.properties.throttleTimeout = null;
-          callback();
-        }, this.throttlerTimeout);
       }
     },
 
@@ -17064,7 +17322,7 @@ module.exports = {
      * @param {Function} [animateCallback] Function to call when animation completes
      */
     animatedScrollTo: function animatedScrollTo(position) {
-      var _this2 = this;
+      var _this = this;
 
       var animateSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
       var animateCallback = arguments[2];
@@ -17072,8 +17330,8 @@ module.exports = {
       if (this.properties.cancelAnimatedScroll) this.properties.cancelAnimatedScroll();
 
       var cancel = this.properties.cancelAnimatedScroll = (0, _base.animatedScrollTo)(this, position, animateSpeed, function () {
-        if (cancel !== _this2.properties.cancelAnimatedScroll) return;
-        _this2.properties.cancelAnimatedScroll = null;
+        if (cancel !== _this.properties.cancelAnimatedScroll) return;
+        _this.properties.cancelAnimatedScroll = null;
         if (animateCallback) animateCallback();
       });
     },
@@ -17110,11 +17368,11 @@ module.exports = {
       return true;
     },
     onRender: function onRender() {
-      var _this3 = this;
+      var _this2 = this;
 
       // Reset the query to initial state by cloning the template
       Array.prototype.slice.call(this.childNodes).forEach(function (node) {
-        if (node._isListItem) _this3.removeChild(node);
+        if (node._isListItem) _this2.removeChild(node);
       });
 
       // Render any data in the query
@@ -17144,11 +17402,11 @@ module.exports = {
      * @private
      */
     _generateFragment: function _generateFragment(data, fragment) {
-      var _this4 = this;
+      var _this3 = this;
 
       if (!fragment) fragment = document.createDocumentFragment();
       data.forEach(function (item, index) {
-        _this4._generateFragmentItem(item, fragment);
+        _this3._generateFragmentItem(item, fragment);
       }, this);
       return fragment;
     },
@@ -17173,7 +17431,7 @@ module.exports = {
      * @private
      */
     _generateFragmentItem: function _generateFragmentItem(item, fragment) {
-      var _this5 = this;
+      var _this4 = this;
 
       var itemInstance = item instanceof _layerWebsdk2.default.Root ? item : this.client.getObject(item.id);
       if (itemInstance) {
@@ -17183,15 +17441,15 @@ module.exports = {
         if (this.customNodes) {
           widget.customNodes = {};
           Object.keys(widget.nodes).forEach(function (nodeName) {
-            if (_this5.customNodes[nodeName]) {
-              if (typeof _this5.customNodes[nodeName] === 'function') {
+            if (_this4.customNodes[nodeName]) {
+              if (typeof _this4.customNodes[nodeName] === 'function') {
                 // no-op
-              } else if (_this5.customNodes[nodeName].tagName !== 'TEMPLATE') {
+              } else if (_this4.customNodes[nodeName].tagName !== 'TEMPLATE') {
                 var template = document.createElement('template');
-                template.content.appendChild(_this5.customNodes[nodeName]);
-                _this5.customNodes[nodeName] = template;
+                template.content.appendChild(_this4.customNodes[nodeName]);
+                _this4.customNodes[nodeName] = template;
               }
-              widget.customNodes[nodeName] = _this5.customNodes[nodeName];
+              widget.customNodes[nodeName] = _this4.customNodes[nodeName];
             }
           });
         }
@@ -17227,11 +17485,11 @@ module.exports = {
      * @private
      */
     _gatherAndProcessAffectedItems: function _gatherAndProcessAffectedItems(affectedItems, isTopItemNew) {
-      var _this6 = this;
+      var _this5 = this;
 
       if (affectedItems.length) {
         var itemIds = affectedItems.map(function (item) {
-          return _this6._getItemId(item.id);
+          return _this5._getItemId(item.id);
         });
         var affectedWidgets = this.querySelectorAllArray('#' + itemIds.join(', #'));
         this._processAffectedWidgets(affectedWidgets, isTopItemNew);
@@ -17250,7 +17508,7 @@ module.exports = {
      * @private
      */
     _processAffectedWidgets: function _processAffectedWidgets(widgets, isTopItemNew) {
-      var _this7 = this;
+      var _this6 = this;
 
       // Get the index of our first widget within listData
       var firstIndex = void 0;
@@ -17266,9 +17524,9 @@ module.exports = {
 
       // Allow external processing of the widgets
       widgets.forEach(function (widget, index) {
-        if (_this7.properties.onRenderListItem) {
+        if (_this6.properties.onRenderListItem) {
           try {
-            _this7.properties.onRenderListItem(widget, _this7.properties.listData, firstIndex + index, isTopItemNew);
+            _this6.properties.onRenderListItem(widget, _this6.properties.listData, firstIndex + index, isTopItemNew);
           } catch (err) {
             console.error('Error in onRenderListItem for ' + widget.item.id + '; ' + err);
           }
@@ -17429,7 +17687,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":33,"./has-query":82,"layer-websdk":109}],88:[function(require,module,exports){
+},{"../base":4,"../components/component":33,"./has-query":82,"./throttler":93,"layer-websdk":110}],88:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
@@ -17536,7 +17794,7 @@ module.exports = {
     }
   }
 }; 
-},{"../base":4,"../components/component":33,"layer-websdk":109}],89:[function(require,module,exports){
+},{"../base":4,"../components/component":33,"layer-websdk":110}],89:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -17748,7 +18006,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":109}],91:[function(require,module,exports){
+},{"layer-websdk":110}],91:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -17833,6 +18091,50 @@ module.exports = {
   }
 };
 },{}],93:[function(require,module,exports){
+/**
+ * A helper mixin for Lists that render alternate text in the event that the list is Empty.
+ *
+ * @class layerUI.mixins.Throttler
+ */
+"use strict";
+
+
+module.exports = {
+  properties: {
+    /**
+     * A throttler is used to prevent excessive scroll events.
+     *
+     * This timeout indicates how frequently scroll events are allowed to fire in miliseconds.
+     * This value should not need to be tinkered with.
+     *
+     * @property {Number} [throttlerTimeout=66]
+     */
+    throttlerTimeout: {
+      value: 66
+    }
+  },
+  methods: {
+    /**
+     * Simple throttler to avoid too many events while scrolling.
+     *
+     * Not at this time safe for handling multiple types of events at the same time.
+     *
+     * @method _throttler
+     * @private
+     */
+    _throttler: function _throttler(callback) {
+      var _this = this;
+
+      if (!this.properties.throttleTimeout) {
+        this.properties.throttleTimeout = setTimeout(function () {
+          _this.properties.throttleTimeout = null;
+          callback();
+        }, this.throttlerTimeout);
+      }
+    }
+  }
+};
+},{}],94:[function(require,module,exports){
 "use strict";
 
 var requestAnimFrame = function () {
@@ -17928,7 +18230,7 @@ module.exports = {
     animatedScrollTo: animatedScrollTo,
     animatedScrollLeftTo: animatedScrollLeftTo
 };
-},{}],94:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 /**
  * Use this module to put a date separator between Messages from different dates in your Messages List.
  *
@@ -17980,7 +18282,7 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
     _base2.default.addListItemSeparator(widget, '', dateClassName, true);
   }
 };
-},{"../base":4}],95:[function(require,module,exports){
+},{"../base":4}],96:[function(require,module,exports){
 'use strict';
 
 /*
@@ -18024,7 +18326,7 @@ module.exports = function isURL(extensions) {
   // resource path
   '(?:[/?#]\\S*)' + resource, 'igm');
 };
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -18055,7 +18357,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -22233,7 +22535,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22535,7 +22837,7 @@ return Autolinker;
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":102,"./load-image-meta":99}],99:[function(require,module,exports){
+},{"./load-image":103,"./load-image-meta":100}],100:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22696,7 +22998,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102}],100:[function(require,module,exports){
+},{"./load-image":103}],101:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22883,7 +23185,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102,"./load-image-meta":99,"./load-image-scale":101}],101:[function(require,module,exports){
+},{"./load-image":103,"./load-image-meta":100,"./load-image-scale":102}],102:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23167,7 +23469,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102}],102:[function(require,module,exports){
+},{"./load-image":103}],103:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23307,9 +23609,9 @@ return Autolinker;
   }
 }(window))
 
-},{}],103:[function(require,module,exports){
-
 },{}],104:[function(require,module,exports){
+
+},{}],105:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -23515,7 +23817,7 @@ return Autolinker;
   exports['default'] = Notify;
 
 }));
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -24422,7 +24724,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -24440,7 +24742,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":105}],107:[function(require,module,exports){
+},{"./emoji-map.js":106}],108:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -25037,7 +25339,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -27543,7 +27845,7 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
@@ -27554,7 +27856,7 @@ if (global.layer && global.layer.Client) {
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":118}],110:[function(require,module,exports){
+},{"./lib/layer":119}],111:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -29231,7 +29533,7 @@ Root.initClass.apply(ClientAuthenticator, [ClientAuthenticator, 'ClientAuthentic
 
 module.exports = ClientAuthenticator;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./logger":119,"./models/identity":135,"./online-state-manager":140,"./root":149,"./sync-event":150,"./sync-manager":151,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],111:[function(require,module,exports){
+},{"./client-utils":113,"./const":115,"./db-manager":116,"./layer-error":117,"./logger":120,"./models/identity":136,"./online-state-manager":141,"./root":150,"./sync-event":151,"./sync-manager":152,"./websockets/change-manager":160,"./websockets/request-manager":161,"./websockets/socket-manager":162,"./xhr":163}],112:[function(require,module,exports){
 'use strict';
 
 /**
@@ -29333,7 +29635,7 @@ module.exports = {
   addListener: addListener,
   removeListener: removeListener
 };
-},{"./client-utils":112}],112:[function(require,module,exports){
+},{"./client-utils":113}],113:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -29756,7 +30058,7 @@ exports.asciiInit = function (version) {
   return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils/defer":157,"./utils/layer-parser":158,"uuid":166}],113:[function(require,module,exports){
+},{"./utils/defer":158,"./utils/layer-parser":159,"uuid":167}],114:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -30563,7 +30865,7 @@ Client._supportedEvents = [
 Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/client-card-models')];
 Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
-},{"./client-authenticator":110,"./client-registry":111,"./client-utils":112,"./layer-error":116,"./logger":119,"./mixins/client-card-models":120,"./mixins/client-channels":121,"./mixins/client-conversations":122,"./mixins/client-identities":123,"./mixins/client-members":124,"./mixins/client-messages":125,"./mixins/client-queries":126,"./models/announcement":127,"./models/channel":130,"./models/channel-message":129,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message-part":137,"./root":149,"./telemetry-monitor":152,"./typing-indicators/typing-indicator-listener":153,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156}],114:[function(require,module,exports){
+},{"./client-authenticator":111,"./client-registry":112,"./client-utils":113,"./layer-error":117,"./logger":120,"./mixins/client-card-models":121,"./mixins/client-channels":122,"./mixins/client-conversations":123,"./mixins/client-identities":124,"./mixins/client-members":125,"./mixins/client-messages":126,"./mixins/client-queries":127,"./models/announcement":128,"./models/channel":131,"./models/channel-message":130,"./models/conversation":135,"./models/conversation-message":134,"./models/identity":136,"./models/membership":137,"./models/message-part":138,"./root":150,"./telemetry-monitor":153,"./typing-indicators/typing-indicator-listener":154,"./typing-indicators/typing-listener":156,"./typing-indicators/typing-publisher":157}],115:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30626,8 +30928,8 @@ module.exports = {
   LOCALSTORAGE_KEYS: {
     SESSIONDATA: 'layer-session-data-'
   },
-  ACCEPT: 'application/vnd.layer+json; version=2.0',
-  WEBSOCKET_PROTOCOL: 'layer-2.0',
+  ACCEPT: 'application/vnd.layer+json; version=3.0',
+  WEBSOCKET_PROTOCOL: 'layer-3.0',
 
   /**
    * Log levels
@@ -30659,7 +30961,7 @@ module.exports = {
     MY_DEVICES: 'my_devices'
   }
 };
-},{}],115:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32262,7 +32564,7 @@ DbManager._supportedEvents = ['open', 'error'].concat(Root._supportedEvents);
 
 Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
-},{"./client-utils":112,"./const":114,"./logger":119,"./models/announcement":127,"./root":149,"./sync-event":150}],116:[function(require,module,exports){
+},{"./client-utils":113,"./const":115,"./logger":120,"./models/announcement":128,"./root":150,"./sync-event":151}],117:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -32470,7 +32772,7 @@ LayerError.dictionary = {
 };
 
 module.exports = LayerError;
-},{"./logger":119}],117:[function(require,module,exports){
+},{"./logger":120}],118:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32679,7 +32981,7 @@ LayerEvent.prototype.target = null;
 LayerEvent.prototype.eventName = '';
 
 module.exports = LayerEvent;
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -32722,7 +33024,7 @@ layer.Util = require('./client-utils');
 layer.TypingIndicators = require('./typing-indicators/typing-indicators');
 layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-listener');
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
-},{"./client":113,"./client-authenticator":110,"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./layer-event":117,"./models/announcement":127,"./models/card-model":128,"./models/channel":130,"./models/channel-message":129,"./models/container":131,"./models/content":132,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message":138,"./models/message-part":137,"./models/syncable":139,"./online-state-manager":140,"./queries/query":148,"./queries/query-builder":147,"./root":149,"./sync-event":150,"./sync-manager":151,"./typing-indicators/typing-indicators":154,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],119:[function(require,module,exports){
+},{"./client":114,"./client-authenticator":111,"./client-utils":113,"./const":115,"./db-manager":116,"./layer-error":117,"./layer-event":118,"./models/announcement":128,"./models/card-model":129,"./models/channel":131,"./models/channel-message":130,"./models/container":132,"./models/content":133,"./models/conversation":135,"./models/conversation-message":134,"./models/identity":136,"./models/membership":137,"./models/message":139,"./models/message-part":138,"./models/syncable":140,"./online-state-manager":141,"./queries/query":149,"./queries/query-builder":148,"./root":150,"./sync-event":151,"./sync-manager":152,"./typing-indicators/typing-indicators":155,"./typing-indicators/typing-listener":156,"./typing-indicators/typing-publisher":157,"./websockets/change-manager":160,"./websockets/request-manager":161,"./websockets/socket-manager":162,"./xhr":163}],120:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -32834,7 +33136,7 @@ Logger.prototype.level = typeof jasmine === 'undefined' ? ERROR : NONE;
 var logger = new Logger();
 
 module.exports = logger;
-},{"./const":114}],120:[function(require,module,exports){
+},{"./const":115}],121:[function(require,module,exports){
 'use strict';
 
 /**
@@ -32943,7 +33245,7 @@ module.exports = {
       var cardId = part.id.replace(/layer:\/\/\/messages\//, CardModel.prefixUUID);
       var cardModel = this.getCardModel(cardId);
       if (cardModel) {
-        cardModel._parseMessage();
+        cardModel._parseMessage(part.body ? JSON.parse(part.body) : {});
         return cardModel;
       } else {
         var CardModelClass = this.getCardModelClassForMimeType(part.mimeType);
@@ -32969,7 +33271,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":112,"../layer-error":116,"../models/card-model":128}],121:[function(require,module,exports){
+},{"../client-utils":113,"../layer-error":117,"../models/card-model":129}],122:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33385,7 +33687,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/channel":130}],122:[function(require,module,exports){
+},{"../layer-error":117,"../models/channel":131}],123:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33803,7 +34105,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/conversation":134}],123:[function(require,module,exports){
+},{"../layer-error":117,"../models/conversation":135}],124:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34108,7 +34410,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":112,"../layer-error":116,"../models/identity":135,"../sync-event":150}],124:[function(require,module,exports){
+},{"../client-utils":113,"../layer-error":117,"../models/identity":136,"../sync-event":151}],125:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34269,7 +34571,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/membership":136,"../models/syncable":139}],125:[function(require,module,exports){
+},{"../layer-error":117,"../models/membership":137,"../models/syncable":140}],126:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34613,7 +34915,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/message":138,"../models/syncable":139}],126:[function(require,module,exports){
+},{"../layer-error":117,"../models/message":139,"../models/syncable":140}],127:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34764,7 +35066,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../queries/announcements-query":141,"../queries/channels-query":142,"../queries/conversations-query":143,"../queries/identities-query":144,"../queries/members-query":145,"../queries/messages-query":146,"../queries/query":148}],127:[function(require,module,exports){
+},{"../layer-error":117,"../queries/announcements-query":142,"../queries/channels-query":143,"../queries/conversations-query":144,"../queries/identities-query":145,"../queries/members-query":146,"../queries/messages-query":147,"../queries/query":149}],128:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34940,7 +35242,7 @@ Announcement.inObjectIgnore = ConversationMessage.inObjectIgnore;
 Root.initClass.apply(Announcement, [Announcement, 'Announcement']);
 Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
-},{"../layer-error":116,"../root":149,"./conversation-message":133,"./syncable":139}],128:[function(require,module,exports){
+},{"../layer-error":117,"../root":150,"./conversation-message":134,"./syncable":140}],129:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35042,7 +35344,10 @@ var CardModel = function (_Root) {
 
       this.message.on('destroy', this.destroy, this);
       this.message.getClient()._addCardModel(this);
-      if (!doNotParse) this._parseMessage();
+      if (!doNotParse) {
+        if (!this.part.body) this.part.fetchContent();
+        this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
+      }
     }
   }, {
     key: '_initBodyWithMetadata',
@@ -35064,16 +35369,29 @@ var CardModel = function (_Root) {
 
   }, {
     key: '_parseMessage',
-    value: function _parseMessage() {
+    value: function _parseMessage(payload) {
+      var _this6 = this;
+
       var responses = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === 'response_summary';
       })[0];
-      if (responses) this.responses = responses;
+      if (responses) {
+        var responseData = JSON.parse(responses.body);
+        if (responseData.participant_data) {
+          responseData.participantData = responseData.participant_data;
+          delete responseData.participant_data;
+        }
+        this.responses = responseData;
+      }
+
+      Object.keys(payload).forEach(function (propertyName) {
+        _this6[Util.camelCase(propertyName)] = payload[propertyName];
+      });
     }
   }, {
     key: '_handlePartChanges',
     value: function _handlePartChanges(evt) {
-      this._parseMessage();
+      this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
       this._triggerAsync('change');
     }
   }, {
@@ -35083,7 +35401,8 @@ var CardModel = function (_Root) {
       if (part.mimeAttributes['parent-node-id'] === this.nodeId) {
         this.childParts.push(part);
         part.on('messageparts:change', this._handlePartChanges, this);
-        this._parseMessage();
+        if (!this.part.body) this.part.fetchContent();
+        this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
         this._triggerAsync('change');
       }
     }
@@ -35122,13 +35441,13 @@ var CardModel = function (_Root) {
   }, {
     key: 'getModelsFromPart',
     value: function getModelsFromPart(role) {
-      var _this6 = this;
+      var _this7 = this;
 
       var parts = this.childParts.filter(function (part) {
         return part.mimeAttributes.role === role;
       });
       return parts.map(function (part) {
-        return _this6.getClient().createCardModel(_this6.message, part);
+        return _this7.getClient().createCardModel(_this7.message, part);
       });
     }
   }, {
@@ -35353,7 +35672,7 @@ CardModel.prefixUUID = 'layer:///cardmodels/';
 CardModel._supportedEvents = ['change'].concat(Root._supportedEvents);
 Root.initClass.apply(CardModel, [CardModel, 'CardModel']);
 module.exports = CardModel;
-},{"../client-utils":112,"../models/message":138,"../models/message-part":137,"../root":149}],129:[function(require,module,exports){
+},{"../client-utils":113,"../models/message":139,"../models/message-part":138,"../root":150}],130:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35533,7 +35852,7 @@ ChannelMessage.inObjectIgnore = Message.inObjectIgnore;
 ChannelMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
-},{"../client-registry":111,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"./message":138}],130:[function(require,module,exports){
+},{"../client-registry":112,"../const":115,"../layer-error":117,"../logger":120,"../root":150,"./message":139}],131:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36222,7 +36541,7 @@ Channel._supportedEvents = [
 Root.initClass.apply(Channel, [Channel, 'Channel']);
 Syncable.subclasses.push(Channel);
 module.exports = Channel;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./channel-message":129,"./container":131,"./syncable":139}],131:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../layer-error":117,"../layer-event":118,"../root":150,"./channel-message":130,"./container":132,"./syncable":140}],132:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -36864,7 +37183,7 @@ Container.FOUND_WITHOUT_REQUESTED_METADATA = 'FoundMismatch';
 Root.initClass.apply(Container, [Container, 'Container']);
 Syncable.subclasses.push(Container);
 module.exports = Container;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],132:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],133:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37063,7 +37382,7 @@ Content.prototype.expiration = null;
 
 Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
-},{"../root":149,"../xhr":162}],133:[function(require,module,exports){
+},{"../root":150,"../xhr":163}],134:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37610,7 +37929,7 @@ ConversationMessage.inObjectIgnore = Message.inObjectIgnore;
 ConversationMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMessage']);
 module.exports = ConversationMessage;
-},{"../client-registry":111,"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./message":138}],134:[function(require,module,exports){
+},{"../client-registry":112,"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./message":139}],135:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38694,7 +39013,7 @@ Conversation._supportedEvents = [
 Root.initClass.apply(Conversation, [Conversation, 'Conversation']);
 Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./container":131,"./conversation-message":133,"./syncable":139}],135:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../layer-error":117,"../layer-event":118,"../root":150,"./container":132,"./conversation-message":134,"./syncable":140}],136:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39350,7 +39669,7 @@ Root.initClass.apply(Identity, [Identity, 'Identity']);
 Syncable.subclasses.push(Identity);
 
 module.exports = Identity;
-},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],136:[function(require,module,exports){
+},{"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],137:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39584,7 +39903,7 @@ Root.initClass.apply(Membership, [Membership, 'Membership']);
 Syncable.subclasses.push(Membership);
 
 module.exports = Membership;
-},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],137:[function(require,module,exports){
+},{"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],138:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39704,15 +40023,15 @@ var MessagePart = function (_Root) {
         mimeType: mimeType,
         body: body,
         size: body.size,
-        hasContent: true,
-        mimeAttributes: options.mimeAttributes
+        hasContent: true
       };
+      if (options.mimeAttributes) newOptions.mimeAttributes = options.mimeAttributes;
     }
 
     var _this = _possibleConstructorReturn(this, (MessagePart.__proto__ || Object.getPrototypeOf(MessagePart)).call(this, newOptions));
 
     if (!_this.mimeAttributes) _this.mimeAttributes = {};
-    _this._moveMimeTypeToAttributes();
+    _this.mimeType = _this._moveMimeTypeToAttributes(_this.mimeType);
 
     if (!_this.size && _this.body) _this.size = _this.body.length;
 
@@ -39741,12 +40060,12 @@ var MessagePart = function (_Root) {
 
   _createClass(MessagePart, [{
     key: '_moveMimeTypeToAttributes',
-    value: function _moveMimeTypeToAttributes() {
+    value: function _moveMimeTypeToAttributes(mimeType) {
       var attributes = this.mimeAttributes;
-      var parameters = this.mimeType.split(/\s*;\s*/);
+      var parameters = mimeType.split(/\s*;\s*/);
       if (!parameters) return;
       this.isInitializing = true;
-      this.mimeType = parameters.shift();
+      mimeType = parameters.shift();
       this.isInitializing = false;
 
       parameters.forEach(function (param) {
@@ -39759,6 +40078,7 @@ var MessagePart = function (_Root) {
           attributes[pName] = pValue;
         }
       });
+      return mimeType;
     }
   }, {
     key: 'destroy',
@@ -40033,7 +40353,8 @@ var MessagePart = function (_Root) {
 
       var obj = {
         mime_type: this.getMimeTypeWithAttributes(),
-        body: this.body
+        body: this.body,
+        id: this.id
       };
       this.trigger('parts:send', obj);
     }
@@ -40041,6 +40362,7 @@ var MessagePart = function (_Root) {
     key: '_sendWithContent',
     value: function _sendWithContent() {
       this.trigger('parts:send', {
+        id: this.id,
         mime_type: this.getMimeTypeWithAttributes(),
         content: {
           size: this.size,
@@ -40071,6 +40393,7 @@ var MessagePart = function (_Root) {
           var body = base64data.substring(base64data.indexOf(',') + 1);
           var obj = {
             body: body,
+            id: _this6.id,
             mime_type: _this6.getMimeTypeWithAttributes()
           };
           obj.encoding = 'base64';
@@ -40190,6 +40513,7 @@ var MessagePart = function (_Root) {
         }
       } else {
         this.trigger('parts:send', {
+          id: this.id,
           mime_type: this.getMimeTypeWithAttributes(),
           content: {
             size: this.size,
@@ -40236,6 +40560,17 @@ var MessagePart = function (_Root) {
       if (part.content && this._content) {
         this._content.downloadUrl = part.content.download_url;
         this._content.expiration = new Date(part.content.expiration);
+      }
+      this.mimeType = part.mime_type;
+      this.updatedAt = part.updated_at ? new Date(part.updated_at) : null;
+
+      if (!part.body && part.content) {
+        this.hasContent = true;
+      } else if (!Util.isBlob(part.body) && !this.isTextualMimeType()) {
+        //this.body = Util.base64ToBlob(Util.utoa(part.body), this.mimeType);
+        this.body = Util.base64ToBlob(part.body, this.mimeType);
+      } else {
+        this.body = part.body;
       }
     }
 
@@ -40310,12 +40645,17 @@ var MessagePart = function (_Root) {
      */
 
   }, {
-    key: '__updateMimeType',
-    value: function __updateMimeType(newValue, oldValue) {
+    key: '__adjustMimeType',
+    value: function __adjustMimeType(newValue) {
       if (newValue.match(/;/)) {
         this.mimeAttributes = {};
-        this._moveMimeTypeToAttributes();
+        return this._moveMimeTypeToAttributes(newValue);
       }
+      return newValue;
+    }
+  }, {
+    key: '__updateMimeType',
+    value: function __updateMimeType(newValue, oldValue) {
       this._triggerAsync('messageparts:change', {
         property: 'mimeType',
         newValue: newValue,
@@ -40509,7 +40849,7 @@ MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'c
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
 module.exports = MessagePart;
-},{"../client-registry":111,"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"../xhr":162,"./content":132}],138:[function(require,module,exports){
+},{"../client-registry":112,"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150,"../xhr":163,"./content":133}],139:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -40741,7 +41081,7 @@ var Message = function (_Syncable) {
           if (part instanceof MessagePart) {
             result = part;
           } else if (part.mime_type && !part.mimeType) {
-            result = MessagePart._createFromServer(part);
+            result = _this2.getClient()._createObject(part);
           } else {
             result = new MessagePart(part);
           }
@@ -40825,7 +41165,7 @@ var Message = function (_Syncable) {
           oldValue: oldValue,
           newValue: this.parts
         });
-        this.trigger('messages:part-added', { mPart: mPart });
+        this.trigger('messages:part-added', { part: mPart });
       }
       return this;
     }
@@ -41049,7 +41389,8 @@ var Message = function (_Syncable) {
       this.parts.forEach(function (part, index) {
         part.once('parts:send', function (evt) {
           data.parts[index] = {
-            mime_type: evt.mime_type
+            mime_type: evt.mime_type,
+            id: evt.id
           };
           if (evt.content) data.parts[index].content = evt.content;
           if (evt.body) data.parts[index].body = evt.body;
@@ -41789,7 +42130,7 @@ Message._supportedEvents = [
 Root.initClass.apply(Message, [Message, 'Message']);
 Syncable.subclasses.push(Message);
 module.exports = Message;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./identity":135,"./message-part":137,"./syncable":139}],139:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./identity":136,"./message-part":138,"./syncable":140}],140:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42351,7 +42692,7 @@ Syncable.subclasses = [];
 Syncable._supportedEvents = [].concat(Root._supportedEvents);
 Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
-},{"../client-registry":111,"../const":114,"../layer-error":116,"../root":149}],140:[function(require,module,exports){
+},{"../client-registry":112,"../const":115,"../layer-error":117,"../root":150}],141:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -42760,7 +43101,7 @@ OnlineStateManager._supportedEvents = [
 Root.initClass.apply(OnlineStateManager, [OnlineStateManager, 'OnlineStateManager']);
 module.exports = OnlineStateManager;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./const":114,"./logger":119,"./root":149,"./xhr":162}],141:[function(require,module,exports){
+},{"./client-utils":113,"./const":115,"./logger":120,"./root":150,"./xhr":163}],142:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42853,7 +43194,7 @@ AnnouncementsQuery.prototype.model = Query.Announcement;
 Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuery']);
 
 module.exports = AnnouncementsQuery;
-},{"../root":149,"./messages-query":146,"./query":148}],142:[function(require,module,exports){
+},{"../root":150,"./messages-query":147,"./query":149}],143:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43150,7 +43491,7 @@ ChannelsQuery.prototype.model = Query.Channel;
 Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 
 module.exports = ChannelsQuery;
-},{"../const":114,"../root":149,"./conversations-query":143,"./query":148}],143:[function(require,module,exports){
+},{"../const":115,"../root":150,"./conversations-query":144,"./query":149}],144:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43480,7 +43821,7 @@ ConversationsQuery.prototype.model = Query.Conversation;
 Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuery']);
 
 module.exports = ConversationsQuery;
-},{"../client-utils":112,"../const":114,"../root":149,"./query":148}],144:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../root":150,"./query":149}],145:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43599,7 +43940,7 @@ IdentitiesQuery.prototype.model = Query.Identity;
 Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 
 module.exports = IdentitiesQuery;
-},{"../root":149,"./query":148}],145:[function(require,module,exports){
+},{"../root":150,"./query":149}],146:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43774,7 +44115,7 @@ MembersQuery.prototype.model = Query.Membership;
 Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 
 module.exports = MembersQuery;
-},{"../layer-error":116,"../logger":119,"../root":149,"./query":148}],146:[function(require,module,exports){
+},{"../layer-error":117,"../logger":120,"../root":150,"./query":149}],147:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44258,7 +44599,7 @@ MessagesQuery.prototype.model = Query.Message;
 Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 
 module.exports = MessagesQuery;
-},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"./query":148}],147:[function(require,module,exports){
+},{"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150,"./query":149}],148:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44944,7 +45285,7 @@ var QueryBuilder = {
 };
 
 module.exports = QueryBuilder;
-},{"./query":148}],148:[function(require,module,exports){
+},{"./query":149}],149:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46120,7 +46461,7 @@ Query._supportedEvents = [
 Root.initClass.apply(Query, [Query, 'Query']);
 
 module.exports = Query;
-},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149}],149:[function(require,module,exports){
+},{"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150}],150:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -46955,7 +47296,7 @@ Root._supportedEvents = ['destroy', 'all'];
 Root._ignoredEvents = [];
 module.exports = Root;
 module.exports.initClass = initClass;
-},{"./client-utils":112,"./layer-error":116,"./layer-event":117,"./logger":119,"backbone-events-standalone/backbone-events-standalone":163}],150:[function(require,module,exports){
+},{"./client-utils":113,"./layer-error":117,"./layer-event":118,"./logger":120,"backbone-events-standalone/backbone-events-standalone":164}],151:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -47355,7 +47696,7 @@ var WebsocketSyncEvent = function (_SyncEvent2) {
 WebsocketSyncEvent.prototype.returnChangesArray = false;
 
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
-},{"./client-utils":112}],151:[function(require,module,exports){
+},{"./client-utils":113}],152:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48358,7 +48699,7 @@ SyncManager._supportedEvents = [
 
 Root.initClass(SyncManager);
 module.exports = SyncManager;
-},{"./client-utils":112,"./logger":119,"./root":149,"./sync-event":150,"./xhr":162}],152:[function(require,module,exports){
+},{"./client-utils":113,"./logger":120,"./root":150,"./sync-event":151,"./xhr":163}],153:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -48870,7 +49211,7 @@ TelemetryMonitor._supportedEvents = Root._supportedEvents.concat(['telemetry-env
 Root.initClass.apply(TelemetryMonitor, [TelemetryMonitor, 'TelemetryMonitor']);
 module.exports = TelemetryMonitor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./root":149,"./xhr":162}],153:[function(require,module,exports){
+},{"./client-utils":113,"./root":150,"./xhr":163}],154:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49193,7 +49534,7 @@ TypingIndicatorListener._supportedEvents = [
 
 Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingIndicatorListener']);
 module.exports = TypingIndicatorListener;
-},{"../client-registry":111,"../root":149,"./typing-indicators":154}],154:[function(require,module,exports){
+},{"../client-registry":112,"../root":150,"./typing-indicators":155}],155:[function(require,module,exports){
 'use strict';
 
 /**
@@ -49228,7 +49569,7 @@ module.exports = {
    */
   FINISHED: 'finished'
 };
-},{}],155:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49448,7 +49789,7 @@ var TypingListener = function () {
 }();
 
 module.exports = TypingListener;
-},{"./typing-indicators":154,"./typing-publisher":156}],156:[function(require,module,exports){
+},{"./typing-indicators":155,"./typing-publisher":157}],157:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49713,7 +50054,7 @@ var TypingPublisher = function () {
 }();
 
 module.exports = TypingPublisher;
-},{"../client-registry":111,"./typing-indicators":154}],157:[function(require,module,exports){
+},{"../client-registry":112,"./typing-indicators":155}],158:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49811,7 +50152,7 @@ if (setImmediate) {
   });
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],158:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 'use strict';
 
 /**
@@ -49902,7 +50243,7 @@ module.exports = function (request) {
   if (!parser) createParser(request);
   parser.parse(request);
 };
-},{"layer-patch":164}],159:[function(require,module,exports){
+},{"layer-patch":165}],160:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50113,7 +50454,7 @@ var WebsocketChangeManager = function () {
 WebsocketChangeManager.prototype.client = null;
 
 module.exports = WebsocketChangeManager;
-},{"../client-utils":112,"../logger":119,"../models/channel":130,"../models/conversation":134,"../models/message":138}],160:[function(require,module,exports){
+},{"../client-utils":113,"../logger":120,"../models/channel":131,"../models/conversation":135,"../models/message":139}],161:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50482,7 +50823,7 @@ WebsocketRequestManager.prototype._callbackCleanupId = 0;
 WebsocketRequestManager.prototype.socketManager = null;
 
 module.exports = WebsocketRequestManager;
-},{"../client-utils":112,"../layer-error":116,"../logger":119}],161:[function(require,module,exports){
+},{"../client-utils":113,"../layer-error":117,"../logger":120}],162:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -51418,7 +51759,7 @@ SocketManager._supportedEvents = [
 'synced'].concat(Root._supportedEvents);
 Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"websocket":103}],162:[function(require,module,exports){
+},{"../client-utils":113,"../const":115,"../layer-error":117,"../logger":120,"../root":150,"websocket":104}],163:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -51654,7 +51995,7 @@ module.exports.trigger = function (evt) {
     return func(evt);
   });
 };
-},{"xhr2":103}],163:[function(require,module,exports){
+},{"xhr2":104}],164:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -51932,7 +52273,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],164:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -52167,7 +52508,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],165:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -52203,7 +52544,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],166:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -52388,5 +52729,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":165}]},{},[77])(77)
+},{"./rng":166}]},{},[77])(77)
 });

@@ -29,7 +29,7 @@ registerComponent('layer-location-card', {
   `,
   properties: {
     mapWidth: {
-      value: 288,
+      value: 350,
     },
     mapHeight: {
       value: 300,
@@ -38,7 +38,7 @@ registerComponent('layer-location-card', {
       value: false,
       set(value) {
         this.toggleClass('layer-location-card-address-only', value);
-        if (this.container) this.setupContainerClasses(this.container);
+        this.setupContainerClasses();
       },
     },
   },
@@ -75,8 +75,9 @@ registerComponent('layer-location-card', {
       this._updateImageSrc();
     },
 
-    setupContainerClasses(container) {
-      container.classList[this.hideMap ? 'add' : 'remove']('layer-arrow-next-container');
+    setupContainerClasses() {
+      this.parentComponent.toggleClass('layer-arrow-next-container', this.hideMap);
+      this.parentComponent.toggleClass('layer-no-core-ui', this.hideMap);
     },
   },
 });

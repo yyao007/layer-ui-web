@@ -8,6 +8,7 @@ import Layer from 'layer-websdk';
 import { animatedScrollTo, components } from '../base';
 import { registerComponent } from '../components/component';
 import HasQuery from './has-query';
+import Throttler from './throttler';
 
 // Shallow array comparison test
 function isEqual(arr1, arr2) {
@@ -19,7 +20,7 @@ function isEqual(arr1, arr2) {
 }
 
 module.exports = {
-  mixins: [HasQuery],
+  mixins: [HasQuery, Throttler],
   properties: {
     /**
      * Lists have some special behaviors; its useful to be able to test if a component is in fact a list.
@@ -83,18 +84,6 @@ module.exports = {
       value: 50,
     },
 
-    /**
-     * A throttler is used to prevent excessive scroll events.
-     *
-     * This timeout indicates how frequently scroll events are allowed to fire in miliseconds.
-     * This value should not need to be tinkered with.
-     *
-     * @property {Number} [throttlerTimeout=66]
-     */
-    throttlerTimeout: {
-      value: 66,
-    },
-
     state: {
       set(newState) {
         Array.prototype.slice.call(this.childNodes).forEach((node) => {
@@ -140,22 +129,7 @@ module.exports = {
       }
     },
 
-    /**
-     * Simple throttler to avoid too many events while scrolling.
-     *
-     * Not at this time safe for handling multiple types of events at the same time.
-     *
-     * @method _throttler
-     * @private
-     */
-    _throttler(callback) {
-      if (!this.properties.throttleTimeout) {
-        this.properties.throttleTimeout = setTimeout(() => {
-          this.properties.throttleTimeout = null;
-          callback();
-        }, this.throttlerTimeout);
-      }
-    },
+
 
     /**
      * Any time we get a new Query assigned, wire it up.

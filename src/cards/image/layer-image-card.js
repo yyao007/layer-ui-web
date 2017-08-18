@@ -26,7 +26,11 @@ registerComponent('layer-image-card', {
     }
  `,
   properties: {
-
+    parentComponent: {
+      set() {
+        this.onRerender();
+      },
+    },
   },
   methods: {
 
@@ -47,21 +51,20 @@ registerComponent('layer-image-card', {
      * @method
      * @private
      */
-    onRender() {
+    onRerender() {
       // maxSizes should be removed
-      let maxSizes = UISettings.maxSizes;
-      const isSmallImage = this.model.width < 350;
-      this.toggleClass('layer-image-card-small-image', isSmallImage);
+      const width = this.model.previewWidth || this.model.width;
+      const height = this.model.previewHeight || this.model.height;
 
-      // TODO: Need to be able to customize this height, as well as the conditions (parentContainers) under which different sizes are applied.
-      if (this.parentComponent && this.parentComponent.tagName === 'LAYER-NOTIFIER') {
-        maxSizes = { height: Math.min(maxSizes.height, 140), width: maxSizes.width };
-      };
-      this.properties.sizes = normalizeSize(
-        { width: this.model.width, height: this.model.height },
-        { width: maxSizes.width, height: maxSizes.height }
-      );
-      //this.style.height = (UISettings.verticalMessagePadding + this.properties.sizes.height) + 'px';
+      const isSmallImage = width < 350;
+      const isSmallAndWideImage = isSmallImage && width > height;
+      this.toggleClass('layer-image-card-small-image', isSmallImage && !isSmallAndWideImage);
+
+      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return; // wait until the parentComponent is a Card Container
+
+      const maxWidth = this.parentComponent.getPreferredMaxWidth();
+      const maxHeight = this.parentComponent.getPreferredMaxHeight();
+
       if (this.model.source || this.model.preview) {
         this.model.getBlob((blob) => this._renderCanvas(blob));
       } else {
@@ -71,13 +74,30 @@ registerComponent('layer-image-card', {
           src: this.model.previewUrl || this.model.sourceUrl,
           parentNode: this,
         });
-        img.style.maxWidth = '350px';
-        img.style.maxHeight = this.properties.sizes.height + 'px';
+        img.style.maxWidth = maxWidth + 'px';
+        img.style.maxHeight = maxHeight + 'px';
       }
     },
 
+
+    /**
+     * Rendering Rules:
+     *
+     * * Images whose height is less than width and width is less than 192px are scaled to 192px
+     * * Images whose height is greater than width and width is less than 192px are scaled to height 192px?
+     * * Images whose width and height are equal, and less than 192px should be scaled up to 192px
+     * * Images between 192-350 are sized as-is
+     * * However, if there is metadata, scale images up to 350px
+     *
+     * @param {*} blob
+     */
     _renderCanvas(blob) {
-      const isSmallImage = this.model.width < 350;
+      let width = this.model.previewWidth || this.model.width;
+      let height = this.model.previewHeight || this.model.height;
+      const minWidth = this.parentComponent.getPreferredWidth();
+      const minHeight = this.parentComponent.getPreferredMinHeight();
+      const maxWidth = this.parentComponent.getPreferredMaxWidth();
+      const maxHeight = this.parentComponent.getPreferredMaxHeight();
 
       // Read the EXIF data
       ImageManager.parseMetaData(
@@ -90,14 +110,21 @@ registerComponent('layer-image-card', {
           if (data.imageHead && data.exif) {
             options.orientation = data.exif.get('Orientation') || 1;
           }
-          options.maxWidth = this.model.width; //options.minWidth = this.properties.sizes.width + 1;
-          options.maxHeight = this.model.height; //options.minHeight = this.properties.sizes.height;
+          options.maxWidth = maxWidth;
+          options.maxHeight = maxHeight;
 
           // Write the image to a canvas with the specified orientation
           ImageManager(blob, (canvas) => {
-            if (!isSmallImage) canvas.classList.add('layer-top-content-for-border-radius');
-            while (this.firstChild) this.removeChild(this.firstChild);
             if (canvas instanceof HTMLElement) {
+              if (width < minWidth && height < minHeight) {
+                if (width > height) {
+                  canvas = ImageManager.scale(canvas, { minWidth });
+                } else {
+                  canvas = ImageManager.scale(canvas, { minHeight });
+                }
+              }
+
+              while (this.firstChild) this.removeChild(this.firstChild);
               this.appendChild(canvas);
             } else {
               console.error(canvas);

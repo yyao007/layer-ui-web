@@ -87,7 +87,16 @@ registerComponent('layer-receipt-card', {
       return 'Order Confirmation';
     },
 
-    onAfterCreate() {
+    /**
+     *
+     * @method
+     */
+    onRender() {
+
+    },
+
+    onRerender() {
+      this.nodes.products.innerHTML = '';
       this.model.items.forEach((item) => {
         this.createElement('layer-receipt-card-item', {
           item,
@@ -107,21 +116,11 @@ registerComponent('layer-receipt-card', {
 
         shipTo.nodes.ui.hideMap = true;
       }
-    },
 
-    /**
-     *
-     * @method
-     */
-    onRender() {
-
-    },
-
-    onRerender() {
       this.nodes.total.innerHTML = new Number(this.model.summary.totalCost)
         .toLocaleString(navigator.language, {
           currency: this.model.currency,
-          style: "currency",
+          style: 'currency',
         });
       this.nodes.paidWith.innerHTML = this.model.paymentMethod || 'Unknown';
     },

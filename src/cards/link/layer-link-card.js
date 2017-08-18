@@ -67,13 +67,16 @@ registerComponent('layer-link-card', {
      * @method
      */
     onRerender() {
+      this.cardView.toggleClass('layer-card-as-chat-bubble',
+        !this.model.title && !this.model.author && !this.model.imageUrl && !this.model.description);
       this.nodes.image.src = this.model.imageUrl || '';
       this.nodes.link.src = this.model.url;
       this.nodes.link.innerHTML = this.model.url;
       this.isLinkOnly = !(this.model.imageUrl || this.model.title || this.model.description || this.model.subtitle || this.model.author);
     },
-    setupContainerClasses(container) {
-      container.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
+    setupContainerClasses() {
+      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
+      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
     },
   },
 });

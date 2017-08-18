@@ -40,7 +40,13 @@ registerComponent('layer-action-button', {
       type: Boolean,
       set(value) {
         this.nodes.button.disabled = value;
-      }
+      },
+    },
+    selected: {
+      type: Boolean,
+      set(value) {
+        this.toggleClass('layer-action-button-selected', value);
+      },
     },
   },
   methods: {
@@ -68,6 +74,7 @@ registerComponent('layer-action-button', {
         cardView = cardView.parentComponent;
       }
       if (cardView) cardView.runAction({ event: this.event, data: this.data });
+      evt.target.blur();
     },
   },
 });

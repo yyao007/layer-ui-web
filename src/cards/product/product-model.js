@@ -38,13 +38,8 @@ class ProductModel extends CardModel {
     }
   }
 
-  _parseMessage() {
-    super._parseMessage();
-
-    const payload = JSON.parse(this.part.body);
-    Object.keys(payload).forEach((propertyName) => {
-      this[Util.camelCase(propertyName)] = payload[propertyName];
-    });
+  _parseMessage(payload) {
+    super._parseMessage(payload);
 
     const detailPart = this.childParts.filter(part => part.mimeAttributes.role === 'product-detail')[0];
     if (detailPart) {

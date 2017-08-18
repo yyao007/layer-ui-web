@@ -6,13 +6,8 @@ import { Client, MessagePart, CardModel, Util }  from 'layer-websdk';
 
 class OrganizationModel extends CardModel {
 
-  _parseMessage() {
-    super._parseMessage();
-
-    const payload = JSON.parse(this.part.body);
-    Object.keys(payload).forEach((propertyName) => {
-      this[Util.camelCase(propertyName)] = payload[propertyName];
-    });
+  _parseMessage(payload) {
+    super._parseMessage(payload);
 
     this.addressModels = this.getModelsFromPart('address');
     this.contactModels = this.getModelsFromPart('contact');

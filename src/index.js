@@ -50,50 +50,50 @@ require('./utils/date-separator');
 require('./cards/text/text-model');
 require('./cards/text/layer-text-card');
 
-import './cards/response/response-model';
-import './cards/response/layer-response-card';
+require('./cards/response/response-model');
+require('./cards/response/layer-response-card');
 
-import './cards/receipt/receipt-model';
-import './cards/receipt/layer-receipt-card';
+require('./cards/receipt/receipt-model');
+require('./cards/receipt/layer-receipt-card');
 
-import './cards/choice/choice-model';
-import './cards/choice/layer-choice-card';
+require('./cards/choice/choice-model');
+require('./cards/choice/layer-choice-card');
 
-import './cards/layer-standard-card-container';
-import './cards/layer-titled-card-container';
-//import './cards/layer-list-item-container';
-import './cards/text/layer-text-card';
-import './cards/text/text-model';
+require('./cards/layer-standard-card-container');
+require('./cards/layer-titled-card-container');
+//require('./cards/layer-list-item-container');
+require('./cards/text/layer-text-card');
+require('./cards/text/text-model');
 
-import './cards/image/image-model';
-import './cards/image/layer-image-card';
+require('./cards/image/image-model');
+require('./cards/image/layer-image-card');
 
-// import './cards/list/list-model';
-// import './cards/list/layer-list-card';
+// require('./cards/list/list-model');
+// require('./cards/list/layer-list-card');
 
-import './cards/carousel/carousel-model';
-import './cards/carousel/layer-carousel-card';
+require('./cards/carousel/carousel-model');
+require('./cards/carousel/layer-carousel-card');
 
-import './cards/buttons/buttons-model';
-import './cards/buttons/layer-buttons-card';
+require('./cards/buttons/buttons-model');
+require('./cards/buttons/layer-buttons-card');
 
-import './cards/file/file-model';
-import './cards/file/layer-file-card';
+require('./cards/file/file-model');
+require('./cards/file/layer-file-card');
 
-import './cards/link/link-model';
-import './cards/link/layer-link-card';
+require('./cards/link/link-model');
+require('./cards/link/layer-link-card');
 
-import './cards/location/location-model';
-import './cards/location/layer-location-card';
+require('./cards/location/location-model');
+require('./cards/location/layer-location-card');
 
-// import './cards/address/address-model';
-// import './cards/address/layer-address-card';
+// require('./cards/address/address-model');
+// require('./cards/address/layer-address-card');
 
-import './cards/product/product-model';
-import './cards/product/layer-product-card';
+require('./cards/product/product-model');
+require('./cards/product/layer-product-card');
 
-import './cards/models/person-model';
-import './cards/models/organization-model';
+require('./cards/models/person-model');
+require('./cards/models/organization-model');
 
 LayerUI.animatedScrollTo = require('./utils/animated-scroll').animatedScrollTo;
 LayerUI.animatedScrollLeftTo = require('./utils/animated-scroll').animatedScrollLeftTo;

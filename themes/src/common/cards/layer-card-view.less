@@ -32,14 +32,29 @@ layer-card-view {
     max-width: 100%;
     width: 100%;
   }
-  &.layer-root-card {
-    max-width: 60%;
-    &.layer-carousel-card {
-      max-width: 85%;
-    }
+
+
+  &.layer-card-primitive:not(.layer-card-as-chat-bubble) > .layer-card-standard-container {
+    min-width: 250px;
   }
 
-  &.layer-card-primitive:not(.layer-raw-primitive-content) {
-    min-width: 192px;
+  &:not(.layer-root-card) {
+    width: 100%;
   }
+}
+
+.layer-conversation-view-width-small .layer-message-item layer-card-view.layer-root-card {
+  max-width: 90%;
+}
+
+.layer-conversation-view-width-medium .layer-message-item layer-card-view.layer-root-card {
+  max-width: 75%;
+}
+
+.layer-conversation-view-width-large .layer-message-item layer-card-view.layer-root-card {
+  max-width: 60%;
+}
+
+.layer-message-item layer-card-view.layer-root-card.layer-carousel-card {
+  max-width: 90%;
 }

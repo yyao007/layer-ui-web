@@ -57,13 +57,14 @@ import MainComponent from '../../mixins/main-component';
 import HasQuery from '../../mixins/has-query';
 import FocusOnKeydown from '../../mixins/focus-on-keydown';
 import FileDropTarget from '../../mixins/file-drop-target';
+import Throttler from '../../mixins/throttler';
 
 import '../message-list/layer-message-list/layer-message-list';
 import '../subcomponents/layer-compose-bar/layer-compose-bar';
 import '../subcomponents/layer-typing-indicator/layer-typing-indicator';
 
 registerComponent('layer-conversation-view', {
-  mixins: [MainComponent, HasQuery, FocusOnKeydown, FileDropTarget],
+  mixins: [MainComponent, HasQuery, FocusOnKeydown, FileDropTarget, Throttler],
 
   /**
    * This event is triggered before any Message is sent.
@@ -645,8 +646,32 @@ registerComponent('layer-conversation-view', {
     _queryModel: {
       value: Layer.Query.Message,
     },
+
+    width: {
+      set(newValue, oldValue) {
+        this.toggleClass('layer-conversation-view-width-small', newValue < 460);
+        this.toggleClass('layer-conversation-view-width-medium', newValue >= 460 && newValue < 600);
+        this.toggleClass('layer-conversation-view-width-large', newValue >= 600);
+      },
+    },
   },
   methods: {
+    onCreate() {
+      this.properties._handleResize = this._handleResize.bind(this);
+      window.addEventListener('resize', this.properties._handleResize);
+    },
+
+    onAttach() {
+      this.width = this.clientWidth;
+    },
+
+    onDestroy() {
+      window.removeEventListener('resize', this.properties._handleResize);
+    },
+
+    _handleResize() {
+      this.width = this.clientWidth;
+    },
 
     /**
      * When a key is pressed and text is not focused, focus on the composer

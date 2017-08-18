@@ -2,23 +2,27 @@
 layer-text-card {
   border-radius: 16px;
   padding: 8px 12px;
+  overflow-y: auto;
 }
 
-layer-message-item-received .layer-card-top,
-layer-message-item-received layer-standard-card-container > layer-text-card {
+.layer-root-card.layer-card-as-chat-bubble > layer-standard-card-container {
+  padding-bottom: 0px;
+}
+
+layer-message-item-received .layer-root-card.layer-card-as-chat-bubble > layer-standard-card-container > .layer-card-top {
   background-color: @message-item-bubble-received-background-color;
   color: @message-item-bubble-received-color;
   font-size: @font-medium;
+  flex-grow: 1;
 }
 
-layer-message-item-sent .layer-card-top,
-layer-message-item-sent layer-standard-card-container > layer-text-card {
+layer-message-item-sent .layer-root-card.layer-card-as-chat-bubble > layer-standard-card-container > .layer-card-top {
   background-color: @message-item-bubble-sent-background-color;
   color: @message-item-bubble-text-sent-color;
   font-size: @font-medium;
   flex-grow: 1;
 }
 
-layer-card-view.layer-text-card {
-  padding-bottom: 0px;
+.layer-root-card.layer-card-as-chat-bubble {
+  border-width: 0px;
 }

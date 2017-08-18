@@ -31,7 +31,8 @@ registerComponent('layer-product-card', {
       return true;
     },
 
-    onAfterCreate() {
+    onRerender() {
+      this.innerHTML = '';
       if (this.model.detailModel) {
         this.createElement('layer-card-view', {
           message: this.model.message,

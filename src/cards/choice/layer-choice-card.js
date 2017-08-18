@@ -47,8 +47,9 @@ registerComponent('layer-choice-card', {
       return 'layer-poll-card-icon';
     },
     getTitle() {
-      return 'Survey Question';
+      return this.model.title;
     },
+
 
     onAfterCreate() {
       this.nodes.question.innerHTML = this.model.question;
@@ -68,6 +69,7 @@ registerComponent('layer-choice-card', {
         for (var i = 0; i < this.nodes.answers.childNodes.length; i++) {
           var child = this.nodes.answers.childNodes[i];
           child.disabled = this.model.selectedAnswer !== child.data.id;
+          child.selected = this.model.selectedAnswer === child.data.id;
         }
       }
     },

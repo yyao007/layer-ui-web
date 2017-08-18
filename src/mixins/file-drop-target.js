@@ -158,7 +158,7 @@ module.exports = {
     processAttachment(file) {
       if (['image/gif', 'image/png', 'image/jpeg', 'image/svg'].indexOf(file.type) !== -1) {
         return new ImageModel({
-          source: file,
+          source: file, title: 'hey ho',
         });
       } else {
         return new FileModel({

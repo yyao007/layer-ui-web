@@ -8,6 +8,7 @@ layer-message-list {
   layer-message-status {
     color: @message-item-status-color;
     font-size: @message-item-status-size;
+    text-transform: capitalize;
   }
 
   .layer-message-item .layer-list-item layer-date {
@@ -224,15 +225,6 @@ layer-message-list {
       margin: 0px;
     }
 
-    .layer-message-text {
-      margin-left: 20px;
-      color: @message-item-bubble-text-sent-color;
-      background-color: @message-item-bubble-sent-background-color;
-
-      a, a:visited, a:focus, a:active {
-        color: @message-item-bubble-text-sent-color;
-      }
-    }
     .layer-message-footer {
       text-align: right;
     }
@@ -251,6 +243,7 @@ layer-message-list {
       display: flex;
       flex-direction: row;
       justify-content: center;
+      padding: 8px 0px;
     }
     layer-card-view {
       background-color: transparent;

@@ -99,7 +99,7 @@ import { Client, MessagePart, CardModel }  from 'layer-websdk';
 
 
 class ButtonsModel extends CardModel {
-   _generateParts(callback) {
+  _generateParts(callback) {
     const body = this._initBodyWithMetadata(['buttons']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -114,9 +114,9 @@ class ButtonsModel extends CardModel {
     }
   }
 
-  _parseMessage() {
-    super._parseMessage();
-    this.buttons = JSON.parse(this.part.body).buttons;
+  _parseMessage(payload) {
+    super._parseMessage(payload);
+
     const contentPart = this.childParts.filter(part => part.mimeAttributes.role === 'content')[0];
     if (contentPart) this.contentModel = this.getClient().createCardModel(this.message, contentPart);
   }

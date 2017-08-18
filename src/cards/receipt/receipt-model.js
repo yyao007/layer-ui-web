@@ -51,6 +51,61 @@ new ReceiptModel({
     },
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+
+
+ReceiptModel = client.getCardModelClassForMimeType('application/vnd.layer.card.receipt+json')
+LocationModel = client.getCardModelClassForMimeType('application/vnd.layer.card.location+json')
+ListModel = client.getCardModelClassForMimeType('application/vnd.layer.card.list+json')
+ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+new ReceiptModel({
+  currency: 'USD',
+  order: {
+    number: 'FRODO-DODO-ONE'
+  },
+  paymentMethod: "VISA ****1234",
+  summary: {
+    subtitle: 'Your Purchase is Complete',
+    shipping_cost: 350.01,
+    total_tax: 0.01,
+    total_cost: 350.02
+  },
+  shippingAddressModel: new LocationModel({
+    city: 'San Francisco',
+    name: 'Layer Inc',
+    postal_code: '94107',
+    state: 'CA',
+    street1: '655 4th st',
+    description: 'Description should not show'
+  }),
+  items: [
+    {
+      currency: 'USD',
+      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      price: 50,
+      quantity: 3,
+      title: "A pretty picture",
+      subtitle: "Hang it on your wall"
+    },
+    {
+      currency: 'USD',
+      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      price: 50,
+      quantity: 1,
+      title: "A boring picture",
+      subtitle: "You hanging around near your wall"
+    },
+    {
+      currency: 'USD',
+      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      price: 150,
+      quantity: 1,
+      title: "A terrifying picture",
+      subtitle: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+    },
+  ]
+}).generateMessage($("layer-conversation-view").conversation, message => message.send());
 */
 import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
@@ -78,17 +133,14 @@ class ReceiptModel extends CardModel {
     });
   }
 
-  _parseMessage() {
-    super._parseMessage();
+  _parseMessage(payload) {
+    super._parseMessage(payload);
+    if (!this.items) this.items = [];
 
-    const payload = JSON.parse(this.part.body);
     const summary = payload.summary;
-    delete payload.summary;
-    if (payload.createdAt) payload.createdAt = new Date(payload.createdAt);
-    Object.keys(payload).forEach((propertyName) => {
-      this[Util.camelCase(propertyName)] = payload[propertyName];
-    });
-    this.summary = {};
+    this.summary = {
+      totalCost: 0,
+    };
     if (summary) {
       Object.keys(summary).forEach((propertyName) => {
         this.summary[Util.camelCase(propertyName)] = summary[propertyName];
@@ -105,7 +157,7 @@ class ReceiptModel extends CardModel {
 ReceiptModel.prototype.billingAddressModel = null;
 ReceiptModel.prototype.shippingAddressModel = null;
 ReceiptModel.prototype.createdAt = null;
-ReceiptModel.prototype.currency = '';
+ReceiptModel.prototype.currency = 'USD';
 ReceiptModel.prototype.discounts = null;
 ReceiptModel.prototype.items = null;
 ReceiptModel.prototype.paymentMethod = '';

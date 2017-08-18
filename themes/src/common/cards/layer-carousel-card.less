@@ -4,7 +4,11 @@ layer-card-view.layer-carousel-card {
 }
 
 layer-carousel-card {
-  .layer-next-icon {
+  .layer-card-top {
+    width: 250px;
+  }
+
+  & > .layer-next-icon {
     background-color: @carousel-next-button-background;
     border: solid 1px @carousel-next-button-border-color;
     border-radius: 6px 0px 0px 6px;
@@ -18,11 +22,8 @@ layer-carousel-card {
     left: 6px;
   }
 
-  .layer-carousel-card-items > * {
+  .layer-carousel-card-items > layer-card-view {
     margin: 0px 4px;
-  }
-
-  & > .layer-carousel-card-items > layer-card-view.layer-image-card {
     min-width: 250px;
   }
 }

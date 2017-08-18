@@ -11,8 +11,8 @@
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
 
-  TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-  CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
+  TextModel = layer.Client.getCardModelClass('TextModel);
+  CarouselModel = layer.Client.getCardModelClass('CarouselModel');
   model = new CarouselModel({
     items: [
       new TextModel({text: "Carousel item 1", title: "Title 1"}),
@@ -80,6 +80,20 @@
         title: "A pretty picture 6",
         subtitle: "Prettier than YOU deserve!"
       }),
+    ]
+  }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+
+    TextModel = layer.Client.getCardModelClass('TextModel');
+  CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+  new CarouselModel({
+    items: [
+      new TextModel({text: "Carousel item 1", title: "Title 1"}),
+      new TextModel({text: "Carousel item 2", title: "Title 2"}),
+      new TextModel({text: "Carousel item 3", title: "Title 3"}),
+      new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
+      new TextModel({text: "Carousel item 3", title: "Title 5"}),
+      new TextModel({text: "Carousel item 3", title: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'})
     ]
   }).generateMessage($("layer-conversation-view").conversation, message => message.send())
 */
@@ -194,8 +208,8 @@ class CarouselModel extends CardModel {
     this.items.forEach(item => item.mergeAction(this.action));
   }
 
-  _parseMessage() {
-    super._parseMessage();
+  _parseMessage(payload) {
+    super._parseMessage(payload);
 
     // Gather all of the parts that represent a high level list element (ignoring any subparts they may bring with them)
     // Exclucde our main list part that defines the list rather than its list items

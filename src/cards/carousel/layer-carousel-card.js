@@ -5,6 +5,7 @@
  */
 import { registerComponent } from '../../components/component';
 import { animatedScrollLeftTo } from '../../base';
+import CardMixin from '../card-mixin';
 
 registerComponent('layer-carousel-card', {
   template: `
@@ -43,10 +44,10 @@ registerComponent('layer-carousel-card', {
     content: "";
     flex: 0 0 5px;
   }
-  .layer-carousel-card-items > * {
-    flex-grow: 1;
-  }
   `,
+
+  mixins: [CardMixin],
+
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
     model: {},
@@ -65,7 +66,9 @@ registerComponent('layer-carousel-card', {
       this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
       this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
     },
-    onAfterCreate() {
+    onRerender() {
+      // TODO: Assign items ids so we don't need to blow away and then recreate them
+      this.nodes.items.innerHTML = '';
       this.model.items.forEach((item) => {
         this.createElement('layer-card-view', {
           message: this.model.message,
@@ -75,6 +78,9 @@ registerComponent('layer-carousel-card', {
         });
       });
       this.classList.add('layer-carousel-start');
+      if (this.clientWidth && this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
+        this.classList.add('layer-carousel-end');
+      }
     },
 
     onAttach() {

@@ -1,31 +1,59 @@
+/* TODO: Assign a class to these that indicates that they are fluid sized when no metadata */
+layer-card-view.layer-text-card, layer-card-view.layer-link-card {
+  layer-standard-card-container.layer-card-no-metadata .layer-card-top {
+    width: auto;
+  }
+}
 
-layer-standard-card-container {
+layer-carousel-card layer-card-view:not(.layer-card-as-chat-bubble) > layer-standard-card-container {
+  width: 250px;
+}
+
+layer-card-view.layer-root-card:not(.layer-card-as-chat-bubble) > layer-standard-card-container {
+  width: 350px;
+}
+
+layer-card-view:not(.layer-card-as-chat-bubble) layer-standard-card-container {
   &:not(.layer-card-no-metadata) .layer-card-body-outer {
     padding-bottom: 8px;
+    max-height: 20rem;
+    overflow-y: auto;
   }
-  &.layer-card-no-metadata {
+}
+
+layer-standard-card-container {
+  &.layer-card-as-chat-bubble {
     .layer-card-top {
         border-radius: 16px;
     }
   }
 
-  .layer-card-top {
-    overflow: hidden; // prevent images from spilling out of bounds
-    border-radius: 16px 16px 0px 0px;
-    max-height: 350px;
-    width: auto;
-    background-color: @card-container-core-ui-background;
-
-    .layer-top-content-for-border-radius {
-      border-radius: 16px 16px 0px 0px;
-    }
-  }
 
   .layer-card-body-outer {
     .layer-card-body {
       margin: 8px 12px 0px 12px;
     }
   }
+}
+
+layer-card-view.layer-root-card:not(.layer-card-as-chat-bubble) > layaer-standard-card-container > .layer-card-top {
+  width: 350px;
+}
+
+
+layer-card-view:not(.layer-card-as-chat-bubble) > layer-standard-card-container > .layer-card-top {
+  overflow: hidden; // prevent images from spilling out of bounds
+  border-radius: 16px 16px 0px 0px;
+  max-height: 450px;
+  background-color: @card-container-core-ui-background;
+
+  .layer-top-content-for-border-radius {
+    border-radius: 16px 16px 0px 0px;
+  }
+}
+
+layer-standard-card-container.layer-no-core-ui > .layer-card-top {
+  display: none;
 }
 
 layer-standard-card-container, layer-list-item-container {
@@ -68,6 +96,7 @@ layer-standard-card-container.layer-arrow-next-container {
   cursor: pointer;
   .layer-next-icon {
 	  width: 30px;
+    height: 30px;
     margin-top: 8px;
   }
 }

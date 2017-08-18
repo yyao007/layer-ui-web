@@ -49,24 +49,24 @@ registerComponent('layer-standard-card-container', {
     model: {},
     ui: {
       set() {
-        while(this.nodes.UIContainer.firstChild) this.nodes.UIContainer.removeChild(this.nodes.UIContainer.firstChild);
+        while (this.nodes.UIContainer.firstChild) this.nodes.UIContainer.removeChild(this.nodes.UIContainer.firstChild);
         if (this.properties.ui) this.nodes.UIContainer.appendChild(this.properties.ui);
-      }
+      },
     },
     title: {
       set(title) {
         this.nodes.title.innerHTML = title;
-      }
+      },
     },
     description: {
       set(description) {
         this.nodes.description.innerHTML = description;
-      }
+      },
     },
     footer: {
       set(footer) {
-        this.nodes.footer.innerHTML = footer;
-      }
+        this.nodes.footer.innerHTML = typeof footer === 'string' ? footer : '';
+      },
     },
     isShowingMetadata: {
       get() {
@@ -99,12 +99,24 @@ registerComponent('layer-standard-card-container', {
       this.title = model.getTitle();
       this.description = model.getDescription();
       this.footer = model.getFooter();
-      this.ui.setupContainerClasses(this);
+      if (this.ui.parentComponent === this) this.ui.setupContainerClasses();
       this.toggleClass('layer-has-title', this.model.getTitle());
       this.toggleClass('layer-has-footer', this.model.getFooter());
       this.toggleClass('layer-has-description', this.model.getDescription());
       this.classList[!this.title && !this.description && !this.footer ? 'add' : 'remove']('layer-card-no-metadata');
     },
+
+    getPreferredWidth() {
+      return this.isShowingMetadata ? 350 : 192;
+    },
+    getPreferredMaxWidth() {
+      return 350;
+    },
+    getPreferredMaxHeight() {
+      return 400;
+    },
+    getPreferredMinHeight() {
+      return 192;
+    },
   },
 });
-

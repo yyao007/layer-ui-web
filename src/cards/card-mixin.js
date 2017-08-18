@@ -10,7 +10,7 @@ module.exports = {
     },
     cardBorderStyle: {
     },
-    container: {},
+    cardView: {},
   },
   methods: {
     onRender: {
@@ -21,7 +21,7 @@ module.exports = {
     },
     generateCardView({ model, parentNode, cardContainerTagName, cssClassList, cardBorderStyle }) {
       const child = this.createElement('layer-card-view', {
-        message:  this.model.message,
+        message: this.model.message,
         rootPart: model.part,
         model,
         parentNode,
@@ -32,10 +32,12 @@ module.exports = {
 
       return child;
     },
-    setupContainerClasses(container) {
-      this.container = container;
-      container.classList[!this.model.getTitle() && !this.model.getDescription() && !this.model.getFooter() ? 'add' : 'remove']('layer-card-no-metadata');
+    setupContainerClasses() {
+      this.parentComponent.toggleClass('layer-card-no-metadata',
+        !this.model.getTitle() && !this.model.getDescription() && !this.model.getFooter());
+    },
+    onDestroy() {
+      delete this.properties.cardView;
     },
   },
 };
-

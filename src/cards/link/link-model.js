@@ -8,6 +8,14 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
 
+
+   model = new LinkModel({
+    url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+    description: ""
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+
  model = new LinkModel({
     url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
     title: "South Carolina inmate used drone, makeshift dummy to escape prison",
@@ -50,6 +58,14 @@
     description: "The Layer Web SDK is a JavaScript library for adding chat services to your web application. For detailed documentation, tutorials and guides please visit our Web SDK documentation. Supported Browsers: IE 11 and Edge, Safari 7, Chrome 42 and up, Firefox 40 and up.  Older versions of Chrome and Firefox will likely work.",
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+  LinkModel = layer.Client.getCardModelClass('LinkModel')
+
+  model = new LinkModel({
+    url: "http://www.cnn.com/2017/07/07/us/sc-prison-escape-drone/index.html",
+    description:  'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.  And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. Four shalt thou not count, neither count thou two, excepting that thou then proceed to three. Five is right out! Once the number three, being the third number, be reached, then lobbest thou thy Holy Hand Grenade of Antioch towards thy foe, who, being naughty in my sight, shall snuff it.'
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
 import { Client, MessagePart, Util, CardModel, xhr }  from 'layer-websdk';
 
@@ -61,25 +77,15 @@ const ImageRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:image['"].*?\/>/
 class LinkModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+    ['image_url', 'author', 'title', 'description'].forEach(key => {
+      if (body[key] === null) delete body[key];
+    });
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
     callback([this.part]);
-  }
-
-  _parseMessage() {
-    super._parseMessage();
-
-    const payload = JSON.parse(this.part.body);
-    Object.keys(payload).forEach((propertyName) => {
-      this[Util.camelCase(propertyName)] = payload[propertyName];
-    });
-
-    // if (!this.title && !this.description) {
-    //   this._fetchArticle();
-    // }
   }
 
   getFooter() { return this.author; }
@@ -94,7 +100,7 @@ class LinkModel extends CardModel {
   // finished populating
   gatherMetadata(callback) {
     layer.xhr({
-      method: "GET",
+      method: 'GET',
       url: this.url,
     }, (result) => {
       if (result.success) {
@@ -123,10 +129,10 @@ class LinkModel extends CardModel {
   }
 }
 
-LinkModel.prototype.imageUrl = '';
-LinkModel.prototype.author = '';
-LinkModel.prototype.title = '';
-LinkModel.prototype.description = '';
+LinkModel.prototype.imageUrl = null;
+LinkModel.prototype.author = null;
+LinkModel.prototype.title = null;
+LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
@@ -138,7 +144,6 @@ LinkModel.MIMEType = 'application/vnd.layer.card.link+json';
 MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(LinkModel, "LinkModel");
+Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
-

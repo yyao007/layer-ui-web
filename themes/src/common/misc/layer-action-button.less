@@ -5,4 +5,21 @@ layer-action-button, layer-url-button {
     color: @card-button-text;
     font-size: @card-button-size;
   }
+  button:focus, button:active {
+    background-color: @card-button-focus-background !important;
+    color: @card-button-focus-text;
+  }
+  button:hover {
+    background-color: @card-button-hover-background;
+    color: @card-button-hover-text;
+  }
+  button:disabled {
+    background-color: @card-button-disabled-background;
+    color: @card-button-disabled-text;
+  }
+
+  &.layer-action-button-selected button {
+    background-color: @card-button-selected-background;
+    color: @card-button-selected-text;
+  }
 }

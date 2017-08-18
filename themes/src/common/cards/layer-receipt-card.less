@@ -17,7 +17,7 @@ layer-receipt-card {
     }
     label {
       font-size: @font-small;
-      color: @color-g3;
+      color: @color-g5;
       padding-bottom: 4px;
       display: block;
     }
@@ -26,6 +26,14 @@ layer-receipt-card {
     border-width: 0px;
     padding: 0px;
     margin: 0px;
+
+    .layer-card-body-outer {
+      align-items: flex-start;
+
+      .layer-next-icon {
+        margin-top: 0px;
+      }
+    }
 
     .layer-card-body {
       margin: 0px;
@@ -37,7 +45,7 @@ layer-receipt-card {
   }
 
   .layer-receipt-detail-item:not(:last-child) {
-    border-bottom: solid 1px @color-g2;
+    border-bottom: solid 1px @color-g3;
   }
   .layer-receipt-detail-item {
     padding: 8px 12px;

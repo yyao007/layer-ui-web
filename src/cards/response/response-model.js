@@ -10,7 +10,7 @@ class ResponseModel extends CardModel {
       this.responseTo = this.responseToMessage.id;
     }
 
-    const body = this._initBodyWithMetadata(['responseTo', 'participantData', 'sharedData']);
+    const body = this._initBodyWithMetadata(['responseTo', 'responseToNodeId', 'participantData', 'sharedData']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -29,13 +29,9 @@ class ResponseModel extends CardModel {
   }
 
   // Reads identity_id and data out of the MessagePart.body and into this model
-  _parseMessage() {
-    super._parseMessage();
+  _parseMessage(payload) {
+    super._parseMessage(payload);
 
-    const payload = JSON.parse(this.part.body);
-    Object.keys(payload).forEach((propertyName) => {
-      this[Util.camelCase(propertyName)] = payload[propertyName];
-    });
     const messagePart = this.childParts.filter(part => part.mimeAttributes.role === 'message')[0];
     if (messagePart) {
       this.messageModel = this.getClient().createCardModel(this.message, messagePart);
@@ -55,12 +51,14 @@ class ResponseModel extends CardModel {
 ResponseModel.prototype.participantData = null;
 ResponseModel.prototype.sharedData = null;
 ResponseModel.prototype.responseTo = null;
+ResponseModel.prototype.responseToNodeId = null;
 ResponseModel.prototype.responseToMessage = null;
 ResponseModel.prototype.messageModel = null;
 
 ResponseModel.cardRenderer = 'layer-response-card';
 ResponseModel.MIMEType = 'application/vnd.layer.card.response+json';
 Layer.MessagePart.TextualMimeTypes.push(ResponseModel.MIMEType);
+Layer.MessagePart.TextualMimeTypes.push('application/vnd.layer.card.responsesummary+json');
 
 // Register the Card Model Class with the Client
 Client.registerCardModelClass(ResponseModel, 'ResponseModel');

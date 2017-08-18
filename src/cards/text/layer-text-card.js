@@ -33,7 +33,7 @@ registerComponent('layer-text-card', {
     },
 
     onAfterCreate() {
-      this._processText();
+
     },
 
     /**
@@ -45,9 +45,8 @@ registerComponent('layer-text-card', {
     },
 
     onRerender() {
-      if (!this.model.title && !this.model.author) {
-        this.classList.remove('layer-standard-card');
-      }
+      this.cardView.toggleClass('layer-card-as-chat-bubble', !this.model.title && !this.model.author);
+      this._processText();
     },
 
     /**
@@ -88,8 +87,6 @@ registerComponent('layer-text-card', {
       const text = this.model.text;
       const textData = {
         text: this._fixHtml(text),
-        afterText: [],
-        afterClasses: [],
       };
 
       // Iterate over each handler, calling each handler.
@@ -98,25 +95,9 @@ registerComponent('layer-text-card', {
       // This is a cheap trick because a TextHandler could arbitrarily edit the `afterText` array,
       // removing previously added elements.  And this code would then break.
       Base.textHandlersOrdered.forEach((handlerDef) => {
-        const afterText = textData.afterText.concat([]);
-        // handlerDef.handler(textData, this.message, Boolean(this.parentComponent && this.parentComponent.isMessageListItem));
-        // const last = textData.afterText[textData.afterText.length - 1];
-        // if (afterText.indexOf(last) === -1) {
-        //   textData.afterClasses[textData.afterText.length - 1] = 'layer-message-text-plain-' + handlerDef.name;
-        // }
+        handlerDef.handler(textData, this.message, this.parentComponent && this.parentComponent.tagName === 'LAYER-STANDARD-CARD-CONTAINER');
       });
       this.html = textData.text;
-
-      if (textData.afterText.length && this.parentComponent && this.parentComponent.isMessageListItem) {
-        textData.afterText.forEach((textItem, i) => {
-          const div = document.createElement('div');
-          div.classList.add('layer-message-text-plain-after-text');
-          div.classList.add(textData.afterClasses[i]);
-          div.innerHTML = textItem;
-          if (div.firstChild.properties) div.firstChild.properties.parentComponent = this;
-          this.appendChild(div);
-        });
-      }
-    }
+    },
   },
 });

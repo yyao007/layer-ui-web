@@ -173,7 +173,7 @@ module.exports = function (grunt) {
     watch: {
       debug: {
         files: ['index.js', 'src/**', 'Gruntfile.js', '!**/test.js', '!src/**/tests/**.js'],
-        tasks: ['debug', 'make-npm-link-safe', 'notify:watch'],
+        tasks: ['cardtest', 'debug', 'make-npm-link-safe', 'notify:watch'],
         options: {
           interrupt: true
         }
@@ -506,8 +506,10 @@ module.exports = function (grunt) {
   grunt.registerTask('coverage', ['webcomponents', 'browserify:coverage', "generate-tests"]);
   grunt.registerTask('theme', ['less', 'copy']),
 
+  grunt.registerTask('cardtest', ['version', 'webcomponents', 'browserify:cardtest']);
+
   grunt.registerTask('docs', ['debug', 'jsducktemplates', 'jsduck', 'jsduckfixes']);
-  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:cardtest', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
+  grunt.registerTask('debug', ['version', 'webcomponents', 'browserify:debug', "generate-tests", 'before-browserify', 'browserify:build', 'after-browserify']);
   grunt.registerTask('build', ['version', 'webcomponents', 'before-browserify', 'browserify:build', 'after-browserify', 'uglify', 'theme', 'cssmin']);
 
   grunt.registerTask('default', ['build', 'docs']);

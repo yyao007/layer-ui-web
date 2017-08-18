@@ -11,13 +11,13 @@ const actionHandlers = {};
 module.exports = {
   addActionHandler(actionName, handler) {
     actionHandlers[actionName] = handler;
-  }
+  },
 };
 
 registerMessageComponent('layer-card-view', {
   mixins: [MessageHandler],
   style: `layer-card-view {
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: stretch;
     position: relative;
@@ -40,6 +40,7 @@ registerMessageComponent('layer-card-view', {
         }
       },
     },
+
     /**
      * This property primarily exists so that one can set/override the cardContainerTagName on
      * individual Card UIs.
@@ -131,6 +132,7 @@ registerMessageComponent('layer-card-view', {
       this.classList.add(cardUIType);
       const cardUI = this.createElement(cardUIType, {
         model: this.model,
+        cardView: this,
       });
       this.nodes.ui = cardUI;
 
@@ -141,13 +143,13 @@ registerMessageComponent('layer-card-view', {
           model: this.model,
           ui: cardUI,
           parentNode: this,
-          name: 'cardContainer'
+          name: 'cardContainer',
         });
         cardContainer.ui = cardUI;
         cardUI.parentComponent = cardContainer;
+        cardUI.setupContainerClasses();
         this.cardBorderStyle = this.properties.cardBorderStyle || cardContainer.cardBorderStyle || 'standard';
       } else {
-        if (cardUI.isCardPrimitive) this.classList.add('layer-raw-primitive-content');
         this.appendChild(cardUI);
         this.cardBorderStyle = this.properties.cardBorderStyle || cardUI.cardBorderStyle || 'standard';
       }
@@ -162,9 +164,7 @@ registerMessageComponent('layer-card-view', {
     },
 
     onRerender() {
-      if (this.nodes.ui && this.nodes.ui.isCardPrimitive) {
-        this.toggleClass('layer-raw-primitive-content', !Boolean(this.nodes.cardContainer &&this.nodes.cardContainer.isShowingMetadata));
-      }
+
     },
 
 
