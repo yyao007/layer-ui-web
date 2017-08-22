@@ -124,16 +124,23 @@ class ButtonsModel extends CardModel {
   getTitle() { return this.contentModel ? this.contentModel.getTitle() : ''; }
   getFooter() { return this.contentModel ? this.contentModel.getFooter() : ''; }
   getDescription() { return this.contentModel ? this.contentModel.getDescription() : ''; }
+
+  getOneLineSummary() {
+    if (this.contentModel) {
+      return this.contentModel.getOneLineSummary();
+    }
+  }
 }
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
 
+ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';
 ButtonsModel.MIMEType = 'application/vnd.layer.card.buttons+json';
 MessagePart.TextualMimeTypes.push(ButtonsModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(ButtonsModel, "ButtonsModel");
+Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 
 module.exports = ButtonsModel;
 

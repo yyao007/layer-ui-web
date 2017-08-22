@@ -74,10 +74,13 @@ module.exports = {
      */
     message: {
       mode: registerComponent.MODES.AFTER,
-      set() {
+      set(newMessage, oldMessage) {
+        if (oldMessage) oldMessage.off(null, null, this);
         this.onRender();
-        this.message.on('messages:change', this._onChange, this);
-        if (this.message.isNew()) this.message.once('messages:sent', this.onSent, this);
+        if (newMessage) {
+          newMessage.on('messages:change', this._onChange, this);
+          if (newMessage.isNew()) newMessage.once('messages:sent', this.onSent, this);
+        }
       },
     },
   },
@@ -127,7 +130,7 @@ module.exports = {
      * @private
      */
     _onChange(evt) {
-      if (this.message.isNew() || evt.hasProperty('parts.body')) {
+      if (this.message.isNew() || evt.hasProperty('parts.body') || evt.hasProperty('parts')) {
         this.onRender();
       } else {
         this.onRerender();

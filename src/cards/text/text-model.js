@@ -29,7 +29,7 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
-import { Client, MessagePart, Util, Root, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
 import { registerMessageHandler } from '../../base';
 
 class TextModel extends CardModel {
@@ -45,6 +45,10 @@ class TextModel extends CardModel {
 
   getDescription() { return this.subtitle; }
   getFooter() { return this.author; }
+
+  getOneLineSummary() {
+    return this.title || this.text;
+  }
 }
 
 TextModel.prototype.text = '';
@@ -54,6 +58,7 @@ TextModel.prototype.title = '';
 TextModel.prototype.subtitle = '';
 TextModel.prototype.mimeType = 'text/plain';
 
+TextModel.Label = 'Text';
 TextModel.MIMEType = 'application/vnd.layer.card.text+json';
 TextModel.cardRenderer = 'layer-text-card';
 Root.initClass.apply(TextModel, [TextModel, 'TextModel']);

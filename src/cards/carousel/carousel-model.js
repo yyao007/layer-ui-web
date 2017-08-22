@@ -11,7 +11,7 @@
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
 
-  TextModel = layer.Client.getCardModelClass('TextModel);
+  TextModel = layer.Client.getCardModelClass('TextModel');
   CarouselModel = layer.Client.getCardModelClass('CarouselModel');
   model = new CarouselModel({
     items: [
@@ -221,17 +221,23 @@ class CarouselModel extends CardModel {
   __updateAction(newValue) {
     if (this.items) this.items.forEach(item => item.mergeAction(newValue));
   }
+
+  getOneLineSummary() {
+    return this.items.length + ' ' + this.constructor.Label;
+  }
 }
 
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
 
+CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';
 CarouselModel.MIMEType = 'application/vnd.layer.card.carousel+json';
 MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(CarouselModel, "CarouselModel");
+Client.registerCardModelClass(CarouselModel, 'CarouselModel');
 
 module.exports = CarouselModel;
+
 

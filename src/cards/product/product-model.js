@@ -18,7 +18,7 @@
  * A Product model, typically used within a Recipt Model, but usable anywhere that you want to display simple product information.
  */
 
-import { Client, MessagePart, Root, Util, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
 
 class ProductModel extends CardModel {
   _generateParts(callback) {
@@ -54,32 +54,33 @@ class ProductModel extends CardModel {
   getFooter() {
     const price = new Number(this.price).toLocaleString(navigator.language, {
       currency: this.currency,
-      style: "currency",
+      style: 'currency',
     });
     const total = new Number(this.price * this.quantity).toLocaleString(navigator.language, {
       currency: this.currency,
-      style: "currency",
-    });;
-    return (this.quantity > 1 ? `Quantity: ${this.quantity}; Per Unit Cost: ${price}; Total: ${total}`  : `Price: ${total}`);
+      style: 'currency',
+    });
+    return (this.quantity > 1 ? `Quantity: ${this.quantity}; Per Unit Cost: ${price}; Total: ${total}` : `Price: ${total}`);
   }
 }
 
 ProductModel.prototype.detailModel = null; // product-detail
 ProductModel.prototype.currency = 'USD';
 ProductModel.prototype.price = null;
-ProductModel.prototype.quantity = null;
+ProductModel.prototype.quantity = 1;
 ProductModel.prototype.title = '';
 ProductModel.prototype.subtitle = '';
 ProductModel.prototype.url = ''; // Where to go for more information on this product
 ProductModel.defaultAction = 'open-url';
 
+ProductModel.Label = 'Product';
 ProductModel.cardRenderer = 'layer-product-card';
-ProductModel.MIMEType = "application/vnd.layer.card.product+json";
+ProductModel.MIMEType = 'application/vnd.layer.card.product+json';
 
 MessagePart.TextualMimeTypes.push(ProductModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(ProductModel, "ProductModel");
+Client.registerCardModelClass(ProductModel, 'ProductModel');
 
 Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;

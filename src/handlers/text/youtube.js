@@ -2,7 +2,9 @@
  * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
  *
  * @class layerUI.handlers.text.Youtube
+ * @removed
  */
+/*
 import layerUI from '../../base';
 
 layerUI.registerTextHandler({
@@ -27,3 +29,4 @@ layerUI.registerTextHandler({
     }
   }
 });
+*/

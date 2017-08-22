@@ -67,9 +67,11 @@ registerComponent('layer-carousel-card', {
       this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
     },
     onRerender() {
+      console.log("CAROUSEL onRERENDER");
       // TODO: Assign items ids so we don't need to blow away and then recreate them
       this.nodes.items.innerHTML = '';
       this.model.items.forEach((item) => {
+        console.log('GENERATE: ' + item.id + '    ' + item.title);
         this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: item.part,
@@ -77,16 +79,19 @@ registerComponent('layer-carousel-card', {
           parentNode: this.nodes.items,
         });
       });
-      this.classList.add('layer-carousel-start');
-      if (this.clientWidth && this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
-        this.classList.add('layer-carousel-end');
-      }
+      setTimeout(this._updateScrollButtons.bind(this), 10);
     },
 
     onAttach() {
-      if (this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
-        this.classList.add('layer-carousel-end');
-      }
+      setTimeout(this._updateScrollButtons.bind(this), 10);
+    },
+
+    _updateScrollButtons() {
+      this.toggleClass('layer-carousel-start', this.nodes.items.scrollLeft === 0);
+
+      const lastVisible = this._findLastFullyVisibleCard();
+      const children = this.nodes.items.childNodes;
+      this.toggleClass('layer-carousel-end', lastVisible === children[children.length - 1]);
     },
 
     // TODO:

@@ -17,6 +17,10 @@ layer-notifier {
     font-size: @toast-title-size;
     color: @toast-title-color;
     font-weight: @toast-title-weight;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
   }
   .layer-notifier-title:after {
     content: ':';
@@ -28,12 +32,12 @@ layer-notifier {
     font-weight: @toast-message-weight;
   }
 
-  /* Neither title nor messages will wrap */
+  /* Neither title nor messages will wrap *
   .layer-message-item-main > * {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-  }
+  }*/
 
   .layer-message-item-main {
     width: @toast-width;

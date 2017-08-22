@@ -94,6 +94,7 @@ LocationModel.prototype.street1 = '';
 LocationModel.prototype.street2 = '';
 LocationModel.prototype.showAddress = null; // 3 state: true: show the address; false: show the description, null: permit default behavior.  Set by Parent Card via API and NOT set via model
 
+LocationModel.Label = 'Location';
 LocationModel.defaultAction = 'open-map';
 LocationModel.cardRenderer = 'layer-location-card';
 LocationModel.MIMEType = 'application/vnd.layer.card.location+json';

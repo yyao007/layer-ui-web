@@ -38,7 +38,6 @@ registerComponent('layer-response-card', {
           model: this.model.messageModel,
           parentNode: this,
           cardBorderStyle: 'none',
-
         });
       }
     }

@@ -91,15 +91,14 @@ class LinkModel extends CardModel {
   getFooter() { return this.author; }
   getDescription() { return this.description; }
 
-  // Disable code in layer-card-view that skips the Card Container
-  hasNoContainerData() {
-    return false;
+  getOneLineSummary() {
+    return `${this.constructor.Label} ${this.title || this.url}`;
   }
 
   // TODO: This should have a callback so that a message sender can send the message once this has
   // finished populating
   gatherMetadata(callback) {
-    layer.xhr({
+    xhr({
       method: 'GET',
       url: this.url,
     }, (result) => {
@@ -136,6 +135,7 @@ LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
+LinkModel.Label = 'Link to';
 LinkModel.defaultAction = 'open-url';
 LinkModel.cardRenderer = 'layer-link-card';
 

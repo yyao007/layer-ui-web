@@ -35,7 +35,7 @@
 */
 
 
-import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, CardModel } from 'layer-websdk';
 
 
 class FileModel extends CardModel {
@@ -50,7 +50,7 @@ class FileModel extends CardModel {
       this.size = source.size;
     }
 
-    if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, "$1");
+    if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
     const body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -107,12 +107,12 @@ class FileModel extends CardModel {
   __getTitle() {
     if (this.__title) return this.__title;
     if (this.source && this.source.mimeAttributes.name) return this.source.mimeAttributes.name;
-    if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, "$1");
+    if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, '$1');
   }
 
   getTitle() { return this.title.replace(/\..{2,5}$/, ''); }
-  getDescription() { return this.author }
-  getFooter() { return (Math.floor(this.size/1000)).toLocaleString() + 'K'; }
+  getDescription() { return this.author; }
+  getFooter() { return (Math.floor(this.size / 1000)).toLocaleString() + 'K'; }
 }
 
 FileModel.prototype.source = null;
@@ -123,13 +123,14 @@ FileModel.prototype.size = '';
 FileModel.prototype.fileExt = '';
 FileModel.prototype.mimeType = '';
 
+FileModel.Label = 'File';
 FileModel.defaultAction = 'open-file';
 FileModel.cardRenderer = 'layer-file-card';
 FileModel.MIMEType = 'application/vnd.layer.card.file+json';
 MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(FileModel, "FileModel");
+Client.registerCardModelClass(FileModel, 'FileModel');
 
 module.exports = FileModel;
 

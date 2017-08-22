@@ -8,9 +8,6 @@ module.exports = {
     cardContainerTagName: {
       noGetterFromSetter: true,
       value: 'layer-standard-card-container',
-      // get() {
-      //   return this.model.hasNoContainerData() ? null : 'layer-standard-card-container';
-      // }
     },
   },
 };

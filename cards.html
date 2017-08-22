@@ -31,7 +31,7 @@
       flex-grow: 1;
     }
     layer-conversation-list, .layer-conversation-list-header {
-      width: 250px;
+      width: 350px;
       border-right: solid 1px black;
     }
     layer-conversation-view, .layer-conversation-header {
@@ -52,7 +52,7 @@
       </div>
     </div>
     <div class='content'>
-      <layer-notifier id="notifier"></layer-notifier>
+      <layer-notifier id="notifier" notify-in-background="toast"></layer-notifier>
       <layer-conversation-list selected-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" id="list"></layer-conversation-list>
       <layer-conversation-view conversation-id="layer:///conversations/083af962-cc5e-4d89-85e0-a5b6e8d0dcff" listen-to="notifier,list"></layer-conversation-view>
     </div>

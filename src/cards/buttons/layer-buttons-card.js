@@ -44,7 +44,7 @@ registerComponent('layer-buttons-card', {
 
     onAfterCreate() {
       if (this.model.contentModel) {
-        const child = this.createElement('layer-card-view', {
+        this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: this.model.contentModel.part,
           model: this.model.contentModel,
@@ -57,7 +57,7 @@ registerComponent('layer-buttons-card', {
 
       this.model.buttons.forEach((button) => {
         let widget;
-        switch(button.type) {
+        switch (button.type) {
           case 'action':
             widget = this.createElement('layer-action-button', {
               text: button.text,
@@ -90,6 +90,6 @@ registerComponent('layer-buttons-card', {
         this.nodes.subcard.runAction(options);
         return true;
       }
-    }
+    },
   },
 });

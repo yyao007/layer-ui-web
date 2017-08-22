@@ -38,7 +38,7 @@ registerComponent('layer-product-card', {
           message: this.model.message,
           rootPart: this.model.detailModel.part,
           model: this.model.detailModel,
-          cardContainerTagName: false,
+          //cardContainerTagName: false,
           cardBorderStyle: 'none',
           parentNode: this,
         });

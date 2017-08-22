@@ -2,7 +2,6 @@
  * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
    ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
    model = new ChoiceModel({
-     title: "Trivia Question",
      question: "what is the airspeed velocity of an unladen swallow?",
      choices: [
         {text:  "Zero, it can not get off the ground!", id: "a"},
@@ -12,10 +11,9 @@
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
  */
-import { Client, MessagePart, Util, Root, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
 import ResponseModel from '../response/response-model';
 import TextModel from '../text/text-model';
-import ButtonsModel from '../buttons/buttons-model';
 
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
@@ -44,7 +42,7 @@ class ChoiceModel extends CardModel {
 
   selectAnswer(answerData) {
     if (!this.selectedAnswer) {
-      const selectedChoice = this.choices.filter(item => item.id == answerData.id)[0];
+      const selectedChoice = this.choices.filter(item => item.id === answerData.id)[0];
       const responseModel = new ResponseModel({
         responseToMessage: this.message,
         responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
@@ -63,23 +61,29 @@ class ChoiceModel extends CardModel {
 
   _processNewResponses() {
     const senderId = this.message.sender.userId;
-    let responseIdentityIds = Object.keys(this.responses.participantData).filter(participantId => this.responses.participantData[participantId].selection);
+    const data = this.responses.participantData;
+    let responseIdentityIds = Object.keys(data).filter(participantId => data[participantId].selection);
     if (responseIdentityIds.length > 1) {
       responseIdentityIds = responseIdentityIds.filter(id => senderId !== id);
     }
-    this.selectedAnswer = responseIdentityIds.length ? this.responses.participantData[responseIdentityIds[0]].selection : null;
+    this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
   }
 
   __updateSelectedAnswer(newValue) {
     this._triggerAsync('change');
   }
+
+  getOneLineSummary() {
+    return this.question || this.title;
+  }
 }
 
-ChoiceModel.prototype.title = 'Survey Question';
+ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
 ChoiceModel.prototype.responses = null;
 
+ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
 ChoiceModel.cardRenderer = 'layer-choice-card';
 ChoiceModel.MIMEType = 'application/vnd.layer.card.choice+json';
@@ -88,7 +92,7 @@ MessagePart.TextualMimeTypes.push(ChoiceModel.MIMEType);
 Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(ChoiceModel, "ChoiceModel");
+Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
 

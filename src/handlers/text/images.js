@@ -2,7 +2,9 @@
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
  * @class layerUI.handlers.text.Images
+ * @removed
  */
+/*
 import layerUI from '../../base';
 import isUrl from '../../utils/is-url';
 
@@ -18,3 +20,4 @@ layerUI.registerTextHandler({
     }
   },
 });
+*/

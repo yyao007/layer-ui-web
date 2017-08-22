@@ -1,9 +1,9 @@
-import LayerUI from './lib-es5/index.js';
 import Layer from 'layer-websdk';
-import TextModel from './lib-es5/cards/text/text-model';
 
-var APP_ID = "layer:///apps/staging/2f1707c0-fd2f-11e6-ae72-c27751092ce1";
-var PROVIDER_URL = "https://layer-quickstart-michael.herokuapp.com";
+import LayerUI from './lib-es6/index';
+
+var APP_ID = 'layer:///apps/staging/2f1707c0-fd2f-11e6-ae72-c27751092ce1';
+var PROVIDER_URL = 'https://layer-quickstart-michael.herokuapp.com';
 var conversationPanel;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -26,14 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
           url: PROVIDER_URL + '/authenticate',
           headers: {
             'Content-type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
           },
           method: 'POST',
           data: {
             nonce: evt.nonce,
             email: USER_ID,
-            password: PASSWORD
-          }
+            password: PASSWORD,
+          },
         }, function(res) {
           if (res.success && res.data.identity_token) {
             console.log('challenge: ok');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.body.addEventListener('grant-grail', function() {
-      alert("We've already got one!");
+      alert('We\'ve already got one!');
     });
 });
 

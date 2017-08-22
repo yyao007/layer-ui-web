@@ -35,7 +35,7 @@ registerComponent('layer-link-card', {
   }
   `,
 
-  template: `<img layer-id="image" class="layer-link-card-image" /><a target='_blank' layer-id='link'></a>`,
+  template: '<img layer-id="image" class="layer-link-card-image" /><a target="_blank" layer-id="link"></a>',
   properties: {
     isLinkOnly: {
       set(isLinkOnly) {

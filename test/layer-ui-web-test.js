@@ -450,7 +450,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":110}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":109}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -527,7 +527,7 @@ var layerUI = {};
  *    because layerUI contains the WebComponents polyfills.
  *
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
- * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'images', 'newline', 'youtube']] Specify which text handlers you want
+ * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'newline']] Specify which text handlers you want
  *    Note that any custom handlers you add do not need to be in the settings, they can be called after calling `init()` using layerUI.registerTextHandler.
  * @property {Object} [settings.maxSizes]  The maximum width/height for image and video previews
  * @property {Object} [settings.verticalMessagePadding=0]  Message handlers that must hard code a height into their dom nodes can be
@@ -545,7 +545,7 @@ layerUI.settings = {
       return true;
     }
   },
-  textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
+  textHandlers: ['autolinker', 'emoji', 'newline'],
   maxSizes: { width: 512, height: 512 },
   verticalMessagePadding: 0
 };
@@ -790,7 +790,7 @@ layerUI.getHandler = function (message, container) {
  * * Turning emoticons symbols into images
  * * Replacing image URLs with image tags
  * * Adding HTML formatting around quoted text
- * * Replacing youtube links with youtube videos
+
  * * Make up your own...
  *
  * You can enable a predefined Text Handler with:
@@ -810,21 +810,6 @@ layerUI.getHandler = function (message, container) {
  *    handler: function(textData, message) {
  *       textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
- *   });
- * });
- * ```
- *
- * You can append data after your message using `afterText`:
- *
- * ```
- * layerUI.registerTextHandler({
- *    name: 'youtube',
- *    order: 200,
- *    handler: function(textData, message) {
- *       var matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g);
- *       if (matches[3) {
- *           textData.afterText.push('<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>');
- *       }
  *   });
  * });
  * ```
@@ -1046,7 +1031,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '2.0.0';
+layerUI.version = '2.0.1';
 
 var clientVersions = _layerWebsdk2.default.Client.version.split('.').map(function (value) {
   return Number(value);
@@ -1066,7 +1051,7 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":110}],5:[function(require,module,exports){
+},{"layer-websdk":109}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1339,6 +1324,13 @@ var ButtonsModel = function (_CardModel) {
     value: function getDescription() {
       return this.contentModel ? this.contentModel.getDescription() : '';
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      if (this.contentModel) {
+        return this.contentModel.getOneLineSummary();
+      }
+    }
   }]);
 
   return ButtonsModel;
@@ -1347,12 +1339,13 @@ var ButtonsModel = function (_CardModel) {
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
 
+ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';
 ButtonsModel.MIMEType = 'application/vnd.layer.card.buttons+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ButtonsModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ButtonsModel, "ButtonsModel");
+_layerWebsdk.Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 
 module.exports = ButtonsModel;
 
@@ -1411,6 +1404,13 @@ var ButtonsModel = function (_CardModel) {
     value: function getDescription() {
       return this.contentModel ? this.contentModel.getDescription() : '';
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      if (this.contentModel) {
+        return this.contentModel.getOneLineSummary();
+      }
+    }
   }]);
 
   return ButtonsModel;
@@ -1419,17 +1419,18 @@ var ButtonsModel = function (_CardModel) {
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
 
+ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';
 ButtonsModel.MIMEType = 'application/vnd.layer.card.buttons+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ButtonsModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ButtonsModel, "ButtonsModel");
+_layerWebsdk.Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 
 module.exports = ButtonsModel;
 
 window.PollModel = ButtonsModel; // debug stuff
-},{"layer-websdk":110}],6:[function(require,module,exports){
+},{"layer-websdk":109}],6:[function(require,module,exports){
 /**
  *
  * @class
@@ -1463,7 +1464,7 @@ require('../../components/subcomponents/layer-url-button/layer-url-button');
       var _this = this;
 
       if (this.model.contentModel) {
-        var child = this.createElement('layer-card-view', {
+        this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: this.model.contentModel.part,
           model: this.model.contentModel,
@@ -1602,7 +1603,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  CarouselModel = layer.Client.getCardModelClass('CarouselModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
@@ -1713,7 +1714,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  CarouselModel = layer.Client.getCardModelClass('CarouselModel');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
@@ -1950,6 +1951,11 @@ var CarouselModel = function (_CardModel) {
         return item.mergeAction(newValue);
       });
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.items.length + ' ' + this.constructor.Label;
+    }
   }]);
 
   return CarouselModel;
@@ -1958,12 +1964,13 @@ var CarouselModel = function (_CardModel) {
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
 
+CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';
 CarouselModel.MIMEType = 'application/vnd.layer.card.carousel+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(CarouselModel, "CarouselModel");
+_layerWebsdk.Client.registerCardModelClass(CarouselModel, 'CarouselModel');
 
 module.exports = CarouselModel;
 
@@ -2117,6 +2124,11 @@ var CarouselModel = function (_CardModel) {
         return item.mergeAction(newValue);
       });
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.items.length + ' ' + this.constructor.Label;
+    }
   }]);
 
   return CarouselModel;
@@ -2125,15 +2137,16 @@ var CarouselModel = function (_CardModel) {
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
 
+CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';
 CarouselModel.MIMEType = 'application/vnd.layer.card.carousel+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(CarouselModel, "CarouselModel");
+_layerWebsdk.Client.registerCardModelClass(CarouselModel, 'CarouselModel');
 
 module.exports = CarouselModel;
-},{"layer-websdk":110}],10:[function(require,module,exports){
+},{"layer-websdk":109}],10:[function(require,module,exports){
 /**
  *
  * @class
@@ -2177,9 +2190,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRerender: function onRerender() {
       var _this = this;
 
+      console.log("CAROUSEL onRERENDER");
       // TODO: Assign items ids so we don't need to blow away and then recreate them
       this.nodes.items.innerHTML = '';
       this.model.items.forEach(function (item) {
+        console.log('GENERATE: ' + item.id + '    ' + item.title);
         _this.createElement('layer-card-view', {
           message: _this.model.message,
           rootPart: item.part,
@@ -2187,15 +2202,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           parentNode: _this.nodes.items
         });
       });
-      this.classList.add('layer-carousel-start');
-      if (this.clientWidth && this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
-        this.classList.add('layer-carousel-end');
-      }
+      setTimeout(this._updateScrollButtons.bind(this), 10);
     },
     onAttach: function onAttach() {
-      if (this.nodes.items.scrollWidth === this.nodes.items.clientWidth) {
-        this.classList.add('layer-carousel-end');
-      }
+      setTimeout(this._updateScrollButtons.bind(this), 10);
+    },
+    _updateScrollButtons: function _updateScrollButtons() {
+      this.toggleClass('layer-carousel-start', this.nodes.items.scrollLeft === 0);
+
+      var lastVisible = this._findLastFullyVisibleCard();
+      var children = this.nodes.items.childNodes;
+      this.toggleClass('layer-carousel-end', lastVisible === children[children.length - 1]);
     },
 
 
@@ -2282,10 +2299,6 @@ var _textModel = require('../text/text-model');
 
 var _textModel2 = _interopRequireDefault(_textModel);
 
-var _buttonsModel = require('../buttons/buttons-model');
-
-var _buttonsModel2 = _interopRequireDefault(_buttonsModel);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2296,7 +2309,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Trivia Question",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     question: "what is the airspeed velocity of an unladen swallow?",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {text:  "Zero, it can not get off the ground!", id: "a"},
@@ -2322,10 +2334,6 @@ var _textModel = require('../text/text-model');
 
 var _textModel2 = _interopRequireDefault(_textModel);
 
-var _buttonsModel = require('../buttons/buttons-model');
-
-var _buttonsModel2 = _interopRequireDefault(_buttonsModel);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2336,7 +2344,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    title: "Trivia Question",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     question: "what is the airspeed velocity of an unladen swallow?",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {text:  "Zero, it can not get off the ground!", id: "a"},
@@ -2391,7 +2398,7 @@ var ChoiceModel = function (_CardModel) {
     value: function selectAnswer(answerData) {
       if (!this.selectedAnswer) {
         var selectedChoice = this.choices.filter(function (item) {
-          return item.id == answerData.id;
+          return item.id === answerData.id;
         })[0];
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
@@ -2411,34 +2418,39 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var _this2 = this;
-
       var senderId = this.message.sender.userId;
-      var responseIdentityIds = Object.keys(this.responses.participantData).filter(function (participantId) {
-        return _this2.responses.participantData[participantId].selection;
+      var data = this.responses.participantData;
+      var responseIdentityIds = Object.keys(data).filter(function (participantId) {
+        return data[participantId].selection;
       });
       if (responseIdentityIds.length > 1) {
         responseIdentityIds = responseIdentityIds.filter(function (id) {
           return senderId !== id;
         });
       }
-      this.selectedAnswer = responseIdentityIds.length ? this.responses.participantData[responseIdentityIds[0]].selection : null;
+      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
     value: function __updateSelectedAnswer(newValue) {
       this._triggerAsync('change');
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.question || this.title;
+    }
   }]);
 
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
-ChoiceModel.prototype.title = 'Survey Question';
+ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
 ChoiceModel.prototype.responses = null;
 
+ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
 ChoiceModel.cardRenderer = 'layer-choice-card';
 ChoiceModel.MIMEType = 'application/vnd.layer.card.choice+json';
@@ -2447,7 +2459,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ChoiceModel.MIMEType);
 _layerWebsdk.Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ChoiceModel, "ChoiceModel");
+_layerWebsdk.Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
 
@@ -2495,7 +2507,7 @@ var ChoiceModel = function (_CardModel) {
     value: function selectAnswer(answerData) {
       if (!this.selectedAnswer) {
         var selectedChoice = this.choices.filter(function (item) {
-          return item.id == answerData.id;
+          return item.id === answerData.id;
         })[0];
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
@@ -2515,34 +2527,39 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var _this2 = this;
-
       var senderId = this.message.sender.userId;
-      var responseIdentityIds = Object.keys(this.responses.participantData).filter(function (participantId) {
-        return _this2.responses.participantData[participantId].selection;
+      var data = this.responses.participantData;
+      var responseIdentityIds = Object.keys(data).filter(function (participantId) {
+        return data[participantId].selection;
       });
       if (responseIdentityIds.length > 1) {
         responseIdentityIds = responseIdentityIds.filter(function (id) {
           return senderId !== id;
         });
       }
-      this.selectedAnswer = responseIdentityIds.length ? this.responses.participantData[responseIdentityIds[0]].selection : null;
+      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
     value: function __updateSelectedAnswer(newValue) {
       this._triggerAsync('change');
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.question || this.title;
+    }
   }]);
 
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
-ChoiceModel.prototype.title = 'Survey Question';
+ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
 ChoiceModel.prototype.responses = null;
 
+ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
 ChoiceModel.cardRenderer = 'layer-choice-card';
 ChoiceModel.MIMEType = 'application/vnd.layer.card.choice+json';
@@ -2551,10 +2568,10 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ChoiceModel.MIMEType);
 _layerWebsdk.Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ChoiceModel, "ChoiceModel");
+_layerWebsdk.Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
-},{"../buttons/buttons-model":5,"../response/response-model":30,"../text/text-model":32,"layer-websdk":110}],12:[function(require,module,exports){
+},{"../response/response-model":30,"../text/text-model":32,"layer-websdk":109}],12:[function(require,module,exports){
 /**
  *
  *
@@ -2757,7 +2774,7 @@ var FileModel = function (_CardModel) {
         this.size = source.size;
       }
 
-      if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, "$1");
+      if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
       var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -2822,7 +2839,7 @@ var FileModel = function (_CardModel) {
     value: function __getTitle() {
       if (this.__title) return this.__title;
       if (this.source && this.source.mimeAttributes.name) return this.source.mimeAttributes.name;
-      if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, "$1");
+      if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, '$1');
     }
   }, {
     key: 'getTitle',
@@ -2852,13 +2869,14 @@ FileModel.prototype.size = '';
 FileModel.prototype.fileExt = '';
 FileModel.prototype.mimeType = '';
 
+FileModel.Label = 'File';
 FileModel.defaultAction = 'open-file';
 FileModel.cardRenderer = 'layer-file-card';
 FileModel.MIMEType = 'application/vnd.layer.card.file+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(FileModel, "FileModel");
+_layerWebsdk.Client.registerCardModelClass(FileModel, 'FileModel');
 
 module.exports = FileModel;
 
@@ -2884,7 +2902,7 @@ var FileModel = function (_CardModel) {
         this.size = source.size;
       }
 
-      if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, "$1");
+      if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
       var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -2949,7 +2967,7 @@ var FileModel = function (_CardModel) {
     value: function __getTitle() {
       if (this.__title) return this.__title;
       if (this.source && this.source.mimeAttributes.name) return this.source.mimeAttributes.name;
-      if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, "$1");
+      if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, '$1');
     }
   }, {
     key: 'getTitle',
@@ -2979,16 +2997,17 @@ FileModel.prototype.size = '';
 FileModel.prototype.fileExt = '';
 FileModel.prototype.mimeType = '';
 
+FileModel.Label = 'File';
 FileModel.defaultAction = 'open-file';
 FileModel.cardRenderer = 'layer-file-card';
 FileModel.MIMEType = 'application/vnd.layer.card.file+json';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(FileModel, "FileModel");
+_layerWebsdk.Client.registerCardModelClass(FileModel, 'FileModel');
 
 module.exports = FileModel;
-},{"layer-websdk":110}],14:[function(require,module,exports){
+},{"layer-websdk":109}],14:[function(require,module,exports){
 /**
  * TODO: Verify that custom handling of "open-file" events are possible and documented
  * @class layerUI.handlers.message.CardView
@@ -3518,6 +3537,7 @@ ImageModel.prototype.previewWidth = 0;
 ImageModel.prototype.previewHeight = 0;
 ImageModel.prototype.url = '';
 
+ImageModel.Label = 'Picture';
 ImageModel.defaultAction = 'open-url';
 ImageModel.cardRenderer = 'layer-image-card';
 ImageModel.MIMEType = 'application/vnd.layer.card.image+json';
@@ -3749,6 +3769,7 @@ ImageModel.prototype.previewWidth = 0;
 ImageModel.prototype.previewHeight = 0;
 ImageModel.prototype.url = '';
 
+ImageModel.Label = 'Picture';
 ImageModel.defaultAction = 'open-url';
 ImageModel.cardRenderer = 'layer-image-card';
 ImageModel.MIMEType = 'application/vnd.layer.card.image+json';
@@ -3759,7 +3780,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ImageModel, "ImageModel");
 
 module.exports = ImageModel;
-},{"../../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101,"layer-websdk":110}],16:[function(require,module,exports){
+},{"../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],16:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -3925,7 +3946,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../base":4,"../../components/component":33,"../../utils/sizing":97,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101}],17:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../utils/sizing":96,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],17:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4100,7 +4121,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   // This will not translate well to shadow-dom.
   style: '\n  layer-card-view.layer-link-card layer-standard-card-container {\n    cursor: pointer;\n    display: block;\n  }\n  layer-link-card img[src=\'\'] {\n    display: none;\n  }\n  layer-link-card img {\n    width: 100%;\n    border-radius: 16px 16px 0px 0px;\n  }\n  layer-link-card:not(.layer-link-card-link-only) a {\n    display: none;\n  }\n  layer-link-card.layer-link-card-link-only a {\n    display: block;\n    padding: 8px 12px;\n    text-decoration: underline;\n  }\n  ',
 
-  template: '<img layer-id="image" class="layer-link-card-image" /><a target=\'_blank\' layer-id=\'link\'></a>',
+  template: '<img layer-id="image" class="layer-link-card-image" /><a target="_blank" layer-id="link"></a>',
   properties: {
     isLinkOnly: {
       set: function set(isLinkOnly) {
@@ -4344,13 +4365,10 @@ var LinkModel = function (_CardModel) {
     value: function getDescription() {
       return this.description;
     }
-
-    // Disable code in layer-card-view that skips the Card Container
-
   }, {
-    key: 'hasNoContainerData',
-    value: function hasNoContainerData() {
-      return false;
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.constructor.Label + ' ' + (this.title || this.url);
     }
 
     // TODO: This should have a callback so that a message sender can send the message once this has
@@ -4361,7 +4379,7 @@ var LinkModel = function (_CardModel) {
     value: function gatherMetadata(callback) {
       var _this2 = this;
 
-      layer.xhr({
+      (0, _layerWebsdk.xhr)({
         method: 'GET',
         url: this.url
       }, function (result) {
@@ -4402,6 +4420,7 @@ LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
+LinkModel.Label = 'Link to';
 LinkModel.defaultAction = 'open-url';
 LinkModel.cardRenderer = 'layer-link-card';
 
@@ -4453,13 +4472,10 @@ var LinkModel = function (_CardModel) {
     value: function getDescription() {
       return this.description;
     }
-
-    // Disable code in layer-card-view that skips the Card Container
-
   }, {
-    key: 'hasNoContainerData',
-    value: function hasNoContainerData() {
-      return false;
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.constructor.Label + ' ' + (this.title || this.url);
     }
 
     // TODO: This should have a callback so that a message sender can send the message once this has
@@ -4470,7 +4486,7 @@ var LinkModel = function (_CardModel) {
     value: function gatherMetadata(callback) {
       var _this2 = this;
 
-      layer.xhr({
+      (0, _layerWebsdk.xhr)({
         method: 'GET',
         url: this.url
       }, function (result) {
@@ -4511,6 +4527,7 @@ LinkModel.prototype.description = null;
 LinkModel.prototype.url = '';
 LinkModel.prototype.html = '';
 
+LinkModel.Label = 'Link to';
 LinkModel.defaultAction = 'open-url';
 LinkModel.cardRenderer = 'layer-link-card';
 
@@ -4522,7 +4539,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
-},{"layer-websdk":110}],21:[function(require,module,exports){
+},{"layer-websdk":109}],21:[function(require,module,exports){
 /**
  * You must set your Google Maps API key in `window.googleMapsAPIKey`
  *
@@ -4800,6 +4817,7 @@ LocationModel.prototype.street1 = '';
 LocationModel.prototype.street2 = '';
 LocationModel.prototype.showAddress = null; // 3 state: true: show the address; false: show the description, null: permit default behavior.  Set by Parent Card via API and NOT set via model
 
+LocationModel.Label = 'Location';
 LocationModel.defaultAction = 'open-map';
 LocationModel.cardRenderer = 'layer-location-card';
 LocationModel.MIMEType = 'application/vnd.layer.card.location+json';
@@ -4863,6 +4881,7 @@ LocationModel.prototype.street1 = '';
 LocationModel.prototype.street2 = '';
 LocationModel.prototype.showAddress = null; // 3 state: true: show the address; false: show the description, null: permit default behavior.  Set by Parent Card via API and NOT set via model
 
+LocationModel.Label = 'Location';
 LocationModel.defaultAction = 'open-map';
 LocationModel.cardRenderer = 'layer-location-card';
 LocationModel.MIMEType = 'application/vnd.layer.card.location+json';
@@ -4873,7 +4892,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LocationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LocationModel, 'LocationModel');
 
 module.exports = LocationModel;
-},{"layer-websdk":110}],23:[function(require,module,exports){
+},{"layer-websdk":109}],23:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4974,7 +4993,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(OrganizationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(OrganizationModel, 'OrganizationModel');
 
 module.exports = OrganizationModel;
-},{"layer-websdk":110}],24:[function(require,module,exports){
+},{"layer-websdk":109}],24:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5081,7 +5100,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(PersonModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(PersonModel, 'PersonModel');
 
 module.exports = PersonModel;
-},{"layer-websdk":110}],25:[function(require,module,exports){
+},{"layer-websdk":109}],25:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5122,7 +5141,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           message: this.model.message,
           rootPart: this.model.detailModel.part,
           model: this.model.detailModel,
-          cardContainerTagName: false,
+          //cardContainerTagName: false,
           cardBorderStyle: 'none',
           parentNode: this
         });
@@ -5253,12 +5272,12 @@ var ProductModel = function (_CardModel) {
     value: function getFooter() {
       var price = new Number(this.price).toLocaleString(navigator.language, {
         currency: this.currency,
-        style: "currency"
+        style: 'currency'
       });
       var total = new Number(this.price * this.quantity).toLocaleString(navigator.language, {
         currency: this.currency,
-        style: "currency"
-      });;
+        style: 'currency'
+      });
       return this.quantity > 1 ? 'Quantity: ' + this.quantity + '; Per Unit Cost: ' + price + '; Total: ' + total : 'Price: ' + total;
     }
   }]);
@@ -5269,19 +5288,20 @@ var ProductModel = function (_CardModel) {
 ProductModel.prototype.detailModel = null; // product-detail
 ProductModel.prototype.currency = 'USD';
 ProductModel.prototype.price = null;
-ProductModel.prototype.quantity = null;
+ProductModel.prototype.quantity = 1;
 ProductModel.prototype.title = '';
 ProductModel.prototype.subtitle = '';
 ProductModel.prototype.url = ''; // Where to go for more information on this product
 ProductModel.defaultAction = 'open-url';
 
+ProductModel.Label = 'Product';
 ProductModel.cardRenderer = 'layer-product-card';
-ProductModel.MIMEType = "application/vnd.layer.card.product+json";
+ProductModel.MIMEType = 'application/vnd.layer.card.product+json';
 
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ProductModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ProductModel, "ProductModel");
+_layerWebsdk.Client.registerCardModelClass(ProductModel, 'ProductModel');
 
 _layerWebsdk.Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;
@@ -5346,12 +5366,12 @@ var ProductModel = function (_CardModel) {
     value: function getFooter() {
       var price = new Number(this.price).toLocaleString(navigator.language, {
         currency: this.currency,
-        style: "currency"
+        style: 'currency'
       });
       var total = new Number(this.price * this.quantity).toLocaleString(navigator.language, {
         currency: this.currency,
-        style: "currency"
-      });;
+        style: 'currency'
+      });
       return this.quantity > 1 ? 'Quantity: ' + this.quantity + '; Per Unit Cost: ' + price + '; Total: ' + total : 'Price: ' + total;
     }
   }]);
@@ -5362,23 +5382,24 @@ var ProductModel = function (_CardModel) {
 ProductModel.prototype.detailModel = null; // product-detail
 ProductModel.prototype.currency = 'USD';
 ProductModel.prototype.price = null;
-ProductModel.prototype.quantity = null;
+ProductModel.prototype.quantity = 1;
 ProductModel.prototype.title = '';
 ProductModel.prototype.subtitle = '';
 ProductModel.prototype.url = ''; // Where to go for more information on this product
 ProductModel.defaultAction = 'open-url';
 
+ProductModel.Label = 'Product';
 ProductModel.cardRenderer = 'layer-product-card';
-ProductModel.MIMEType = "application/vnd.layer.card.product+json";
+ProductModel.MIMEType = 'application/vnd.layer.card.product+json';
 
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ProductModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ProductModel, "ProductModel");
+_layerWebsdk.Client.registerCardModelClass(ProductModel, 'ProductModel');
 
 _layerWebsdk.Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;
-},{"layer-websdk":110}],27:[function(require,module,exports){
+},{"layer-websdk":109}],27:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5786,6 +5807,11 @@ var ReceiptModel = function (_CardModel) {
       /*this.merchantModel = this.getModelFromPart('merchant');
       this.recipientModel = this.getModelFromPart('recipient');*/
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return (this.message.sender.sessionOwner ? 'A ' : 'Your ') + this.constructor.Label;
+    }
   }]);
 
   return ReceiptModel;
@@ -5810,8 +5836,10 @@ ReceiptModel.prototype.order = null;
 // Expected fields: subtitle, shipping_cost, total_tax, total_cost
 ReceiptModel.prototype.summary = null;
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.modelSet = [{ model: 'productModel', role: 'product' }, { model: 'shippingAddressModel', role: 'shipping-address' }, { model: 'billingAddressModel', role: 'billing-address' }, { model: 'merchantModel', role: 'merchant' }, { model: 'recipientModel', role: 'recipient' }];
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.MIMEType = 'application/vnd.layer.card.receipt+json';
 ReceiptModel.cardRenderer = 'layer-receipt-card';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
@@ -5884,6 +5912,11 @@ var ReceiptModel = function (_CardModel) {
       /*this.merchantModel = this.getModelFromPart('merchant');
       this.recipientModel = this.getModelFromPart('recipient');*/
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return (this.message.sender.sessionOwner ? 'A ' : 'Your ') + this.constructor.Label;
+    }
   }]);
 
   return ReceiptModel;
@@ -5908,8 +5941,10 @@ ReceiptModel.prototype.order = null;
 // Expected fields: subtitle, shipping_cost, total_tax, total_cost
 ReceiptModel.prototype.summary = null;
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.modelSet = [{ model: 'productModel', role: 'product' }, { model: 'shippingAddressModel', role: 'shipping-address' }, { model: 'billingAddressModel', role: 'billing-address' }, { model: 'merchantModel', role: 'merchant' }, { model: 'recipientModel', role: 'recipient' }];
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.MIMEType = 'application/vnd.layer.card.receipt+json';
 ReceiptModel.cardRenderer = 'layer-receipt-card';
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
@@ -5918,7 +5953,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ReceiptModel, 'ReceiptModel');
 
 module.exports = ReceiptModel;
-},{"layer-websdk":110}],29:[function(require,module,exports){
+},{"layer-websdk":109}],29:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5965,7 +6000,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           model: this.model.messageModel,
           parentNode: this,
           cardBorderStyle: 'none'
-
         });
       }
     }
@@ -6054,6 +6088,11 @@ var ResponseModel = function (_CardModel) {
         return message.send(notification);
       });
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.messageModel ? this.messageModel.getOneLineSummary() : '';
+    }
   }]);
 
   return ResponseModel;
@@ -6075,7 +6114,7 @@ _layerWebsdk2.default.MessagePart.TextualMimeTypes.push('application/vnd.layer.c
 _layerWebsdk.Client.registerCardModelClass(ResponseModel, 'ResponseModel');
 
 module.exports = ResponseModel;
-},{"layer-websdk":110}],31:[function(require,module,exports){
+},{"layer-websdk":109}],31:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -6308,6 +6347,11 @@ var TextModel = function (_CardModel) {
     value: function getFooter() {
       return this.author;
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.title || this.text;
+    }
   }]);
 
   return TextModel;
@@ -6320,6 +6364,7 @@ TextModel.prototype.title = '';
 TextModel.prototype.subtitle = '';
 TextModel.prototype.mimeType = 'text/plain';
 
+TextModel.Label = 'Text';
 TextModel.MIMEType = 'application/vnd.layer.card.text+json';
 TextModel.cardRenderer = 'layer-text-card';
 _layerWebsdk.Root.initClass.apply(TextModel, [TextModel, 'TextModel']);
@@ -6378,6 +6423,11 @@ var TextModel = function (_CardModel) {
     value: function getFooter() {
       return this.author;
     }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.title || this.text;
+    }
   }]);
 
   return TextModel;
@@ -6390,6 +6440,7 @@ TextModel.prototype.title = '';
 TextModel.prototype.subtitle = '';
 TextModel.prototype.mimeType = 'text/plain';
 
+TextModel.Label = 'Text';
 TextModel.MIMEType = 'application/vnd.layer.card.text+json';
 TextModel.cardRenderer = 'layer-text-card';
 _layerWebsdk.Root.initClass.apply(TextModel, [TextModel, 'TextModel']);
@@ -6416,7 +6467,7 @@ _layerWebsdk.Client.registerCardModelClass(TextModel, 'TextModel');
 });
 
 module.exports = TextModel;
-},{"../../base":4,"layer-websdk":110}],33:[function(require,module,exports){
+},{"../../base":4,"layer-websdk":109}],33:[function(require,module,exports){
 /**
  * This is the base class for all UI classes in the Layer UI Framework.
  *
@@ -8173,7 +8224,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":92,"layer-websdk":110}],34:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":92,"layer-websdk":109}],34:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -8971,7 +9022,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-list", "<div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>      No Conversations yet    </layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-conversation-list", "layer-conversation-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversation-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-channel-item/layer-channel-item":34,"../layer-conversation-item/layer-conversation-item":35,"layer-websdk":110}],37:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-channel-item/layer-channel-item":34,"../layer-conversation-item/layer-conversation-item":35,"layer-websdk":109}],37:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -9169,7 +9220,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/size-property":91,"../../subcomponents/layer-age/layer-age":49,"../../subcomponents/layer-avatar/layer-avatar":50,"layer-websdk":110}],38:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/size-property":91,"../../subcomponents/layer-age/layer-age":49,"../../subcomponents/layer-avatar/layer-avatar":50,"layer-websdk":109}],38:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -9577,7 +9628,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>        No Users yet      </layer-replaceable-content><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-identity-list", "layer-identity-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identity-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-identity-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-identity-item/layer-identity-item":37,"layer-websdk":110}],39:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-identity-item/layer-identity-item":37,"layer-websdk":109}],39:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -10399,7 +10450,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-view", "<layer-message-list layer-id='list'></layer-message-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-compose-bar layer-id='composer'></layer-compose-bar>", "");
   layerUI.buildStyle("layer-conversation-view", "layer-conversation-view {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-message-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-compose-bar {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/file-drop-target":80,"../../mixins/focus-on-keydown":81,"../../mixins/has-query":82,"../../mixins/main-component":88,"../../mixins/throttler":93,"../message-list/layer-message-list/layer-message-list":47,"../subcomponents/layer-compose-bar/layer-compose-bar":51,"../subcomponents/layer-typing-indicator/layer-typing-indicator":65,"layer-websdk":110}],40:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/file-drop-target":80,"../../mixins/focus-on-keydown":81,"../../mixins/has-query":82,"../../mixins/main-component":88,"../../mixins/throttler":93,"../message-list/layer-message-list/layer-message-list":47,"../subcomponents/layer-compose-bar/layer-compose-bar":51,"../subcomponents/layer-typing-indicator/layer-typing-indicator":65,"layer-websdk":109}],40:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -10874,27 +10925,18 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
     toastNotify: function toastNotify(message) {
       var _this2 = this;
 
+      this.closeToast();
       var placeholder = this.querySelector('.layer-message-item-placeholder');
-      var handler = (0, _base.getHandler)(message, this);
+      var rootPart = message.getPartsMatchingAttribute({ role: 'root' })[0];
 
-      if (handler) {
+      if (rootPart) {
         this.nodes.avatar.users = [message.sender];
         this.nodes.title.innerHTML = message.sender.displayName;
 
         if (this.properties._toastTimeout) clearTimeout(this.properties._toastTimeout);
-        this.classList.add(handler.tagName);
 
-        if (handler.canRenderConcise(message)) {
-          if (placeholder) this.nodes.container.removeChild(placeholder);
-          var messageHandler = document.createElement(handler.tagName);
-          messageHandler.parentComponent = this;
-          messageHandler.message = message;
-
-          messageHandler.classList.add('layer-message-item-placeholder');
-          this.nodes.container.appendChild(messageHandler);
-        } else {
-          placeholder.innerHTML = '<div class="layer-custom-mime-type layer-message-item-placeholder">' + handler.label + '</div>';
-        }
+        this.nodes.rootPart = rootPart;
+        this.nodes.card.message = message;
         this.classList.add('layer-notifier-toast-fade');
         this.classList.add('layer-notifier-toast');
         this.properties._toastTimeout = setTimeout(this.closeToast.bind(this), this.timeoutSeconds * 1000);
@@ -10915,13 +10957,21 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
      * @method closeToast
      */
     closeToast: function closeToast() {
-      this.classList.add('layer-notifier-toast-fade');
-      this.classList.remove('layer-notifier-toast');
+      if (this.nodes.card.model) {
+        this.classList.add('layer-notifier-toast-fade');
+        this.classList.remove('layer-notifier-toast');
+        this.nodes.card.message.off(null, null, this);
+        this.nodes.card.model.off(null, null, this);
+        this.nodes.card.message = null;
+        this.nodes.card.model = null;
+        this.nodes.card.rootPart = null;
+        this.nodes.card.innerHTML = '';
 
-      clearTimeout(this.properties._toastTimeout);
-      this.properties._toastTimeout = 0;
-      if (this.properties.toastMessage) this.properties.toastMessage.off(null, null, this);
-      this.properties.toastMessage = null;
+        clearTimeout(this.properties._toastTimeout);
+        this.properties._toastTimeout = 0;
+        if (this.properties.toastMessage) this.properties.toastMessage.off(null, null, this);
+        this.properties.toastMessage = null;
+      }
     },
 
 
@@ -10945,10 +10995,10 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
 
 (function () {
   var layerUI = require('../../base');
-  layerUI.buildAndRegisterTemplate("layer-notifier", "<layer-avatar layer-id='avatar'></layer-avatar><div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title' layer-id='title'></div><div class='layer-message-item-placeholder'></div></div>", "");
-  layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\nmax-height: 250px;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
+  layerUI.buildAndRegisterTemplate("layer-notifier", "<div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title'><layer-avatar layer-id='avatar' size='small'></layer-avatar><span layer-id='title'></span></div><layer-card-view layer-id='card'></layer-card-view></div>", "");
+  layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/main-component":88,"../subcomponents/layer-avatar/layer-avatar":50,"notifyjs":105}],41:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/main-component":88,"../subcomponents/layer-avatar/layer-avatar":50,"notifyjs":104}],41:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -11242,7 +11292,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":87,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../component":33,"../layer-membership-item/layer-membership-item":41,"layer-websdk":110}],43:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":87,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../component":33,"../layer-membership-item/layer-membership-item":41,"layer-websdk":109}],43:[function(require,module,exports){
 /**
  * The Layer Message Item widget renders a single Message synopsis.
  *
@@ -11559,7 +11609,7 @@ module.exports = {
     }
   }
 };
-},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":62,"layer-websdk":110}],44:[function(require,module,exports){
+},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":62,"layer-websdk":109}],44:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -12525,7 +12575,7 @@ var PAGING_DELAY = 2000;
   layerUI.buildAndRegisterTemplate("layer-message-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'><layer-start-of-conversation layer-id='startOfConversation'></layer-start-of-conversation></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-message-list", "layer-message-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-message-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-message-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/query-end-indicator":90,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":64,"../layer-message-item-received/layer-message-item-received":44,"../layer-message-item-sent/layer-message-item-sent":45,"../layer-message-item-status/layer-message-item-status":46,"layer-websdk":110}],48:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/query-end-indicator":90,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":64,"../layer-message-item-received/layer-message-item-received":44,"../layer-message-item-sent/layer-message-item-sent":45,"../layer-message-item-status/layer-message-item-status":46,"layer-websdk":109}],48:[function(require,module,exports){
 /**
  *
  * @class
@@ -12977,7 +13027,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/main-component":88,"../../../mixins/size-property":91,"../layer-presence/layer-presence":61,"layer-websdk":110}],51:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/main-component":88,"../../../mixins/size-property":91,"../layer-presence/layer-presence":61,"layer-websdk":109}],51:[function(require,module,exports){
 /**
  * The Layer Composer widget provides the textarea for layerUI.components.ConversationPanel.
  *
@@ -13400,9 +13450,9 @@ var TAB = 9;
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-compose-bar", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'><layer-send-button></layer-send-button></layer-replaceable-content>", "");
-  layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 1px;\nborder-color: transparent;\nfont-size: 1em;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
+  layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 1px;\nborder-color: transparent;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],52:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],52:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -13455,6 +13505,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         if (newValue) newValue.on('conversations:change', this.onRerender, this);
         this.onRender();
       }
+    },
+
+    unknownHTML: {
+      value: '<div class="layer-custom-mime-type">Message</div>'
     }
 
   },
@@ -13485,26 +13539,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onRerender: function onRerender(evt) {
       if (!evt || evt.hasProperty('lastMessage')) {
-        var conversation = this.item;
-        var message = conversation ? conversation.lastMessage : null;
-        if (this.firstChild && this.firstChild.onDestroy) this.firstChild.onDestroy();
-        this.innerHTML = '';
-        if (message) {
-          var handler = _base2.default.getHandler(message, this);
-          if (handler) {
-            this.classList.add(handler.tagName);
-            // Create the element specified by the handler and add it as a childNode.
-            if (handler.canRenderConcise(message)) {
-              var messageHandler = document.createElement(handler.tagName);
-              messageHandler.parentComponent = this;
-              messageHandler.message = message;
-              this.appendChild(messageHandler);
-            } else if (handler.label) {
-              this.innerHTML = '<div class="layer-custom-mime-type">' + handler.label + '</div>';
-            }
-          }
-        }
+        this.innerHTML = this.summarizeLastMessage();
       }
+    },
+    summarizeLastMessage: function summarizeLastMessage() {
+      var message = this.item.lastMessage;
+      if (!message) return '';
+      var rootPart = message.getPartsMatchingAttribute({ role: 'root' })[0];
+      if (!rootPart) return this.unknownHTML;
+
+      var model = message.getClient().createCardModel(message, rootPart);
+      var result = model ? model.getOneLineSummary() : null;
+      return result || this.unknownHTML;
     }
   }
 });
@@ -13956,7 +14002,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],56:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],56:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -14077,7 +14123,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],57:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],57:[function(require,module,exports){
 /**
  * The Layer Loading Spinner/indicator
  *
@@ -14205,7 +14251,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../layer-menu/layer-menu":59,"layer-websdk":110}],59:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../layer-menu/layer-menu":59,"layer-websdk":109}],59:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -14331,7 +14377,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu", "", "");
   layerUI.buildStyle("layer-menu", "layer-menu {\ndisplay: none;\nposition: absolute;\n}\nlayer-menu.layer-menu-list-showing {\ndisplay: block;\nz-index: 10;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],60:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],60:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -14474,7 +14520,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":110}],61:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],61:[function(require,module,exports){
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
@@ -14652,7 +14698,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/size-property":91,"layer-websdk":110}],62:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/size-property":91,"layer-websdk":109}],62:[function(require,module,exports){
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
  *
@@ -15126,9 +15172,12 @@ module.exports = {
     },
     rootPart: {},
     message: {
-      set: function set() {
-        if (this.properties._internalState.onAfterCreateCalled) {
-          this.setupMessage();
+      set: function set(message) {
+        this.innerHTML = '';
+        if (message) {
+          if (this.properties._internalState.onAfterCreateCalled) {
+            this.setupMessage();
+          }
         }
       }
     },
@@ -15184,7 +15233,7 @@ module.exports = {
      * @static
      */
     handlesMessage: function handlesMessage(message, container) {
-      return Boolean(message.getPartsMatchingAttribute({ 'role': 'root' })[0]);
+      return Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     },
 
 
@@ -15517,7 +15566,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/message-handler":89,"../../../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101}],69:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":33,"../../../mixins/message-handler":89,"../../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],69:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
@@ -15680,7 +15729,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":33,"../../mixins/message-handler":89,"../../utils/sizing":97}],71:[function(require,module,exports){
+},{"../../base":4,"../../components/component":33,"../../mixins/message-handler":89,"../../utils/sizing":96}],71:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -15714,7 +15763,7 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":98}],72:[function(require,module,exports){
+},{"../../base":4,"autolinker":97}],72:[function(require,module,exports){
 /**
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
@@ -15795,39 +15844,33 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":107,"twemoji":108}],74:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":106,"twemoji":107}],74:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
  * @class layerUI.handlers.text.Images
+ * @removed
  */
-'use strict';
 
-var _base = require('../../base');
+/*
+import layerUI from '../../base';
+import isUrl from '../../utils/is-url';
 
-var _base2 = _interopRequireDefault(_base);
-
-var _isUrl = require('../../utils/is-url');
-
-var _isUrl2 = _interopRequireDefault(_isUrl);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-
-_base2.default.registerTextHandler({
+layerUI.registerTextHandler({
   name: 'images',
   order: 100,
   requiresEnable: true,
-  handler: function handler(textData) {
-    var matches = textData.text.match((0, _isUrl2.default)(['png', 'jpg', 'jpeg', 'gif']));
+  handler(textData) {
+    const matches = textData.text.match(isUrl(['png', 'jpg', 'jpeg', 'gif']));
     if (matches) {
-      matches.forEach(function (match) {
-        return textData.afterText.push('<img class="layer-parsed-image" src="' + match + '"></img>');
-      });
+      matches.forEach(match =>
+        textData.afterText.push('<img class="layer-parsed-image" src="' + match + '"></img>'));
     }
-  }
+  },
 });
-},{"../../base":4,"../../utils/is-url":96}],75:[function(require,module,exports){
+*/
+"use strict";
+},{}],75:[function(require,module,exports){
 /**
  * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
  *
@@ -15887,38 +15930,37 @@ _base2.default.registerTextHandler({
  * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
  *
  * @class layerUI.handlers.text.Youtube
+ * @removed
  */
-'use strict';
 
-var _base = require('../../base');
+/*
+import layerUI from '../../base';
 
-var _base2 = _interopRequireDefault(_base);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_base2.default.registerTextHandler({
+layerUI.registerTextHandler({
   name: 'youtube',
   order: 200,
   requiresEnable: true,
-  handler: function handler(textData) {
-    var matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*?v=)?([a-zA-Z0-9-]+)/g);
+  handler(textData) {
+    const matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*?v=)?([a-zA-Z0-9-]+)/g);
     if (matches) {
-      matches.forEach(function (match) {
-        var videoId = void 0;
-        var shortUrlMatches = match.match(/https:\/\/youtu\.be\/(.*)$/);
+      matches.forEach((match) => {
+        let videoId;
+        const shortUrlMatches = match.match(/https:\/\/youtu\.be\/(.*)$/);
         if (shortUrlMatches) videoId = shortUrlMatches[1];
         if (!videoId) {
-          var urlMatches = match.match(/https:\/\/www\.youtube\.com\/watch\?v=(.*)$/);
+          const urlMatches = match.match(/https:\/\/www\.youtube\.com\/watch\?v=(.*)$/);
           if (urlMatches) videoId = urlMatches[1];
         }
         if (videoId) {
-          textData.afterText.push('<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>');
+          textData.afterText.push(`<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`);
         }
       });
     }
   }
-}); 
-},{"../../base":4}],77:[function(require,module,exports){
+});
+*/
+"use strict";
+},{}],77:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16278,7 +16320,7 @@ _base2.default.setupMixins = function setupMixins(mixins) {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":33,"./handlers/message/layer-message-unknown":69,"webcomponents.js/webcomponents-lite":109}],79:[function(require,module,exports){
+},{"./base":4,"./components/component":33,"./handlers/message/layer-message-unknown":69,"webcomponents.js/webcomponents-lite":108}],79:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -16531,7 +16573,7 @@ module.exports = {
     processAttachment: function processAttachment(file) {
       if (['image/gif', 'image/png', 'image/jpeg', 'image/svg'].indexOf(file.type) !== -1) {
         return new _imageModel2.default({
-          source: file, title: 'hey ho'
+          source: file
         });
       } else {
         return new _fileModel2.default({
@@ -16541,7 +16583,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":13,"../cards/image/image-model":15,"../utils/sizing":97,"blueimp-load-image/js/load-image":103,"blueimp-load-image/js/load-image-exif":99,"blueimp-load-image/js/load-image-meta":100,"blueimp-load-image/js/load-image-orientation":101,"layer-websdk":110}],81:[function(require,module,exports){
+},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":13,"../cards/image/image-model":15,"../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],81:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to refocus when keyboard input is received.
  *
@@ -16747,7 +16789,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":110}],83:[function(require,module,exports){
+},{"layer-websdk":109}],83:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -17687,7 +17729,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":33,"./has-query":82,"./throttler":93,"layer-websdk":110}],88:[function(require,module,exports){
+},{"../base":4,"../components/component":33,"./has-query":82,"./throttler":93,"layer-websdk":109}],88:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
@@ -17794,7 +17836,7 @@ module.exports = {
     }
   }
 }; 
-},{"../base":4,"../components/component":33,"layer-websdk":110}],89:[function(require,module,exports){
+},{"../base":4,"../components/component":33,"layer-websdk":109}],89:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -17873,10 +17915,13 @@ module.exports = {
      */
     message: {
       mode: _component.registerComponent.MODES.AFTER,
-      set: function set() {
+      set: function set(newMessage, oldMessage) {
+        if (oldMessage) oldMessage.off(null, null, this);
         this.onRender();
-        this.message.on('messages:change', this._onChange, this);
-        if (this.message.isNew()) this.message.once('messages:sent', this.onSent, this);
+        if (newMessage) {
+          newMessage.on('messages:change', this._onChange, this);
+          if (newMessage.isNew()) newMessage.once('messages:sent', this.onSent, this);
+        }
       }
     }
   },
@@ -17927,7 +17972,7 @@ module.exports = {
      * @private
      */
     _onChange: function _onChange(evt) {
-      if (this.message.isNew() || evt.hasProperty('parts.body')) {
+      if (this.message.isNew() || evt.hasProperty('parts.body') || evt.hasProperty('parts')) {
         this.onRender();
       } else {
         this.onRerender();
@@ -18006,7 +18051,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":110}],91:[function(require,module,exports){
+},{"layer-websdk":109}],91:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -18283,50 +18328,6 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
   }
 };
 },{"../base":4}],96:[function(require,module,exports){
-'use strict';
-
-/*
- * isURL returns a Regular Expression that can be used to test if a string is a URL ending in any of the specified extensions.
- *
- * @class layerUI.utils.isURL
- * @singleton
- */
-
-module.exports = function isURL(extensions) {
-  var resource = '?';
-
-  /* istanbul ignore else */
-  if (extensions) resource = '.(' + extensions.join('|') + ')';
-
-  // Taken from https://gist.github.com/dperini/729294
-  return new RegExp(
-  // protocol identifier
-  '(?:(?:https?|ftp)://)' +
-  // user:pass authentication
-  '(?:\\S+(?::\\S*)?@)?' + '(?:' +
-  // IP address exclusion
-  // private & local networks
-  '(?!(?:10|127)(?:\\.\\d{1,3}){3})' + '(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})' + '(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})' +
-  // IP address dotted notation octets
-  // excludes loopback network 0.0.0.0
-  // excludes reserved space >= 224.0.0.0
-  // excludes network & broacast addresses
-  // (first & last IP address of each class)
-  '(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])' + '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' + '(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))' + '|' +
-  // host name
-  '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
-  // domain name
-  '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
-  // TLD identifier
-  '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' +
-  // TLD may end with dot
-  '\\.?' + ')' +
-  // port number
-  '(?::\\d{2,5})?' +
-  // resource path
-  '(?:[/?#]\\S*)' + resource, 'igm');
-};
-},{}],97:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -18357,7 +18358,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],98:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -22535,7 +22536,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],99:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22837,7 +22838,7 @@ return Autolinker;
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":103,"./load-image-meta":100}],100:[function(require,module,exports){
+},{"./load-image":102,"./load-image-meta":99}],99:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22998,7 +22999,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":103}],101:[function(require,module,exports){
+},{"./load-image":102}],100:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23185,7 +23186,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":103,"./load-image-meta":100,"./load-image-scale":102}],102:[function(require,module,exports){
+},{"./load-image":102,"./load-image-meta":99,"./load-image-scale":101}],101:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23469,7 +23470,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":103}],103:[function(require,module,exports){
+},{"./load-image":102}],102:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23609,9 +23610,9 @@ return Autolinker;
   }
 }(window))
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 
-},{}],105:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -23817,7 +23818,7 @@ return Autolinker;
   exports['default'] = Notify;
 
 }));
-},{}],106:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -24724,7 +24725,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],107:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -24742,7 +24743,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":106}],108:[function(require,module,exports){
+},{"./emoji-map.js":105}],107:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -25339,7 +25340,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],109:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -27845,7 +27846,7 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],110:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
@@ -27856,7 +27857,7 @@ if (global.layer && global.layer.Client) {
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":119}],111:[function(require,module,exports){
+},{"./lib/layer":118}],110:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -29533,7 +29534,7 @@ Root.initClass.apply(ClientAuthenticator, [ClientAuthenticator, 'ClientAuthentic
 
 module.exports = ClientAuthenticator;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":113,"./const":115,"./db-manager":116,"./layer-error":117,"./logger":120,"./models/identity":136,"./online-state-manager":141,"./root":150,"./sync-event":151,"./sync-manager":152,"./websockets/change-manager":160,"./websockets/request-manager":161,"./websockets/socket-manager":162,"./xhr":163}],112:[function(require,module,exports){
+},{"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./logger":119,"./models/identity":135,"./online-state-manager":140,"./root":149,"./sync-event":150,"./sync-manager":151,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],111:[function(require,module,exports){
 'use strict';
 
 /**
@@ -29635,7 +29636,7 @@ module.exports = {
   addListener: addListener,
   removeListener: removeListener
 };
-},{"./client-utils":113}],113:[function(require,module,exports){
+},{"./client-utils":112}],112:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -30058,7 +30059,7 @@ exports.asciiInit = function (version) {
   return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils/defer":158,"./utils/layer-parser":159,"uuid":167}],114:[function(require,module,exports){
+},{"./utils/defer":157,"./utils/layer-parser":158,"uuid":166}],113:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -30822,7 +30823,7 @@ Client.prototype.telemetryMonitor = null;
  * @static
  * @type {String}
  */
-Client.version = '3.3.6';
+Client.version = '3.3.7';
 
 /**
  * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
@@ -30865,7 +30866,7 @@ Client._supportedEvents = [
 Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/client-card-models')];
 Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
-},{"./client-authenticator":111,"./client-registry":112,"./client-utils":113,"./layer-error":117,"./logger":120,"./mixins/client-card-models":121,"./mixins/client-channels":122,"./mixins/client-conversations":123,"./mixins/client-identities":124,"./mixins/client-members":125,"./mixins/client-messages":126,"./mixins/client-queries":127,"./models/announcement":128,"./models/channel":131,"./models/channel-message":130,"./models/conversation":135,"./models/conversation-message":134,"./models/identity":136,"./models/membership":137,"./models/message-part":138,"./root":150,"./telemetry-monitor":153,"./typing-indicators/typing-indicator-listener":154,"./typing-indicators/typing-listener":156,"./typing-indicators/typing-publisher":157}],115:[function(require,module,exports){
+},{"./client-authenticator":110,"./client-registry":111,"./client-utils":112,"./layer-error":116,"./logger":119,"./mixins/client-card-models":120,"./mixins/client-channels":121,"./mixins/client-conversations":122,"./mixins/client-identities":123,"./mixins/client-members":124,"./mixins/client-messages":125,"./mixins/client-queries":126,"./models/announcement":127,"./models/channel":130,"./models/channel-message":129,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message-part":137,"./root":149,"./telemetry-monitor":152,"./typing-indicators/typing-indicator-listener":153,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156}],114:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30961,7 +30962,7 @@ module.exports = {
     MY_DEVICES: 'my_devices'
   }
 };
-},{}],116:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32564,7 +32565,7 @@ DbManager._supportedEvents = ['open', 'error'].concat(Root._supportedEvents);
 
 Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
-},{"./client-utils":113,"./const":115,"./logger":120,"./models/announcement":128,"./root":150,"./sync-event":151}],117:[function(require,module,exports){
+},{"./client-utils":112,"./const":114,"./logger":119,"./models/announcement":127,"./root":149,"./sync-event":150}],116:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -32772,7 +32773,7 @@ LayerError.dictionary = {
 };
 
 module.exports = LayerError;
-},{"./logger":120}],118:[function(require,module,exports){
+},{"./logger":119}],117:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32981,7 +32982,7 @@ LayerEvent.prototype.target = null;
 LayerEvent.prototype.eventName = '';
 
 module.exports = LayerEvent;
-},{}],119:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -33024,7 +33025,7 @@ layer.Util = require('./client-utils');
 layer.TypingIndicators = require('./typing-indicators/typing-indicators');
 layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-listener');
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
-},{"./client":114,"./client-authenticator":111,"./client-utils":113,"./const":115,"./db-manager":116,"./layer-error":117,"./layer-event":118,"./models/announcement":128,"./models/card-model":129,"./models/channel":131,"./models/channel-message":130,"./models/container":132,"./models/content":133,"./models/conversation":135,"./models/conversation-message":134,"./models/identity":136,"./models/membership":137,"./models/message":139,"./models/message-part":138,"./models/syncable":140,"./online-state-manager":141,"./queries/query":149,"./queries/query-builder":148,"./root":150,"./sync-event":151,"./sync-manager":152,"./typing-indicators/typing-indicators":155,"./typing-indicators/typing-listener":156,"./typing-indicators/typing-publisher":157,"./websockets/change-manager":160,"./websockets/request-manager":161,"./websockets/socket-manager":162,"./xhr":163}],120:[function(require,module,exports){
+},{"./client":113,"./client-authenticator":110,"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./layer-event":117,"./models/announcement":127,"./models/card-model":128,"./models/channel":130,"./models/channel-message":129,"./models/container":131,"./models/content":132,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message":138,"./models/message-part":137,"./models/syncable":139,"./online-state-manager":140,"./queries/query":148,"./queries/query-builder":147,"./root":149,"./sync-event":150,"./sync-manager":151,"./typing-indicators/typing-indicators":154,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],119:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -33136,7 +33137,7 @@ Logger.prototype.level = typeof jasmine === 'undefined' ? ERROR : NONE;
 var logger = new Logger();
 
 module.exports = logger;
-},{"./const":115}],121:[function(require,module,exports){
+},{"./const":114}],120:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33271,7 +33272,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":113,"../layer-error":117,"../models/card-model":129}],122:[function(require,module,exports){
+},{"../client-utils":112,"../layer-error":116,"../models/card-model":128}],121:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33687,7 +33688,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":117,"../models/channel":131}],123:[function(require,module,exports){
+},{"../layer-error":116,"../models/channel":130}],122:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34105,7 +34106,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":117,"../models/conversation":135}],124:[function(require,module,exports){
+},{"../layer-error":116,"../models/conversation":134}],123:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34410,7 +34411,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":113,"../layer-error":117,"../models/identity":136,"../sync-event":151}],125:[function(require,module,exports){
+},{"../client-utils":112,"../layer-error":116,"../models/identity":135,"../sync-event":150}],124:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34571,7 +34572,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":117,"../models/membership":137,"../models/syncable":140}],126:[function(require,module,exports){
+},{"../layer-error":116,"../models/membership":136,"../models/syncable":139}],125:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34915,7 +34916,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":117,"../models/message":139,"../models/syncable":140}],127:[function(require,module,exports){
+},{"../layer-error":116,"../models/message":138,"../models/syncable":139}],126:[function(require,module,exports){
 'use strict';
 
 /**
@@ -35066,7 +35067,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":117,"../queries/announcements-query":142,"../queries/channels-query":143,"../queries/conversations-query":144,"../queries/identities-query":145,"../queries/members-query":146,"../queries/messages-query":147,"../queries/query":149}],128:[function(require,module,exports){
+},{"../layer-error":116,"../queries/announcements-query":141,"../queries/channels-query":142,"../queries/conversations-query":143,"../queries/identities-query":144,"../queries/members-query":145,"../queries/messages-query":146,"../queries/query":148}],127:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35242,7 +35243,7 @@ Announcement.inObjectIgnore = ConversationMessage.inObjectIgnore;
 Root.initClass.apply(Announcement, [Announcement, 'Announcement']);
 Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
-},{"../layer-error":117,"../root":150,"./conversation-message":134,"./syncable":140}],129:[function(require,module,exports){
+},{"../layer-error":116,"../root":149,"./conversation-message":133,"./syncable":139}],128:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35341,6 +35342,7 @@ var CardModel = function (_Root) {
         return part.on('messageparts:change', _this4._handlePartChanges, _this4);
       });
       this.message.on('messages:part-added', this._handlePartAdded, this);
+      this.message.on('messages:part-removed', this._handlePartRemoved, this);
 
       this.message.on('destroy', this.destroy, this);
       this.message.getClient()._addCardModel(this);
@@ -35395,15 +35397,31 @@ var CardModel = function (_Root) {
       this._triggerAsync('change');
     }
   }, {
+    key: '_handlePartRemoved',
+    value: function _handlePartRemoved(removed) {
+      // const removedPart = this.childParts.filter(part => part.id === removed.part.id);
+      this.childParts = this.childParts.filter(function (part) {
+        return part.id !== removed.part.id;
+      });
+      this._handlePartChanges();
+    }
+  }, {
     key: '_handlePartAdded',
     value: function _handlePartAdded(evt) {
       var part = evt.part;
-      if (part.mimeAttributes['parent-node-id'] === this.nodeId) {
+      var message = this.message;
+      this.childParts = this.childParts.filter(function (childPart) {
+        return message.parts.indexOf(childPart) !== -1;
+      });
+      if (part.mimeAttributes['parent-node-id'] && part.mimeAttributes['parent-node-id'] === this.nodeId) {
         this.childParts.push(part);
         part.on('messageparts:change', this._handlePartChanges, this);
         if (!this.part.body) this.part.fetchContent();
         this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
         this._triggerAsync('change');
+      } else if (part.mimeAttributes['node-id'] === this.part.mimeAttributes['node-id']) {
+        this.part = part;
+        this._handlePartChanges();
       }
     }
   }, {
@@ -35476,7 +35494,6 @@ var CardModel = function (_Root) {
   }, {
     key: 'destroy',
     value: function destroy() {
-      var client = this.getClient();
       this.getClient()._removeCardModel(this);
       delete this.message;
       _get(CardModel.prototype.__proto__ || Object.getPrototypeOf(CardModel.prototype), 'destroy', this).call(this);
@@ -35495,6 +35512,11 @@ var CardModel = function (_Root) {
     key: 'getFooter',
     value: function getFooter() {
       return '';
+    }
+  }, {
+    key: 'getOneLineSummary',
+    value: function getOneLineSummary() {
+      return this.getTitle() || this.constructor.Label;
     }
   }, {
     key: 'mergeAction',
@@ -35672,7 +35694,7 @@ CardModel.prefixUUID = 'layer:///cardmodels/';
 CardModel._supportedEvents = ['change'].concat(Root._supportedEvents);
 Root.initClass.apply(CardModel, [CardModel, 'CardModel']);
 module.exports = CardModel;
-},{"../client-utils":113,"../models/message":139,"../models/message-part":138,"../root":150}],130:[function(require,module,exports){
+},{"../client-utils":112,"../models/message":138,"../models/message-part":137,"../root":149}],129:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35852,7 +35874,7 @@ ChannelMessage.inObjectIgnore = Message.inObjectIgnore;
 ChannelMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
-},{"../client-registry":112,"../const":115,"../layer-error":117,"../logger":120,"../root":150,"./message":139}],131:[function(require,module,exports){
+},{"../client-registry":111,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"./message":138}],130:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36541,7 +36563,7 @@ Channel._supportedEvents = [
 Root.initClass.apply(Channel, [Channel, 'Channel']);
 Syncable.subclasses.push(Channel);
 module.exports = Channel;
-},{"../client-utils":113,"../const":115,"../layer-error":117,"../layer-event":118,"../root":150,"./channel-message":130,"./container":132,"./syncable":140}],132:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./channel-message":129,"./container":131,"./syncable":139}],131:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -37183,7 +37205,7 @@ Container.FOUND_WITHOUT_REQUESTED_METADATA = 'FoundMismatch';
 Root.initClass.apply(Container, [Container, 'Container']);
 Syncable.subclasses.push(Container);
 module.exports = Container;
-},{"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],133:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],132:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37382,7 +37404,7 @@ Content.prototype.expiration = null;
 
 Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
-},{"../root":150,"../xhr":163}],134:[function(require,module,exports){
+},{"../root":149,"../xhr":162}],133:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37929,7 +37951,7 @@ ConversationMessage.inObjectIgnore = Message.inObjectIgnore;
 ConversationMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMessage']);
 module.exports = ConversationMessage;
-},{"../client-registry":112,"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./message":139}],135:[function(require,module,exports){
+},{"../client-registry":111,"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./message":138}],134:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39013,7 +39035,7 @@ Conversation._supportedEvents = [
 Root.initClass.apply(Conversation, [Conversation, 'Conversation']);
 Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
-},{"../client-utils":113,"../const":115,"../layer-error":117,"../layer-event":118,"../root":150,"./container":132,"./conversation-message":134,"./syncable":140}],136:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./container":131,"./conversation-message":133,"./syncable":139}],135:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39669,7 +39691,7 @@ Root.initClass.apply(Identity, [Identity, 'Identity']);
 Syncable.subclasses.push(Identity);
 
 module.exports = Identity;
-},{"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],137:[function(require,module,exports){
+},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],136:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39903,7 +39925,7 @@ Root.initClass.apply(Membership, [Membership, 'Membership']);
 Syncable.subclasses.push(Membership);
 
 module.exports = Membership;
-},{"../const":115,"../layer-error":117,"../root":150,"./syncable":140}],138:[function(require,module,exports){
+},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],137:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40849,7 +40871,7 @@ MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'c
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
 module.exports = MessagePart;
-},{"../client-registry":112,"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150,"../xhr":163,"./content":133}],139:[function(require,module,exports){
+},{"../client-registry":111,"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"../xhr":162,"./content":132}],138:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -41094,9 +41116,17 @@ var Message = function (_Syncable) {
       }
       this._setupPartIds(adjustedParts);
       if (adjustedParts) {
-        adjustedParts.forEach(function (part) {
-          part.off('messageparts:change', _this2._onMessagePartChange, _this2); // if we already subscribed, don't create a redundant subscription
+        var currentParts = this.parts || [];
+        adjustedParts.filter(function (part) {
+          return currentParts.indexOf(part) === -1;
+        }).forEach(function (part) {
           part.on('messageparts:change', _this2._onMessagePartChange, _this2);
+        });
+        var removedParts = currentParts.filter(function (part) {
+          return adjustedParts.indexOf(part) === -1;
+        });
+        removedParts.forEach(function (part) {
+          return part.destroy();
         });
       }
       return adjustedParts;
@@ -41750,11 +41780,17 @@ var Message = function (_Syncable) {
         }).filter(function (part) {
           return part;
         });
+        var removedParts = oldValue.filter(function (part) {
+          return !_this12.getClient().getMessagePart(part.id);
+        });
         var addedParts = newValue.filter(function (part) {
           return oldValueParts.indexOf(part) === -1;
         });
         addedParts.forEach(function (part) {
           return _this12.addPart(part);
+        });
+        removedParts.forEach(function (partObj) {
+          return _this12.trigger('messages:part-removed', { part: partObj });
         });
       }
       this._inLayerParser = true;
@@ -42125,12 +42161,21 @@ Message._supportedEvents = [
  * @param {layer.LayerEvent} evt
  * @param {layer.MessagePart} evt.part
  */
-'messages:part-added'].concat(Syncable._supportedEvents);
+'messages:part-added',
+
+/**
+ * A new Message Part has been removed
+ *
+ * @event
+ * @param {layer.LayerEvent} evt
+ * @param {layer.MessagePart} evt.part
+ */
+'messages:part-removed'].concat(Syncable._supportedEvents);
 
 Root.initClass.apply(Message, [Message, 'Message']);
 Syncable.subclasses.push(Message);
 module.exports = Message;
-},{"../client-utils":113,"../const":115,"../layer-error":117,"../root":150,"./identity":136,"./message-part":138,"./syncable":140}],140:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./identity":135,"./message-part":137,"./syncable":139}],139:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42692,7 +42737,7 @@ Syncable.subclasses = [];
 Syncable._supportedEvents = [].concat(Root._supportedEvents);
 Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
-},{"../client-registry":112,"../const":115,"../layer-error":117,"../root":150}],141:[function(require,module,exports){
+},{"../client-registry":111,"../const":114,"../layer-error":116,"../root":149}],140:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -43101,7 +43146,7 @@ OnlineStateManager._supportedEvents = [
 Root.initClass.apply(OnlineStateManager, [OnlineStateManager, 'OnlineStateManager']);
 module.exports = OnlineStateManager;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":113,"./const":115,"./logger":120,"./root":150,"./xhr":163}],142:[function(require,module,exports){
+},{"./client-utils":112,"./const":114,"./logger":119,"./root":149,"./xhr":162}],141:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43194,7 +43239,7 @@ AnnouncementsQuery.prototype.model = Query.Announcement;
 Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuery']);
 
 module.exports = AnnouncementsQuery;
-},{"../root":150,"./messages-query":147,"./query":149}],143:[function(require,module,exports){
+},{"../root":149,"./messages-query":146,"./query":148}],142:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43491,7 +43536,7 @@ ChannelsQuery.prototype.model = Query.Channel;
 Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 
 module.exports = ChannelsQuery;
-},{"../const":115,"../root":150,"./conversations-query":144,"./query":149}],144:[function(require,module,exports){
+},{"../const":114,"../root":149,"./conversations-query":143,"./query":148}],143:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43821,7 +43866,7 @@ ConversationsQuery.prototype.model = Query.Conversation;
 Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuery']);
 
 module.exports = ConversationsQuery;
-},{"../client-utils":113,"../const":115,"../root":150,"./query":149}],145:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../root":149,"./query":148}],144:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43940,7 +43985,7 @@ IdentitiesQuery.prototype.model = Query.Identity;
 Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 
 module.exports = IdentitiesQuery;
-},{"../root":150,"./query":149}],146:[function(require,module,exports){
+},{"../root":149,"./query":148}],145:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44115,7 +44160,7 @@ MembersQuery.prototype.model = Query.Membership;
 Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 
 module.exports = MembersQuery;
-},{"../layer-error":117,"../logger":120,"../root":150,"./query":149}],147:[function(require,module,exports){
+},{"../layer-error":116,"../logger":119,"../root":149,"./query":148}],146:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44599,7 +44644,7 @@ MessagesQuery.prototype.model = Query.Message;
 Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 
 module.exports = MessagesQuery;
-},{"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150,"./query":149}],148:[function(require,module,exports){
+},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"./query":148}],147:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45285,7 +45330,7 @@ var QueryBuilder = {
 };
 
 module.exports = QueryBuilder;
-},{"./query":149}],149:[function(require,module,exports){
+},{"./query":148}],148:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46461,7 +46506,7 @@ Query._supportedEvents = [
 Root.initClass.apply(Query, [Query, 'Query']);
 
 module.exports = Query;
-},{"../client-utils":113,"../layer-error":117,"../logger":120,"../root":150}],150:[function(require,module,exports){
+},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149}],149:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -47296,7 +47341,7 @@ Root._supportedEvents = ['destroy', 'all'];
 Root._ignoredEvents = [];
 module.exports = Root;
 module.exports.initClass = initClass;
-},{"./client-utils":113,"./layer-error":117,"./layer-event":118,"./logger":120,"backbone-events-standalone/backbone-events-standalone":164}],151:[function(require,module,exports){
+},{"./client-utils":112,"./layer-error":116,"./layer-event":117,"./logger":119,"backbone-events-standalone/backbone-events-standalone":163}],150:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -47696,7 +47741,7 @@ var WebsocketSyncEvent = function (_SyncEvent2) {
 WebsocketSyncEvent.prototype.returnChangesArray = false;
 
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
-},{"./client-utils":113}],152:[function(require,module,exports){
+},{"./client-utils":112}],151:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48699,7 +48744,7 @@ SyncManager._supportedEvents = [
 
 Root.initClass(SyncManager);
 module.exports = SyncManager;
-},{"./client-utils":113,"./logger":120,"./root":150,"./sync-event":151,"./xhr":163}],153:[function(require,module,exports){
+},{"./client-utils":112,"./logger":119,"./root":149,"./sync-event":150,"./xhr":162}],152:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49211,7 +49256,7 @@ TelemetryMonitor._supportedEvents = Root._supportedEvents.concat(['telemetry-env
 Root.initClass.apply(TelemetryMonitor, [TelemetryMonitor, 'TelemetryMonitor']);
 module.exports = TelemetryMonitor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":113,"./root":150,"./xhr":163}],154:[function(require,module,exports){
+},{"./client-utils":112,"./root":149,"./xhr":162}],153:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49534,7 +49579,7 @@ TypingIndicatorListener._supportedEvents = [
 
 Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingIndicatorListener']);
 module.exports = TypingIndicatorListener;
-},{"../client-registry":112,"../root":150,"./typing-indicators":155}],155:[function(require,module,exports){
+},{"../client-registry":111,"../root":149,"./typing-indicators":154}],154:[function(require,module,exports){
 'use strict';
 
 /**
@@ -49569,7 +49614,7 @@ module.exports = {
    */
   FINISHED: 'finished'
 };
-},{}],156:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49789,7 +49834,7 @@ var TypingListener = function () {
 }();
 
 module.exports = TypingListener;
-},{"./typing-indicators":155,"./typing-publisher":157}],157:[function(require,module,exports){
+},{"./typing-indicators":154,"./typing-publisher":156}],156:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50054,7 +50099,7 @@ var TypingPublisher = function () {
 }();
 
 module.exports = TypingPublisher;
-},{"../client-registry":112,"./typing-indicators":155}],158:[function(require,module,exports){
+},{"../client-registry":111,"./typing-indicators":154}],157:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -50152,7 +50197,7 @@ if (setImmediate) {
   });
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],159:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 'use strict';
 
 /**
@@ -50243,7 +50288,7 @@ module.exports = function (request) {
   if (!parser) createParser(request);
   parser.parse(request);
 };
-},{"layer-patch":165}],160:[function(require,module,exports){
+},{"layer-patch":164}],159:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50454,7 +50499,7 @@ var WebsocketChangeManager = function () {
 WebsocketChangeManager.prototype.client = null;
 
 module.exports = WebsocketChangeManager;
-},{"../client-utils":113,"../logger":120,"../models/channel":131,"../models/conversation":135,"../models/message":139}],161:[function(require,module,exports){
+},{"../client-utils":112,"../logger":119,"../models/channel":130,"../models/conversation":134,"../models/message":138}],160:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50823,7 +50868,7 @@ WebsocketRequestManager.prototype._callbackCleanupId = 0;
 WebsocketRequestManager.prototype.socketManager = null;
 
 module.exports = WebsocketRequestManager;
-},{"../client-utils":113,"../layer-error":117,"../logger":120}],162:[function(require,module,exports){
+},{"../client-utils":112,"../layer-error":116,"../logger":119}],161:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -51759,7 +51804,7 @@ SocketManager._supportedEvents = [
 'synced'].concat(Root._supportedEvents);
 Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
-},{"../client-utils":113,"../const":115,"../layer-error":117,"../logger":120,"../root":150,"websocket":104}],163:[function(require,module,exports){
+},{"../client-utils":112,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"websocket":103}],162:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -51995,7 +52040,7 @@ module.exports.trigger = function (evt) {
     return func(evt);
   });
 };
-},{"xhr2":104}],164:[function(require,module,exports){
+},{"xhr2":103}],163:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -52273,7 +52318,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],165:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -52508,7 +52553,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],166:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -52544,7 +52589,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],167:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -52729,5 +52774,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":166}]},{},[77])(77)
+},{"./rng":165}]},{},[77])(77)
 });

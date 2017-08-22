@@ -44,6 +44,10 @@ registerComponent('layer-conversation-last-message', {
       },
     },
 
+    unknownHTML: {
+      value: '<div class="layer-custom-mime-type">Message</div>',
+    },
+
     /**
      * Provide a function to determine if the last message is rendered in the Conversation List.
      *
@@ -88,26 +92,19 @@ registerComponent('layer-conversation-last-message', {
      */
     onRerender(evt) {
       if (!evt || evt.hasProperty('lastMessage')) {
-        const conversation = this.item;
-        const message = conversation ? conversation.lastMessage : null;
-        if (this.firstChild && this.firstChild.onDestroy) this.firstChild.onDestroy();
-        this.innerHTML = '';
-        if (message) {
-          const handler = layerUI.getHandler(message, this);
-          if (handler) {
-            this.classList.add(handler.tagName);
-            // Create the element specified by the handler and add it as a childNode.
-            if (handler.canRenderConcise(message)) {
-              const messageHandler = document.createElement(handler.tagName);
-              messageHandler.parentComponent = this;
-              messageHandler.message = message;
-              this.appendChild(messageHandler);
-            } else if (handler.label) {
-              this.innerHTML = `<div class="layer-custom-mime-type">${handler.label}</div>`;
-            }
-          }
-        }
+        this.innerHTML = this.summarizeLastMessage();
       }
+    },
+
+    summarizeLastMessage() {
+      const message = this.item.lastMessage;
+      if (!message) return '';
+      const rootPart = message.getPartsMatchingAttribute({ role: 'root' })[0];
+      if (!rootPart) return this.unknownHTML;
+
+      const model = message.getClient().createCardModel(message, rootPart);
+      const result = model ? model.getOneLineSummary() : null;
+      return result || this.unknownHTML;
     },
   },
 });

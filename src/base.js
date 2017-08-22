@@ -68,7 +68,7 @@ const layerUI = {};
  *    because layerUI contains the WebComponents polyfills.
  *
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
- * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'images', 'newline', 'youtube']] Specify which text handlers you want
+ * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'newline']] Specify which text handlers you want
  *    Note that any custom handlers you add do not need to be in the settings, they can be called after calling `init()` using layerUI.registerTextHandler.
  * @property {Object} [settings.maxSizes]  The maximum width/height for image and video previews
  * @property {Object} [settings.verticalMessagePadding=0]  Message handlers that must hard code a height into their dom nodes can be
@@ -83,7 +83,7 @@ layerUI.settings = {
     tagName: 'layer-message-unknown',
     canRenderConcise: () => true,
   },
-  textHandlers: ['autolinker', 'emoji', 'images', 'newline', 'youtube'],
+  textHandlers: ['autolinker', 'emoji', 'newline'],
   maxSizes: { width: 512, height: 512 },
   verticalMessagePadding: 0,
 };
@@ -329,7 +329,7 @@ layerUI.getHandler = (message, container) => {
  * * Turning emoticons symbols into images
  * * Replacing image URLs with image tags
  * * Adding HTML formatting around quoted text
- * * Replacing youtube links with youtube videos
+
  * * Make up your own...
  *
  * You can enable a predefined Text Handler with:
@@ -349,21 +349,6 @@ layerUI.getHandler = (message, container) => {
  *    handler: function(textData, message) {
  *       textData.text = textData.text.replace(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g, function(ignore1, ignore2, ignore3, ignore4, videoId) {
  *       return '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
- *   });
- * });
- * ```
- *
- * You can append data after your message using `afterText`:
- *
- * ```
- * layerUI.registerTextHandler({
- *    name: 'youtube',
- *    order: 200,
- *    handler: function(textData, message) {
- *       var matches = textData.text.match(/https:\/\/(www\.)?(youtu\.be|youtube\.com)\/(watch\?.*v=)?([a-zA-Z0-9\-]+)/g);
- *       if (matches[3) {
- *           textData.afterText.push('<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>');
- *       }
  *   });
  * });
  * ```
@@ -581,7 +566,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '2.0.0';
+layerUI.version = '2.0.2';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

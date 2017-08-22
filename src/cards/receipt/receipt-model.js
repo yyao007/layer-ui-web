@@ -152,6 +152,10 @@ class ReceiptModel extends CardModel {
     /*this.merchantModel = this.getModelFromPart('merchant');
     this.recipientModel = this.getModelFromPart('recipient');*/
   }
+
+  getOneLineSummary() {
+    return (this.message.sender.sessionOwner ? 'A ' : 'Your ') + this.constructor.Label;
+  }
 }
 
 ReceiptModel.prototype.billingAddressModel = null;
@@ -173,14 +177,16 @@ ReceiptModel.prototype.order = null;
 // Expected fields: subtitle, shipping_cost, total_tax, total_cost
 ReceiptModel.prototype.summary = null;
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.modelSet = [
-  {model: 'productModel', role: 'product'},
-  {model: 'shippingAddressModel', role: 'shipping-address'},
-  {model: 'billingAddressModel', role: 'billing-address'},
-  {model: 'merchantModel', role: 'merchant'},
-  {model: 'recipientModel', role: 'recipient'}
+  { model: 'productModel', role: 'product' },
+  { model: 'shippingAddressModel', role: 'shipping-address' },
+  { model: 'billingAddressModel', role: 'billing-address' },
+  { model: 'merchantModel', role: 'merchant' },
+  { model: 'recipientModel', role: 'recipient' },
 ];
 
+ReceiptModel.Label = 'Receipt';
 ReceiptModel.MIMEType = 'application/vnd.layer.card.receipt+json';
 ReceiptModel.cardRenderer = 'layer-receipt-card';
 MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);

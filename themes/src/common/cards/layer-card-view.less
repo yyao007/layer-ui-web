@@ -35,7 +35,7 @@ layer-card-view {
 
 
   &.layer-card-primitive:not(.layer-card-as-chat-bubble) > .layer-card-standard-container {
-    min-width: 250px;
+    min-width: 192px;
   }
 
   &:not(.layer-root-card) {
@@ -57,4 +57,12 @@ layer-card-view {
 
 .layer-message-item layer-card-view.layer-root-card.layer-carousel-card {
   max-width: 90%;
+}
+
+layer-conversation-last-message {
+  &.layer-has-left-icon {
+    background-size: 1rem;
+    background-position-y: 2px;
+    margin-right: 20px;
+  }
 }

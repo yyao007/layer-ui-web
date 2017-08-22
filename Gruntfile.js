@@ -340,7 +340,8 @@ module.exports = function (grunt) {
 
       //var outputES5 = output.replace(/\/\*[\s\S]*?\*\//g, '');
       var outputES5 = output;
-      var outputES6 = output.replace(/import\s+Layer\s+from\s+'layer-websdk'\s*;/g, 'import Layer from \'layer-websdk/index-es6\'');
+      //var outputES6 = output.replace(/import\s+Layer\s+from\s+'layer-websdk'\s*;/g, 'import Layer from \'layer-websdk/index-es6\'');
+      var outputES6 = output.replace(/import\s+(Layer, {.*?}|Layer|{.*?})\s+from\s+'layer-websdk'\s*;/g, 'import $1 from \'layer-websdk/index-es6\'');
 
       if (!grunt.file.exists(outputFolderES6)) {
         grunt.file.mkdir(outputFolderES6);
@@ -351,7 +352,7 @@ module.exports = function (grunt) {
         grunt.file.mkdir(outputFolderES5);
       }
       var babelResult = babel.transform(outputES5, {
-        presets: ["babel-preset-es2015"]
+        presets: ['babel-preset-es2015']
       });
       outputES5 = babelResult.code;
 
@@ -365,7 +366,7 @@ module.exports = function (grunt) {
           endOfClassCodeBlock += 2;
           var prefix = outputES5.substring(0, indexOfClassCodeBlock);
           var classComment = outputES5.substring(indexOfClassCodeBlock, endOfClassCodeBlock);
-          classComment = classComment.replace(/\n\s*\*/g, "\n *") + '\n';
+          classComment = classComment.replace(/\n\s*\*/g, '\n *') + '\n';
           var postfix =  outputES5.substring(endOfClassCodeBlock);
           outputES5 = classComment + prefix + postfix;
         }

@@ -34,9 +34,12 @@ registerMessageComponent('layer-card-view', {
     },
     rootPart: {},
     message: {
-      set() {
-        if (this.properties._internalState.onAfterCreateCalled) {
-          this.setupMessage();
+      set(message) {
+        this.innerHTML = '';
+        if (message) {
+          if (this.properties._internalState.onAfterCreateCalled) {
+            this.setupMessage();
+          }
         }
       },
     },
@@ -92,7 +95,7 @@ registerMessageComponent('layer-card-view', {
      * @static
      */
     handlesMessage(message, container) {
-      return Boolean(message.getPartsMatchingAttribute({'role': 'root'})[0]);
+      return Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     },
 
     /**

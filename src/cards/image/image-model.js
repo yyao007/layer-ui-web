@@ -192,7 +192,6 @@ class ImageModel extends CardModel {
   getDescription() { return this.subtitle; }
   getFooter() { return this.artist; }
 
-
   _gatherMetadataFromEXIF(file, callback) {
     ImageManager.parseMetaData(file, onParseMetadata.bind(this));
 
@@ -278,6 +277,7 @@ ImageModel.prototype.previewWidth = 0;
 ImageModel.prototype.previewHeight = 0;
 ImageModel.prototype.url = '';
 
+ImageModel.Label = 'Picture';
 ImageModel.defaultAction = 'open-url';
 ImageModel.cardRenderer = 'layer-image-card';
 ImageModel.MIMEType = 'application/vnd.layer.card.image+json';

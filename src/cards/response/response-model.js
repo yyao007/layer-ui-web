@@ -46,6 +46,10 @@ class ResponseModel extends CardModel {
   send(notification) {
     this.generateMessage(this.responseToMessage.getConversation(), message => message.send(notification));
   }
+
+  getOneLineSummary() {
+    return this.messageModel ? this.messageModel.getOneLineSummary() : '';
+  }
 }
 
 ResponseModel.prototype.participantData = null;

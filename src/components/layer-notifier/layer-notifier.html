@@ -6,7 +6,6 @@
       right: 10px;
       top: -10000px;
       max-width: 40%;
-      max-height: 250px;
       display: flex;
       opacity: 0;
       transition: opacity 500ms;
@@ -30,10 +29,12 @@
       max-height: 200px;
     }
   </style>
-  <layer-avatar layer-id='avatar'></layer-avatar>
   <div class='layer-message-item-main' layer-id='container'>
-    <div class='layer-notifier-title' layer-id='title'></div>
-    <div class='layer-message-item-placeholder'></div>
+    <div class='layer-notifier-title'>
+      <layer-avatar layer-id='avatar' size='small'></layer-avatar>
+      <span layer-id='title'></span>
+    </div>
+    <layer-card-view layer-id='card'></layer-card-view>
   </div>
 </template>
 <script>
