@@ -51,7 +51,7 @@ class FileModel extends CardModel {
     }
 
     if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
-    const body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
+    const body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),

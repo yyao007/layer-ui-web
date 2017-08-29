@@ -117,7 +117,7 @@ class ImageModel extends CardModel {
       this._gatherMetadataFromEXIF(this.source.body, () => {
         this._generatePreview(this.source.body, () => {
           const body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation',
-            'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+            'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
           // Replace the source blob with a source message part
           if (this.source) this.source = new MessagePart(this.source);
           this.part = new MessagePart({
@@ -140,7 +140,7 @@ class ImageModel extends CardModel {
       });
     } else {
       const body = this._initBodyWithMetadata(['sourceUrl','previewUrl', 'artist', 'fileName', 'orientation',
-      'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+      'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
       if (body.source) body.source = new MessagePart(body.source);
       this.part = new MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -285,7 +285,7 @@ Root.initClass.apply(ImageModel, [ImageModel, 'ImageModel']);
 MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 
 // Register the Card Model Class with the Client
-Client.registerCardModelClass(ImageModel, "ImageModel");
+Client.registerCardModelClass(ImageModel, 'ImageModel');
 
 module.exports = ImageModel;
 

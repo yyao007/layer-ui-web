@@ -810,8 +810,8 @@ function registerComponent(tagName, classDef) {
 
   if (classDef.template) {
     layerUI.components[tagName].template = classDef.template;
-    delete classDef.template;
   }
+  delete classDef.template; // deletes templates that are empty and fail the above test
 
   if (classDef.style) {
     layerUI.components[tagName].style = classDef.style;

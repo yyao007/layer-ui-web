@@ -33,14 +33,8 @@ registerComponent('layer-image-card', {
     },
   },
   methods: {
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
+    onCreate() {
+      this.isHeightAllocated = false;
     },
 
     /**
@@ -52,6 +46,9 @@ registerComponent('layer-image-card', {
      * @private
      */
     onRerender() {
+      // wait until the parentComponent is a Card Container
+      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return;
+
       // maxSizes should be removed
       const width = this.model.previewWidth || this.model.width;
       const height = this.model.previewHeight || this.model.height;
@@ -60,20 +57,19 @@ registerComponent('layer-image-card', {
       const isSmallAndWideImage = isSmallImage && width > height;
       this.toggleClass('layer-image-card-small-image', isSmallImage && !isSmallAndWideImage);
 
-      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return; // wait until the parentComponent is a Card Container
-
       const maxWidth = this.parentComponent.getPreferredMaxWidth();
       const maxHeight = this.parentComponent.getPreferredMaxHeight();
 
       if (this.model.source || this.model.preview) {
-        this.model.getBlob((blob) => this._renderCanvas(blob));
+        this.model.getBlob(blob => this._renderCanvas(blob));
       } else {
         while (this.firstChild) this.removeChild(this.firstChild);
         const img = this.createElement('img', {
           classList: isSmallImage ? [] : ['layer-top-content-for-border-radius'],
-          src: this.model.previewUrl || this.model.sourceUrl,
           parentNode: this,
         });
+        img.addEventListener('load', evt => (this.isHeightAllocated = true));
+        img.src = this.model.previewUrl || this.model.sourceUrl;
         img.style.maxWidth = maxWidth + 'px';
         img.style.maxHeight = maxHeight + 'px';
       }
@@ -126,6 +122,7 @@ registerComponent('layer-image-card', {
 
               while (this.firstChild) this.removeChild(this.firstChild);
               this.appendChild(canvas);
+              this.isHeightAllocated = true;
             } else {
               console.error(canvas);
             }

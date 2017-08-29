@@ -76,7 +76,7 @@ const ImageRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:image['"].*?\/>/
 
 class LinkModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+    const body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url']);
     ['image_url', 'author', 'title', 'description'].forEach(key => {
       if (body[key] === null) delete body[key];
     });

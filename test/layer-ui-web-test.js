@@ -450,7 +450,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":109}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":111}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -1031,7 +1031,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '2.0.1';
+layerUI.version = '2.0.3';
 
 var clientVersions = _layerWebsdk2.default.Client.version.split('.').map(function (value) {
   return Number(value);
@@ -1051,7 +1051,7 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":109}],5:[function(require,module,exports){
+},{"layer-websdk":111}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1076,6 +1076,54 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "choice", "choices": [{"text": "like", "id": "like", "tooltip": "like"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "action", "text": "do nothing"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "choice", "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}], "data": {"responseName": "helpfulness", allowReslect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "like", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "helpfulness", allowReselect: false}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   contentModel: new ProductModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 175,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 3,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A pretty picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "Prettier than YOU deserve!",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     detailModel: new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new ButtonModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    buttons: [
@@ -1185,6 +1233,54 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "choice", "choices": [{"text": "like", "id": "like", "tooltip": "like"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "action", "text": "do nothing"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {"type": "choice", "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}], "data": {"responseName": "helpfulness", allowReslect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "like", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "helpfulness", allowReselect: false}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   contentModel: new ProductModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 175,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 3,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     title: "A pretty picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     subtitle: "Prettier than YOU deserve!",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     detailModel: new ImageModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new ButtonModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    buttons: [
@@ -1430,7 +1526,7 @@ _layerWebsdk.Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 module.exports = ButtonsModel;
 
 window.PollModel = ButtonsModel; // debug stuff
-},{"layer-websdk":109}],6:[function(require,module,exports){
+},{"layer-websdk":111}],6:[function(require,module,exports){
 /**
  *
  * @class
@@ -1444,13 +1540,24 @@ require('../../components/subcomponents/layer-action-button/layer-action-button'
 
 require('../../components/subcomponents/layer-url-button/layer-url-button');
 
+require('../../components/subcomponents/layer-choice-button/layer-choice-button');
+
+var _choiceModel = require('../choice/choice-model');
+
+var _choiceModel2 = _interopRequireDefault(_choiceModel);
+
+var _cardMixin = require('../card-mixin');
+
+var _cardMixin2 = _interopRequireDefault(_cardMixin);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
 (0, _component.registerComponent)('layer-buttons-card', {
   template: '\n    <div class="layer-button-content" layer-id="content"></div>\n    <div class="layer-button-list" layer-id="buttons">\n  </div>',
   style: 'layer-buttons-card {\n    display: flex;\n    flex-direction: column;\n  }\n  layer-buttons-card .layer-button-content {\n    flex-grow: 1;\n    display: flex;\n    flex-direction: row;\n  }\n  .layer-button-list {\n    display: flex;\n    flex-direction: column;\n    align-items: stretch;\n    justify-content: center;\n  }\n  ',
-  // Note that there is also a message property managed by the MessageHandler mixin
-  properties: {
-    model: {}
-  },
+  mixins: [_cardMixin2.default],
+
   methods: {
     /**
      * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
@@ -1492,9 +1599,35 @@ require('../../components/subcomponents/layer-url-button/layer-url-button');
               url: button.url
             });
             break;
+          case 'choice':
+            var obj = {
+              parentNodeId: _this.model.nodeId,
+              choices: button.choices,
+              message: _this.model.message,
+              responseName: button.data.responseName,
+              responses: _this.model.responses
+            };
+            if ('allowDeselect' in button.data) obj.allowDeselect = button.data.allowDeselect;
+            if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
+            if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
+            var model = new _choiceModel2.default(obj);
+            // Update the selectedAnswer based on any responses
+            if (_this.model.responses) {
+              model._processNewResponses();
+            } else if (_this.model.selectedAnswer) {
+              _this.model.selectAnswer({ id: _this.model.selectedAnswer });
+            }
+
+            widget = _this.createElement('layer-choice-button', {
+              model: model
+            });
+            break;
         }
         _this.nodes.buttons.appendChild(widget);
       });
+    },
+    onRender: function onRender() {
+      this.onRerender();
     },
 
 
@@ -1502,7 +1635,14 @@ require('../../components/subcomponents/layer-url-button/layer-url-button');
      *
      * @method
      */
-    onRender: function onRender() {},
+    onRerender: function onRerender() {
+      for (var i = 0; i < this.nodes.buttons.childNodes.length; i++) {
+        var node = this.nodes.buttons.childNodes[i];
+        if (node.tagName === 'LAYER-CHOICE-BUTTON') {
+          node.model.responses = this.model.responses;
+        }
+      }
+    },
     runAction: function runAction(options) {
       if (this.nodes.subcard) {
         this.nodes.subcard.runAction(options);
@@ -1510,8 +1650,8 @@ require('../../components/subcomponents/layer-url-button/layer-url-button');
       }
     }
   }
-}); 
-},{"../../components/component":33,"../../components/subcomponents/layer-action-button/layer-action-button":48,"../../components/subcomponents/layer-url-button/layer-url-button":66}],7:[function(require,module,exports){
+});
+},{"../../components/component":34,"../../components/subcomponents/layer-action-button/layer-action-button":49,"../../components/subcomponents/layer-choice-button/layer-choice-button":52,"../../components/subcomponents/layer-url-button/layer-url-button":68,"../card-mixin":7,"../choice/choice-model":11}],7:[function(require,module,exports){
 'use strict';
 
 var _component = require('../components/component');
@@ -1525,7 +1665,15 @@ module.exports = {
       }
     },
     cardBorderStyle: {},
-    cardView: {}
+    cardView: {},
+    isHeightAllocated: {
+      value: true,
+      set: function set(value) {
+        if (value) {
+          this.trigger('message-height-change');
+        }
+      }
+    }
   },
   methods: {
     onRender: {
@@ -1561,7 +1709,7 @@ module.exports = {
     }
   }
 };
-},{"../components/component":33}],8:[function(require,module,exports){
+},{"../components/component":34}],8:[function(require,module,exports){
 'use strict';
 
 var _component = require('../components/component');
@@ -1577,7 +1725,7 @@ module.exports = {
     }
   }
 };
-},{"../components/component":33}],9:[function(require,module,exports){
+},{"../components/component":34}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1595,27 +1743,55 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3"})
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", "title": "C 1"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", "title": "C 2"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", "title": "C 3"})
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel');
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new CarouselModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   items: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", title: "Title 1"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", title: "Title 2"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 3"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 5"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 6"})
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TextModel = layer.Client.getCardModelClass('TextModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               model = new CarouselModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Product Carousel:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
@@ -1706,27 +1882,55 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new CarouselModel({
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    items: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3"})
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", "title": "C 1"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", "title": "C 2"}),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", "title": "C 3"})
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 TextModel = layer.Client.getCardModelClass('TextModel');
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 CarouselModel = layer.Client.getCardModelClass('CarouselModel');
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new CarouselModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   items: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 1", title: "Title 1"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 2", title: "Title 2"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 3"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 5"}),
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     new TextModel({text: "Carousel item 3", title: "Title 6"})
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ]
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               TextModel = layer.Client.getCardModelClass('TextModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               model = new CarouselModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 items: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   }),
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     contentModel: new TextModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       title: 'The Holy Hand Grenade',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       author: 'King Arthur'
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               model.generateMessage($("layer-conversation-view").conversation, message => message.send())
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  // Product Carousel:
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
@@ -1900,7 +2104,7 @@ var CarouselModel = function (_CardModel) {
     value: function _generateParts(callback) {
       var _this2 = this;
 
-      var body = this._initBodyWithMetadata(['action']);
+      var body = this._initBodyWithMetadata(['title']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -1963,6 +2167,7 @@ var CarouselModel = function (_CardModel) {
 
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
+CarouselModel.prototype.title = '';
 
 CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';
@@ -2073,7 +2278,7 @@ var CarouselModel = function (_CardModel) {
     value: function _generateParts(callback) {
       var _this2 = this;
 
-      var body = this._initBodyWithMetadata(['action']);
+      var body = this._initBodyWithMetadata(['title']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -2136,6 +2341,7 @@ var CarouselModel = function (_CardModel) {
 
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
+CarouselModel.prototype.title = '';
 
 CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';
@@ -2146,7 +2352,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(CarouselModel, 'CarouselModel');
 
 module.exports = CarouselModel;
-},{"layer-websdk":109}],10:[function(require,module,exports){
+},{"layer-websdk":111}],10:[function(require,module,exports){
 /**
  *
  * @class
@@ -2172,16 +2378,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
-    model: {}
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      get: function get() {
+        return this.model.title ? 'layer-titled-card-container' : null;
+      }
+    }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
+    getIconClass: function getIconClass() {
+      return '';
+    },
+    getTitle: function getTitle() {
+      return this.model.title;
     },
     onCreate: function onCreate() {
       this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
@@ -2282,7 +2491,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRender: function onRender() {}
   }
 }); 
-},{"../../base":4,"../../components/component":33,"../card-mixin":7}],11:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../card-mixin":7}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2301,19 +2510,34 @@ var _textModel2 = _interopRequireDefault(_textModel);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
- * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
+ *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    question: "what is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    question: "What is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    responseName: 'airselection',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    selectedAnswer: 'clever bastard',
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "a"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "b"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "c"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "zero"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ChoiceModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   allowReselect: true,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   question: "What is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   choices: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "zero"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
@@ -2336,19 +2560,34 @@ var _textModel2 = _interopRequireDefault(_textModel);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model = new ChoiceModel({
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    question: "what is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    question: "What is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    responseName: 'airselection',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    selectedAnswer: 'clever bastard',
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "a"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "b"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "c"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "zero"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ChoiceModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   allowReselect: true,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   question: "What is the airspeed velocity of an unladen swallow?",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   choices: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Zero, it can not get off the ground!", id: "zero"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
@@ -2367,12 +2606,13 @@ var ChoiceModel = function (_CardModel) {
   _createClass(ChoiceModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['question', 'action', 'choices']);
+      var body = this._initBodyWithMetadata(['question', 'choices', 'allowReselect', 'allowDeselect', 'label', 'type']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
       });
       this._buildActionModels();
+      if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
       callback([this.part]);
     }
   }, {
@@ -2380,6 +2620,10 @@ var ChoiceModel = function (_CardModel) {
     value: function _parseMessage(payload) {
       _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this, payload);
       this._buildActionModels();
+      if (this.responses) {
+        this._processNewResponses();
+      }
+      if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
     }
   }, {
     key: '_buildActionModels',
@@ -2396,39 +2640,61 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: 'selectAnswer',
     value: function selectAnswer(answerData) {
-      if (!this.selectedAnswer) {
-        var selectedChoice = this.choices.filter(function (item) {
+      var _this2 = this;
+
+      if (!this.selectedAnswer || this.allowReselect) {
+        var _choices$filter$ = this.choices.filter(function (item) {
           return item.id === answerData.id;
-        })[0];
+        })[0],
+            id = _choices$filter$.id,
+            text = _choices$filter$.text;
+
+        var selectionText = ' selected ';
+
+        if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
+          id = null;
+          selectionText = ' deselected ';
+        }
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
-          responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
-          participantData: {
-            selection: answerData.id
-          },
+          responseToNodeId: this.parentNodeId || this.nodeId,
+          participantData: _defineProperty({}, this.responseName, id),
           messageModel: new _textModel2.default({
-            text: this.getClient().user.displayName + ' selected ' + selectedChoice.text
+            text: this.getClient().user.displayName + selectionText + text
           })
         });
         responseModel.send();
-        this.selectedAnswer = answerData.id;
+        this.selectedAnswer = id;
         this.trigger('change');
+        if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
+
+        // We generate local changes, we generate more local changes then the server sends us the first changes
+        // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
+        // from the server after a user change.
+        this.pauseUpdateTimeout = setTimeout(function () {
+          _this2.pauseUpdateTimeout = 0;
+          _this2._processNewResponses();
+        }, 6000);
       }
     }
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var senderId = this.message.sender.userId;
-      var data = this.responses.participantData;
-      var responseIdentityIds = Object.keys(data).filter(function (participantId) {
-        return data[participantId].selection;
-      });
-      if (responseIdentityIds.length > 1) {
-        responseIdentityIds = responseIdentityIds.filter(function (id) {
-          return senderId !== id;
+      var _this3 = this;
+
+      if (!this.pauseUpdateTimeout) {
+        var senderId = this.message.sender.userId;
+        var data = this.responses.participantData;
+        var responseIdentityIds = Object.keys(data).filter(function (participantId) {
+          return data[participantId][_this3.responseName];
         });
+        if (responseIdentityIds.length > 1) {
+          responseIdentityIds = responseIdentityIds.filter(function (id) {
+            return senderId !== id;
+          });
+        }
+        this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
       }
-      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
@@ -2440,15 +2706,33 @@ var ChoiceModel = function (_CardModel) {
     value: function getOneLineSummary() {
       return this.question || this.title;
     }
+  }, {
+    key: '__getCurrentCardRenderer',
+    value: function __getCurrentCardRenderer() {
+      switch (this.type) {
+        case 'standard':
+          return 'layer-choice-card';
+        case 'TiledChoices':
+          return 'layer-choice-tiles-card';
+      }
+    }
   }]);
 
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
+ChoiceModel.prototype.pauseUpdateTimeout = 0;
+ChoiceModel.prototype.allowReselect = false;
+ChoiceModel.prototype.allowDeselect = true; // ignored if !allowReselect
+ChoiceModel.prototype.label = '';
+ChoiceModel.prototype.type = 'standard';
 ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
+ChoiceModel.prototype.responseName = 'selection';
 ChoiceModel.prototype.responses = null;
+ChoiceModel.prototype.currentCardRenderer = null;
+ChoiceModel.prototype.selectedAnswer = null;
 
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
@@ -2476,12 +2760,13 @@ var ChoiceModel = function (_CardModel) {
   _createClass(ChoiceModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['question', 'action', 'choices']);
+      var body = this._initBodyWithMetadata(['question', 'choices', 'allowReselect', 'allowDeselect', 'label', 'type']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
       });
       this._buildActionModels();
+      if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
       callback([this.part]);
     }
   }, {
@@ -2489,6 +2774,10 @@ var ChoiceModel = function (_CardModel) {
     value: function _parseMessage(payload) {
       _get(ChoiceModel.prototype.__proto__ || Object.getPrototypeOf(ChoiceModel.prototype), '_parseMessage', this).call(this, payload);
       this._buildActionModels();
+      if (this.responses) {
+        this._processNewResponses();
+      }
+      if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
     }
   }, {
     key: '_buildActionModels',
@@ -2505,39 +2794,61 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: 'selectAnswer',
     value: function selectAnswer(answerData) {
-      if (!this.selectedAnswer) {
-        var selectedChoice = this.choices.filter(function (item) {
+      var _this2 = this;
+
+      if (!this.selectedAnswer || this.allowReselect) {
+        var _choices$filter$ = this.choices.filter(function (item) {
           return item.id === answerData.id;
-        })[0];
+        })[0],
+            id = _choices$filter$.id,
+            text = _choices$filter$.text;
+
+        var selectionText = ' selected ';
+
+        if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
+          id = null;
+          selectionText = ' deselected ';
+        }
         var responseModel = new _responseModel2.default({
           responseToMessage: this.message,
-          responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
-          participantData: {
-            selection: answerData.id
-          },
+          responseToNodeId: this.parentNodeId || this.nodeId,
+          participantData: _defineProperty({}, this.responseName, id),
           messageModel: new _textModel2.default({
-            text: this.getClient().user.displayName + ' selected ' + selectedChoice.text
+            text: this.getClient().user.displayName + selectionText + text
           })
         });
         responseModel.send();
-        this.selectedAnswer = answerData.id;
+        this.selectedAnswer = id;
         this.trigger('change');
+        if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
+
+        // We generate local changes, we generate more local changes then the server sends us the first changes
+        // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
+        // from the server after a user change.
+        this.pauseUpdateTimeout = setTimeout(function () {
+          _this2.pauseUpdateTimeout = 0;
+          _this2._processNewResponses();
+        }, 6000);
       }
     }
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var senderId = this.message.sender.userId;
-      var data = this.responses.participantData;
-      var responseIdentityIds = Object.keys(data).filter(function (participantId) {
-        return data[participantId].selection;
-      });
-      if (responseIdentityIds.length > 1) {
-        responseIdentityIds = responseIdentityIds.filter(function (id) {
-          return senderId !== id;
+      var _this3 = this;
+
+      if (!this.pauseUpdateTimeout) {
+        var senderId = this.message.sender.userId;
+        var data = this.responses.participantData;
+        var responseIdentityIds = Object.keys(data).filter(function (participantId) {
+          return data[participantId][_this3.responseName];
         });
+        if (responseIdentityIds.length > 1) {
+          responseIdentityIds = responseIdentityIds.filter(function (id) {
+            return senderId !== id;
+          });
+        }
+        this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
       }
-      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
     }
   }, {
     key: '__updateSelectedAnswer',
@@ -2549,15 +2860,33 @@ var ChoiceModel = function (_CardModel) {
     value: function getOneLineSummary() {
       return this.question || this.title;
     }
+  }, {
+    key: '__getCurrentCardRenderer',
+    value: function __getCurrentCardRenderer() {
+      switch (this.type) {
+        case 'standard':
+          return 'layer-choice-card';
+        case 'TiledChoices':
+          return 'layer-choice-tiles-card';
+      }
+    }
   }]);
 
   return ChoiceModel;
 }(_layerWebsdk.CardModel);
 
+ChoiceModel.prototype.pauseUpdateTimeout = 0;
+ChoiceModel.prototype.allowReselect = false;
+ChoiceModel.prototype.allowDeselect = true; // ignored if !allowReselect
+ChoiceModel.prototype.label = '';
+ChoiceModel.prototype.type = 'standard';
 ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
+ChoiceModel.prototype.responseName = 'selection';
 ChoiceModel.prototype.responses = null;
+ChoiceModel.prototype.currentCardRenderer = null;
+ChoiceModel.prototype.selectedAnswer = null;
 
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
@@ -2571,7 +2900,7 @@ _layerWebsdk.Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 _layerWebsdk.Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
-},{"../response/response-model":30,"../text/text-model":32,"layer-websdk":109}],12:[function(require,module,exports){
+},{"../response/response-model":31,"../text/text-model":33,"layer-websdk":111}],12:[function(require,module,exports){
 /**
  *
  *
@@ -2629,6 +2958,71 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           text: choice.text,
           event: 'layer-choice-select',
           data: { id: choice.id },
+          icon: choice.icon,
+          parentNode: _this.nodes.answers
+        });
+      });
+    },
+    onRerender: function onRerender() {
+      this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
+      for (var i = 0; i < this.nodes.answers.childNodes.length; i++) {
+        var child = this.nodes.answers.childNodes[i];
+        child.disabled = this.model.selectedAnswer && (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
+        child.selected = this.model.selectedAnswer === child.data.id;
+      }
+    },
+    onChoiceSelect: function onChoiceSelect(data) {
+      this.model.selectAnswer(data);
+    },
+    runAction: function runAction(_ref) {
+      var event = _ref.event,
+          data = _ref.data;
+
+      if (event === 'layer-choice-select') {
+        this.onChoiceSelect(data);
+      }
+    }
+  }
+}); 
+},{"../../components/component":34,"../../components/subcomponents/layer-action-button/layer-action-button":49,"../card-mixin":7}],13:[function(require,module,exports){
+/**
+ *
+ *
+ *
+ * @class layerUI.handlers.message.ChoiceModel
+ * @extends layerUI.components.Component
+ */
+'use strict';
+
+var _component = require('../../components/component');
+
+var _cardMixin = require('../card-mixin');
+
+var _cardMixin2 = _interopRequireDefault(_cardMixin);
+
+require('../../components/subcomponents/layer-action-button/layer-action-button');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(0, _component.registerComponent)('layer-choice-tiles-card', {
+  mixins: [_cardMixin2.default],
+  template: '\n    <div layer-id=\'question\' class=\'layer-choice-card-question\'></div>\n    <div layer-id=\'answers\' class=\'layer-choice-card-answers\'></div>\n  ',
+  style: '\n  layer-choice-tiles-card {\n    display: block;\n  }\n  layer-choice-tiles-card .layer-choice-card-answers {\n\n  }\n  ',
+  properties: {
+    label: {
+      value: 'Choices'
+    }
+  },
+  methods: {
+    onAfterCreate: function onAfterCreate() {
+      var _this = this;
+
+      this.nodes.question.innerHTML = this.model.question;
+      this.model.choices.forEach(function (choice) {
+        var button = _this.createElement('layer-action-button', {
+          text: choice.text,
+          event: 'layer-choice-select',
+          data: { id: choice.id },
           parentNode: _this.nodes.answers
         });
       });
@@ -2636,9 +3030,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRerender: function onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
       if (this.model.selectedAnswer) {
-        for (var i = 0; i < this.nodes.answers.childNodes.length; i++) {
-          var child = this.nodes.answers.childNodes[i];
-          child.disabled = this.model.selectedAnswer !== child.data.id;
+        for (var i = 0; i < this.nodes.options.childNodes.length; i++) {
+          var child = this.nodes.options.childNodes[i];
+          child.disabled = !this.model.allowReselect || this.model.selectedAnswer === child.data.id;
           child.selected = this.model.selectedAnswer === child.data.id;
         }
       }
@@ -2656,7 +3050,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../components/component":33,"../../components/subcomponents/layer-action-button/layer-action-button":48,"../card-mixin":7}],13:[function(require,module,exports){
+},{"../../components/component":34,"../../components/subcomponents/layer-action-button/layer-action-button":49,"../card-mixin":7}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2775,7 +3169,7 @@ var FileModel = function (_CardModel) {
       }
 
       if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
-      var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
+      var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
@@ -2903,7 +3297,7 @@ var FileModel = function (_CardModel) {
       }
 
       if (!this.fileExt && this.title) this.fileExt = this.title.replace(/^.*\.(.*)$/, '$1');
-      var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType', 'action']);
+      var body = this._initBodyWithMetadata(['sourceUrl', 'author', 'size', 'title', 'mimeType']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
@@ -3007,7 +3401,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(FileModel, 'FileModel');
 
 module.exports = FileModel;
-},{"layer-websdk":109}],14:[function(require,module,exports){
+},{"layer-websdk":111}],15:[function(require,module,exports){
 /**
  * TODO: Verify that custom handling of "open-file" events are possible and documented
  * @class layerUI.handlers.message.CardView
@@ -3075,7 +3469,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../components/component":33,"../../handlers/message/layer-card-view":67,"../card-mixin":7,"../card-primitive-mixin":8}],15:[function(require,module,exports){
+},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7,"../card-primitive-mixin":8}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3350,7 +3744,7 @@ var ImageModel = function (_CardModel) {
         if (!this.fileName) this.fileName = this.source.name;
         this._gatherMetadataFromEXIF(this.source.body, function () {
           _this2._generatePreview(_this2.source.body, function () {
-            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
             // Replace the source blob with a source message part
             if (_this2.source) _this2.source = new _layerWebsdk.MessagePart(_this2.source);
             _this2.part = new _layerWebsdk.MessagePart({
@@ -3372,7 +3766,7 @@ var ImageModel = function (_CardModel) {
           });
         });
       } else {
-        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
         if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
         this.part = new _layerWebsdk.MessagePart({
           mimeType: this.constructor.MIMEType,
@@ -3545,7 +3939,7 @@ _layerWebsdk.Root.initClass.apply(ImageModel, [ImageModel, 'ImageModel']);
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ImageModel, "ImageModel");
+_layerWebsdk.Client.registerCardModelClass(ImageModel, 'ImageModel');
 
 module.exports = ImageModel;
 
@@ -3582,7 +3976,7 @@ var ImageModel = function (_CardModel) {
         if (!this.fileName) this.fileName = this.source.name;
         this._gatherMetadataFromEXIF(this.source.body, function () {
           _this2._generatePreview(_this2.source.body, function () {
-            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+            var body = _this2._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
             // Replace the source blob with a source message part
             if (_this2.source) _this2.source = new _layerWebsdk.MessagePart(_this2.source);
             _this2.part = new _layerWebsdk.MessagePart({
@@ -3604,7 +3998,7 @@ var ImageModel = function (_CardModel) {
           });
         });
       } else {
-        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle', 'action']);
+        var body = this._initBodyWithMetadata(['sourceUrl', 'previewUrl', 'artist', 'fileName', 'orientation', 'width', 'height', 'previewWidth', 'previewHeight', 'title', 'subtitle']);
         if (body.source) body.source = new _layerWebsdk.MessagePart(body.source);
         this.part = new _layerWebsdk.MessagePart({
           mimeType: this.constructor.MIMEType,
@@ -3777,10 +4171,10 @@ _layerWebsdk.Root.initClass.apply(ImageModel, [ImageModel, 'ImageModel']);
 _layerWebsdk.MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 
 // Register the Card Model Class with the Client
-_layerWebsdk.Client.registerCardModelClass(ImageModel, "ImageModel");
+_layerWebsdk.Client.registerCardModelClass(ImageModel, 'ImageModel');
 
 module.exports = ImageModel;
-},{"../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],16:[function(require,module,exports){
+},{"../../utils/sizing":98,"blueimp-load-image/js/load-image":104,"blueimp-load-image/js/load-image-exif":100,"blueimp-load-image/js/load-image-meta":101,"blueimp-load-image/js/load-image-orientation":102,"layer-websdk":111}],17:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -3827,14 +4221,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
+    onCreate: function onCreate() {
+      this.isHeightAllocated = false;
     },
 
 
@@ -3849,6 +4237,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRerender: function onRerender() {
       var _this = this;
 
+      // wait until the parentComponent is a Card Container
+      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return;
+
       // maxSizes should be removed
       var width = this.model.previewWidth || this.model.width;
       var height = this.model.previewHeight || this.model.height;
@@ -3856,8 +4247,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       var isSmallImage = width < 350;
       var isSmallAndWideImage = isSmallImage && width > height;
       this.toggleClass('layer-image-card-small-image', isSmallImage && !isSmallAndWideImage);
-
-      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return; // wait until the parentComponent is a Card Container
 
       var maxWidth = this.parentComponent.getPreferredMaxWidth();
       var maxHeight = this.parentComponent.getPreferredMaxHeight();
@@ -3871,9 +4260,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
           this.removeChild(this.firstChild);
         }var img = this.createElement('img', {
           classList: isSmallImage ? [] : ['layer-top-content-for-border-radius'],
-          src: this.model.previewUrl || this.model.sourceUrl,
           parentNode: this
         });
+        img.addEventListener('load', function (evt) {
+          return _this.isHeightAllocated = true;
+        });
+        img.src = this.model.previewUrl || this.model.sourceUrl;
         img.style.maxWidth = maxWidth + 'px';
         img.style.maxHeight = maxHeight + 'px';
       }
@@ -3928,6 +4320,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
             while (_this2.firstChild) {
               _this2.removeChild(_this2.firstChild);
             }_this2.appendChild(canvas);
+            _this2.isHeightAllocated = true;
           } else {
             console.error(canvas);
           }
@@ -3946,7 +4339,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../base":4,"../../components/component":33,"../../utils/sizing":96,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],17:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../../utils/sizing":98,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":104,"blueimp-load-image/js/load-image-exif":100,"blueimp-load-image/js/load-image-meta":101,"blueimp-load-image/js/load-image-orientation":102}],18:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4036,7 +4429,7 @@ var _component = require('../components/component');
     }
   }
 }); 
-},{"../components/component":33}],18:[function(require,module,exports){
+},{"../components/component":34}],19:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4047,7 +4440,7 @@ var _component = require('../components/component');
 var _component = require('../components/component');
 
 (0, _component.registerComponent)('layer-titled-card-container', {
-  style: '\n    layer-titled-card-container {\n      display: flex;\n      flex-direction: column;\n      align-items: stretch;\n    }\n\n    layer-titled-card-container .layer-card-title-bar {\n      display: flex;\n      flex-direction: row;\n    }\n    layer-titled-card-container .layer-card-title-bar-title {\n      flex-grow: 1;\n    }\n  ',
+  style: '\n    layer-titled-card-container {\n      display: flex;\n      flex-direction: column;\n      align-items: stretch;\n    }\n    layer-titled-card-container.layer-title-icon-empty .layer-card-title-bar-icon {\n      display: none;\n    }\n    layer-titled-card-container .layer-card-title-bar {\n      display: flex;\n      flex-direction: row;\n    }\n    layer-titled-card-container .layer-card-title-bar-text {\n      flex-grow: 1;\n    }\n  ',
   template: '\n  <div class="layer-card-title-bar">\n    <div layer-id=\'icon\' class="layer-card-title-bar-icon"></div>\n    <div layer-id=\'title\' class="layer-card-title-bar-text"></div>\n  </div>\n  <div layer-id=\'UIContainer\' class=\'layer-card-top\'></div>\n  ',
 
   // Note that there is also a message property managed by the MessageHandler mixin
@@ -4066,9 +4459,11 @@ var _component = require('../components/component');
       }
     },
     icon: {
+      value: '',
       set: function set(icon, oldIcon) {
         if (oldIcon) this.nodes.icon.classList.remove(oldIcon);
-        this.nodes.icon.classList.add(icon);
+        if (icon) this.nodes.icon.classList.add(icon);
+        this.toggleClass('layer-title-icon-empty', !Boolean(icon));
       }
     }
   },
@@ -4091,7 +4486,7 @@ var _component = require('../components/component');
     }
   }
 }); 
-},{"../components/component":33}],19:[function(require,module,exports){
+},{"../components/component":34}],20:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4166,7 +4561,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   var url = customData.url || this.model.url;
   if (url) window.open(url);
 });
-},{"../../components/component":33,"../../handlers/message/layer-card-view":67,"../card-mixin":7,"../card-primitive-mixin":8}],20:[function(require,module,exports){
+},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7,"../card-primitive-mixin":8}],21:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4344,7 +4739,7 @@ var LinkModel = function (_CardModel) {
   _createClass(LinkModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+      var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url']);
       ['image_url', 'author', 'title', 'description'].forEach(function (key) {
         if (body[key] === null) delete body[key];
       });
@@ -4451,7 +4846,7 @@ var LinkModel = function (_CardModel) {
   _createClass(LinkModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url', 'action']);
+      var body = this._initBodyWithMetadata(['imageUrl', 'author', 'title', 'description', 'url']);
       ['image_url', 'author', 'title', 'description'].forEach(function (key) {
         if (body[key] === null) delete body[key];
       });
@@ -4539,7 +4934,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
-},{"layer-websdk":109}],21:[function(require,module,exports){
+},{"layer-websdk":111}],22:[function(require,module,exports){
 /**
  * You must set your Google Maps API key in `window.googleMapsAPIKey`
  *
@@ -4634,7 +5029,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   }
   if (url) window.open(url);
 });
-},{"../../components/component":33,"../../handlers/message/layer-card-view":67,"../card-mixin":7,"../card-primitive-mixin":8}],22:[function(require,module,exports){
+},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7,"../card-primitive-mixin":8}],23:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4778,7 +5173,7 @@ var LocationModel = function (_CardModel) {
   _createClass(LocationModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'action', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
+      var body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -4842,7 +5237,7 @@ var LocationModel = function (_CardModel) {
   _createClass(LocationModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'action', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
+      var body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -4892,7 +5287,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LocationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LocationModel, 'LocationModel');
 
 module.exports = LocationModel;
-},{"layer-websdk":109}],23:[function(require,module,exports){
+},{"layer-websdk":111}],24:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4993,7 +5388,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(OrganizationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(OrganizationModel, 'OrganizationModel');
 
 module.exports = OrganizationModel;
-},{"layer-websdk":109}],24:[function(require,module,exports){
+},{"layer-websdk":111}],25:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5100,7 +5495,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(PersonModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(PersonModel, 'PersonModel');
 
 module.exports = PersonModel;
-},{"layer-websdk":109}],25:[function(require,module,exports){
+},{"layer-websdk":111}],26:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5156,7 +5551,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     onRender: function onRender() {}
   }
 }); 
-},{"../../components/component":33,"../card-mixin":7,"../card-primitive-mixin":8}],26:[function(require,module,exports){
+},{"../../components/component":34,"../card-mixin":7,"../card-primitive-mixin":8}],27:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5399,7 +5794,7 @@ _layerWebsdk.Client.registerCardModelClass(ProductModel, 'ProductModel');
 
 _layerWebsdk.Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;
-},{"layer-websdk":109}],27:[function(require,module,exports){
+},{"layer-websdk":111}],28:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5427,7 +5822,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.onRerender();
     },
     onRerender: function onRerender() {
-      this.nodes.img.src = this.item.source_url;
+      this.nodes.img.src = this.item.image_url;
       this.nodes.title.innerHTML = this.item.title;
       this.nodes.description.innerHTML = this.item.subtitle;
       this.nodes.footer.innerHTML = this.item.quantity !== 1 ? 'Qty: ' + this.item.quantity : '';
@@ -5500,7 +5895,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../components/component":33,"../card-mixin":7}],28:[function(require,module,exports){
+},{"../../components/component":34,"../card-mixin":7}],29:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5542,7 +5937,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 3,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A pretty picture",
@@ -5550,7 +5945,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A boring picture",
@@ -5558,7 +5953,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 150,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A terrifying picture",
@@ -5597,7 +5992,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 3,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A pretty picture",
@@ -5605,7 +6000,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A boring picture",
@@ -5613,7 +6008,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 150,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A terrifying picture",
@@ -5663,7 +6058,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 3,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A pretty picture",
@@ -5671,7 +6066,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A boring picture",
@@ -5679,7 +6074,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 150,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A terrifying picture",
@@ -5718,7 +6113,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  items: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 3,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A pretty picture",
@@ -5726,7 +6121,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 50,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A boring picture",
@@ -5734,7 +6129,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      currency: 'USD',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      price: 150,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      quantity: 1,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      title: "A terrifying picture",
@@ -5759,7 +6154,7 @@ var ReceiptModel = function (_CardModel) {
     value: function _generateParts(callback) {
       var _this2 = this;
 
-      var body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'action', 'items']);
+      var body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'items']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -5864,7 +6259,7 @@ var ReceiptModel = function (_CardModel) {
     value: function _generateParts(callback) {
       var _this2 = this;
 
-      var body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'action', 'items']);
+      var body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'items']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -5953,7 +6348,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ReceiptModel, 'ReceiptModel');
 
 module.exports = ReceiptModel;
-},{"layer-websdk":109}],29:[function(require,module,exports){
+},{"layer-websdk":111}],30:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -6005,7 +6400,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../components/component":33,"../card-mixin":7}],30:[function(require,module,exports){
+},{"../../components/component":34,"../card-mixin":7}],31:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6114,7 +6509,7 @@ _layerWebsdk2.default.MessagePart.TextualMimeTypes.push('application/vnd.layer.c
 _layerWebsdk.Client.registerCardModelClass(ResponseModel, 'ResponseModel');
 
 module.exports = ResponseModel;
-},{"layer-websdk":109}],31:[function(require,module,exports){
+},{"layer-websdk":111}],32:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -6228,7 +6623,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":33,"../card-mixin":7,"../card-primitive-mixin":8}],32:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../card-mixin":7,"../card-primitive-mixin":8}],33:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6329,7 +6724,7 @@ var TextModel = function (_CardModel) {
   _createClass(TextModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle', 'action']);
+      var body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -6405,7 +6800,7 @@ var TextModel = function (_CardModel) {
   _createClass(TextModel, [{
     key: '_generateParts',
     value: function _generateParts(callback) {
-      var body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle', 'action']);
+      var body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle']);
 
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
@@ -6467,7 +6862,7 @@ _layerWebsdk.Client.registerCardModelClass(TextModel, 'TextModel');
 });
 
 module.exports = TextModel;
-},{"../../base":4,"layer-websdk":109}],33:[function(require,module,exports){
+},{"../../base":4,"layer-websdk":111}],34:[function(require,module,exports){
 /**
  * This is the base class for all UI classes in the Layer UI Framework.
  *
@@ -7307,8 +7702,8 @@ function registerComponent(tagName, classDef) {
 
   if (classDef.template) {
     _base2.default.components[tagName].template = classDef.template;
-    delete classDef.template;
   }
+  delete classDef.template; // deletes templates that are empty and fail the above test
 
   if (classDef.style) {
     _base2.default.components[tagName].style = classDef.style;
@@ -8224,7 +8619,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":92,"layer-websdk":109}],34:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":94,"layer-websdk":111}],35:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -8341,7 +8736,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-channel-item", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-channel-item-content'><div layer-id='title' class='layer-channel-title'></div></div><layer-delete layer-id='delete'></layer-delete></div>", "");
   layerUI.buildStyle("layer-channel-item", "layer-channel-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-channel-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-channel-item  .layer-list-item .layer-channel-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-channel-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/list-item-selection":83,"../../../mixins/size-property":91,"../../subcomponents/layer-delete/layer-delete":55}],35:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../../../mixins/list-item-selection":85,"../../../mixins/size-property":93,"../../subcomponents/layer-delete/layer-delete":57}],36:[function(require,module,exports){
 /**
  * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
  * conversation within a list of conversations.
@@ -8579,7 +8974,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-replaceable-content  class='layer-conversation-left-side' name='conversationRowLeftSide'></layer-replaceable-content><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='date'></layer-date></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div><layer-replaceable-content  class='layer-conversation-right-side' name='conversationRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/list-item-selection":83,"../../../mixins/size-property":91,"../../subcomponents/layer-avatar/layer-avatar":50,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":52,"../../subcomponents/layer-conversation-title/layer-conversation-title":53,"../../subcomponents/layer-menu-button/layer-menu-button":58}],36:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../../../mixins/list-item-selection":85,"../../../mixins/size-property":93,"../../subcomponents/layer-avatar/layer-avatar":51,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":54,"../../subcomponents/layer-conversation-title/layer-conversation-title":55,"../../subcomponents/layer-menu-button/layer-menu-button":60}],37:[function(require,module,exports){
 /**
  * The Layer Conversation List widget renders a scrollable, pagable list of Conversations.
  *
@@ -9022,7 +9417,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-list", "<div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>      No Conversations yet    </layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-conversation-list", "layer-conversation-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversation-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-channel-item/layer-channel-item":34,"../layer-conversation-item/layer-conversation-item":35,"layer-websdk":109}],37:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/empty-list":81,"../../../mixins/list":89,"../../../mixins/list-load-indicator":87,"../../../mixins/list-selection":88,"../../../mixins/main-component":90,"../../../mixins/query-end-indicator":92,"../../../mixins/size-property":93,"../layer-channel-item/layer-channel-item":35,"../layer-conversation-item/layer-conversation-item":36,"layer-websdk":111}],38:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -9220,7 +9615,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../../mixins/size-property":91,"../../subcomponents/layer-age/layer-age":49,"../../subcomponents/layer-avatar/layer-avatar":50,"layer-websdk":109}],38:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../../../mixins/size-property":93,"../../subcomponents/layer-age/layer-age":50,"../../subcomponents/layer-avatar/layer-avatar":51,"layer-websdk":111}],39:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -9628,7 +10023,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>        No Users yet      </layer-replaceable-content><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-identity-list", "layer-identity-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identity-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-identity-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/main-component":88,"../../../mixins/query-end-indicator":90,"../../../mixins/size-property":91,"../layer-identity-item/layer-identity-item":37,"layer-websdk":109}],39:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/empty-list":81,"../../../mixins/has-query":84,"../../../mixins/list":89,"../../../mixins/list-load-indicator":87,"../../../mixins/main-component":90,"../../../mixins/query-end-indicator":92,"../../../mixins/size-property":93,"../layer-identity-item/layer-identity-item":38,"layer-websdk":111}],40:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -10450,7 +10845,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-view", "<layer-message-list layer-id='list'></layer-message-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-compose-bar layer-id='composer'></layer-compose-bar>", "");
   layerUI.buildStyle("layer-conversation-view", "layer-conversation-view {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-message-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-compose-bar {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/file-drop-target":80,"../../mixins/focus-on-keydown":81,"../../mixins/has-query":82,"../../mixins/main-component":88,"../../mixins/throttler":93,"../message-list/layer-message-list/layer-message-list":47,"../subcomponents/layer-compose-bar/layer-compose-bar":51,"../subcomponents/layer-typing-indicator/layer-typing-indicator":65,"layer-websdk":109}],40:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../../mixins/file-drop-target":82,"../../mixins/focus-on-keydown":83,"../../mixins/has-query":84,"../../mixins/main-component":90,"../../mixins/throttler":95,"../message-list/layer-message-list/layer-message-list":48,"../subcomponents/layer-compose-bar/layer-compose-bar":53,"../subcomponents/layer-typing-indicator/layer-typing-indicator":67,"layer-websdk":111}],41:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -10998,7 +11393,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
   layerUI.buildAndRegisterTemplate("layer-notifier", "<div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title'><layer-avatar layer-id='avatar' size='small'></layer-avatar><span layer-id='title'></span></div><layer-card-view layer-id='card'></layer-card-view></div>", "");
   layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":33,"../../mixins/main-component":88,"../subcomponents/layer-avatar/layer-avatar":50,"notifyjs":104}],41:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../../mixins/main-component":90,"../subcomponents/layer-avatar/layer-avatar":51,"notifyjs":106}],42:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -11087,7 +11482,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-membership-name' layer-id='title'></label></div>", "");
   layerUI.buildStyle("layer-membership-item", "layer-membership-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-membership-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-membership-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-membership-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-membership-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-membership-item.layer-membership-item-empty {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list-item":84,"../../../mixins/list-item-selection":83,"../../component":33,"../../subcomponents/layer-avatar/layer-avatar":50}],42:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list-item":86,"../../../mixins/list-item-selection":85,"../../component":34,"../../subcomponents/layer-avatar/layer-avatar":51}],43:[function(require,module,exports){
 /**
  * The Layer Membership List renders a pagable list of layer.Membership objects, and allows the user to
  * see who else is in the Channel with them.
@@ -11292,7 +11687,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":87,"../../../mixins/list-selection":86,"../../../mixins/main-component":88,"../../component":33,"../layer-membership-item/layer-membership-item":41,"layer-websdk":109}],43:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":89,"../../../mixins/list-selection":88,"../../../mixins/main-component":90,"../../component":34,"../layer-membership-item/layer-membership-item":42,"layer-websdk":111}],44:[function(require,module,exports){
 /**
  * The Layer Message Item widget renders a single Message synopsis.
  *
@@ -11609,7 +12004,7 @@ module.exports = {
     }
   }
 };
-},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":62,"layer-websdk":109}],44:[function(require,module,exports){
+},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":64,"layer-websdk":111}],45:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -11637,7 +12032,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><layer-card-view layer-id='cardView'></layer-card-view><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../subcomponents/layer-avatar/layer-avatar":50,"../../subcomponents/layer-date/layer-date":54,"../layer-message-item-mixin":43}],45:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../../subcomponents/layer-avatar/layer-avatar":51,"../../subcomponents/layer-date/layer-date":56,"../layer-message-item-mixin":44}],46:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -11669,7 +12064,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><layer-card-view layer-id='cardView'></layer-card-view><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: flex;\nflex-direction: row;\njustify-content: flex-end;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-message-right-side > div {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../../subcomponents/layer-avatar/layer-avatar":50,"../../subcomponents/layer-date/layer-date":54,"../../subcomponents/layer-delete/layer-delete":55,"../../subcomponents/layer-message-status/layer-message-status":60,"../layer-message-item-mixin":43}],46:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../../subcomponents/layer-avatar/layer-avatar":51,"../../subcomponents/layer-date/layer-date":56,"../../subcomponents/layer-delete/layer-delete":57,"../../subcomponents/layer-message-status/layer-message-status":62,"../layer-message-item-mixin":44}],47:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -11693,7 +12088,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-status", "<div class='layer-list-item' layer-id='innerNode'><layer-card-view layer-id='cardView' class='layer-message-item-main'></layer-card-view></div>", "");
   layerUI.buildStyle("layer-message-item-status", "layer-message-item-status {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-status .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}\nlayer-message-item-status  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-status layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/list-item":84,"../layer-message-item-mixin":43}],47:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/list-item":86,"../layer-message-item-mixin":44}],48:[function(require,module,exports){
 /**
  * The Layer Message List widget renders a scrollable, pagable list of layerUI.components.MessagesListPanel.Item widgets.
  *
@@ -12559,9 +12954,30 @@ var PAGING_DELAY = 2000;
       });
       delete this.properties.insertEvents;
 
+      var cards = this.querySelectorAllArray('layer-card-view').map(function (card) {
+        return card.nodes.ui;
+      }).filter(function (ui) {
+        return ui;
+      });
+
       _layerWebsdk2.default.Util.defer(function () {
         if (_this7.properties.stuckToBottom) {
           _this7.scrollTo(_this7.scrollHeight - _this7.clientHeight);
+          var unfinishedCards = cards.filter(function (card) {
+            return !card.isHeightAllocated;
+          });
+          if (unfinishedCards.length) {
+            var onCardFinished = function onCardFinished() {
+              unfinishedCards = unfinishedCards.filter(function (card) {
+                return !card.isHeightAllocated;
+              });
+              if (unfinishedCards.length === 0) {
+                _this7.scrollTo(_this7.scrollHeight - _this7.clientHeight);
+                _this7.removeEventListener('message-height-change', onCardFinished);
+              }
+            };
+            _this7.addEventListener('message-height-change', onCardFinished);
+          }
         } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
           _this7.scrollTo(firstVisibleItem.offsetTop - _this7.offsetTop - initialOffset);
         }
@@ -12575,7 +12991,7 @@ var PAGING_DELAY = 2000;
   layerUI.buildAndRegisterTemplate("layer-message-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'><layer-start-of-conversation layer-id='startOfConversation'></layer-start-of-conversation></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-message-list", "layer-message-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-message-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-message-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/empty-list":79,"../../../mixins/has-query":82,"../../../mixins/list":87,"../../../mixins/list-load-indicator":85,"../../../mixins/query-end-indicator":90,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":64,"../layer-message-item-received/layer-message-item-received":44,"../layer-message-item-sent/layer-message-item-sent":45,"../layer-message-item-status/layer-message-item-status":46,"layer-websdk":109}],48:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/empty-list":81,"../../../mixins/has-query":84,"../../../mixins/list":89,"../../../mixins/list-load-indicator":87,"../../../mixins/query-end-indicator":92,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":66,"../layer-message-item-received/layer-message-item-received":45,"../layer-message-item-sent/layer-message-item-sent":46,"../layer-message-item-status/layer-message-item-status":47,"layer-websdk":111}],49:[function(require,module,exports){
 /**
  *
  * @class
@@ -12586,8 +13002,8 @@ var PAGING_DELAY = 2000;
 var _component = require('../../component');
 
 (0, _component.registerComponent)('layer-action-button', {
-  template: '<button class="layer-button" layer-id="button"></button>',
-  style: 'layer-action-button {\n    display: flex;\n    flex-direction: column;\n    align-content: stretch;\n  }\n  layer-action-button button {\n    border-radius: 0px;\n    border-width: 0px;\n    cursor: pointer;\n  }\n  .layer-button-content > * {\n    max-width: 100%;\n    width: 100%;\n  }\n  ',
+  template: '<button class="layer-button" layer-id="button" tab-index="0"></button>',
+  style: 'layer-action-button {\n    display: flex;\n    flex-direction: column;\n    align-content: stretch;\n  }\n  layer-action-button button {\n    cursor: pointer;\n  }\n  .layer-button-content > * {\n    max-width: 100%;\n    width: 100%;\n  }\n  ',
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
     text: {
@@ -12606,6 +13022,12 @@ var _component = require('../../component');
       type: Boolean,
       set: function set(value) {
         this.nodes.button.disabled = value;
+      }
+    },
+    icon: {
+      set: function set(value, oldValue) {
+        if (oldValue) this.classList.remove(oldValue);
+        if (value) this.classList.add(value);
       }
     },
     selected: {
@@ -12641,7 +13063,7 @@ var _component = require('../../component');
     }
   }
 }); 
-},{"../../component":33}],49:[function(require,module,exports){
+},{"../../component":34}],50:[function(require,module,exports){
 /**
  * The Layer Age widget renders how long ago a date is.
  *
@@ -12748,7 +13170,7 @@ function getMonthsDiff(a, b) {
   layerUI.buildAndRegisterTemplate("layer-age", "", "");
   layerUI.buildStyle("layer-age", "layer-age {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],50:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],51:[function(require,module,exports){
 /**
  * The Layer Avatar widget renders an icon representing a user or users.
  *
@@ -13027,7 +13449,99 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/main-component":88,"../../../mixins/size-property":91,"../layer-presence/layer-presence":61,"layer-websdk":109}],51:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/main-component":90,"../../../mixins/size-property":93,"../layer-presence/layer-presence":63,"layer-websdk":111}],52:[function(require,module,exports){
+/**
+ *
+ * @class
+ * @extends layerUI.components.Component
+ */
+'use strict';
+
+var _component = require('../../component');
+
+(0, _component.registerComponent)('layer-choice-button', {
+  style: 'layer-choice-button {\n    display: flex;\n    flex-direction: row;\n    align-content: stretch;\n  }\n  layer-choice-button layer-action-button {\n    cursor: pointer;\n    flex-grow: 1;\n    width: 50px; // flexbox bug\n  }\n  .layer-button-content > * {\n    max-width: 100%;\n    width: 100%;\n  }\n  ',
+  // Note that there is also a message property managed by the MessageHandler mixin
+  properties: {
+    disabled: {
+      type: Boolean,
+      set: function set(value) {
+        for (var i = 0; i < this.childNodes.length; i++) {
+          this.childNodes[i].disabled = value;
+        }
+      }
+    },
+    selected: {
+      type: Boolean,
+      set: function set(value) {
+        //this.toggleClass('layer-action-button-selected', value);
+      }
+    },
+    model: {}
+  },
+
+  methods: {
+    /**
+     * @method
+     */
+    onCreate: function onCreate() {},
+    onAfterCreate: function onAfterCreate() {
+      var _this = this;
+
+      this.model.on('change', this.onRerender, this);
+      this.properties.buttons = [];
+      this.model.choices.forEach(function (choice) {
+        var widget = _this.createElement('layer-action-button', {
+          text: choice.text,
+          tooltip: choice.tooltip,
+          parentNode: _this,
+          data: { id: choice.id },
+          icon: choice.icon
+        });
+        var def = { widget: widget, choice: choice };
+        _this.properties.buttons.push(def);
+        widget.addEventListener('click', _this._onClick.bind(_this, def));
+      });
+    },
+    onRender: function onRender() {
+      this.onRerender();
+    },
+
+
+    /**
+     *
+     * @method
+     */
+    onRerender: function onRerender() {
+      this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
+      for (var i = 0; i < this.childNodes.length; i++) {
+        var child = this.childNodes[i];
+        child.disabled = this.model.selectedAnswer && (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
+
+        child.selected = this.model.selectedAnswer === child.data.id;
+      }
+    },
+    _onClick: function _onClick(_ref, evt) {
+      var choice = _ref.choice,
+          widget = _ref.widget;
+
+      evt.preventDefault();
+      evt.stopPropagation();
+
+      // Select the answer
+      this.model.selectAnswer(choice);
+
+      // Trigger any other customized events as though this were an action button
+      var cardView = this;
+      while (cardView.tagName !== 'LAYER-CARD-VIEW' && cardView.parentComponent) {
+        cardView = cardView.parentComponent;
+      }
+      if (cardView) cardView.runAction({ event: this.model.responseName, data: this.model });
+      evt.target.blur();
+    }
+  }
+}); 
+},{"../../component":34}],53:[function(require,module,exports){
 /**
  * The Layer Composer widget provides the textarea for layerUI.components.ConversationPanel.
  *
@@ -13452,7 +13966,7 @@ var TAB = 9;
   layerUI.buildAndRegisterTemplate("layer-compose-bar", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'><layer-send-button></layer-send-button></layer-replaceable-content>", "");
   layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 1px;\nborder-color: transparent;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],52:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"layer-websdk":111}],54:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -13560,7 +14074,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-last-message", "", "");
   layerUI.buildStyle("layer-conversation-last-message", "layer-conversation-last-message, .layer-custom-mime-type {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],53:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],55:[function(require,module,exports){
 /**
  * The Layer widget renders a title for a layer.Conversation.
  *
@@ -13688,7 +14202,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-conversation-title", "", "");
   layerUI.buildStyle("layer-conversation-title", "layer-conversation-title {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],54:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],56:[function(require,module,exports){
 /**
  * The Layer Date widget renders a date.
  *
@@ -13856,7 +14370,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-date", "", "");
   layerUI.buildStyle("layer-date", "layer-date {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],55:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],57:[function(require,module,exports){
 /**
  * The Layer Delete widget renders a deletion button.
  *
@@ -14002,7 +14516,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],56:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"layer-websdk":111}],58:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -14123,7 +14637,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],57:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"layer-websdk":111}],59:[function(require,module,exports){
 /**
  * The Layer Loading Spinner/indicator
  *
@@ -14148,7 +14662,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-loading-indicator", "<div></div>", "");
   layerUI.buildStyle("layer-loading-indicator", "@-webkit-keyframes layer-loader {\nto { -webkit-transform: rotate(360deg); }\n}\n@keyframes layer-loader {\nto { transform: rotate(360deg); }\n}\nlayer-loading-indicator {\ndisplay: block;\nmargin: 15px 0px;\nwidth: 50px;\nheight: 50px;\n}\nlayer-loading-indicator > div {\nbox-sizing: border-box;\nwidth: 48px;\nheight: 48px;\nborder-radius: 50%;\nbackground: transparent;\nborder-width: 4px;\nborder-style: solid;\n-webkit-animation: layer-loader 1.2s infinite linear;\nanimation: layer-loader 1.2s infinite linear;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],58:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],60:[function(require,module,exports){
 /**
  * The Layer Menu Button renders a menu button and has associated menu items.
  *
@@ -14251,7 +14765,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../layer-menu/layer-menu":59,"layer-websdk":109}],59:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../layer-menu/layer-menu":61,"layer-websdk":111}],61:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -14377,7 +14891,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-menu", "", "");
   layerUI.buildStyle("layer-menu", "layer-menu {\ndisplay: none;\nposition: absolute;\n}\nlayer-menu.layer-menu-list-showing {\ndisplay: block;\nz-index: 10;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],60:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"layer-websdk":111}],62:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -14520,7 +15034,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"layer-websdk":109}],61:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"layer-websdk":111}],63:[function(require,module,exports){
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
@@ -14698,7 +15212,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/size-property":91,"layer-websdk":109}],62:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/size-property":93,"layer-websdk":111}],64:[function(require,module,exports){
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
  *
@@ -14817,7 +15331,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-replaceable-content", "<div class='layer-replaceable-inner' layer-id='content'></div>", "");
   layerUI.buildStyle("layer-replaceable-content", "layer-replaceable-content {\ndisplay: flex;\nflex-direction: row;\n}\n.layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],63:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],65:[function(require,module,exports){
 /**
  * The Layer Send button widget provides an alternative to hitting a keyboard `ENTER` key for sending a message.
  *
@@ -14886,7 +15400,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-send-button", "<div></div>", "");
   layerUI.buildStyle("layer-send-button", "layer-send-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-send-button div {\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],64:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],66:[function(require,module,exports){
 /**
  * The Start of Conversation which renders some customizable welcome message based on the Conversation
  *
@@ -14921,7 +15435,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-start-of-conversation", "Conversation began <layer-date layer-id='startDate' default-format='{\"month\": \"long\", \"year\": \"numeric\", \"day\": \"numeric\", \"hour\": \"numeric\", \"minute\": \"numeric\" }' today-format='{\"hour\": \"numeric\", \"minute\": \"numeric\"}' week-format='{\"weekday\": \"long\", \"hour\": \"numeric\", \"minute\": \"numeric\"}'></layer-date>", "");
   layerUI.buildStyle("layer-start-of-conversation", "layer-start-of-conversation {\ndisplay: block;\nwhite-space: nowrap;\ntext-overflow: ellipsis;\noverflow: hidden;\n}\nlayer-start-of-conversation layer-date {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],65:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],67:[function(require,module,exports){
 /**
  * The Layer Typing Indicator widget renders a short description of who is currently typing into the current Conversation.
  *
@@ -15091,7 +15605,7 @@ var _component = require('../../../components/component');
   layerUI.buildAndRegisterTemplate("layer-typing-indicator", "<span class='layer-typing-message' layer-id='panel'></span>", "");
   layerUI.buildStyle("layer-typing-indicator", "layer-typing-indicator {\ndisplay: block;\n}\nlayer-typing-indicator span {\ndisplay: none;\n}\nlayer-typing-indicator.layer-typing-occuring span {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33}],66:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34}],68:[function(require,module,exports){
 /**
  *
  * @class
@@ -15133,7 +15647,7 @@ var _component = require('../../component');
     }
   }
 }); 
-},{"../../component":33}],67:[function(require,module,exports){
+},{"../../component":34}],69:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -15255,7 +15769,7 @@ module.exports = {
     setupMessage: function setupMessage() {
       // The rootPart is typically the Root Part of the message, but the Card View may be asked to render subcards
       // in which case its rootPart property will be preset
-      var rootPart = this.message.getPartsMatchingAttribute({ 'role': 'root' })[0];
+      var rootPart = this.message.getPartsMatchingAttribute({ role: 'root' })[0];
       if (!this.rootPart) {
         this.rootPart = rootPart;
       }
@@ -15276,6 +15790,7 @@ module.exports = {
       this.nodes.ui = cardUI;
 
       var cardContainerClass = this.cardContainerTagName;
+      if (this.cardContainerTagName) this.classList.add(this.cardContainerTagName);
       if (cardUI.isCardPrimitive) this.classList.add('layer-card-primitive');
       if (cardContainerClass) {
         var cardContainer = this.createElement(cardContainerClass, {
@@ -15323,7 +15838,7 @@ module.exports = {
     }
   }
 });
-},{"../../components/component":33,"../../mixins/message-handler":89}],68:[function(require,module,exports){
+},{"../../components/component":34,"../../mixins/message-handler":91}],70:[function(require,module,exports){
 /**
  * The Layer Image MessageHandler renders a single MessagePart image, or an Atlas 3-message-part Image.
  *
@@ -15566,7 +16081,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":33,"../../../mixins/message-handler":89,"../../../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100}],69:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":34,"../../../mixins/message-handler":91,"../../../utils/sizing":98,"blueimp-load-image/js/load-image":104,"blueimp-load-image/js/load-image-exif":100,"blueimp-load-image/js/load-image-meta":101,"blueimp-load-image/js/load-image-orientation":102}],71:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
@@ -15614,7 +16129,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 });
 
 // Do not register this handler
-},{"../../components/component":33,"../../mixins/message-handler":89}],70:[function(require,module,exports){
+},{"../../components/component":34,"../../mixins/message-handler":91}],72:[function(require,module,exports){
 /**
  * The Layer Video MessageHandler renders a single MessagePart Video, or an Atlas 3-message-part Video.
  *
@@ -15729,7 +16244,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":33,"../../mixins/message-handler":89,"../../utils/sizing":96}],71:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../../mixins/message-handler":91,"../../utils/sizing":98}],73:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -15763,7 +16278,7 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":97}],72:[function(require,module,exports){
+},{"../../base":4,"autolinker":99}],74:[function(require,module,exports){
 /**
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
@@ -15793,7 +16308,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4}],73:[function(require,module,exports){
+},{"../../base":4}],75:[function(require,module,exports){
 /**
  * The Layer Emoji TextHandler replaces all :smile: and :-) with emoji images
  *
@@ -15844,7 +16359,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":106,"twemoji":107}],74:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":108,"twemoji":109}],76:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -15870,7 +16385,7 @@ layerUI.registerTextHandler({
 });
 */
 "use strict";
-},{}],75:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /**
  * The Layer Newline TextHandler replaces all newline characters with <br/> tags.
  *
@@ -15925,7 +16440,7 @@ _base2.default.registerTextHandler({
     textData.text = body;
   }
 }); 
-},{"../../base":4}],76:[function(require,module,exports){
+},{"../../base":4}],78:[function(require,module,exports){
 /**
  * The Layer Youtube URL TextHandler replaces all youtube-like URLs with a video player.
  *
@@ -15960,7 +16475,7 @@ layerUI.registerTextHandler({
 });
 */
 "use strict";
-},{}],77:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -16041,6 +16556,7 @@ require('./cards/receipt/layer-receipt-card');
 
 require('./cards/choice/choice-model');
 require('./cards/choice/layer-choice-card');
+require('./cards/choice/layer-choice-tiles-card');
 
 require('./cards/layer-standard-card-container');
 require('./cards/layer-titled-card-container');
@@ -16137,6 +16653,7 @@ require('./cards/receipt/layer-receipt-card');
 
 require('./cards/choice/choice-model');
 require('./cards/choice/layer-choice-card');
+require('./cards/choice/layer-choice-tiles-card');
 
 require('./cards/layer-standard-card-container');
 require('./cards/layer-titled-card-container');
@@ -16191,7 +16708,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/file/file-model":13,"./cards/file/layer-file-card":14,"./cards/image/image-model":15,"./cards/image/layer-image-card":16,"./cards/layer-standard-card-container":17,"./cards/layer-titled-card-container":18,"./cards/link/layer-link-card":19,"./cards/link/link-model":20,"./cards/location/layer-location-card":21,"./cards/location/location-model":22,"./cards/models/organization-model":23,"./cards/models/person-model":24,"./cards/product/layer-product-card":25,"./cards/product/product-model":26,"./cards/receipt/layer-receipt-card":27,"./cards/receipt/receipt-model":28,"./cards/response/layer-response-card":29,"./cards/response/response-model":30,"./cards/text/layer-text-card":31,"./cards/text/text-model":32,"./components/conversation-list/layer-conversation-list/layer-conversation-list":36,"./components/identity-list/layer-identity-list/layer-identity-list":38,"./components/layer-conversation-view/layer-conversation-view":39,"./components/layer-notifier/layer-notifier":40,"./components/membership-list-panel/layer-membership-list/layer-membership-list":42,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":56,"./components/subcomponents/layer-presence/layer-presence":61,"./components/subcomponents/layer-send-button/layer-send-button":63,"./handlers/message/layer-card-view":67,"./handlers/message/layer-message-image/layer-message-image":68,"./handlers/message/layer-message-video":70,"./handlers/text/autolinker":71,"./handlers/text/code-blocks":72,"./handlers/text/emoji":73,"./handlers/text/images":74,"./handlers/text/newline":75,"./handlers/text/youtube":76,"./layer-ui":78,"./mixins/focus-on-keydown":81,"./mixins/has-query":82,"./mixins/list":87,"./mixins/list-item":84,"./mixins/list-item-selection":83,"./mixins/list-selection":86,"./mixins/main-component":88,"./mixins/message-handler":89,"./utils/animated-scroll":94,"./utils/date-separator":95}],78:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/choice/layer-choice-tiles-card":13,"./cards/file/file-model":14,"./cards/file/layer-file-card":15,"./cards/image/image-model":16,"./cards/image/layer-image-card":17,"./cards/layer-standard-card-container":18,"./cards/layer-titled-card-container":19,"./cards/link/layer-link-card":20,"./cards/link/link-model":21,"./cards/location/layer-location-card":22,"./cards/location/location-model":23,"./cards/models/organization-model":24,"./cards/models/person-model":25,"./cards/product/layer-product-card":26,"./cards/product/product-model":27,"./cards/receipt/layer-receipt-card":28,"./cards/receipt/receipt-model":29,"./cards/response/layer-response-card":30,"./cards/response/response-model":31,"./cards/text/layer-text-card":32,"./cards/text/text-model":33,"./components/conversation-list/layer-conversation-list/layer-conversation-list":37,"./components/identity-list/layer-identity-list/layer-identity-list":39,"./components/layer-conversation-view/layer-conversation-view":40,"./components/layer-notifier/layer-notifier":41,"./components/membership-list-panel/layer-membership-list/layer-membership-list":43,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":58,"./components/subcomponents/layer-presence/layer-presence":63,"./components/subcomponents/layer-send-button/layer-send-button":65,"./handlers/message/layer-card-view":69,"./handlers/message/layer-message-image/layer-message-image":70,"./handlers/message/layer-message-video":72,"./handlers/text/autolinker":73,"./handlers/text/code-blocks":74,"./handlers/text/emoji":75,"./handlers/text/images":76,"./handlers/text/newline":77,"./handlers/text/youtube":78,"./layer-ui":80,"./mixins/focus-on-keydown":83,"./mixins/has-query":84,"./mixins/list":89,"./mixins/list-item":86,"./mixins/list-item-selection":85,"./mixins/list-selection":88,"./mixins/main-component":90,"./mixins/message-handler":91,"./utils/animated-scroll":96,"./utils/date-separator":97}],80:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -16320,7 +16837,7 @@ _base2.default.setupMixins = function setupMixins(mixins) {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":33,"./handlers/message/layer-message-unknown":69,"webcomponents.js/webcomponents-lite":108}],79:[function(require,module,exports){
+},{"./base":4,"./components/component":34,"./handlers/message/layer-message-unknown":71,"webcomponents.js/webcomponents-lite":110}],81:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -16370,7 +16887,7 @@ module.exports = {
     }
   }
 };
-},{}],80:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to be a drop target for files.
  *
@@ -16583,7 +17100,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":13,"../cards/image/image-model":15,"../utils/sizing":96,"blueimp-load-image/js/load-image":102,"blueimp-load-image/js/load-image-exif":98,"blueimp-load-image/js/load-image-meta":99,"blueimp-load-image/js/load-image-orientation":100,"layer-websdk":109}],81:[function(require,module,exports){
+},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":14,"../cards/image/image-model":16,"../utils/sizing":98,"blueimp-load-image/js/load-image":104,"blueimp-load-image/js/load-image-exif":100,"blueimp-load-image/js/load-image-meta":101,"blueimp-load-image/js/load-image-orientation":102,"layer-websdk":111}],83:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to refocus when keyboard input is received.
  *
@@ -16638,7 +17155,7 @@ module.exports = {
     }
   }
 };
-},{}],82:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /**
  * A Mixin for main components that can receive or generate a Query
  *
@@ -16789,7 +17306,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":109}],83:[function(require,module,exports){
+},{"layer-websdk":111}],85:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -16824,7 +17341,7 @@ module.exports = {
     }
   }
 };
-},{}],84:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /**
  * A List Item Mixin that provides common properties, shortcuts and code.
  *
@@ -17031,7 +17548,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":33}],85:[function(require,module,exports){
+},{"../base":4,"../components/component":34}],87:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that data is currently loading.
  *
@@ -17056,7 +17573,7 @@ module.exports = {
 
   }
 }; 
-},{"../components/subcomponents/layer-loading-indicator/layer-loading-indicator":57}],86:[function(require,module,exports){
+},{"../components/subcomponents/layer-loading-indicator/layer-loading-indicator":59}],88:[function(require,module,exports){
 /**
  * A List Mixin that add a `selectedId` property to a List.
  *
@@ -17169,7 +17686,7 @@ module.exports = {
     }
   }
 };
-},{}],87:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /**
  * A List Mixin that provides common list patterns
  *
@@ -17729,7 +18246,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":33,"./has-query":82,"./throttler":93,"layer-websdk":109}],88:[function(require,module,exports){
+},{"../base":4,"../components/component":34,"./has-query":84,"./throttler":95,"layer-websdk":111}],90:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
@@ -17836,7 +18353,7 @@ module.exports = {
     }
   }
 }; 
-},{"../base":4,"../components/component":33,"layer-websdk":109}],89:[function(require,module,exports){
+},{"../base":4,"../components/component":34,"layer-websdk":111}],91:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -17990,7 +18507,7 @@ module.exports = {
     onSent: function onSent() {}
   }
 }; 
-},{"../components/component":33}],90:[function(require,module,exports){
+},{"../components/component":34}],92:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that there is no more data to page in.
  *
@@ -18051,7 +18568,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":109}],91:[function(require,module,exports){
+},{"layer-websdk":111}],93:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -18084,7 +18601,7 @@ module.exports = {
     }
   }
 }; 
-},{"../components/component":33}],92:[function(require,module,exports){
+},{"../components/component":34}],94:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -18135,7 +18652,7 @@ module.exports = {
     }
   }
 };
-},{}],93:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -18179,7 +18696,7 @@ module.exports = {
     }
   }
 };
-},{}],94:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 "use strict";
 
 var requestAnimFrame = function () {
@@ -18275,7 +18792,7 @@ module.exports = {
     animatedScrollTo: animatedScrollTo,
     animatedScrollLeftTo: animatedScrollLeftTo
 };
-},{}],95:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 /**
  * Use this module to put a date separator between Messages from different dates in your Messages List.
  *
@@ -18327,7 +18844,7 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
     _base2.default.addListItemSeparator(widget, '', dateClassName, true);
   }
 };
-},{"../base":4}],96:[function(require,module,exports){
+},{"../base":4}],98:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -18358,7 +18875,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],97:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -22536,7 +23053,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22838,7 +23355,7 @@ return Autolinker;
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":102,"./load-image-meta":99}],99:[function(require,module,exports){
+},{"./load-image":104,"./load-image-meta":101}],101:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -22999,7 +23516,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102}],100:[function(require,module,exports){
+},{"./load-image":104}],102:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23186,7 +23703,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102,"./load-image-meta":99,"./load-image-scale":101}],101:[function(require,module,exports){
+},{"./load-image":104,"./load-image-meta":101,"./load-image-scale":103}],103:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23470,7 +23987,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":102}],102:[function(require,module,exports){
+},{"./load-image":104}],104:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -23610,9 +24127,9 @@ return Autolinker;
   }
 }(window))
 
-},{}],103:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 
-},{}],104:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -23818,7 +24335,7 @@ return Autolinker;
   exports['default'] = Notify;
 
 }));
-},{}],105:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -24725,7 +25242,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],106:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -24743,7 +25260,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":105}],107:[function(require,module,exports){
+},{"./emoji-map.js":107}],109:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -25340,7 +25857,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],108:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -27846,7 +28363,7 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],109:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
@@ -27857,7 +28374,7 @@ if (global.layer && global.layer.Client) {
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":118}],110:[function(require,module,exports){
+},{"./lib/layer":120}],112:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -28162,6 +28679,8 @@ var ClientAuthenticator = function (_Root) {
     value: function connect() {
       var userId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
+      if (this.isAuthenticated) return this;
+
       var user = void 0;
       this.isConnected = false;
       this._lastChallengeTime = 0;
@@ -28223,6 +28742,8 @@ var ClientAuthenticator = function (_Root) {
     value: function connectWithSession(userId, sessionToken) {
       var _this3 = this;
 
+      if (this.isAuthenticated) return this;
+
       var user = void 0;
       this.isConnected = false;
       this.user = null;
@@ -28250,9 +28771,9 @@ var ClientAuthenticator = function (_Root) {
 
       this.isConnected = true;
       setTimeout(function () {
-        return _this3._authComplete({
-          session_token: sessionToken
-        }, false);
+        if (!_this3.isAuthenticated) {
+          _this3._authComplete({ session_token: sessionToken }, false);
+        }
       }, 1);
       return this;
     }
@@ -29528,13 +30049,23 @@ ClientAuthenticator._supportedEvents = [
  * @event
  * @private
  */
-'state-change'].concat(Root._supportedEvents);
+'state-change',
+
+/**
+ * An operation has been received via the websocket.
+ *
+ * Used for custom/complex operations that cannot be handled via `udpate` requests.
+ *
+ * @event
+ * @private
+ */
+'websocket:operation'].concat(Root._supportedEvents);
 
 Root.initClass.apply(ClientAuthenticator, [ClientAuthenticator, 'ClientAuthenticator']);
 
 module.exports = ClientAuthenticator;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./logger":119,"./models/identity":135,"./online-state-manager":140,"./root":149,"./sync-event":150,"./sync-manager":151,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],111:[function(require,module,exports){
+},{"./client-utils":114,"./const":116,"./db-manager":117,"./layer-error":118,"./logger":121,"./models/identity":138,"./online-state-manager":143,"./root":152,"./sync-event":153,"./sync-manager":154,"./websockets/change-manager":162,"./websockets/request-manager":163,"./websockets/socket-manager":164,"./xhr":165}],113:[function(require,module,exports){
 'use strict';
 
 /**
@@ -29636,7 +30167,7 @@ module.exports = {
   addListener: addListener,
   removeListener: removeListener
 };
-},{"./client-utils":112}],112:[function(require,module,exports){
+},{"./client-utils":114}],114:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -29793,7 +30324,7 @@ exports.decode = function (str) {
     default:
       throw new Error('Illegal base64url string!');
   }
-  return atob(output);
+  return exports.atob(output);
 };
 
 /**
@@ -30059,7 +30590,7 @@ exports.asciiInit = function (version) {
   return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils/defer":157,"./utils/layer-parser":158,"uuid":166}],113:[function(require,module,exports){
+},{"./utils/defer":160,"./utils/layer-parser":161,"uuid":169}],115:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -30156,6 +30687,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * @mixin layer.mixins.ClientChannels
  * @mixin layer.mixins.ClientMessages
  * @mixin layer.mixins.ClientQueries
+ * @mixin layer.mixin.WebsocketOperations
  * @mixin layer.mixins.ClientCardModels
  */
 
@@ -30587,16 +31119,10 @@ var Client = function (_ClientAuth) {
   }, {
     key: '_isCachedObject',
     value: function _isCachedObject(obj) {
-      if (obj._loadType === 'fetched') return true;
       var list = Object.keys(this._models.queries);
       for (var i = 0; i < list.length; i++) {
         var query = this._models.queries[list[i]];
-        if (query._getItem(obj.id)) {
-          if (obj._loadType === 'websocket') obj._loadType = 'queried';
-          return true;
-        } else if (obj._loadType === 'websocket' && Date.now() - obj.localCreatedAt.getTime() < Client.WEBSOCKET_CACHE_PURGE_INTERVAL) {
-          return true;
-        }
+        if (query._getItem(obj.id)) return true;
       }
       return false;
     }
@@ -30823,20 +31349,20 @@ Client.prototype.telemetryMonitor = null;
  * @static
  * @type {String}
  */
-Client.version = '3.3.7';
+Client.version = '3.4.2';
 
 /**
- * Any Conversation or Message that is part of a Query's results are kept in memory for as long as it
- * remains in that Query.  However, when a websocket event delivers new Messages and Conversations that
+ * Any  Message that is part of a Query's results are kept in memory for as long as it
+ * remains in that Query.  However, when a websocket event delivers new Messages  that
  * are NOT part of a Query, how long should they stick around in memory?  Why have them stick around?
  * Perhaps an app wants to post a notification of a new Message or Conversation... and wants to keep
- * the object local for a little while.  Default is 10 minutes before checking to see if
+ * the object local for a little while.  Default is 2 hours before checking to see if
  * the object is part of a Query or can be uncached.  Value is in miliseconds.
  * @static
  * @type {number}
  */
-Client.QUERIED_CACHE_PURGE_INTERVAL = 10 * 60 * 1000; // 10 minutes
-Client.WEBSOCKET_CACHE_PURGE_INTERVAL = 60 * 60 * 1000; // one hour
+
+Client.CACHE_PURGE_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours * 60 minutes per hour * 60 seconds per minute * 1000 miliseconds/second
 
 Client._ignoredEvents = ['conversations:loaded', 'conversations:loaded-error'];
 
@@ -30863,10 +31389,10 @@ Client._supportedEvents = [
  */
 'typing-indicator-change'].concat(ClientAuth._supportedEvents);
 
-Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/client-card-models')];
+Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/websocket-operations'), require('./mixins/client-card-models')];
 Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
-},{"./client-authenticator":110,"./client-registry":111,"./client-utils":112,"./layer-error":116,"./logger":119,"./mixins/client-card-models":120,"./mixins/client-channels":121,"./mixins/client-conversations":122,"./mixins/client-identities":123,"./mixins/client-members":124,"./mixins/client-messages":125,"./mixins/client-queries":126,"./models/announcement":127,"./models/channel":130,"./models/channel-message":129,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message-part":137,"./root":149,"./telemetry-monitor":152,"./typing-indicators/typing-indicator-listener":153,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156}],114:[function(require,module,exports){
+},{"./client-authenticator":112,"./client-registry":113,"./client-utils":114,"./layer-error":118,"./logger":121,"./mixins/client-card-models":122,"./mixins/client-channels":123,"./mixins/client-conversations":124,"./mixins/client-identities":125,"./mixins/client-members":126,"./mixins/client-messages":127,"./mixins/client-queries":128,"./mixins/websocket-operations":129,"./models/announcement":130,"./models/channel":133,"./models/channel-message":132,"./models/conversation":137,"./models/conversation-message":136,"./models/identity":138,"./models/membership":139,"./models/message-part":140,"./root":152,"./telemetry-monitor":155,"./typing-indicators/typing-indicator-listener":156,"./typing-indicators/typing-listener":158,"./typing-indicators/typing-publisher":159}],116:[function(require,module,exports){
 'use strict';
 
 /**
@@ -30962,7 +31488,7 @@ module.exports = {
     MY_DEVICES: 'my_devices'
   }
 };
-},{}],115:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32565,7 +33091,7 @@ DbManager._supportedEvents = ['open', 'error'].concat(Root._supportedEvents);
 
 Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
-},{"./client-utils":112,"./const":114,"./logger":119,"./models/announcement":127,"./root":149,"./sync-event":150}],116:[function(require,module,exports){
+},{"./client-utils":114,"./const":116,"./logger":121,"./models/announcement":130,"./root":152,"./sync-event":153}],118:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -32680,7 +33206,7 @@ var LayerError = function () {
 /**
  * A string name for the event; these names are paired with codes.
  *
- * Codes can be looked up at https://github.com/layerhq/docs/blob/web-api/specs/rest-api.md#client-errors
+ * Codes can be looked up at https://docs.layer.com/reference/client_api/errors
  * @type {String}
  */
 
@@ -32690,7 +33216,7 @@ LayerError.prototype.errType = '';
 /**
  * Numerical error code.
  *
- * https://developer.layer.com/docs/client/rest#full-list
+ * https://docs.layer.com/reference/client_api/errors
  * @type {Number}
  */
 LayerError.prototype.code = 0;
@@ -32773,7 +33299,7 @@ LayerError.dictionary = {
 };
 
 module.exports = LayerError;
-},{"./logger":119}],117:[function(require,module,exports){
+},{"./logger":121}],119:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -32982,7 +33508,7 @@ LayerEvent.prototype.target = null;
 LayerEvent.prototype.eventName = '';
 
 module.exports = LayerEvent;
-},{}],118:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -33025,7 +33551,7 @@ layer.Util = require('./client-utils');
 layer.TypingIndicators = require('./typing-indicators/typing-indicators');
 layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-listener');
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
-},{"./client":113,"./client-authenticator":110,"./client-utils":112,"./const":114,"./db-manager":115,"./layer-error":116,"./layer-event":117,"./models/announcement":127,"./models/card-model":128,"./models/channel":130,"./models/channel-message":129,"./models/container":131,"./models/content":132,"./models/conversation":134,"./models/conversation-message":133,"./models/identity":135,"./models/membership":136,"./models/message":138,"./models/message-part":137,"./models/syncable":139,"./online-state-manager":140,"./queries/query":148,"./queries/query-builder":147,"./root":149,"./sync-event":150,"./sync-manager":151,"./typing-indicators/typing-indicators":154,"./typing-indicators/typing-listener":155,"./typing-indicators/typing-publisher":156,"./websockets/change-manager":159,"./websockets/request-manager":160,"./websockets/socket-manager":161,"./xhr":162}],119:[function(require,module,exports){
+},{"./client":115,"./client-authenticator":112,"./client-utils":114,"./const":116,"./db-manager":117,"./layer-error":118,"./layer-event":119,"./models/announcement":130,"./models/card-model":131,"./models/channel":133,"./models/channel-message":132,"./models/container":134,"./models/content":135,"./models/conversation":137,"./models/conversation-message":136,"./models/identity":138,"./models/membership":139,"./models/message":141,"./models/message-part":140,"./models/syncable":142,"./online-state-manager":143,"./queries/query":151,"./queries/query-builder":150,"./root":152,"./sync-event":153,"./sync-manager":154,"./typing-indicators/typing-indicators":157,"./typing-indicators/typing-listener":158,"./typing-indicators/typing-publisher":159,"./websockets/change-manager":162,"./websockets/request-manager":163,"./websockets/socket-manager":164,"./xhr":165}],121:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -33137,7 +33663,7 @@ Logger.prototype.level = typeof jasmine === 'undefined' ? ERROR : NONE;
 var logger = new Logger();
 
 module.exports = logger;
-},{"./const":114}],120:[function(require,module,exports){
+},{"./const":116}],122:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33272,7 +33798,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":112,"../layer-error":116,"../models/card-model":128}],121:[function(require,module,exports){
+},{"../client-utils":114,"../layer-error":118,"../models/card-model":131}],123:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33688,7 +34214,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/channel":130}],122:[function(require,module,exports){
+},{"../layer-error":118,"../models/channel":133}],124:[function(require,module,exports){
 'use strict';
 
 /**
@@ -33935,8 +34461,6 @@ module.exports = {
         // Make sure the client is set so that the next event bubbles up
         if (conversation.clientId !== this.appId) conversation.clientId = this.appId;
         this._triggerAsync('conversations:add', { conversations: [conversation] });
-
-        this._scheduleCheckAndPurgeCache(conversation);
       }
     },
 
@@ -34106,7 +34630,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/conversation":134}],123:[function(require,module,exports){
+},{"../layer-error":118,"../models/conversation":137}],125:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34411,7 +34935,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":112,"../layer-error":116,"../models/identity":135,"../sync-event":150}],124:[function(require,module,exports){
+},{"../client-utils":114,"../layer-error":118,"../models/identity":138,"../sync-event":153}],126:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34572,7 +35096,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../models/membership":136,"../models/syncable":139}],125:[function(require,module,exports){
+},{"../layer-error":118,"../models/membership":139,"../models/syncable":142}],127:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34913,10 +35437,25 @@ module.exports = {
           message.destroy();
         }
       });
+    },
+
+
+    /**
+     * Iterate over every locally cached Message, calling your function.
+     *
+     * @param {Function} fn
+     * @param {layer.Message} fn.message
+     */
+    forEachMessage: function forEachMessage(fn) {
+      var _this3 = this;
+
+      Object.keys(this._models.messages).forEach(function (id) {
+        return fn(_this3._models.messages[id]);
+      });
     }
   }
 };
-},{"../layer-error":116,"../models/message":138,"../models/syncable":139}],126:[function(require,module,exports){
+},{"../layer-error":118,"../models/message":141,"../models/syncable":142}],128:[function(require,module,exports){
 'use strict';
 
 /**
@@ -35067,7 +35606,107 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":116,"../queries/announcements-query":141,"../queries/channels-query":142,"../queries/conversations-query":143,"../queries/identities-query":144,"../queries/members-query":145,"../queries/messages-query":146,"../queries/query":148}],127:[function(require,module,exports){
+},{"../layer-error":118,"../queries/announcements-query":144,"../queries/channels-query":145,"../queries/conversations-query":146,"../queries/identities-query":147,"../queries/members-query":148,"../queries/messages-query":149,"../queries/query":151}],129:[function(require,module,exports){
+'use strict';
+
+/**
+ * Adds handling of custom websocket operations.
+ *
+ * This is handled by a Client mixin rather than:
+ *
+ * * The Client itself so we can keep the client simple and clean
+ * * The Websocket Change Manager so that the change manager does not need to know
+ *   how to handle any operation on any data.  Its primarily aimed at insuring websocket
+ *   events get processed, not knowing minute details of the objects.
+ *
+ * @class layer.mixins.WebsocketOperations
+ */
+
+var Identity = require('../models/identity');
+var ErrorDictionary = require('../layer-error').dictionary;
+var Util = require('../client-utils');
+
+var _require = require('../const'),
+    RECEIPT_STATE = _require.RECEIPT_STATE;
+
+var _require2 = require('../sync-event'),
+    WebsocketSyncEvent = _require2.WebsocketSyncEvent;
+
+module.exports = {
+  lifecycle: {
+
+    // Listen for any websocket operations and call our handler
+    constructor: function constructor(options) {
+      this.on('websocket:operation', this._handleWebsocketOperation, this);
+    }
+  },
+  methods: {
+
+    /**
+     * Enourmous switch statement for handling our immense library of operations.
+     *
+     * Any time we have a Websocket Operation, this switch statement routes the event to the
+     * appropriate handler.
+     *
+     * @param {Object} evt
+     */
+    _handleWebsocketOperation: function _handleWebsocketOperation(evt) {
+      switch (evt.data.method) {
+        case 'Conversation.mark_all_read':
+          return this._handleMarkAllReadOperation(evt.data);
+      }
+    },
+
+
+    /**
+     * Process a mark_all_read websocket operation.
+     *
+     * This will update recipientStatus and isRead for all impacted messages.
+     * Note that we don't have a good mechanism of organizing all messages and simply
+     * iterate over all messages in the message cache checking if they are affected by the request.
+     *
+     * Future optimizations could:
+     *
+     * 1. Get the conversation if its cached, and update its lastMessage
+     * 2. Iterate over all queries to see if a query is for messages in this conversation
+     *
+     * That would still miss messages created via websocket `create` events but not referenced
+     * by any query or last message.
+     *
+     * @param {Object} body
+     */
+    _handleMarkAllReadOperation: function _handleMarkAllReadOperation(body) {
+      var position = body.data.position;
+      var conversation = this.getObject(body.object.id);
+      if (!conversation) return;
+      var identityId = body.data.identity.id;
+      var isOwner = this.user.id === identityId;
+
+      // Prevent read receipts from being sent when we set isRead=true
+      conversation._inMarkAllAsRead = true;
+
+      // Iterate over all messages, and operate on any message with the proper converation ID and position
+      this.forEachMessage(function (m) {
+        if (m.conversationId === conversation.id && m.position <= position) {
+
+          // NOTE: We may want to trigger "messages:change" on recipientStatus if isOwner, but
+          // don't have a strong use case for that event.
+          if (isOwner) {
+            m.recipientStatus[identityId] = RECEIPT_STATE.READ;
+            m.isRead = true;
+          } else if (m.recipientStatus[identityId] !== RECEIPT_STATE.READ) {
+            var newRecipientStatus = Util.clone(m.recipientStatus);
+
+            newRecipientStatus[identityId] = RECEIPT_STATE.READ;
+            m.recipientStatus = newRecipientStatus;
+          }
+        }
+      });
+      conversation._inMarkAllAsRead = false;
+    }
+  }
+};
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../models/identity":138,"../sync-event":153}],130:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35243,7 +35882,7 @@ Announcement.inObjectIgnore = ConversationMessage.inObjectIgnore;
 Root.initClass.apply(Announcement, [Announcement, 'Announcement']);
 Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
-},{"../layer-error":116,"../root":149,"./conversation-message":133,"./syncable":139}],128:[function(require,module,exports){
+},{"../layer-error":118,"../root":152,"./conversation-message":136,"./syncable":142}],131:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35330,23 +35969,29 @@ var CardModel = function (_Root) {
     value: function _setupMessage(doNotParse) {
       var _this4 = this;
 
-      this.id = CardModel.prefixUUID + this.part.id.replace(/^.*messages\//, '');
-      this.role = this.part.mimeAttributes.role;
-      this.childParts = this.message.getPartsMatchingAttribute({
-        'parent-node-id': this.nodeId
-      });
+      if (this.part) {
+        this.id = CardModel.prefixUUID + this.part.id.replace(/^.*messages\//, '');
+        this.role = this.part.mimeAttributes.role;
+        this.childParts = this.message.getPartsMatchingAttribute({
+          'parent-node-id': this.nodeId
+        });
+        this.parent;
 
-      // Call handlePartChanges any message edits that update a part.
-      this.part.on('messageparts:change', this._handlePartChanges, this);
-      this.childParts.forEach(function (part) {
-        return part.on('messageparts:change', _this4._handlePartChanges, _this4);
-      });
+        // Call handlePartChanges any message edits that update a part.
+        this.part.on('messageparts:change', this._handlePartChanges, this);
+        this.childParts.forEach(function (part) {
+          return part.on('messageparts:change', _this4._handlePartChanges, _this4);
+        });
+      } else {
+        this.childParts = [];
+      }
+
       this.message.on('messages:part-added', this._handlePartAdded, this);
       this.message.on('messages:part-removed', this._handlePartRemoved, this);
 
       this.message.on('destroy', this.destroy, this);
       this.message.getClient()._addCardModel(this);
-      if (!doNotParse) {
+      if (!doNotParse && this.part) {
         if (!this.part.body) this.part.fetchContent();
         this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
       }
@@ -35357,7 +36002,8 @@ var CardModel = function (_Root) {
       var _this5 = this;
 
       var body = {};
-      fields.forEach(function (fieldName) {
+      var newFields = ['action', 'purpose'].concat(fields);
+      newFields.forEach(function (fieldName) {
         body[Util.hyphenate(fieldName, '_')] = _this5[fieldName];
       });
       return body;
@@ -35383,7 +36029,9 @@ var CardModel = function (_Root) {
           responseData.participantData = responseData.participant_data;
           delete responseData.participant_data;
         }
-        this.responses = responseData;
+        if (!Util.doesObjectMatch(this.responses, responseData)) {
+          this.responses = responseData;
+        }
       }
 
       Object.keys(payload).forEach(function (propertyName) {
@@ -35419,7 +36067,7 @@ var CardModel = function (_Root) {
         if (!this.part.body) this.part.fetchContent();
         this._parseMessage(this.part.body ? JSON.parse(this.part.body) : {});
         this._triggerAsync('change');
-      } else if (part.mimeAttributes['node-id'] === this.part.mimeAttributes['node-id']) {
+      } else if (part.mimeAttributes['node-id'] === this.nodeId) {
         this.part = part;
         this._handlePartChanges();
       }
@@ -35447,8 +36095,8 @@ var CardModel = function (_Root) {
   }, {
     key: 'getModelFromPart',
     value: function getModelFromPart(role) {
-      var part = this.childParts.filter(function (part) {
-        return part.mimeAttributes.role === role;
+      var part = this.childParts.filter(function (aPart) {
+        return aPart.mimeAttributes.role === role;
       })[0];
       if (part) {
         return this.getClient().createCardModel(this.message, part);
@@ -35539,7 +36187,7 @@ var CardModel = function (_Root) {
 
   }, {
     key: '__updateResponses',
-    value: function __updateResponses() {
+    value: function __updateResponses(newResponse, oldResponse) {
       if (!this.responses) this.__responses = {};
       this._processNewResponses();
     }
@@ -35600,7 +36248,17 @@ var CardModel = function (_Root) {
   }, {
     key: 'nodeId',
     get: function get() {
-      return this.part.mimeAttributes['node-id'];
+      return this.part ? this.part.mimeAttributes['node-id'] : '';
+    }
+  }, {
+    key: 'parentPart',
+    get: function get() {
+      var parentNodeId = this.part && this.part.mimeAttributes['parent-node-id'] || this.parentNodeId;
+      if (parentNodeId) {
+        return this.message.getPartsMatchingAttribute({ 'node-id': parentNodeId })[0];
+      } else {
+        return null;
+      }
     }
   }], [{
     key: 'isSupportedMessage',
@@ -35615,12 +36273,20 @@ var CardModel = function (_Root) {
 }(Root);
 
 /**
+ * If a model is created without a Part, it may still need to know what its parent part is.
+ *
+ * @protected
+ * @type {String}
+ */
+
+
+CardModel.prototype.parentNodeId = null;
+
+/**
  * Message for this Card Model
  *
  * @type {layer.Message}
  */
-
-
 CardModel.prototype.message = null;
 
 /**
@@ -35629,6 +36295,13 @@ CardModel.prototype.message = null;
  * @type {layer.MessagePart[]}
  */
 CardModel.prototype.childParts = null;
+
+/**
+ * Custom string used to describe the purpose of this Card to Integration Services.
+ *
+ * @type {String}
+ */
+CardModel.prototype.purpose = '';
 
 /**
  * Action object contains actionEvent and actionData
@@ -35694,7 +36367,7 @@ CardModel.prefixUUID = 'layer:///cardmodels/';
 CardModel._supportedEvents = ['change'].concat(Root._supportedEvents);
 Root.initClass.apply(CardModel, [CardModel, 'CardModel']);
 module.exports = CardModel;
-},{"../client-utils":112,"../models/message":138,"../models/message-part":137,"../root":149}],129:[function(require,module,exports){
+},{"../client-utils":114,"../models/message":141,"../models/message-part":140,"../root":152}],132:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -35874,7 +36547,7 @@ ChannelMessage.inObjectIgnore = Message.inObjectIgnore;
 ChannelMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
-},{"../client-registry":111,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"./message":138}],130:[function(require,module,exports){
+},{"../client-registry":113,"../const":116,"../layer-error":118,"../logger":121,"../root":152,"./message":141}],133:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36563,7 +37236,7 @@ Channel._supportedEvents = [
 Root.initClass.apply(Channel, [Channel, 'Channel']);
 Syncable.subclasses.push(Channel);
 module.exports = Channel;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./channel-message":129,"./container":131,"./syncable":139}],131:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../layer-event":119,"../root":152,"./channel-message":132,"./container":134,"./syncable":142}],134:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -37205,7 +37878,7 @@ Container.FOUND_WITHOUT_REQUESTED_METADATA = 'FoundMismatch';
 Root.initClass.apply(Container, [Container, 'Container']);
 Syncable.subclasses.push(Container);
 module.exports = Container;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],132:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../root":152,"./syncable":142}],135:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37404,7 +38077,7 @@ Content.prototype.expiration = null;
 
 Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
-},{"../root":149,"../xhr":162}],133:[function(require,module,exports){
+},{"../root":152,"../xhr":165}],136:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37673,7 +38346,7 @@ var ConversationMessage = function (_Message) {
     key: '__updateIsRead',
     value: function __updateIsRead(value) {
       if (value) {
-        if (!this._inPopulateFromServer) {
+        if (!this._inPopulateFromServer && !this.getConversation()._inMarkAllAsRead) {
           this._sendReceipt(Constants.RECEIPT_STATE.READ);
         }
         this._triggerMessageRead();
@@ -37951,7 +38624,7 @@ ConversationMessage.inObjectIgnore = Message.inObjectIgnore;
 ConversationMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMessage']);
 module.exports = ConversationMessage;
-},{"../client-registry":111,"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./message":138}],134:[function(require,module,exports){
+},{"../client-registry":113,"../client-utils":114,"../const":116,"../layer-error":118,"../root":152,"./message":141}],137:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38024,6 +38697,7 @@ var LayerError = require('../layer-error');
 var Util = require('../client-utils');
 var Constants = require('../const');
 var LayerEvent = require('../layer-event');
+var logger = require('../logger');
 
 var Conversation = function (_Container) {
   _inherits(Conversation, _Container);
@@ -38266,6 +38940,45 @@ var Conversation = function (_Container) {
         }
       };
     }
+
+    /**
+     * Mark all messages in the conversation as read.
+     *
+     * Optionally provide a Message object to mark all messages up to and including
+     * the specified message as read.
+     *
+     * Will not update `message.isRead` nor `conversation.unreadCount` until after
+     * server has responded to the request.
+     *
+     * ```
+     * conversation.markAllMessagesAsRead();
+     * ```
+     *
+     * @method markAllMessagesAsRead
+     * @param {layer.Message} [message=conversation.lastMessage]
+     * @return this
+     */
+
+  }, {
+    key: 'markAllMessagesAsRead',
+    value: function markAllMessagesAsRead(message) {
+      if (!this.isSaved()) return this;
+      if (!message) message = this.lastMessage;
+      var position = !message || !message.isSaved() ? null : message.position;
+      this._xhr({
+        method: 'POST',
+        url: '/mark_all_read',
+        data: { position: position },
+        sync: {
+          operation: 'RECEIPT'
+        }
+      }, function (result) {
+        if (!result.success) {
+          logger.error('Mark all as read failed; currently this error is not handled by Layer WebSDK');
+        }
+      });
+      return this;
+    }
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(conversation) {
@@ -38283,6 +38996,7 @@ var Conversation = function (_Container) {
       });
       this.distinct = conversation.distinct;
       this.unreadCount = conversation.unread_message_count;
+      this.totalMessageCount = conversation.total_message_count;
       this.isCurrentParticipant = this.participants.indexOf(client.user) !== -1;
       _get(Conversation.prototype.__proto__ || Object.getPrototypeOf(Conversation.prototype), '_populateFromServer', this).call(this, conversation);
 
@@ -38936,6 +39650,14 @@ Conversation.prototype.lastMessage = null;
  */
 Conversation.prototype._lastMessagePosition = 0;
 
+/**
+ * Indicates if we are currently processing a markAllAsRead operation
+ *
+ * @private
+ * @property {Boolean}
+ */
+Conversation.prototype._inMarkAllAsRead = false;
+
 Conversation.eventPrefix = 'conversations';
 
 /**
@@ -39035,7 +39757,7 @@ Conversation._supportedEvents = [
 Root.initClass.apply(Conversation, [Conversation, 'Conversation']);
 Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../layer-event":117,"../root":149,"./container":131,"./conversation-message":133,"./syncable":139}],135:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../layer-event":119,"../logger":121,"../root":152,"./container":134,"./conversation-message":136,"./syncable":142}],138:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39265,6 +39987,7 @@ var Identity = function (_Syncable) {
     value: function _handlePatchEvent(newValueIn, oldValueIn, paths) {
       var _this3 = this;
 
+      var changes = [];
       paths.forEach(function (path) {
         var newValue = newValueIn,
             oldValue = oldValueIn;
@@ -39276,17 +39999,25 @@ var Identity = function (_Syncable) {
         } else if (path === 'presence.status') {
           newValue = _this3._presence.status;
           oldValue = oldValue.status;
+
+          //We receive a huge number of presence.status change events from the websocket that do not represent
+          // an actual change in value. Insure we do not trigger events announcing such a change.
+          if (newValue === oldValue) return;
         }
         var property = path.replace(/_(.)/g, function (match, value) {
           return value.toUpperCase();
         }).replace(/^presence\./, '');
-
-        _this3._triggerAsync('identities:change', {
-          property: property,
-          oldValue: oldValue,
-          newValue: newValue
-        });
+        changes.push({ property: property, oldValue: oldValue, newValue: newValue });
       });
+
+      // Don't trigger changes if the only thing to change was lastSeenAt; lastSeenAt only changes if your online,
+      // and if your online, lastSeenAt isn't all that significant.
+      // The only time changes to `lastSeenAt` should be triggered as an event is when status changes to offline
+      if (changes.length !== 1 || changes[0].property !== 'lastSeenAt') {
+        changes.forEach(function (change) {
+          return _this3._triggerAsync('identities:change', change);
+        });
+      }
     }
 
     /**
@@ -39691,7 +40422,7 @@ Root.initClass.apply(Identity, [Identity, 'Identity']);
 Syncable.subclasses.push(Identity);
 
 module.exports = Identity;
-},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],136:[function(require,module,exports){
+},{"../const":116,"../layer-error":118,"../root":152,"./syncable":142}],139:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39925,7 +40656,7 @@ Root.initClass.apply(Membership, [Membership, 'Membership']);
 Syncable.subclasses.push(Membership);
 
 module.exports = Membership;
-},{"../const":114,"../layer-error":116,"../root":149,"./syncable":139}],137:[function(require,module,exports){
+},{"../const":116,"../layer-error":118,"../root":152,"./syncable":142}],140:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40579,9 +41310,32 @@ var MessagePart = function (_Root) {
   }, {
     key: '_populateFromServer',
     value: function _populateFromServer(part) {
+      var _this9 = this;
+
       if (part.content && this._content) {
         this._content.downloadUrl = part.content.download_url;
         this._content.expiration = new Date(part.content.expiration);
+      } else {
+        var textual = this.isTextualMimeType();
+
+        // Custom handling for non-textual content
+        if (!textual) {
+
+          // If the body exists and is a blob, extract the data uri for convenience; only really relevant for image and video HTML tags.
+          if (part.body) {
+            Util.blobToBase64(this.body, function (inputBase64) {
+              if (inputBase64 !== Util.btoa(part.body)) {
+                _this9.body = new Blob([part.body], { type: _this9.mimeType });
+                if (_this9.body) _this9.url = URL.createObjectURL(_this9.body);
+              }
+            });
+          } else {
+            this.body = null;
+            this.url = '';
+          }
+        } else {
+          this.body = part.body;
+        }
       }
       this.mimeType = part.mime_type;
       this.updatedAt = part.updated_at ? new Date(part.updated_at) : null;
@@ -40683,6 +41437,11 @@ var MessagePart = function (_Root) {
         newValue: newValue,
         oldValue: oldValue
       });
+    }
+  }, {
+    key: '_updateUrl',
+    value: function _updateUrl(newValue, oldValue) {
+      if (oldValue) URL.revokeObjectURL(oldValue);
     }
   }, {
     key: '__adjustUpdatedAt',
@@ -40871,7 +41630,7 @@ MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'c
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
 module.exports = MessagePart;
-},{"../client-registry":111,"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"../xhr":162,"./content":132}],138:[function(require,module,exports){
+},{"../client-registry":113,"../client-utils":114,"../layer-error":118,"../logger":121,"../root":152,"../xhr":165,"./content":135}],141:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -41251,6 +42010,7 @@ var Message = function (_Syncable) {
      * to complete or cancel this process.
      *
      * @method presend
+     * @return this
      */
 
   }, {
@@ -42175,7 +42935,7 @@ Message._supportedEvents = [
 Root.initClass.apply(Message, [Message, 'Message']);
 Syncable.subclasses.push(Message);
 module.exports = Message;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../root":149,"./identity":135,"./message-part":137,"./syncable":139}],139:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../root":152,"./identity":138,"./message-part":140,"./syncable":142}],142:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42737,7 +43497,7 @@ Syncable.subclasses = [];
 Syncable._supportedEvents = [].concat(Root._supportedEvents);
 Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
-},{"../client-registry":111,"../const":114,"../layer-error":116,"../root":149}],140:[function(require,module,exports){
+},{"../client-registry":113,"../const":116,"../layer-error":118,"../root":152}],143:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -43146,7 +43906,7 @@ OnlineStateManager._supportedEvents = [
 Root.initClass.apply(OnlineStateManager, [OnlineStateManager, 'OnlineStateManager']);
 module.exports = OnlineStateManager;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./const":114,"./logger":119,"./root":149,"./xhr":162}],141:[function(require,module,exports){
+},{"./client-utils":114,"./const":116,"./logger":121,"./root":152,"./xhr":165}],144:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43239,7 +43999,7 @@ AnnouncementsQuery.prototype.model = Query.Announcement;
 Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuery']);
 
 module.exports = AnnouncementsQuery;
-},{"../root":149,"./messages-query":146,"./query":148}],142:[function(require,module,exports){
+},{"../root":152,"./messages-query":149,"./query":151}],145:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43536,7 +44296,7 @@ ChannelsQuery.prototype.model = Query.Channel;
 Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 
 module.exports = ChannelsQuery;
-},{"../const":114,"../root":149,"./conversations-query":143,"./query":148}],143:[function(require,module,exports){
+},{"../const":116,"../root":152,"./conversations-query":146,"./query":151}],146:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43866,7 +44626,7 @@ ConversationsQuery.prototype.model = Query.Conversation;
 Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuery']);
 
 module.exports = ConversationsQuery;
-},{"../client-utils":112,"../const":114,"../root":149,"./query":148}],144:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../root":152,"./query":151}],147:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -43985,7 +44745,7 @@ IdentitiesQuery.prototype.model = Query.Identity;
 Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 
 module.exports = IdentitiesQuery;
-},{"../root":149,"./query":148}],145:[function(require,module,exports){
+},{"../root":152,"./query":151}],148:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44160,7 +44920,7 @@ MembersQuery.prototype.model = Query.Membership;
 Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 
 module.exports = MembersQuery;
-},{"../layer-error":116,"../logger":119,"../root":149,"./query":148}],146:[function(require,module,exports){
+},{"../layer-error":118,"../logger":121,"../root":152,"./query":151}],149:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44644,7 +45404,7 @@ MessagesQuery.prototype.model = Query.Message;
 Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 
 module.exports = MessagesQuery;
-},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149,"./query":148}],147:[function(require,module,exports){
+},{"../client-utils":114,"../layer-error":118,"../logger":121,"../root":152,"./query":151}],150:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45330,7 +46090,7 @@ var QueryBuilder = {
 };
 
 module.exports = QueryBuilder;
-},{"./query":148}],148:[function(require,module,exports){
+},{"./query":151}],151:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46506,7 +47266,7 @@ Query._supportedEvents = [
 Root.initClass.apply(Query, [Query, 'Query']);
 
 module.exports = Query;
-},{"../client-utils":112,"../layer-error":116,"../logger":119,"../root":149}],149:[function(require,module,exports){
+},{"../client-utils":114,"../layer-error":118,"../logger":121,"../root":152}],152:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -47341,7 +48101,7 @@ Root._supportedEvents = ['destroy', 'all'];
 Root._ignoredEvents = [];
 module.exports = Root;
 module.exports.initClass = initClass;
-},{"./client-utils":112,"./layer-error":116,"./layer-event":117,"./logger":119,"backbone-events-standalone/backbone-events-standalone":163}],150:[function(require,module,exports){
+},{"./client-utils":114,"./layer-error":118,"./layer-event":119,"./logger":121,"backbone-events-standalone/backbone-events-standalone":166}],153:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -47741,7 +48501,7 @@ var WebsocketSyncEvent = function (_SyncEvent2) {
 WebsocketSyncEvent.prototype.returnChangesArray = false;
 
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
-},{"./client-utils":112}],151:[function(require,module,exports){
+},{"./client-utils":114}],154:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48744,7 +49504,7 @@ SyncManager._supportedEvents = [
 
 Root.initClass(SyncManager);
 module.exports = SyncManager;
-},{"./client-utils":112,"./logger":119,"./root":149,"./sync-event":150,"./xhr":162}],152:[function(require,module,exports){
+},{"./client-utils":114,"./logger":121,"./root":152,"./sync-event":153,"./xhr":165}],155:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -49256,7 +50016,7 @@ TelemetryMonitor._supportedEvents = Root._supportedEvents.concat(['telemetry-env
 Root.initClass.apply(TelemetryMonitor, [TelemetryMonitor, 'TelemetryMonitor']);
 module.exports = TelemetryMonitor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":112,"./root":149,"./xhr":162}],153:[function(require,module,exports){
+},{"./client-utils":114,"./root":152,"./xhr":165}],156:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49579,7 +50339,7 @@ TypingIndicatorListener._supportedEvents = [
 
 Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingIndicatorListener']);
 module.exports = TypingIndicatorListener;
-},{"../client-registry":111,"../root":149,"./typing-indicators":154}],154:[function(require,module,exports){
+},{"../client-registry":113,"../root":152,"./typing-indicators":157}],157:[function(require,module,exports){
 'use strict';
 
 /**
@@ -49614,7 +50374,7 @@ module.exports = {
    */
   FINISHED: 'finished'
 };
-},{}],155:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49834,7 +50594,7 @@ var TypingListener = function () {
 }();
 
 module.exports = TypingListener;
-},{"./typing-indicators":154,"./typing-publisher":156}],156:[function(require,module,exports){
+},{"./typing-indicators":157,"./typing-publisher":159}],159:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50099,7 +50859,7 @@ var TypingPublisher = function () {
 }();
 
 module.exports = TypingPublisher;
-},{"../client-registry":111,"./typing-indicators":154}],157:[function(require,module,exports){
+},{"../client-registry":113,"./typing-indicators":157}],160:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -50197,7 +50957,7 @@ if (setImmediate) {
   });
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],158:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 'use strict';
 
 /**
@@ -50288,7 +51048,7 @@ module.exports = function (request) {
   if (!parser) createParser(request);
   parser.parse(request);
 };
-},{"layer-patch":164}],159:[function(require,module,exports){
+},{"layer-patch":167}],162:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50344,6 +51104,8 @@ var WebsocketChangeManager = function () {
     value: function _handleChange(evt) {
       if (evt.data.type === 'change') {
         this._processChange(evt.data.body);
+      } else if (evt.data.type === 'operation') {
+        this.client.trigger('websocket:operation', { data: evt.data.body });
       }
     }
 
@@ -50499,7 +51261,7 @@ var WebsocketChangeManager = function () {
 WebsocketChangeManager.prototype.client = null;
 
 module.exports = WebsocketChangeManager;
-},{"../client-utils":112,"../logger":119,"../models/channel":130,"../models/conversation":134,"../models/message":138}],160:[function(require,module,exports){
+},{"../client-utils":114,"../logger":121,"../models/channel":133,"../models/conversation":137,"../models/message":141}],163:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50868,7 +51630,7 @@ WebsocketRequestManager.prototype._callbackCleanupId = 0;
 WebsocketRequestManager.prototype.socketManager = null;
 
 module.exports = WebsocketRequestManager;
-},{"../client-utils":112,"../layer-error":116,"../logger":119}],161:[function(require,module,exports){
+},{"../client-utils":114,"../layer-error":118,"../logger":121}],164:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50984,6 +51746,7 @@ var SocketManager = function (_Root) {
       if (evt.isOnline) {
         this._reconnect(evt.reset);
       } else {
+        logger.info('Websocket closed due to ambigious connection state');
         this.close();
       }
     }
@@ -51039,7 +51802,7 @@ var SocketManager = function (_Root) {
     key: 'connect',
     value: function connect(evt) {
       if (this.client.isDestroyed || !this.client.isOnline) return;
-      if (this._isOpen()) return this._reconnect();
+      if (this._socket) return this._reconnect();
 
       this._closing = false;
 
@@ -51047,6 +51810,8 @@ var SocketManager = function (_Root) {
 
       // Get the URL and connect to it
       var url = this.client.websocketUrl + '/?session_token=' + this.client.sessionToken;
+
+      logger.info('Websocket Connecting');
 
       // Load up our websocket component or shim
       /* istanbul ignore next */
@@ -51611,6 +52376,7 @@ var SocketManager = function (_Root) {
         this._socket.onopen = null;
         this._socket.onerror = null;
       }
+      this._clearConnectionFailed();
     }
 
     /**
@@ -51804,7 +52570,7 @@ SocketManager._supportedEvents = [
 'synced'].concat(Root._supportedEvents);
 Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
-},{"../client-utils":112,"../const":114,"../layer-error":116,"../logger":119,"../root":149,"websocket":103}],162:[function(require,module,exports){
+},{"../client-utils":114,"../const":116,"../layer-error":118,"../logger":121,"../root":152,"websocket":105}],165:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -52040,7 +52806,7 @@ module.exports.trigger = function (evt) {
     return func(evt);
   });
 };
-},{"xhr2":103}],163:[function(require,module,exports){
+},{"xhr2":105}],166:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -52318,7 +53084,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],164:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -52553,7 +53319,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],165:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -52589,7 +53355,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],166:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -52774,5 +53540,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":165}]},{},[77])(77)
+},{"./rng":168}]},{},[79])(79)
 });

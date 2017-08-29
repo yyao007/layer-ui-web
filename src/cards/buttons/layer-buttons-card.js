@@ -6,6 +6,9 @@
 import { registerComponent } from '../../components/component';
 import '../../components/subcomponents/layer-action-button/layer-action-button';
 import '../../components/subcomponents/layer-url-button/layer-url-button';
+import '../../components/subcomponents/layer-choice-button/layer-choice-button';
+import ChoiceModel from '../choice/choice-model';
+import CardMixin from '../card-mixin';
 
 registerComponent('layer-buttons-card', {
   template: `
@@ -28,10 +31,8 @@ registerComponent('layer-buttons-card', {
     justify-content: center;
   }
   `,
-  // Note that there is also a message property managed by the MessageHandler mixin
-  properties: {
-    model: {},
-  },
+  mixins: [CardMixin],
+
   methods: {
     /**
      * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
@@ -72,17 +73,49 @@ registerComponent('layer-buttons-card', {
               url: button.url,
             });
             break;
+          case 'choice':
+            const obj = {
+              parentNodeId: this.model.nodeId,
+              choices: button.choices,
+              message: this.model.message,
+              responseName: button.data.responseName,
+              responses: this.model.responses,
+            };
+            if ('allowDeselect' in button.data) obj.allowDeselect = button.data.allowDeselect;
+            if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
+            if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
+            const model = new ChoiceModel(obj);
+            // Update the selectedAnswer based on any responses
+            if (this.model.responses) {
+              model._processNewResponses();
+            } else if (this.model.selectedAnswer) {
+              this.model.selectAnswer({ id: this.model.selectedAnswer });
+            }
+
+            widget = this.createElement('layer-choice-button', {
+              model,
+            });
+            break;
         }
         this.nodes.buttons.appendChild(widget);
       });
+    },
+
+    onRender() {
+      this.onRerender();
     },
 
     /**
      *
      * @method
      */
-    onRender() {
-
+    onRerender() {
+      for (let i = 0; i < this.nodes.buttons.childNodes.length; i++) {
+        const node = this.nodes.buttons.childNodes[i];
+        if (node.tagName === 'LAYER-CHOICE-BUTTON') {
+          node.model.responses = this.model.responses;
+        }
+      }
     },
 
     runAction(options) {

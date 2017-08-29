@@ -795,9 +795,22 @@ registerComponent('layer-message-list', {
       if (this.properties.insertEvents) this.properties.insertEvents.forEach(anEvt => this._renderInsertedData(anEvt));
       delete this.properties.insertEvents;
 
+      const cards = this.querySelectorAllArray('layer-card-view').map(card => card.nodes.ui).filter(ui => ui);
+
       Layer.Util.defer(() => {
         if (this.properties.stuckToBottom) {
           this.scrollTo(this.scrollHeight - this.clientHeight);
+          let unfinishedCards = cards.filter(card => !card.isHeightAllocated);
+          if (unfinishedCards.length) {
+            const onCardFinished = () => {
+              unfinishedCards = unfinishedCards.filter(card => !card.isHeightAllocated);
+              if (unfinishedCards.length === 0) {
+                this.scrollTo(this.scrollHeight - this.clientHeight);
+                this.removeEventListener('message-height-change', onCardFinished);
+              }
+            };
+            this.addEventListener('message-height-change', onCardFinished);
+          }
         } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
           this.scrollTo(firstVisibleItem.offsetTop - this.offsetTop - initialOffset);
         }

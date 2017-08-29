@@ -34,7 +34,7 @@ import { registerMessageHandler } from '../../base';
 
 class TextModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle', 'action']);
+    const body = this._initBodyWithMetadata(['text', 'author', 'summary', 'title', 'subtitle']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,

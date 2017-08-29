@@ -50,16 +50,19 @@ registerComponent('layer-carousel-card', {
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
-    model: {},
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      get() {
+        return this.model.title ? 'layer-titled-card-container' : null;
+      },
+    },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
+    getIconClass() {
+      return '';
+    },
+    getTitle() {
+      return this.model.title;
     },
 
     onCreate() {

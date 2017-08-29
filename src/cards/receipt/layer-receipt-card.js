@@ -29,7 +29,7 @@ registerComponent('layer-receipt-card-item', {
       this.onRerender();
     },
     onRerender() {
-      this.nodes.img.src = this.item.source_url;
+      this.nodes.img.src = this.item.image_url;
       this.nodes.title.innerHTML = this.item.title;
       this.nodes.description.innerHTML = this.item.subtitle;
       this.nodes.footer.innerHTML = this.item.quantity !== 1 ? 'Qty: ' + this.item.quantity : '';

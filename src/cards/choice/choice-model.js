@@ -1,12 +1,25 @@
 /**
- * TextModel = client.getCardModelClassForMimeType('application/vnd.layer.card.text+json')
-   ChoiceModel = client.getCardModelClassForMimeType('application/vnd.layer.card.choice+json')
+ *
+   ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
    model = new ChoiceModel({
-     question: "what is the airspeed velocity of an unladen swallow?",
+     question: "What is the airspeed velocity of an unladen swallow?",
+     responseName: 'airselection',
+     selectedAnswer: 'clever bastard',
      choices: [
-        {text:  "Zero, it can not get off the ground!", id: "a"},
-        {text:  "Are we using Imperial or Metric units?", id: "b"},
-        {text:  "What do you mean? African or European swallow?", id: "c"},
+        {text:  "Zero, it can not get off the ground!", id: "zero"},
+        {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+        {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
+      ],
+   });
+   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+  model = new ChoiceModel({
+    allowReselect: true,
+    question: "What is the airspeed velocity of an unladen swallow?",
+    choices: [
+        {text:  "Zero, it can not get off the ground!", id: "zero"},
+        {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+        {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
       ]
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
@@ -17,18 +30,23 @@ import TextModel from '../text/text-model';
 
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['question', 'action', 'choices']);
+    const body = this._initBodyWithMetadata(['question', 'choices', 'allowReselect', 'allowDeselect', 'label', 'type']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
     this._buildActionModels();
+    if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
     callback([this.part]);
   }
 
   _parseMessage(payload) {
     super._parseMessage(payload);
     this._buildActionModels();
+    if (this.responses) {
+      this._processNewResponses();
+    }
+    if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
   }
 
   _buildActionModels() {
@@ -41,32 +59,50 @@ class ChoiceModel extends CardModel {
   }
 
   selectAnswer(answerData) {
-    if (!this.selectedAnswer) {
-      const selectedChoice = this.choices.filter(item => item.id === answerData.id)[0];
+    if (!this.selectedAnswer || this.allowReselect) {
+      let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
+      let selectionText = ' selected ';
+
+      if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
+        id = null;
+        selectionText = ' deselected ';
+      }
       const responseModel = new ResponseModel({
         responseToMessage: this.message,
-        responseToNodeId: this.message.getPartsMatchingAttribute({ role: 'root' })[0].mimeAttributes['node-id'],
+        responseToNodeId: this.parentNodeId || this.nodeId,
         participantData: {
-          selection: answerData.id,
+          [this.responseName]: id,
         },
         messageModel: new TextModel({
-          text: this.getClient().user.displayName + ' selected ' + selectedChoice.text,
+          text: this.getClient().user.displayName + selectionText + text,
         }),
       });
       responseModel.send();
-      this.selectedAnswer = answerData.id;
+      this.selectedAnswer = id;
       this.trigger('change');
+      if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
+
+      // We generate local changes, we generate more local changes then the server sends us the first changes
+      // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
+      // from the server after a user change.
+      this.pauseUpdateTimeout = setTimeout(() => {
+        this.pauseUpdateTimeout = 0;
+        this._processNewResponses();
+      }, 6000);
     }
   }
 
+
   _processNewResponses() {
-    const senderId = this.message.sender.userId;
-    const data = this.responses.participantData;
-    let responseIdentityIds = Object.keys(data).filter(participantId => data[participantId].selection);
-    if (responseIdentityIds.length > 1) {
-      responseIdentityIds = responseIdentityIds.filter(id => senderId !== id);
+    if (!this.pauseUpdateTimeout) {
+      const senderId = this.message.sender.userId;
+      const data = this.responses.participantData;
+      let responseIdentityIds = Object.keys(data).filter(participantId => data[participantId][this.responseName]);
+      if (responseIdentityIds.length > 1) {
+        responseIdentityIds = responseIdentityIds.filter(id => senderId !== id);
+      }
+      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
     }
-    this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]].selection : null;
   }
 
   __updateSelectedAnswer(newValue) {
@@ -76,12 +112,30 @@ class ChoiceModel extends CardModel {
   getOneLineSummary() {
     return this.question || this.title;
   }
+
+
+  __getCurrentCardRenderer() {
+    switch (this.type) {
+      case 'standard':
+        return 'layer-choice-card';
+      case 'TiledChoices':
+        return 'layer-choice-tiles-card';
+    }
+  }
 }
 
+ChoiceModel.prototype.pauseUpdateTimeout = 0;
+ChoiceModel.prototype.allowReselect = false;
+ChoiceModel.prototype.allowDeselect = true; // ignored if !allowReselect
+ChoiceModel.prototype.label = '';
+ChoiceModel.prototype.type = 'standard';
 ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';
 ChoiceModel.prototype.choices = null;
+ChoiceModel.prototype.responseName = 'selection';
 ChoiceModel.prototype.responses = null;
+ChoiceModel.prototype.currentCardRenderer = null;
+ChoiceModel.prototype.selectedAnswer = null;
 
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
@@ -95,4 +149,3 @@ Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
-

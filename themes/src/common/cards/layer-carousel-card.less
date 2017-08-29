@@ -1,6 +1,19 @@
-layer-card-view.layer-carousel-card {
+layer-card-view.layer-carousel-card:not(.layer-titled-card-container) {
   border-width: 0px;
   border-radius: 0px;
+}
+
+layer-card-view:not(.layer-card-as-chat-bubble) layer-titled-card-container layer-carousel-card {
+  .layer-carousel-card-items > layer-card-view {
+     margin: 0px 0px;
+     border-radius: 0px;
+     border-width: 0px 1px 0px 0px;
+     position: static;
+  }
+
+  layer-card-view .layer-card-top {
+    border-radius: 0px 0px 0px 0px;
+  }
 }
 
 layer-carousel-card {

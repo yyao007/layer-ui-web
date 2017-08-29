@@ -10,46 +10,26 @@ import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
 import '../../components/subcomponents/layer-action-button/layer-action-button';
 
-registerComponent('layer-choice-card', {
+registerComponent('layer-choice-tiles-card', {
   mixins: [CardMixin],
   template: `
     <div layer-id='question' class='layer-choice-card-question'></div>
     <div layer-id='answers' class='layer-choice-card-answers'></div>
   `,
   style: `
-  layer-choice-card .layer-choice-card-answers {
-    display: flex;
-    flex-direction: column;
+  layer-choice-tiles-card {
+    display: block;
   }
+  layer-choice-tiles-card .layer-choice-card-answers {
 
+  }
   `,
-  //layerCardId: 'layer-choice-card',
   properties: {
     label: {
       value: 'Choices',
     },
-    cardContainerTagName: {
-      noGetterFromSetter: true,
-      value: 'layer-titled-card-container',
-    },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *s
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
-
-    getIconClass() {
-      return 'layer-poll-card-icon';
-    },
-    getTitle() {
-      return this.model.title;
-    },
-
 
     onAfterCreate() {
       this.nodes.question.innerHTML = this.model.question;
@@ -58,7 +38,6 @@ registerComponent('layer-choice-card', {
           text: choice.text,
           event: 'layer-choice-select',
           data: { id: choice.id },
-          icon: choice.icon,
           parentNode: this.nodes.answers,
         });
       });
@@ -66,11 +45,12 @@ registerComponent('layer-choice-card', {
 
     onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
-      for (let i = 0; i < this.nodes.answers.childNodes.length; i++) {
-        const child = this.nodes.answers.childNodes[i];
-        child.disabled = this.model.selectedAnswer &&
-          (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
-        child.selected = this.model.selectedAnswer === child.data.id;
+      if (this.model.selectedAnswer) {
+        for (let i = 0; i < this.nodes.options.childNodes.length; i++) {
+          const child = this.nodes.options.childNodes[i];
+          child.disabled = !this.model.allowReselect || this.model.selectedAnswer === child.data.id;
+          child.selected = this.model.selectedAnswer === child.data.id;
+        }
       }
     },
 

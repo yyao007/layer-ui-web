@@ -27,7 +27,7 @@ new ReceiptModel({
   items: [
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 50,
       quantity: 3,
       title: "A pretty picture",
@@ -35,7 +35,7 @@ new ReceiptModel({
     },
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 50,
       quantity: 1,
       title: "A boring picture",
@@ -43,7 +43,7 @@ new ReceiptModel({
     },
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 150,
       quantity: 1,
       title: "A terrifying picture",
@@ -82,7 +82,7 @@ new ReceiptModel({
   items: [
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 50,
       quantity: 3,
       title: "A pretty picture",
@@ -90,7 +90,7 @@ new ReceiptModel({
     },
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 50,
       quantity: 1,
       title: "A boring picture",
@@ -98,7 +98,7 @@ new ReceiptModel({
     },
     {
       currency: 'USD',
-      source_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
+      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
       price: 150,
       quantity: 1,
       title: "A terrifying picture",
@@ -111,7 +111,7 @@ import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 class ReceiptModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'action', 'items']);
+    const body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'items']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,

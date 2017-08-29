@@ -119,7 +119,7 @@ registerMessageComponent('layer-card-view', {
     setupMessage() {
       // The rootPart is typically the Root Part of the message, but the Card View may be asked to render subcards
       // in which case its rootPart property will be preset
-      const rootPart = this.message.getPartsMatchingAttribute({'role': 'root'})[0];
+      const rootPart = this.message.getPartsMatchingAttribute({ role: 'root' })[0];
       if (!this.rootPart) {
         this.rootPart = rootPart;
       }
@@ -140,6 +140,7 @@ registerMessageComponent('layer-card-view', {
       this.nodes.ui = cardUI;
 
       const cardContainerClass = this.cardContainerTagName;
+      if (this.cardContainerTagName) this.classList.add(this.cardContainerTagName);
       if (cardUI.isCardPrimitive) this.classList.add('layer-card-primitive');
       if (cardContainerClass) {
         const cardContainer = this.createElement(cardContainerClass, {

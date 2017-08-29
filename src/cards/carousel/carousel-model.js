@@ -3,27 +3,55 @@
   CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
   model = new CarouselModel({
     items: [
-      new TextModel({text: "Carousel item 1"}),
-      new TextModel({text: "Carousel item 2"}),
-      new TextModel({text: "Carousel item 3"})
+      new TextModel({text: "Carousel item 1", "title": "C 1"}),
+      new TextModel({text: "Carousel item 2", "title": "C 2"}),
+      new TextModel({text: "Carousel item 3", "title": "C 3"})
     ]
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
 
-  TextModel = layer.Client.getCardModelClass('TextModel');
-  CarouselModel = layer.Client.getCardModelClass('CarouselModel');
-  model = new CarouselModel({
-    items: [
-      new TextModel({text: "Carousel item 1", title: "Title 1"}),
-      new TextModel({text: "Carousel item 2", title: "Title 2"}),
-      new TextModel({text: "Carousel item 3", title: "Title 3"}),
-      new TextModel({text: "Bacon ipsum dolor amet non in minim, incididunt capicola bresaola brisket exercitation commodo nulla ex chuck dolore beef ribs.  Et beef prosciutto pig pork.  Pancetta pork loin ullamco ea nostrud minim reprehenderit labore kevin, brisket est.  Short ribs nostrud ex, beef ribs dolor tenderloin swine tail.  Minim ut corned beef, prosciutto shoulder ut exercitation pig rump leberkas pork adipisicing.  Eu beef ribs aute meatball.  Pork belly sausage in sirloin excepteur laboris, non est pancetta qui leberkas anim eiusmod spare ribs.", title: "Title 4"}),
-      new TextModel({text: "Carousel item 3", title: "Title 5"}),
-      new TextModel({text: "Carousel item 3", title: "Title 6"})
-    ]
-  });
-  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+TextModel = layer.Client.getCardModelClass('TextModel');
+CarouselModel = layer.Client.getCardModelClass('CarouselModel');
+model = new CarouselModel({
+  items: [
+    new ButtonModel({
+      buttons: [
+        {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+        {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+      ],
+      contentModel: new TextModel({
+        text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+        title: 'The Holy Hand Grenade',
+        author: 'King Arthur'
+      })
+    }),
+    new ButtonModel({
+      buttons: [
+        {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+        {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+      ],
+      contentModel: new TextModel({
+        text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+        title: 'The Holy Hand Grenade',
+        author: 'King Arthur'
+      })
+    }),
+    new ButtonModel({
+      buttons: [
+        {"type": "choice", "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+        {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}},
+      ],
+      contentModel: new TextModel({
+        text: 'And the Lord spake, saying, "First shalt thou take out the Holy Pin. Then shalt thou count to three, no more, no less. Three shall be the number thou shalt count, and the number of the counting shall be three. ',
+        title: 'The Holy Hand Grenade',
+        author: 'King Arthur'
+      })
+    })
+  ]
+});
+model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
   // Product Carousel:
 
@@ -186,7 +214,7 @@ import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 class CarouselModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['action']);
+    const body = this._initBodyWithMetadata(['title']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -229,6 +257,7 @@ class CarouselModel extends CardModel {
 
 CarouselModel.prototype.action = null;
 CarouselModel.prototype.items = null;
+CarouselModel.prototype.title = '';
 
 CarouselModel.Label = 'Items';
 CarouselModel.cardRenderer = 'layer-carousel-card';

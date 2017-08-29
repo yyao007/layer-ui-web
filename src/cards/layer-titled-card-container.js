@@ -12,12 +12,14 @@ registerComponent('layer-titled-card-container', {
       flex-direction: column;
       align-items: stretch;
     }
-
+    layer-titled-card-container.layer-title-icon-empty .layer-card-title-bar-icon {
+      display: none;
+    }
     layer-titled-card-container .layer-card-title-bar {
       display: flex;
       flex-direction: row;
     }
-    layer-titled-card-container .layer-card-title-bar-title {
+    layer-titled-card-container .layer-card-title-bar-text {
       flex-grow: 1;
     }
   `,
@@ -34,20 +36,22 @@ registerComponent('layer-titled-card-container', {
     model: {},
     ui: {
       set() {
-        while(this.nodes.UIContainer.firstChild) this.nodes.UIContainer.removeChild(this.nodes.UIContainer.firstChild);
+        while (this.nodes.UIContainer.firstChild) this.nodes.UIContainer.removeChild(this.nodes.UIContainer.firstChild);
         if (this.properties.ui) this.nodes.UIContainer.appendChild(this.properties.ui);
-      }
+      },
     },
     title: {
       set(title) {
         this.nodes.title.innerHTML = title;
-      }
+      },
     },
     icon: {
+      value: '',
       set(icon, oldIcon) {
         if (oldIcon) this.nodes.icon.classList.remove(oldIcon);
-        this.nodes.icon.classList.add(icon);
-      }
+        if (icon) this.nodes.icon.classList.add(icon);
+        this.toggleClass('layer-title-icon-empty', !Boolean(icon));
+      },
     },
   },
   methods: {

@@ -59,7 +59,7 @@ import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
 
 class LocationModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'action', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
+    const body = this._initBodyWithMetadata(['latitude', 'longitude', 'heading', 'accuracy', 'createdAt', 'altitude', 'description', 'title', 'city', 'country', 'postalCode', 'administrativeArea', 'street1', 'street2']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,

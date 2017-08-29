@@ -11,6 +11,54 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
+
+     ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+  model = new ButtonModel({
+    buttons: [
+      {"type": "choice", "choices": [{"text": "like", "id": "like", "tooltip": "like"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike"}], "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}},
+      {"type": "action", "text": "do nothing"},
+      {"type": "choice", "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}], "data": {"responseName": "helpfulness", allowReslect: true}},
+    ]
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+   ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+   ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+  model = new ButtonModel({
+    buttons: [
+      {
+        "type": "choice",
+        "choices": [{"text": "like", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+        "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+        "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+        "data": {"responseName": "helpfulness", allowReselect: false}
+      },
+    ],
+    contentModel: new ProductModel({
+      currency: 'USD',
+      price: 175,
+      quantity: 3,
+      title: "A pretty picture",
+      subtitle: "Prettier than YOU deserve!",
+      detailModel: new ImageModel({
+        sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"
+      })
+    })
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+
+
+
   model = new ButtonModel({
     buttons: [
       {"type": "action", "text": "Kill Arthur", "event": "kill-arthur"},
@@ -95,7 +143,7 @@ message = conversation.createMessage({parts: [
   }
 ]});
 */
-import { Client, MessagePart, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, CardModel } from 'layer-websdk';
 
 
 class ButtonsModel extends CardModel {

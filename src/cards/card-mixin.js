@@ -11,6 +11,14 @@ module.exports = {
     cardBorderStyle: {
     },
     cardView: {},
+    isHeightAllocated: {
+      value: true,
+      set(value) {
+        if (value) {
+          this.trigger('message-height-change');
+        }
+      },
+    },
   },
   methods: {
     onRender: {

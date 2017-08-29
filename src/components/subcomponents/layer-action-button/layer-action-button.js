@@ -6,15 +6,13 @@
 import { registerComponent } from '../../component';
 
 registerComponent('layer-action-button', {
-  template: '<button class="layer-button" layer-id="button"></button>',
+  template: '<button class="layer-button" layer-id="button" tab-index="0"></button>',
   style: `layer-action-button {
     display: flex;
     flex-direction: column;
     align-content: stretch;
   }
   layer-action-button button {
-    border-radius: 0px;
-    border-width: 0px;
     cursor: pointer;
   }
   .layer-button-content > * {
@@ -40,6 +38,12 @@ registerComponent('layer-action-button', {
       type: Boolean,
       set(value) {
         this.nodes.button.disabled = value;
+      },
+    },
+    icon: {
+      set(value, oldValue) {
+        if (oldValue) this.classList.remove(oldValue);
+        if (value) this.classList.add(value);
       },
     },
     selected: {
