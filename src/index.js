@@ -59,6 +59,8 @@ require('./cards/receipt/layer-receipt-card');
 require('./cards/choice/choice-model');
 require('./cards/choice/layer-choice-card');
 require('./cards/choice/layer-choice-tiles-card');
+require('./cards/choice/layer-choice-label-card');
+
 
 require('./cards/layer-standard-card-container');
 require('./cards/layer-titled-card-container');

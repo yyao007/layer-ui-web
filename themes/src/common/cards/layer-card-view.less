@@ -1,3 +1,69 @@
+.layer-conversation-view-width-medium, .layer-conversation-view-width-small {
+  layer-card-view.layer-root-card.layer-card-width-full-card {
+    width: 90%;
+  }
+}
+.layer-conversation-view-width-large {
+  layer-card-view.layer-root-card.layer-card-width-full-card {
+    width: 60%;
+  }
+}
+
+.layer-conversation-view-width-medium, .layer-conversation-view-width-small {
+  layer-card-view.layer-root-card.layer-card-width-flex-card {
+    max-width: 90%;
+    min-width: 192px;
+  }
+}
+.layer-conversation-view-width-large {
+  layer-card-view.layer-root-card.layer-card-width-flex-card {
+    max-width: 60%;
+    min-width: 192px;
+  }
+}
+
+.layer-conversation-view-width-medium, .layer-conversation-view-width-small {
+  layer-card-view.layer-root-card.layer-card-width-chat-bubble {
+    max-width: 90%;
+  }
+}
+.layer-conversation-view-width-large {
+  layer-card-view.layer-root-card.layer-card-width-chat-bubble {
+    max-width: 60%;
+  }
+}
+
+
+.layer-root-card.layer-card-width-chat-bubble > layer-standard-card-container {
+  padding-bottom: 0px;
+}
+
+layer-message-item-received .layer-root-card.layer-card-width-chat-bubble > layer-standard-card-container > .layer-card-top {
+  background-color: @message-item-bubble-received-background-color;
+  color: @message-item-bubble-received-color;
+  font-size: @font-medium;
+  flex-grow: 1;
+
+  a, a:visited {
+    color: @message-item-bubble-received-color;
+  }
+}
+
+layer-message-item-sent .layer-root-card.layer-card-width-chat-bubble > layer-standard-card-container > .layer-card-top {
+  background-color: @message-item-bubble-sent-background-color;
+  color: @message-item-bubble-text-sent-color;
+  font-size: @font-medium;
+  flex-grow: 1;
+
+  a, a:visited {
+    color: @message-item-bubble-text-sent-color;
+  }
+}
+
+.layer-root-card.layer-card-width-chat-bubble {
+  border-width: 0px;
+}
+
 
 layer-card-view {
   &.layer-card-border-standard,
@@ -33,7 +99,6 @@ layer-card-view {
     width: 100%;
   }
 
-
   &.layer-card-primitive:not(.layer-card-as-chat-bubble) > .layer-card-standard-container {
     min-width: 192px;
   }
@@ -42,13 +107,13 @@ layer-card-view {
     width: 100%;
   }
 }
-
+/*
 .layer-conversation-view-width-small .layer-message-item layer-card-view.layer-root-card {
   max-width: 90%;
 }
 
 .layer-conversation-view-width-medium .layer-message-item layer-card-view.layer-root-card {
-  max-width: 75%;
+  max-width: 90%;
 }
 
 .layer-conversation-view-width-large .layer-message-item layer-card-view.layer-root-card {
@@ -58,7 +123,7 @@ layer-card-view {
 .layer-message-item layer-card-view.layer-root-card.layer-carousel-card {
   max-width: 90%;
 }
-
+*/
 layer-conversation-last-message {
   &.layer-has-left-icon {
     background-size: 1rem;

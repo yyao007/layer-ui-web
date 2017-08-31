@@ -6,16 +6,16 @@
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
 
-registerComponent('layer-receipt-card-item', {
+registerComponent('layer-product-card-mini', {
   template: `
     <img layer-id='img' />
-    <div class='layer-receipt-card-item-right'>
-      <div layer-id="title" class="layer-card-title"></div>
-      <div layer-id="description" class="layer-card-description"></div>
-      <div layer-id="footer" class="layer-card-footer"></div>
+    <div class='layer-product-card-mini-right'>
+      <div layer-id="name" class="layer-receipt-card-name"></div>
+      <div layer-id="price" class="layer-receipt-card-price"></div>
+      <div layer-id="quantity" class="layer-receipt-card-quantity"></div>
     </div>
   `,
-  style: `layer-receipt-card-item {
+  style: `layer-product-card-mini {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -29,10 +29,10 @@ registerComponent('layer-receipt-card-item', {
       this.onRerender();
     },
     onRerender() {
-      this.nodes.img.src = this.item.image_url;
-      this.nodes.title.innerHTML = this.item.title;
-      this.nodes.description.innerHTML = this.item.subtitle;
-      this.nodes.footer.innerHTML = this.item.quantity !== 1 ? 'Qty: ' + this.item.quantity : '';
+      this.nodes.img.src = this.item.imageUrls[0];
+      this.nodes.name.innerHTML = this.item.name;
+      this.nodes.price.innerHTML = this.item.getFormattedPrice();
+      this.nodes.quantity.innerHTML = this.item.quantity !== 1 ? this.item.quantity : '';
     },
   },
 });
@@ -69,6 +69,9 @@ registerComponent('layer-receipt-card', {
       noGetterFromSetter: true,
       value: 'layer-titled-card-container',
     },
+    widthType: {
+      value: 'full-card',
+    },
   },
   methods: {
     /**
@@ -98,7 +101,7 @@ registerComponent('layer-receipt-card', {
     onRerender() {
       this.nodes.products.innerHTML = '';
       this.model.items.forEach((item) => {
-        this.createElement('layer-receipt-card-item', {
+        this.createElement('layer-product-card-mini', {
           item,
           parentNode: this.nodes.products,
         });

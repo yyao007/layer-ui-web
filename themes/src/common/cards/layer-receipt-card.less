@@ -1,12 +1,32 @@
-layer-receipt-card-item {
+layer-product-card-mini {
   padding: 12px;
+  border-bottom: solid 1px @color-g3;
+
+  .layer-receipt-card-quantity:not(:empty)::before {
+    content: "Quantity: "
+  }
+
+  .layer-receipt-card-name {
+    color: @color-black;
+    font-size: @font-large;
+    padding: 4px 0px;
+  }
+
+  .layer-receipt-card-price {
+    color: @color-g5;
+    font-size: @font-medium;
+    padding: 4px 0px;
+  }
+
   & > img {
     max-width: 50px;
-    max-height: 50px;
+    max-height: 80px;
     margin-right: 12px;
     align-self: center;
   }
 }
+
+
 layer-receipt-card {
   min-width: 192px;
   .layer-receipt-details {

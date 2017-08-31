@@ -11,6 +11,11 @@ module.exports = {
     cardBorderStyle: {
     },
     cardView: {},
+    // One of:
+    // "full-card": Uses all available width
+    // "chat-bubble": No minimum, maximum is all available width; generallay does not look like a card
+    // "flex-card": card that has a minimum and a maximum but tries for an optimal size for its contents
+    widthType: {},
     isHeightAllocated: {
       value: true,
       set(value) {
@@ -26,6 +31,11 @@ module.exports = {
       value() {
         this.onRerender();
       },
+    },
+    onRerender() {
+      if (this.cardView) {
+        this.cardView.widthType = this.widthType || 'flex-card';
+      }
     },
     generateCardView({ model, parentNode, cardContainerTagName, cssClassList, cardBorderStyle }) {
       const child = this.createElement('layer-card-view', {

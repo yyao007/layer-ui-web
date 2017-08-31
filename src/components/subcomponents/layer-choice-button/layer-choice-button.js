@@ -57,6 +57,7 @@ registerComponent('layer-choice-button', {
           data: { id: choice.id },
           icon: choice.icon,
         });
+
         const def = { widget, choice };
         this.properties.buttons.push(def);
         widget.addEventListener('click', this._onClick.bind(this, def));

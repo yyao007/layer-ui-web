@@ -31,10 +31,25 @@ registerComponent('layer-image-card', {
         this.onRerender();
       },
     },
+    widthType: {
+      get() {
+        return this.parentComponent.isShowingMetadata ? 'flex-card' : 'chat-bubble';
+      },
+    },
+    maxHeight: {
+      value: 300,
+    },
   },
   methods: {
     onCreate() {
       this.isHeightAllocated = false;
+    },
+
+    onAttach: {
+      mode: registerComponent.MODES.AFTER,
+      value() {
+        this.onRerender();
+      },
     },
 
     /**
@@ -47,21 +62,19 @@ registerComponent('layer-image-card', {
      */
     onRerender() {
       // wait until the parentComponent is a Card Container
-      if (this.parentComponent.tagName === 'LAYER-CARD-VIEW') return;
+      if (!this.properties._internalState.onAttachCalled) return;
+      const maxCardWidth = this._getMaxCardWidth();
 
       // maxSizes should be removed
-      const width = this.model.previewWidth || this.model.width;
-      const height = this.model.previewHeight || this.model.height;
+      const width = this.model.previewWidth || this.model.width || maxCardWidth;
+      const height = this.model.previewHeight || this.model.height || this.maxHeight;
 
-      const isSmallImage = width < 350;
-      const isSmallAndWideImage = isSmallImage && width > height;
+      const isSmallImage = width < maxCardWidth;
+      const isSmallAndWideImage = isSmallImage && maxCardWidth > height;
       this.toggleClass('layer-image-card-small-image', isSmallImage && !isSmallAndWideImage);
 
-      const maxWidth = this.parentComponent.getPreferredMaxWidth();
-      const maxHeight = this.parentComponent.getPreferredMaxHeight();
-
       if (this.model.source || this.model.preview) {
-        this.model.getBlob(blob => this._renderCanvas(blob));
+        this.model.getBlob(blob => this._renderCanvas(blob, maxCardWidth));
       } else {
         while (this.firstChild) this.removeChild(this.firstChild);
         const img = this.createElement('img', {
@@ -70,8 +83,21 @@ registerComponent('layer-image-card', {
         });
         img.addEventListener('load', evt => (this.isHeightAllocated = true));
         img.src = this.model.previewUrl || this.model.sourceUrl;
-        img.style.maxWidth = maxWidth + 'px';
-        img.style.maxHeight = maxHeight + 'px';
+        img.style.maxWidth = maxCardWidth + 'px';
+        img.style.maxHeight = this.maxHeight + 'px';
+      }
+    },
+
+    _getMaxCardWidth() {
+      if (this.cardView.classList.contains('layer-root-card')) {
+        const parent = this.cardView.parentNode;
+        if (!parent || !parent.clientWidth) return 0;
+        let width = parent.clientWidth;
+        if (width > 600) width = width * 0.6;
+        else width = width * 0.8;
+        return width;
+      } else {
+        return this.cardView.parentNode.clientWidth;
       }
     },
 
@@ -87,12 +113,11 @@ registerComponent('layer-image-card', {
      *
      * @param {*} blob
      */
-    _renderCanvas(blob) {
-      let width = this.model.previewWidth || this.model.width;
-      let height = this.model.previewHeight || this.model.height;
-      const minWidth = this.parentComponent.getPreferredWidth();
+    _renderCanvas(blob, maxCardWidth) {
+      let width = this.model.previewWidth || this.model.width || maxCardWidth;
+      let height = this.model.previewHeight || this.model.height || this.maxHeight;
+      const minWidth = this.parentComponent.getPreferredMinWidth();
       const minHeight = this.parentComponent.getPreferredMinHeight();
-      const maxWidth = this.parentComponent.getPreferredMaxWidth();
       const maxHeight = this.parentComponent.getPreferredMaxHeight();
 
       // Read the EXIF data
@@ -106,7 +131,7 @@ registerComponent('layer-image-card', {
           if (data.imageHead && data.exif) {
             options.orientation = data.exif.get('Orientation') || 1;
           }
-          options.maxWidth = maxWidth;
+          options.maxWidth = maxCardWidth;
           options.maxHeight = maxHeight;
 
           // Write the image to a canvas with the specified orientation
@@ -122,6 +147,7 @@ registerComponent('layer-image-card', {
 
               while (this.firstChild) this.removeChild(this.firstChild);
               this.appendChild(canvas);
+              if (canvas.width >= minWidth) this.parentComponent.style.width = canvas.width + 'px';
               this.isHeightAllocated = true;
             } else {
               console.error(canvas);

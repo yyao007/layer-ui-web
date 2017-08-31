@@ -23,23 +23,17 @@ registerComponent('layer-link-card', {
   }
   layer-link-card img {
     width: 100%;
-    border-radius: 16px 16px 0px 0px;
   }
-  layer-link-card:not(.layer-link-card-link-only) a {
+  .layer-card-width-flex-card layer-link-card a {
     display: none;
-  }
-  layer-link-card.layer-link-card-link-only a {
-    display: block;
-    padding: 8px 12px;
-    text-decoration: underline;
   }
   `,
 
   template: '<img layer-id="image" class="layer-link-card-image" /><a target="_blank" layer-id="link"></a>',
   properties: {
-    isLinkOnly: {
-      set(isLinkOnly) {
-        this.classList[!isLinkOnly ? 'remove' : 'add']('layer-link-card-link-only');
+    widthType: {
+      get() {
+        return this.model.imageUrl || this.parentComponent.isShowingMetadata ? 'flex-card' : 'chat-bubble';
       },
     },
   },
@@ -72,11 +66,13 @@ registerComponent('layer-link-card', {
       this.nodes.image.src = this.model.imageUrl || '';
       this.nodes.link.src = this.model.url;
       this.nodes.link.innerHTML = this.model.url;
-      this.isLinkOnly = !(this.model.imageUrl || this.model.title || this.model.description || this.model.subtitle || this.model.author);
     },
     setupContainerClasses() {
-      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
-      this.parentComponent.classList[this.model.imageUrl || this.isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
+      if (this.widthType) {
+        const isLinkOnly = this.widthType === 'chat-bubble';
+        this.parentComponent.classList[isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
+        this.parentComponent.classList[!isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
+      }
     },
   },
 });

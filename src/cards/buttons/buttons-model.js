@@ -11,6 +11,13 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
+  model = new ButtonModel({
+    buttons: [
+      {"type": "action", "text": "Kill Arthur, all his friends, his horse and his dog", "event": "kill-arthur"},
+      {"type": "action", "text": "Give Holy Grail", "event": "grant-grail"}
+    ]
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
      ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
   model = new ButtonModel({
@@ -47,11 +54,9 @@ ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.p
       currency: 'USD',
       price: 175,
       quantity: 3,
-      title: "A pretty picture",
-      subtitle: "Prettier than YOU deserve!",
-      detailModel: new ImageModel({
-        sourceUrl: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"
-      })
+      brand: "randomcrap.com",
+      name: "A pretty picture",
+      imageUrls: [ "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg" ],
     })
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());

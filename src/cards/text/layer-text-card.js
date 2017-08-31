@@ -21,17 +21,13 @@ registerComponent('layer-text-card', {
         this.innerHTML = html;
       },
     },
+    widthType: {
+      get() {
+        return this.parentComponent.isShowingMetadata ? 'flex-card' : 'chat-bubble';
+      },
+    },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
-
     onAfterCreate() {
 
     },

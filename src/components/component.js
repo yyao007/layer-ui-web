@@ -1521,7 +1521,7 @@ const standardClassMethods = {
   createElement: function createElement(tagName, properties) {
     const node = document.createElement(tagName);
     node.parentComponent = this;
-    const ignore = ['parentNode', 'name', 'classList'];
+    const ignore = ['parentNode', 'name', 'classList', 'noCreate'];
 
     Object.keys(properties).forEach((propName) => {
       if (ignore.indexOf(propName) === -1) node[propName] = properties[propName];
@@ -1530,8 +1530,10 @@ const standardClassMethods = {
     if (properties.parentNode) properties.parentNode.appendChild(node);
     if (properties.name) this.nodes[properties.name] = node;
 
-    CustomElements.takeRecords();
-    if (node._onAfterCreate) node._onAfterCreate();
+    if (!properties.noCreate) {
+      CustomElements.takeRecords();
+      if (node._onAfterCreate) node._onAfterCreate();
+    }
     return node;
   },
 

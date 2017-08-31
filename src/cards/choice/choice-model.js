@@ -13,6 +13,21 @@
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
+   ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
+   model = new ChoiceModel({
+     question: "Pick a color",
+     responseName: 'color',
+     selectedAnswer: 'black',
+     allowReselect: true,
+     choices: [
+        {text:  "red", id: "red"},
+        {text:  "blue", id: "blue"},
+        {text:  "black", id: "black"},
+      ],
+   });
+   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+
   model = new ChoiceModel({
     allowReselect: true,
     question: "What is the airspeed velocity of an unladen swallow?",
@@ -30,13 +45,13 @@ import TextModel from '../text/text-model';
 
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['question', 'choices', 'allowReselect', 'allowDeselect', 'label', 'type']);
+    const body = this._initBodyWithMetadata(['question', 'choices', 'selectedAnswer', 'allowReselect', 'allowDeselect', 'label', 'type']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
     this._buildActionModels();
-    if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
+    // if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
     callback([this.part]);
   }
 
@@ -46,7 +61,7 @@ class ChoiceModel extends CardModel {
     if (this.responses) {
       this._processNewResponses();
     }
-    if (this.selectedAnswer) this.selectAnswer({ id: this.selectedAnswer });
+    if (this.selectedAnswer) this.__updateSelectedAnswer(this.selectedAnswer);
   }
 
   _buildActionModels() {
@@ -118,8 +133,10 @@ class ChoiceModel extends CardModel {
     switch (this.type) {
       case 'standard':
         return 'layer-choice-card';
-      case 'TiledChoices':
-        return 'layer-choice-tiles-card';
+      //case 'TiledChoices':
+      //  return 'layer-choice-tiles-card';
+      case 'Label':
+        return 'layer-choice-label-card';
     }
   }
 }

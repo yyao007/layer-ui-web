@@ -15,6 +15,7 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
 
+  LocationModel = layer.Client.getCardModelClass('LocationModel');
   model = new LocationModel({
       city: 'San Francisco',
       title: 'Layer Inc',
@@ -27,7 +28,7 @@
   LocationModel = layer.Client.getCardModelClass('LocationModel');
   ButtonsModel = layer.Client.getCardModelClass('ButtonsModel');
   model = new ButtonsModel({
-    buttons: [{"type": "action", "text": "Navigate", "event": "open-map"}]
+    buttons: [{"type": "action", "text": "Navigate", "event": "open-map"}],
     contentModel: new LocationModel({
       latitude: 37.7734858,
       longitude: -122.3916087,
@@ -36,7 +37,7 @@
       title: "Here I am.  Right there on the dot. I'm stuck on the dot.  Please free me.",
       description: "Dot prisoner 455 has attempted to escape.  Send in the puncutation and make a very strong point about dot prisoner escapes",
       accuracy: 0.8,
-      createdAt: new Date(),
+      createdAt: new Date()
     })
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());

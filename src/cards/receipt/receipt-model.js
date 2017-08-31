@@ -4,6 +4,8 @@ LocationModel = client.getCardModelClassForMimeType('application/vnd.layer.card.
 ListModel = client.getCardModelClassForMimeType('application/vnd.layer.card.list+json')
 ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
 ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+   ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
+
 new ReceiptModel({
   currency: 'USD',
   order: {
@@ -25,30 +27,102 @@ new ReceiptModel({
     description: 'Description should not show'
   }),
   items: [
-    {
-      currency: 'USD',
-      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
-      price: 50,
-      quantity: 3,
-      title: "A pretty picture",
-      subtitle: "Hang it on your wall"
-    },
-    {
-      currency: 'USD',
-      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
-      price: 50,
-      quantity: 1,
-      title: "A boring picture",
-      subtitle: "You hanging around near your wall"
-    },
-    {
-      currency: 'USD',
-      image_url: "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg",
-      price: 150,
-      quantity: 1,
-      title: "A terrifying picture",
-      subtitle: "What you'd look like if you were hung from your wall"
-    },
+      new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+      }),
+      new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+      }),
+      new ProductModel({
+        url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+        price: 525,
+        quantity: 3,
+        currency: "USD",
+        brand: "Prison Garb Inc",
+        name: "Formal Strait Jacket",
+        description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+        imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+        options: [
+          new ChoiceModel({
+            question: 'Size',
+            type: 'Label',
+            selectedAnswer: 'small',
+            choices: [
+              {text:  "Small", id: "small"},
+              {text:  "Medium", id: "medium"},
+              {text:  "Large", id: "large"},
+            ]
+          }),
+          new ChoiceModel({
+            question: 'Color',
+            type: 'Label',
+            selectedAnswer: 'white',
+            choices: [
+              {text:  "White", id: "white"},
+              {text:  "Black", id: "black"},
+              {text:  "Gold", id: "gold"},
+            ]
+          })
+        ]
+    })
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
 
@@ -107,11 +181,11 @@ new ReceiptModel({
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
 */
-import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel } from 'layer-websdk';
 
 class ReceiptModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order', 'items']);
+    const body = this._initBodyWithMetadata(['createdAt', 'currency', 'discounts', 'paymentMethod', 'summary', 'order']);
 
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -124,11 +198,19 @@ class ReceiptModel extends CardModel {
 
     this.constructor.modelSet.forEach((modelDef) => {
       if (this[modelDef.model]) {
-        this._addModel(this[modelDef.model], modelDef.role, (moreParts) => {
-          moreParts.forEach(p => parts.push(p));
+        if (modelDef.model === 'items') {
+          this.items.forEach((item) => {
+            this._addModel(item, modelDef.role, moreParts => moreParts.forEach(p => parts.push(p)));
+          });
           currentCount++;
           if (currentCount === expectedCount) callback(parts);
-        });
+        } else {
+          this._addModel(this[modelDef.model], modelDef.role, (moreParts) => {
+            moreParts.forEach(p => parts.push(p));
+            currentCount++;
+            if (currentCount === expectedCount) callback(parts);
+          });
+        }
       }
     });
   }
@@ -147,6 +229,7 @@ class ReceiptModel extends CardModel {
       });
     }
 
+    this.items = this.getModelsFromPart('product-items');
     this.billingAddressModel = this.getModelFromPart('billing-address');
     this.shippingAddressModel = this.getModelFromPart('shipping-address');
     /*this.merchantModel = this.getModelFromPart('merchant');
@@ -179,7 +262,7 @@ ReceiptModel.prototype.summary = null;
 
 ReceiptModel.Label = 'Receipt';
 ReceiptModel.modelSet = [
-  { model: 'productModel', role: 'product' },
+  { model: 'items', role: 'product-items' },
   { model: 'shippingAddressModel', role: 'shipping-address' },
   { model: 'billingAddressModel', role: 'billing-address' },
   { model: 'merchantModel', role: 'merchant' },

@@ -58,55 +58,261 @@ model.generateMessage($("layer-conversation-view").conversation, message => mess
   ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
   ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
   CarouselModel = client.getCardModelClassForMimeType('application/vnd.layer.card.carousel+json')
+     ButtonsModel = layer.Client.getCardModelClass('ButtonsModel')
+     ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
   model = new CarouselModel({
     items: [
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 1",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 2",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 3",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 4",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 5",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
-      new ProductModel({
-        currency: 'USD',
-        detailModel: new ImageModel({previewUrl:"https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg"}),
-        price: 175,
-        quantity: 3,
-        title: "A pretty picture 6",
-        subtitle: "Prettier than YOU deserve!"
+      new ButtonsModel({
+        buttons: [
+          {
+            "type": "choice",
+            "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+            "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: true}
+          },
+          {"type": "choice", "choices": [{"text": "I want to order one", "id": "buy", "tooltip": "buy"}], "data": {"responseName": "buy", allowReselect: false}}
+        ],
+        contentModel: new ProductModel({
+          url: "http://www.neimanmarcus.com/Manolo-Blahnik-Fiboslac-Crystal-Embellished-Satin-Halter-Pump/prod200660136_cat13410734__/p.prod?icid=&searchType=EndecaDrivenCat&rte=%252Fcategory.service%253FitemId%253Dcat13410734%2526pageSize%253D30%2526No%253D0%2526Ns%253DPCS_SORT%2526refinements%253D299%252C381%252C4294910321%252C717%252C730&eItemId=prod200660136&xbcpath=cat13410734%2Ccat13030734%2Ccat000141%2Ccat000000&cmCat=product",
+          price: 525,
+          quantity: 1,
+          currency: "USD",
+          brand: "Prison Garb Inc",
+          name: "Formal Strait Jacket",
+          description: "The right choice for special occasions with your crazed inlaws.  This will make you feel like you at last belong.",
+          imageUrls: [ "http://l7.alamy.com/zooms/e33f19042cbe4ec1807bba7f3720ba62/executive-in-a-strait-jacket-aakafp.jpg" ],
+          options: [
+            new ChoiceModel({
+              question: 'Size',
+              type: 'Label',
+              selectedAnswer: 'small',
+              choices: [
+                {text:  "Small", id: "small"},
+                {text:  "Medium", id: "medium"},
+                {text:  "Large", id: "large"},
+              ]
+            }),
+            new ChoiceModel({
+              question: 'Color',
+              type: 'Label',
+              selectedAnswer: 'white',
+              choices: [
+                {text:  "White", id: "white"},
+                {text:  "Black", id: "black"},
+                {text:  "Gold", id: "gold"},
+              ]
+            })
+          ]
+        }),
       }),
     ]
   }).generateMessage($("layer-conversation-view").conversation, message => message.send())

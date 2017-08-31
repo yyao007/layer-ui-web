@@ -9,6 +9,14 @@
 
     <link rel="stylesheet" href="themes/build/bubbles-basic.css">
     <style>
+      @media (max-width: 650px) {
+        layer-conversation-list, .layer-conversation-list-header {
+          display: none !important;
+        }
+        layer-message-item-sent layer-avatar {
+          display: none !important;
+        }
+      }
     body {
       display: flex;
       flex-direction: column;

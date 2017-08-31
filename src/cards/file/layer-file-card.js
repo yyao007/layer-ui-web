@@ -23,7 +23,9 @@ registerComponent('layer-file-card', {
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
-
+    widthType: {
+      value: 'flex-card',
+    },
   },
   methods: {
     /**

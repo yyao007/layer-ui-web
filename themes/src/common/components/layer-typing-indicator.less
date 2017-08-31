@@ -1,23 +1,22 @@
 /* Layout the Conversation panel */
-/*layer-conversation-view layer-typing-indicator {
+layer-conversation-view layer-typing-indicator {
   height: 0px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
+  text-align: center;
 }
 
 layer-typing-indicator.layer-typing-occuring span {
-  height: 20px;
   display: inline;
   line-height: 18px;
   position: relative;
-  top: -20px;
+  top: -32px;
   overflow: visible;
-  border-radius: 6px 6px 0px 0px;
-  background-color: rgba(255,255,255,0.8);
-  padding: 2px 6px 0px 6px;
+  border-radius: 16px;
+  background-color: rgba(255,255,255,0.85);
+  padding: 4px 6px;
+  font-size: @typing-indicators-size;
+  color: @typing-indicators-color;
 }
-*/
+/*
 
 layer-conversation-view layer-typing-indicator {
   height: 0px;
@@ -41,3 +40,4 @@ layer-typing-indicator.layer-typing-occuring span {
   padding: 2px 6px 0px 6px;
   margin: 0px 20px; // Do not cover scrollbars
 }
+*/

@@ -1,16 +1,27 @@
 layer-product-card {
-  width: 350px;
+  .layer-card-top {
+    overflow: hidden; // prevent images from spilling out of bounds
+    border-radius: 16px 16px 0px 0px;
+    max-height: 450px;
+    background-color: @card-container-core-ui-background;
+    border-bottom: solid 1px @color-g2;
+    text-align: center;
 
-  .layer-card-top img {
-    width: 100%;
+    .layer-top-content-for-border-radius {
+      border-radius: 16px 16px 0px 0px;
+    }
+    img {
+      width: auto;
+      max-height: 250px;
+    }
   }
 
   .layer-card-body-outer {
-    margin: 4px 0px;
+    margin: 10px 0px;
   }
 
   .layer-card-product-header {
-    padding: 4px 12px;
+    padding: 4px 18px;
     color: @color-g6;
     font-size: @font-medium;
     display: flex;
@@ -22,15 +33,24 @@ layer-product-card {
   }
 
   .layer-card-product-name, .layer-card-product-price {
-    padding: 4px 12px;
+    padding: 4px 18px;
     color: @color-black;
     font-size: @font-large;
   }
 
   .layer-card-product-description {
-    padding: 4px 12px;
+    padding: 4px 18px;
     color: @color-darknavy;
     font-size: @font-medium;
   }
 
+  .layer-card-product-choices {
+    padding: 4px 18px;
+    color: @color-black;
+    font-size: @font-large;
+
+    layer-card-view + layer-card-view {
+      margin-top: 8px;
+    }
+  }
 }

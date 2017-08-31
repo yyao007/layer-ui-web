@@ -84,7 +84,18 @@ registerMessageComponent('layer-card-view', {
         if (newValue) {
           this.classList.add('layer-card-border-' + newValue);
         }
-      }
+      },
+    },
+
+    // One of:
+    // "full-card": Uses all available width
+    // "chat-bubble": No minimum, maximum is all available width; generallay does not look like a card
+    // "flex-card": card that has a minimum and a maximum but tries for an optimal size for its contents
+    widthType: {
+      set(newValue, oldValue) {
+        if (oldValue) this.classList.remove('layer-card-width-' + oldValue);
+        if (newValue) this.classList.add('layer-card-width-' + newValue);
+      },
     },
   },
   methods: {
@@ -136,6 +147,7 @@ registerMessageComponent('layer-card-view', {
       const cardUI = this.createElement(cardUIType, {
         model: this.model,
         cardView: this,
+        noCreate: true,
       });
       this.nodes.ui = cardUI;
 
@@ -148,15 +160,21 @@ registerMessageComponent('layer-card-view', {
           ui: cardUI,
           parentNode: this,
           name: 'cardContainer',
+          noCreate: true,
         });
         cardContainer.ui = cardUI;
         cardUI.parentComponent = cardContainer;
-        cardUI.setupContainerClasses();
         this.cardBorderStyle = this.properties.cardBorderStyle || cardContainer.cardBorderStyle || 'standard';
       } else {
         this.appendChild(cardUI);
         this.cardBorderStyle = this.properties.cardBorderStyle || cardUI.cardBorderStyle || 'standard';
       }
+
+      CustomElements.takeRecords();
+      if (this.nodes.cardContainer) this.nodes.cardContainer._onAfterCreate();
+      if (cardUI._onAfterCreate) cardUI._onAfterCreate();
+      if (this.nodes.cardContainer) cardUI.setupContainerClasses();
+
     },
 
     /**

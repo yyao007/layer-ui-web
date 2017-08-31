@@ -17,7 +17,12 @@ registerComponent('layer-response-card', {
   properties: {
     model: {},
     cardBorderStyle: {
-      value: 'none'
+      value: 'none',
+    },
+    widthType: {
+      get() {
+        return this.properties.contentView ? this.properties.contentView.widthType : 'flex-card';
+      },
     },
   },
   methods: {
@@ -32,7 +37,7 @@ registerComponent('layer-response-card', {
 
     onAfterCreate() {
       if (this.model.messageModel) {
-        this.createElement('layer-card-view', {
+        this.properties.contentView = this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: this.model.messageModel.part,
           model: this.model.messageModel,

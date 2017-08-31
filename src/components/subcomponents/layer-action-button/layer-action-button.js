@@ -71,8 +71,10 @@ registerComponent('layer-action-button', {
 
 
     _onClick(evt) {
+      if (!this.event) return;
       evt.preventDefault();
       evt.stopPropagation();
+
       let cardView = this;
       while (cardView.tagName !== 'LAYER-CARD-VIEW' && cardView.parentComponent) {
         cardView = cardView.parentComponent;

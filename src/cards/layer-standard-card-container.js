@@ -27,6 +27,7 @@ registerComponent('layer-standard-card-container', {
     layer-standard-card-container .layer-card-body-outer {
       display: flex;
       flex-direction: row;
+      align-items: center;
     }
     layer-standard-card-container .layer-card-body-outer .layer-card-body {
       flex-grow: 1;
@@ -106,7 +107,7 @@ registerComponent('layer-standard-card-container', {
       this.classList[!this.title && !this.description && !this.footer ? 'add' : 'remove']('layer-card-no-metadata');
     },
 
-    getPreferredWidth() {
+    getPreferredMinWidth() {
       return this.isShowingMetadata ? 350 : 192;
     },
     getPreferredMaxWidth() {

@@ -28,9 +28,6 @@ registerComponent('layer-location-card', {
   }
   `,
   properties: {
-    mapWidth: {
-      value: 350,
-    },
     mapHeight: {
       value: 300,
     },
@@ -40,6 +37,9 @@ registerComponent('layer-location-card', {
         this.toggleClass('layer-location-card-address-only', value);
         this.setupContainerClasses();
       },
+    },
+    widthType: {
+      value: 'full-card',
     },
   },
   methods: {
@@ -53,14 +53,16 @@ registerComponent('layer-location-card', {
     },
 
 
-    onAfterCreate() {
+    onAttach() {
       if (!this.hideMap) this._updateImageSrc();
     },
 
     _updateImageSrc() {
-      const marker = this.model.latitude ? this.model.latitude + ',' + this.model.longitude : escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + ` ${this.model.city} ${this.model.administrativeArea}, ${this.model.postalCode} ${this.model.country}`);
+      if (this.parentNode && this.parentNode.clientWidth) {
+        const marker = this.model.latitude ? this.model.latitude + ',' + this.model.longitude : escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + ` ${this.model.city} ${this.model.administrativeArea}, ${this.model.postalCode} ${this.model.country}`);
 
-      this.nodes.img.src = `${location.protocol}//maps.googleapis.com/maps/api/staticmap?size=${this.mapWidth}x${this.mapHeight}&language=${navigator.language}&key=${window.googleMapsAPIKey}&zoom=${this.model.zoom}&markers=${marker}`;
+        this.nodes.img.src = `${location.protocol}//maps.googleapis.com/maps/api/staticmap?size=${this.parentNode.clientWidth}x${this.mapHeight}&language=${navigator.language}&key=${window.googleMapsAPIKey}&zoom=${this.model.zoom}&markers=${marker}`;
+      }
     },
 
     onRender() {

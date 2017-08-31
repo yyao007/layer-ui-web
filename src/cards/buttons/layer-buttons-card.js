@@ -32,7 +32,13 @@ registerComponent('layer-buttons-card', {
   }
   `,
   mixins: [CardMixin],
-
+  properties: {
+    widthType: {
+      get() {
+        return this.properties.contentView ? this.properties.contentView.widthType : 'flex-card';
+      },
+    },
+  },
   methods: {
     /**
      * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
@@ -45,7 +51,7 @@ registerComponent('layer-buttons-card', {
 
     onAfterCreate() {
       if (this.model.contentModel) {
-        this.createElement('layer-card-view', {
+        this.properties.contentView = this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: this.model.contentModel.part,
           model: this.model.contentModel,

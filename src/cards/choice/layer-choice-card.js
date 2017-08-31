@@ -32,6 +32,9 @@ registerComponent('layer-choice-card', {
       noGetterFromSetter: true,
       value: 'layer-titled-card-container',
     },
+    widthType: {
+      value: 'flex-card',
+    },
   },
   methods: {
     /**

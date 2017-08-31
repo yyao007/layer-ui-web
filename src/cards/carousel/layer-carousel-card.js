@@ -6,6 +6,7 @@
 import { registerComponent } from '../../components/component';
 import { animatedScrollLeftTo } from '../../base';
 import CardMixin from '../card-mixin';
+import Throttler from '../../mixins/throttler';
 
 registerComponent('layer-carousel-card', {
   template: `
@@ -46,7 +47,7 @@ registerComponent('layer-carousel-card', {
   }
   `,
 
-  mixins: [CardMixin],
+  mixins: [CardMixin, Throttler],
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -55,6 +56,9 @@ registerComponent('layer-carousel-card', {
       get() {
         return this.model.title ? 'layer-titled-card-container' : null;
       },
+    },
+    widthType: {
+      value: 'flex-card',
     },
   },
   methods: {
@@ -65,28 +69,72 @@ registerComponent('layer-carousel-card', {
       return this.model.title;
     },
 
+    onDestroy() {
+      window.removeEventListener('resize', this.properties.onResize);
+    },
+
     onCreate() {
       this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
       this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
+      this.properties.onResize = this._onResize.bind(this);
+      window.addEventListener('resize', this.properties.onResize);
     },
     onRerender() {
-      console.log("CAROUSEL onRERENDER");
+      if (!this.properties._internalState.onAttachCalled) return;
+      this._adjustCarouselWidth();
+
+      // console.log("CAROUSEL onRERENDER");
       // TODO: Assign items ids so we don't need to blow away and then recreate them
       this.nodes.items.innerHTML = '';
+      const maxCardWidth = this._getMaxCardWidth();
       this.model.items.forEach((item) => {
-        console.log('GENERATE: ' + item.id + '    ' + item.title);
-        this.createElement('layer-card-view', {
+        // console.log('GENERATE: ' + item.id + '    ' + item.title);
+        const card = this.createElement('layer-card-view', {
           message: this.model.message,
           rootPart: item.part,
           model: item,
           parentNode: this.nodes.items,
         });
+        switch (card.widthType) {
+          case 'full-card':
+            card.style.width = card.style.minWidth = maxCardWidth + 'px';
+            break;
+          case 'flex-card':
+            if (maxCardWidth < 600) {
+              card.style.width = card.style.minWidth = maxCardWidth + 'px';
+            } else {
+              card.style.width = card.style.minWidth = '350px';
+            }
+            break;
+        }
       });
       setTimeout(this._updateScrollButtons.bind(this), 10);
     },
 
-    onAttach() {
-      setTimeout(this._updateScrollButtons.bind(this), 10);
+    onAttach: {
+      mode: registerComponent.MODES.AFTER,
+      value() {
+        setTimeout(this._updateScrollButtons.bind(this), 10);
+        this.onRerender();
+      },
+    },
+    _onResize() {
+      this._throttler(() => this._adjustCarouselWidth());
+    },
+    _adjustCarouselWidth() {
+      const parent = this.parentComponent.parentNode;
+      if (!parent || !parent.clientWidth) return 0;
+      const carouselWidth = Math.floor(parent.clientWidth * 0.9);
+      if (carouselWidth) this.cardView.style.maxWidth = carouselWidth + 'px';
+    },
+
+    _getMaxCardWidth() {
+      const parent = this.parentComponent.parentNode;
+      if (!parent || !parent.clientWidth) return 0;
+      let width = parent.clientWidth;
+      if (width > 600) width = width * 0.6;
+      else width = width * 0.8;
+      return Math.min(500, width);
     },
 
     _updateScrollButtons() {
@@ -166,3 +214,4 @@ registerComponent('layer-carousel-card', {
     },
   },
 });
+
