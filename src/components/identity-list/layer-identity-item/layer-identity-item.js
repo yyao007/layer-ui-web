@@ -13,11 +13,12 @@ import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import SizeProperty from '../../../mixins/size-property';
+import Clickable from '../../../mixins/clickable';
 import '../../subcomponents/layer-avatar/layer-avatar';
 import '../../subcomponents/layer-age/layer-age';
 
 registerComponent('layer-identity-item', {
-  mixins: [ListItem, SizeProperty],
+  mixins: [ListItem, SizeProperty, Clickable],
   properties: {
 
     /**
@@ -75,7 +76,7 @@ registerComponent('layer-identity-item', {
      */
     onCreate() {
       if (!this.id) this.id = Layer.Util.generateUUID();
-      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('item-click', this.nodes.listItem, this.onClick.bind(this));
     },
 
     /**

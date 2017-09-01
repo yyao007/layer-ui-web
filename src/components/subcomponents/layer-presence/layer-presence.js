@@ -42,9 +42,10 @@
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import SizeProperty from '../../../mixins/size-property';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-presence', {
-  mixins: [SizeProperty],
+  mixins: [SizeProperty, Clickable],
 
   /**
    * The user has clicked on the `<layer-presence />` widget
@@ -109,7 +110,7 @@ registerComponent('layer-presence', {
   },
   methods: {
     onCreate() {
-      this.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('presence-click', this, this.onClick.bind(this));
     },
 
     /**

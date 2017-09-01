@@ -7,6 +7,7 @@ import { registerComponent } from '../../components/component';
 import { animatedScrollLeftTo } from '../../base';
 import CardMixin from '../card-mixin';
 import Throttler from '../../mixins/throttler';
+import Clickable from '../../mixins/clickable';
 
 registerComponent('layer-carousel-card', {
   template: `
@@ -47,7 +48,7 @@ registerComponent('layer-carousel-card', {
   }
   `,
 
-  mixins: [CardMixin, Throttler],
+  mixins: [CardMixin, Throttler, Clickable],
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -74,8 +75,9 @@ registerComponent('layer-carousel-card', {
     },
 
     onCreate() {
-      this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
-      this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
+      this.addClickHandler('click-next', this.nodes.next, this._scroll.bind(this, true));
+      this.addClickHandler('click-prev', this.nodes.prev, this._scroll.bind(this, false));
+
       this.properties.onResize = this._onResize.bind(this);
       window.addEventListener('resize', this.properties.onResize);
     },

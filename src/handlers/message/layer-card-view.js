@@ -5,6 +5,7 @@
  */
 import { registerMessageComponent } from '../../components/component';
 import MessageHandler from '../../mixins/message-handler';
+import Clickable from '../../mixins/clickable';
 
 const actionHandlers = {};
 
@@ -15,7 +16,7 @@ module.exports = {
 };
 
 registerMessageComponent('layer-card-view', {
-  mixins: [MessageHandler],
+  mixins: [MessageHandler, Clickable],
   style: `layer-card-view {
     display: inline-flex;
     flex-direction: row;
@@ -119,8 +120,7 @@ registerMessageComponent('layer-card-view', {
     },
 
     onCreate() {
-      this.addEventListener('click', this.handleSelection.bind(this));
-      this.addEventListener('tap', this.handleSelection.bind(this));
+      this.addClickHandler('card-click', this, this.handleSelection.bind(this));
     },
 
     onAfterCreate() {

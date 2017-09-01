@@ -450,7 +450,7 @@ function initReact(React, ReactDom) {
 
 module.exports = initReact;
 _base2.default.addAdapter('react', initReact);
-},{"../base":4,"layer-websdk":112}],4:[function(require,module,exports){
+},{"../base":4,"layer-websdk":113}],4:[function(require,module,exports){
 /**
  * @class layerUI
  * @static
@@ -1051,7 +1051,7 @@ if (clientVersions[0] !== 3 && _layerWebsdk2.default.Client.version !== '3.1.1')
  */
 
 module.exports = layerUI;
-},{"layer-websdk":112}],5:[function(require,module,exports){
+},{"layer-websdk":113}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1536,7 +1536,7 @@ _layerWebsdk.Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 module.exports = ButtonsModel;
 
 window.PollModel = ButtonsModel; // debug stuff
-},{"layer-websdk":112}],6:[function(require,module,exports){
+},{"layer-websdk":113}],6:[function(require,module,exports){
 /**
  *
  * @class
@@ -2790,7 +2790,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(CarouselModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(CarouselModel, 'CarouselModel');
 
 module.exports = CarouselModel;
-},{"layer-websdk":112}],10:[function(require,module,exports){
+},{"layer-websdk":113}],10:[function(require,module,exports){
 /**
  *
  * @class
@@ -2810,14 +2810,17 @@ var _throttler = require('../../mixins/throttler');
 
 var _throttler2 = _interopRequireDefault(_throttler);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _clickable = require('../../mixins/clickable');
 
+var _clickable2 = _interopRequireDefault(_clickable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-carousel-card', {
   template: '\n    <span layer-id=\'prev\' class="layer-next-icon layer-previous-icon" ></span>\n    <div class="layer-carousel-card-items" layer-id="items"></div>\n    <span layer-id=\'next\' class="layer-next-icon" ></span>\n  ',
   style: '\n  layer-carousel-card {\n    display: flex;\n    flex-direction: row;\n    align-items: center;\n    max-width: 100%;\n    position: relative;\n  }\n  layer-carousel-card .layer-next-icon {\n    display: inline-block;\n    z-index: 10;\n    position: absolute;\n    cursor: pointer;\n  }\n\n  layer-carousel-card.layer-carousel-end .layer-next-icon:not(.layer-previous-icon) {\n    display: none;\n  }\n  layer-carousel-card.layer-carousel-start .layer-previous-icon {\n    display: none;\n  }\n  .layer-carousel-card-items {\n    display: flex;\n    flex-direction: row;\n    align-items: stretch;\n    overflow-x: hidden;\n  }\n  .layer-carousel-card-items:after {\n    content: "";\n    flex: 0 0 5px;\n  }\n  ',
 
-  mixins: [_cardMixin2.default, _throttler2.default],
+  mixins: [_cardMixin2.default, _throttler2.default, _clickable2.default],
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -2842,8 +2845,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       window.removeEventListener('resize', this.properties.onResize);
     },
     onCreate: function onCreate() {
-      this.nodes.next.addEventListener('click', this._scroll.bind(this, true));
-      this.nodes.prev.addEventListener('click', this._scroll.bind(this, false));
+      this.addClickHandler('click-next', this.nodes.next, this._scroll.bind(this, true));
+      this.addClickHandler('click-prev', this.nodes.prev, this._scroll.bind(this, false));
+
       this.properties.onResize = this._onResize.bind(this);
       window.addEventListener('resize', this.properties.onResize);
     },
@@ -2983,8 +2987,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onRender: function onRender() {}
   }
-});
-},{"../../base":4,"../../components/component":35,"../../mixins/throttler":96,"../card-mixin":7}],11:[function(require,module,exports){
+}); 
+},{"../../base":4,"../../components/component":35,"../../mixins/clickable":82,"../../mixins/throttler":97,"../card-mixin":7}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3427,7 +3431,7 @@ _layerWebsdk.Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
 _layerWebsdk.Client.registerCardModelClass(ChoiceModel, 'ChoiceModel');
 
 module.exports = ChoiceModel;
-},{"../response/response-model":32,"../text/text-model":34,"layer-websdk":112}],12:[function(require,module,exports){
+},{"../response/response-model":32,"../text/text-model":34,"layer-websdk":113}],12:[function(require,module,exports){
 /**
  *
  *
@@ -3973,7 +3977,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(FileModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(FileModel, 'FileModel');
 
 module.exports = FileModel;
-},{"layer-websdk":112}],16:[function(require,module,exports){
+},{"layer-websdk":113}],16:[function(require,module,exports){
 /**
  * TODO: Verify that custom handling of "open-file" events are possible and documented
  * @class layerUI.handlers.message.CardView
@@ -4750,7 +4754,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ImageModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ImageModel, 'ImageModel');
 
 module.exports = ImageModel;
-},{"../../utils/sizing":99,"blueimp-load-image/js/load-image":105,"blueimp-load-image/js/load-image-exif":101,"blueimp-load-image/js/load-image-meta":102,"blueimp-load-image/js/load-image-orientation":103,"layer-websdk":112}],18:[function(require,module,exports){
+},{"../../utils/sizing":100,"blueimp-load-image/js/load-image":106,"blueimp-load-image/js/load-image-exif":102,"blueimp-load-image/js/load-image-meta":103,"blueimp-load-image/js/load-image-orientation":104,"layer-websdk":113}],18:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -4939,7 +4943,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 }); 
-},{"../../base":4,"../../components/component":35,"../../utils/sizing":99,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":105,"blueimp-load-image/js/load-image-exif":101,"blueimp-load-image/js/load-image-meta":102,"blueimp-load-image/js/load-image-orientation":103}],19:[function(require,module,exports){
+},{"../../base":4,"../../components/component":35,"../../utils/sizing":100,"../card-mixin":7,"../card-primitive-mixin":8,"blueimp-load-image/js/load-image":106,"blueimp-load-image/js/load-image-exif":102,"blueimp-load-image/js/load-image-meta":103,"blueimp-load-image/js/load-image-orientation":104}],19:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -5536,7 +5540,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LinkModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LinkModel, 'LinkModel');
 
 module.exports = LinkModel;
-},{"layer-websdk":112}],23:[function(require,module,exports){
+},{"layer-websdk":113}],23:[function(require,module,exports){
 /**
  * You must set your Google Maps API key in `window.googleMapsAPIKey`
  *
@@ -5893,7 +5897,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(LocationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(LocationModel, 'LocationModel');
 
 module.exports = LocationModel;
-},{"layer-websdk":112}],25:[function(require,module,exports){
+},{"layer-websdk":113}],25:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -5994,7 +5998,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(OrganizationModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(OrganizationModel, 'OrganizationModel');
 
 module.exports = OrganizationModel;
-},{"layer-websdk":112}],26:[function(require,module,exports){
+},{"layer-websdk":113}],26:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -6101,7 +6105,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(PersonModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(PersonModel, 'PersonModel');
 
 module.exports = PersonModel;
-},{"layer-websdk":112}],27:[function(require,module,exports){
+},{"layer-websdk":113}],27:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -6675,7 +6679,7 @@ _layerWebsdk.Client.registerCardModelClass(ProductModel, 'ProductModel');
 
 _layerWebsdk.Root.initClass.apply(ProductModel, [ProductModel, 'ProductModel']);
 module.exports = ProductModel;
-},{"layer-websdk":112}],29:[function(require,module,exports){
+},{"layer-websdk":113}],29:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -7406,7 +7410,7 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ReceiptModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ReceiptModel, 'ReceiptModel');
 
 module.exports = ReceiptModel;
-},{"layer-websdk":112}],31:[function(require,module,exports){
+},{"layer-websdk":113}],31:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -7572,7 +7576,7 @@ _layerWebsdk2.default.MessagePart.TextualMimeTypes.push('application/vnd.layer.c
 _layerWebsdk.Client.registerCardModelClass(ResponseModel, 'ResponseModel');
 
 module.exports = ResponseModel;
-},{"layer-websdk":112}],33:[function(require,module,exports){
+},{"layer-websdk":113}],33:[function(require,module,exports){
 /**
  *
  * @class layerUI.handlers.message.CardView
@@ -7922,7 +7926,7 @@ _layerWebsdk.Client.registerCardModelClass(TextModel, 'TextModel');
 });
 
 module.exports = TextModel;
-},{"../../base":4,"layer-websdk":112}],35:[function(require,module,exports){
+},{"../../base":4,"layer-websdk":113}],35:[function(require,module,exports){
 /**
  * This is the base class for all UI classes in the Layer UI Framework.
  *
@@ -9681,7 +9685,7 @@ module.exports = {
   registerAll: registerAll,
   unregisterComponent: unregisterComponent
 };
-},{"../base":4,"../mixins/state-manager":95,"layer-websdk":112}],36:[function(require,module,exports){
+},{"../base":4,"../mixins/state-manager":96,"layer-websdk":113}],36:[function(require,module,exports){
 /**
  * The Layer Channel Item widget renders a single Channel, typically for use representing a
  * channel within a list of channels.
@@ -9798,7 +9802,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-channel-item", "<div class='layer-list-item' layer-id='innerNode'><div class='layer-channel-item-content'><div layer-id='title' class='layer-channel-title'></div></div><layer-delete layer-id='delete'></layer-delete></div>", "");
   layerUI.buildStyle("layer-channel-item", "layer-channel-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-channel-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-channel-item  .layer-list-item .layer-channel-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-channel-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../../../mixins/list-item-selection":86,"../../../mixins/size-property":94,"../../subcomponents/layer-delete/layer-delete":58}],37:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":88,"../../../mixins/list-item-selection":87,"../../../mixins/size-property":95,"../../subcomponents/layer-delete/layer-delete":58}],37:[function(require,module,exports){
 /**
  * The Layer Conversation Item widget renders a single Conversation, typically for use representing a
  * conversation within a list of conversations.
@@ -10036,7 +10040,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-item", "<div class='layer-list-item' layer-id='innerNode'><layer-replaceable-content  class='layer-conversation-left-side' name='conversationRowLeftSide'></layer-replaceable-content><div class='layer-conversation-item-content'><div class='layer-conversation-title-row'><layer-conversation-title layer-id='title'></layer-conversation-title><layer-date layer-id='date'></layer-date></div><layer-conversation-last-message layer-id='lastMessage'></layer-conversation-last-message></div><layer-replaceable-content  class='layer-conversation-right-side' name='conversationRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-conversation-item", "layer-conversation-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-conversation-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-conversation-item  .layer-list-item .layer-conversation-item-content {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item .layer-conversation-title-row {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-conversation-item .layer-conversation-title-row layer-conversation-title {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-conversation-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-conversation-item layer-presence, layer-conversation-item .layer-group-counter {\ndisplay: none;\n}\nlayer-conversation-item layer-avatar layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-group-conversation .layer-group-counter {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny.layer-direct-message-conversation layer-presence {\ndisplay: block;\n}\nlayer-conversation-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../../../mixins/list-item-selection":86,"../../../mixins/size-property":94,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":55,"../../subcomponents/layer-conversation-title/layer-conversation-title":56,"../../subcomponents/layer-menu-button/layer-menu-button":61}],38:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":88,"../../../mixins/list-item-selection":87,"../../../mixins/size-property":95,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-conversation-last-message/layer-conversation-last-message":55,"../../subcomponents/layer-conversation-title/layer-conversation-title":56,"../../subcomponents/layer-menu-button/layer-menu-button":61}],38:[function(require,module,exports){
 /**
  * The Layer Conversation List widget renders a scrollable, pagable list of Conversations.
  *
@@ -10479,7 +10483,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-list", "<div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>      No Conversations yet    </layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-conversation-list", "layer-conversation-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-conversation-list:not(.layer-loading-data) .layer-load-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":82,"../../../mixins/list":90,"../../../mixins/list-load-indicator":88,"../../../mixins/list-selection":89,"../../../mixins/main-component":91,"../../../mixins/query-end-indicator":93,"../../../mixins/size-property":94,"../layer-channel-item/layer-channel-item":36,"../layer-conversation-item/layer-conversation-item":37,"layer-websdk":112}],39:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":83,"../../../mixins/list":91,"../../../mixins/list-load-indicator":89,"../../../mixins/list-selection":90,"../../../mixins/main-component":92,"../../../mixins/query-end-indicator":94,"../../../mixins/size-property":95,"../layer-channel-item/layer-channel-item":36,"../layer-conversation-item/layer-conversation-item":37,"layer-websdk":113}],39:[function(require,module,exports){
 /**
  * The Layer User Item represents a single user within a User List.
  *
@@ -10507,15 +10511,18 @@ var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 require('../../subcomponents/layer-avatar/layer-avatar');
 
 require('../../subcomponents/layer-age/layer-age');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-identity-item', {
-  mixins: [_listItem2.default, _sizeProperty2.default],
+  mixins: [_listItem2.default, _sizeProperty2.default, _clickable2.default],
   properties: {
 
     /**
@@ -10573,7 +10580,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onCreate: function onCreate() {
       if (!this.id) this.id = _layerWebsdk2.default.Util.generateUUID();
-      this.nodes.listItem.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('item-click', this.nodes.listItem, this.onClick.bind(this));
     },
 
 
@@ -10670,14 +10677,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.classList[match ? 'remove' : 'add']('layer-item-filtered');
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-identity-item", "<div class='layer-list-item' layer-id='listItem'><layer-avatar layer-id='avatar' show-presence='true'></layer-avatar><layer-presence layer-id='presence' class='presence-without-avatar' size='medium'></layer-presence><label class='layer-identity-name' layer-id='title'></label><layer-age layer-id='age'></layer-age><layer-replaceable-content layer-id='loadIndicator' class='layer-identity-right-side' name='identityRowRightSide'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-identity-item", "layer-identity-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-identity-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-identity-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-identity-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-identity-item.layer-identity-item-empty {\ndisplay: none;\n}\nlayer-identity-item layer-presence.presence-without-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-presence {\ndisplay: block;\n}\nlayer-identity-item.layer-size-tiny layer-avatar {\ndisplay: none;\n}\nlayer-identity-item.layer-size-tiny layer-age {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../../../mixins/size-property":94,"../../subcomponents/layer-age/layer-age":51,"../../subcomponents/layer-avatar/layer-avatar":52,"layer-websdk":112}],40:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82,"../../../mixins/list-item":88,"../../../mixins/size-property":95,"../../subcomponents/layer-age/layer-age":51,"../../subcomponents/layer-avatar/layer-avatar":52,"layer-websdk":113}],40:[function(require,module,exports){
 /**
  * The Layer User List renders a pagable list of layer.Identity objects, and allows the user to select people to talk with.
  *
@@ -11085,7 +11093,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-identity-list", "<div class='layer-list-meta' layer-id='listMeta'><div class='layer-empty-list' layer-id='emptyNode'></div><div class='layer-meta-toggle'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'>        No Users yet      </layer-replaceable-content><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-identity-list", "layer-identity-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-identity-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-identity-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":82,"../../../mixins/has-query":85,"../../../mixins/list":90,"../../../mixins/list-load-indicator":88,"../../../mixins/main-component":91,"../../../mixins/query-end-indicator":93,"../../../mixins/size-property":94,"../layer-identity-item/layer-identity-item":39,"layer-websdk":112}],41:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":83,"../../../mixins/has-query":86,"../../../mixins/list":91,"../../../mixins/list-load-indicator":89,"../../../mixins/main-component":92,"../../../mixins/query-end-indicator":94,"../../../mixins/size-property":95,"../layer-identity-item/layer-identity-item":39,"layer-websdk":113}],41:[function(require,module,exports){
 /**
  * The Layer Conversation Panel includes a Message List, Typing Indicator Panel, and a Compose bar.
  *
@@ -11907,7 +11915,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-conversation-view", "<layer-message-list layer-id='list'></layer-message-list><layer-typing-indicator layer-id='typingIndicators'></layer-typing-indicator><layer-compose-bar layer-id='composer'></layer-compose-bar>", "");
   layerUI.buildStyle("layer-conversation-view", "layer-conversation-view {\ndisplay: flex;\nflex-direction: column;\noutline: none; \n}\nlayer-message-list {\nflex-grow: 1;\nheight: 100px;\n}\nlayer-compose-bar {\nborder-top: 1px solid #dedede;\nmin-height: 30px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":35,"../../mixins/file-drop-target":83,"../../mixins/focus-on-keydown":84,"../../mixins/has-query":85,"../../mixins/main-component":91,"../../mixins/throttler":96,"../message-list/layer-message-list/layer-message-list":49,"../subcomponents/layer-compose-bar/layer-compose-bar":54,"../subcomponents/layer-typing-indicator/layer-typing-indicator":68,"layer-websdk":112}],42:[function(require,module,exports){
+},{"../../base":4,"../../components/component":35,"../../mixins/file-drop-target":84,"../../mixins/focus-on-keydown":85,"../../mixins/has-query":86,"../../mixins/main-component":92,"../../mixins/throttler":97,"../message-list/layer-message-list/layer-message-list":49,"../subcomponents/layer-compose-bar/layer-compose-bar":54,"../subcomponents/layer-typing-indicator/layer-typing-indicator":68,"layer-websdk":113}],42:[function(require,module,exports){
 /**
  * The Layer Notifier widget can show Desktop Notifications when your app is in the background,
  * and Toast notifications when your app is in the foreground.
@@ -11952,16 +11960,20 @@ var _mainComponent = require('../../mixins/main-component');
 
 var _mainComponent2 = _interopRequireDefault(_mainComponent);
 
+var _clickable = require('../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 require('../subcomponents/layer-avatar/layer-avatar');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Notify = _notifyjs2.default; 
 
+var Notify = _notifyjs2.default;
 if ('default' in Notify) Notify = Notify.default; // Annoying difference between webpack and browserify...
 
 (0, _component.registerComponent)('layer-notifier', {
-  mixins: [_mainComponent2.default],
+  mixins: [_mainComponent2.default, _clickable2.default],
 
   /**
    * Before showing any notification, this event will be triggered.
@@ -12231,7 +12243,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
      * @private
      */
     onCreate: function onCreate() {
-      this.addEventListener('click', this.onClickToast.bind(this));
+      this.addClickHandler('item-click', this, this.onClickToast.bind(this));
       this.addEventListener('transitionend', this._afterTransition.bind(this), true);
     },
 
@@ -12455,7 +12467,7 @@ if ('default' in Notify) Notify = Notify.default; // Annoying difference between
   layerUI.buildAndRegisterTemplate("layer-notifier", "<div class='layer-message-item-main' layer-id='container'><div class='layer-notifier-title'><layer-avatar layer-id='avatar' size='small'></layer-avatar><span layer-id='title'></span></div><layer-card-view layer-id='card'></layer-card-view></div>", "");
   layerUI.buildStyle("layer-notifier", "layer-notifier {\nposition: fixed;\nz-index: 1000;\nright: 10px;\ntop: -10000px;\nmax-width: 40%;\ndisplay: flex;\nopacity: 0;\ntransition: opacity 500ms;\n}\nlayer-notifier.layer-notifier-toast-fade {\ntop: 10px;\n}\nlayer-notifier.layer-notifier-toast {\ntop: 10px;\nflex-direction: row;\nopacity: 1;\ntransition: opacity 1s;\n}\nlayer-notifier .layer-message-item-main {\ndisplay: flex;\nflex-direction: column;\nflex-grow: 1;\n}\nlayer-notifier layer-message-text-plain {\noverflow: hidden;\nmax-height: 200px;\n}", "");
 })();
-},{"../../base":4,"../../components/component":35,"../../mixins/main-component":91,"../subcomponents/layer-avatar/layer-avatar":52,"notifyjs":107}],43:[function(require,module,exports){
+},{"../../base":4,"../../components/component":35,"../../mixins/clickable":82,"../../mixins/main-component":92,"../subcomponents/layer-avatar/layer-avatar":52,"notifyjs":108}],43:[function(require,module,exports){
 /**
  * The Layer Membership Item represents a single user within a Membership List.
  *
@@ -12544,7 +12556,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-item", "<div class='layer-list-item'><layer-avatar layer-id='avatar'></layer-avatar><label class='layer-membership-name' layer-id='title'></label></div>", "");
   layerUI.buildStyle("layer-membership-item", "layer-membership-item {\ndisplay: flex;\nflex-direction: column;\n}\nlayer-membership-item .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-membership-item .layer-list-item layer-avatar {\nmargin-right: 20px;\n}\nlayer-membership-item .layer-list-item label {\nflex-grow: 1;\nwidth: 100px; \n}\nlayer-membership-item.layer-item-filtered .layer-list-item {\ndisplay: none;\n}\nlayer-membership-item.layer-membership-item-empty {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list-item":87,"../../../mixins/list-item-selection":86,"../../component":35,"../../subcomponents/layer-avatar/layer-avatar":52}],44:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list-item":88,"../../../mixins/list-item-selection":87,"../../component":35,"../../subcomponents/layer-avatar/layer-avatar":52}],44:[function(require,module,exports){
 /**
  * The Layer Membership List renders a pagable list of layer.Membership objects, and allows the user to
  * see who else is in the Channel with them.
@@ -12749,7 +12761,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-membership-list", "<div class='layer-load-indicator' layer-id='loadIndicator'>Loading users...</div>", "");
   layerUI.buildStyle("layer-membership-list", "layer-membership-list {\noverflow-y: auto;\ndisplay: block;\n}\nlayer-membership-list .layer-load-indicator {\ndisplay: none;\n}\nlayer-membership-list.layer-loading-data .layer-load-indicator {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../mixins/list":90,"../../../mixins/list-selection":89,"../../../mixins/main-component":91,"../../component":35,"../layer-membership-item/layer-membership-item":43,"layer-websdk":112}],45:[function(require,module,exports){
+},{"../../../base":4,"../../../mixins/list":91,"../../../mixins/list-selection":90,"../../../mixins/main-component":92,"../../component":35,"../layer-membership-item/layer-membership-item":43,"layer-websdk":113}],45:[function(require,module,exports){
 /**
  * The Layer Message Item widget renders a single Message synopsis.
  *
@@ -13066,7 +13078,7 @@ module.exports = {
     }
   }
 };
-},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":65,"layer-websdk":112}],46:[function(require,module,exports){
+},{"../subcomponents/layer-replaceable-content/layer-replaceable-content":65,"layer-websdk":113}],46:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -13094,7 +13106,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-received", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: Left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><layer-card-view layer-id='cardView'></layer-card-view><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-message-item-received", "layer-message-item-received {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-received .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\n}\nlayer-message-item-received  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-received layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-date/layer-date":57,"../layer-message-item-mixin":45}],47:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":88,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-date/layer-date":57,"../layer-message-item-mixin":45}],47:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -13126,7 +13138,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-sent", "<div class='layer-list-item' layer-id='innerNode'><!-- Header --><layer-replaceable-content class='layer-message-header' name='messageRowHeader'></layer-replaceable-content><!-- Body --><div class='layer-message-row' layer-id='messageRow'><!-- Body: left Side --><layer-replaceable-content class='layer-message-left-side' name='messageRowLeftSide'></layer-replaceable-content><!-- Body: Message Contents --><div class='layer-message-item-main'><layer-card-view layer-id='cardView'></layer-card-view><div class='layer-message-item-content' layer-id='content'></div></div><!-- Body: Right Side --><layer-replaceable-content class='layer-message-right-side' name='messageRowRightSide'></layer-replaceable-content></div><!-- Footer --><layer-replaceable-content class='layer-message-footer' name='messageRowFooter'></layer-replaceable-content></div>", "");
   layerUI.buildStyle("layer-message-item-sent", "layer-message-item-sent {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-sent img.emoji {\nmargin: 0 .05em 0 .1em;\nvertical-align: -0.1em;\n}\nlayer-message-item-sent .layer-list-item {\ndisplay: flex;\nflex-direction: column;\nalign-items: stretch;\n}\nlayer-message-item-sent .layer-message-row {\ndisplay: flex;\nflex-direction: row;\nalign-items: flex-end;\nflex-grow: 1;\n}\nlayer-message-item-sent .layer-message-item-main {\ntext-align: right;\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-sent .layer-message-item-main .layer-message-item-content {\ndisplay: flex;\nflex-direction: row;\njustify-content: flex-end;\n}\nlayer-message-item-sent layer-message-text-plain {\ndisplay: block;\n}\nlayer-message-item-sent .layer-message-right-side > div {\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-date/layer-date":57,"../../subcomponents/layer-delete/layer-delete":58,"../../subcomponents/layer-message-status/layer-message-status":63,"../layer-message-item-mixin":45}],48:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":88,"../../subcomponents/layer-avatar/layer-avatar":52,"../../subcomponents/layer-date/layer-date":57,"../../subcomponents/layer-delete/layer-delete":58,"../../subcomponents/layer-message-status/layer-message-status":63,"../layer-message-item-mixin":45}],48:[function(require,module,exports){
 'use strict';
 
 var _component = require('../../../components/component');
@@ -13150,7 +13162,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-item-status", "<div class='layer-list-item' layer-id='innerNode'><layer-card-view layer-id='cardView' class='layer-message-item-main'></layer-card-view></div>", "");
   layerUI.buildStyle("layer-message-item-status", "layer-message-item-status {\ndisplay: flex;\nflex-direction: column;\nalign-content: stretch;\n}\nlayer-message-item-status .layer-list-item {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}\nlayer-message-item-status  .layer-message-item-main {\nflex-grow: 1;\noverflow: hidden;\n}\nlayer-message-item-status layer-message-text-plain {\ndisplay: block;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":87,"../layer-message-item-mixin":45}],49:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/list-item":88,"../layer-message-item-mixin":45}],49:[function(require,module,exports){
 /**
  * The Layer Message List widget renders a scrollable, pagable list of layerUI.components.MessagesListPanel.Item widgets.
  *
@@ -14053,7 +14065,7 @@ var PAGING_DELAY = 2000;
   layerUI.buildAndRegisterTemplate("layer-message-list", "<!-- The List Header contains a collection of special nodes that may render at the top of the list for    different conditions --><div class='layer-list-meta' layer-id='listMeta'><!-- Rendered when the list is empty --><layer-replaceable-content layer-id='emptyNode' class='layer-empty-list' name='emptyNode'></layer-replaceable-content><div class='layer-header-toggle'><!-- Rendered when there are no more results to page to --><layer-replaceable-content layer-id='endOfResultsNode' class='layer-end-of-results-indicator' name='endOfResultsNode'><layer-start-of-conversation layer-id='startOfConversation'></layer-start-of-conversation></layer-replaceable-content><!-- Rendered when waiting for server data --><layer-replaceable-content layer-id='loadIndicator' class='layer-load-indicator' name='loadIndicator'><layer-loading-indicator></layer-loading-indicator></layer-replaceable-content></div></div>", "");
   layerUI.buildStyle("layer-message-list", "layer-message-list {\ndisplay: block;\nflex-grow: 1;\nheight: 100px; \npadding-bottom: 15px;\noverflow-y: scroll; \n-webkit-overflow-scrolling: touch;\n}\nlayer-message-list:not(.layer-loading-data) .layer-load-indicator,\nlayer-message-list:not(.layer-end-of-results) .layer-end-of-results-indicator {\ndisplay: none;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":82,"../../../mixins/has-query":85,"../../../mixins/list":90,"../../../mixins/list-load-indicator":88,"../../../mixins/query-end-indicator":93,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":67,"../layer-message-item-received/layer-message-item-received":46,"../layer-message-item-sent/layer-message-item-sent":47,"../layer-message-item-status/layer-message-item-status":48,"layer-websdk":112}],50:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/empty-list":83,"../../../mixins/has-query":86,"../../../mixins/list":91,"../../../mixins/list-load-indicator":89,"../../../mixins/query-end-indicator":94,"../../subcomponents/layer-start-of-conversation/layer-start-of-conversation":67,"../layer-message-item-received/layer-message-item-received":46,"../layer-message-item-sent/layer-message-item-sent":47,"../layer-message-item-status/layer-message-item-status":48,"layer-websdk":113}],50:[function(require,module,exports){
 /**
  *
  * @class
@@ -14063,7 +14075,15 @@ var PAGING_DELAY = 2000;
 
 var _component = require('../../component');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
 (0, _component.registerComponent)('layer-action-button', {
+  mixins: [_clickable2.default],
   template: '<button class="layer-button" layer-id="button" tab-index="0"></button>',
   style: 'layer-action-button {\n    display: flex;\n    flex-direction: column;\n    align-content: stretch;\n  }\n  layer-action-button button {\n    cursor: pointer;\n  }\n  .layer-button-content > * {\n    max-width: 100%;\n    width: 100%;\n  }\n  ',
   // Note that there is also a message property managed by the MessageHandler mixin
@@ -14104,7 +14124,7 @@ var _component = require('../../component');
      * @method
      */
     onCreate: function onCreate() {
-      this.addEventListener('click', this._onClick.bind(this));
+      this.addClickHandler('button-click', this, this._onClick.bind(this));
     },
 
 
@@ -14126,8 +14146,8 @@ var _component = require('../../component');
       evt.target.blur();
     }
   }
-}); 
-},{"../../component":35}],51:[function(require,module,exports){
+});
+},{"../../../mixins/clickable":82,"../../component":35}],51:[function(require,module,exports){
 /**
  * The Layer Age widget renders how long ago a date is.
  *
@@ -14513,7 +14533,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-avatar", "", "");
   layerUI.buildStyle("layer-avatar", "layer-avatar {\ndisplay: block;\n}\nlayer-avatar layer-presence {\nposition: absolute;\nbottom: 0px;\nright: 0px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/main-component":91,"../../../mixins/size-property":94,"../layer-presence/layer-presence":64,"layer-websdk":112}],53:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/main-component":92,"../../../mixins/size-property":95,"../layer-presence/layer-presence":64,"layer-websdk":113}],53:[function(require,module,exports){
 /**
  *
  * @class
@@ -14523,7 +14543,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _component = require('../../component');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
 (0, _component.registerComponent)('layer-choice-button', {
+  mixins: [_clickable2.default],
   style: 'layer-choice-button {\n    display: flex;\n    flex-direction: row;\n    align-content: stretch;\n  }\n  layer-choice-button layer-action-button {\n    cursor: pointer;\n    flex-grow: 1;\n    width: 50px; // flexbox bug\n  }\n  .layer-button-content > * {\n    max-width: 100%;\n    width: 100%;\n  }\n  ',
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -14565,7 +14593,7 @@ var _component = require('../../component');
 
         var def = { widget: widget, choice: choice };
         _this.properties.buttons.push(def);
-        widget.addEventListener('click', _this._onClick.bind(_this, def));
+        _this.addClickHandler('button-click', widget, _this._onClick.bind(_this, def));
       });
     },
     onRender: function onRender() {
@@ -14605,8 +14633,8 @@ var _component = require('../../component');
       evt.target.blur();
     }
   }
-}); 
-},{"../../component":35}],54:[function(require,module,exports){
+});
+},{"../../../mixins/clickable":82,"../../component":35}],54:[function(require,module,exports){
 /**
  * The Layer Composer widget provides the textarea for layerUI.components.ConversationPanel.
  *
@@ -15031,7 +15059,7 @@ var TAB = 9;
   layerUI.buildAndRegisterTemplate("layer-compose-bar", "<layer-replaceable-content class='layer-button-panel layer-button-panel-left' name='composerButtonPanelLeft'></layer-replaceable-content><div class='layer-compose-edit-panel' layer-id='editPanel'><div class='hidden-resizer' layer-id='resizer'>&nbsp;&nbsp;</div><div class='hidden-lineheighter' layer-id='lineHeighter'>&nbsp;</div><textarea rows=\"1\" layer-id='input'></textarea></div><layer-replaceable-content class='layer-button-panel layer-button-panel-right' name='composerButtonPanelRight'><layer-send-button></layer-send-button></layer-replaceable-content>", "");
   layerUI.buildStyle("layer-compose-bar", "layer-compose-bar {\ndisplay: flex;\nflex-direction: row;\n}\nlayer-compose-bar .layer-compose-edit-panel {\nposition: relative;\nflex-grow: 1;\nwidth: 100px; \npadding: 1px 0px;\n}\nlayer-compose-bar textarea, layer-compose-bar .hidden-resizer, layer-compose-bar .hidden-lineheighter {\nmin-height: 20px;\noverflow: hidden;\nborder-width: 1px;\nborder-color: transparent;\nmargin: 0px;\nwidth: 100%;\n}\nlayer-compose-bar textarea {\nresize: none;\noutline: none;\nposition: absolute;\nz-index: 2;\ntop: 0px;\nleft: 0px;\nheight: 100%;\noverflow-y: auto;\nwhite-space: pre-wrap;\nword-wrap: break-word;\n}\nlayer-compose-bar.layer-compose-bar-one-line-of-text textarea {\noverflow-y: hidden;\n}\nlayer-compose-bar .hidden-resizer {\nopacity: 0.1;\nwhite-space: pre-wrap;\nword-wrap: break-word;\nmax-height: 250px;\n}\nlayer-compose-bar .layer-compose-edit-panel .hidden-lineheighter {\ntop: 0px;\nopacity: 0.1;\nwhite-space: nowrap;\nposition: absolute;\nright: 10000px;\n}\nlayer-compose-bar .layer-button-panel .layer-replaceable-inner {\ndisplay: flex;\nflex-direction: row;\nalign-items: stretch;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"layer-websdk":112}],55:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"layer-websdk":113}],55:[function(require,module,exports){
 /**
  * The Layer widget renders a Last Message for a layer.Conversation.
  *
@@ -15581,7 +15609,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-delete", "&#x2715;", "");
   layerUI.buildStyle("layer-delete", "layer-delete {\ndisplay: none;\n}\nlayer-delete.layer-delete-enabled {\ndisplay: inline;\nwidth: 12px;\nheight: 12px;\nfont-size: 12px;\npadding: 4px 4px 6px 4px;\nmargin-right: 5px;\nborder: solid 1px transparent;\ncursor: default;\ntext-align: center;\ncursor: pointer;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"layer-websdk":112}],59:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"layer-websdk":113}],59:[function(require,module,exports){
 /**
  * The Layer file upload button widget allows users to select a File to send.
  *
@@ -15618,9 +15646,15 @@ var _base2 = _interopRequireDefault(_base);
 
 var _component = require('../../../components/component');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-file-upload-button', {
+  mixins: [_clickable2.default],
   properties: {
     /**
      * Set the `accept` attribute of the file upload widget.
@@ -15654,7 +15688,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
       // This causes test to fail by causing the click event to fire twice.
       // but without this, the click event is not received at all.
-      this.addEventListener('click', function (evt) {
+      this.addClickHandler('button-click', this, function (evt) {
         if (evt.target !== _this.nodes.input) _this.nodes.input.click();
       });
     },
@@ -15694,15 +15728,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-file-upload-button", "<label layer-id='label'>+</label><input layer-id='input' type='file'></input>", "");
   layerUI.buildStyle("layer-file-upload-button", "layer-file-upload-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: column;\njustify-content: center;\n}\nlayer-file-upload-button input {\nwidth: 0.1px;\nheight: 0.1px;\nopacity: 0;\noverflow: hidden;\nposition: absolute;\nz-index: -1;\n}\nlayer-file-upload-button label {\ndisplay: block;\npointer-events: none;\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"layer-websdk":112}],60:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82,"layer-websdk":113}],60:[function(require,module,exports){
 /**
  * The Layer Loading Spinner/indicator
  *
@@ -15757,9 +15790,15 @@ var _component = require('../../../components/component');
 
 require('../layer-menu/layer-menu');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+
 (0, _component.registerComponent)('layer-menu-button', {
+  mixins: [_clickable2.default],
   properties: {
     getMenuOptions: {
       type: Function,
@@ -15794,7 +15833,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     onCreate: function onCreate() {
-      this.addEventListener('click', this.onButtonClick, this);
+      this.addClickHandler('menu-click', this, this.onButtonClick.bind(this));
     },
 
 
@@ -15822,15 +15861,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       }
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-menu-button", "<span>&#8285;</span>", "");
   layerUI.buildStyle("layer-menu-button", "layer-menu-button {\ndisplay: block;\ncursor: pointer;\nposition: relative;\nwidth: 0px;\nheight: 14px;\n}\nlayer-menu-button span {\npadding: 0px 8px;\nuser-select: none;\n-webkit-user-select: none;\nposition: absolute;\ntop: -9px;\nleft: -9px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../layer-menu/layer-menu":62,"layer-websdk":112}],62:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82,"../layer-menu/layer-menu":62,"layer-websdk":113}],62:[function(require,module,exports){
 /**
  * The Layer Menu renders a menu absolutely positioned beside the specified node.
  *
@@ -15853,20 +15891,26 @@ var _layerWebsdk2 = _interopRequireDefault(_layerWebsdk);
 
 var _component = require('../../../components/component');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
 (0, _component.registerComponent)('layer-menu', {
+  mixins: [_clickable2.default],
   properties: {
     options: {
       set: function set(value) {
+        var _this = this;
+
         var menu = document.createElement('div');
         menu.classList.add('layer-menu-button-menu-list');
         value.forEach(function (option) {
           var menuItem = document.createElement('div');
           menuItem.classList.add('layer-menu-button-menu-item');
           menuItem.innerHTML = option.text;
-          menuItem.addEventListener('click', function (evt) {
+          _this.addClickHandler('menu-item-click', menuItem, function (evt) {
             return option.method();
           });
           menu.appendChild(menuItem);
@@ -15916,17 +15960,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      * @private
      */
     onCreate: function onCreate() {
-      this.onDocumentClick = this.onDocumentClick.bind(this);
-      document.addEventListener('click', this.onDocumentClick);
+      this.addClickHandler('background-click', document, this.onDocumentClick.bind(this));
     },
     onDestroy: function onDestroy() {
-      document.removeEventListener('click', this.onDocumentClick);
+      this.removeClickHandler('background-click', document);
     },
     onDocumentClick: function onDocumentClick(evt) {
       if (this.isShowing) this.isShowing = false;
     },
     _showNear: function _showNear() {
-      var _this = this;
+      var _this2 = this;
 
       var node = this.near;
       var bounds = node.getBoundingClientRect();
@@ -15942,21 +15985,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       this.style.top = bounds.bottom + 'px';
       this.style.minWidth = this.menuWidth + 'px';
       setTimeout(function () {
-        if (_this.offsetTop + _this.clientHeight > document.body.clientHeight) {
-          _this.style.top = '';
-          _this.style.bottom = '2px';
+        if (_this2.offsetTop + _this2.clientHeight > document.body.clientHeight) {
+          _this2.style.top = '';
+          _this2.style.bottom = '2px';
         }
       }, 1);
     }
   }
-});
+}); 
+
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-menu", "", "");
   layerUI.buildStyle("layer-menu", "layer-menu {\ndisplay: none;\nposition: absolute;\n}\nlayer-menu.layer-menu-list-showing {\ndisplay: block;\nz-index: 10;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"layer-websdk":112}],63:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82,"layer-websdk":113}],63:[function(require,module,exports){
 /**
  * The Layer Message Status widget renders a Message's sent/delivered/read status.
  *
@@ -16099,7 +16143,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-status", "", "");
   layerUI.buildStyle("layer-message-status", "layer-message-status {\ndisplay: inline;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"layer-websdk":112}],64:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"layer-websdk":113}],64:[function(require,module,exports){
 /**
  * The Layer Presence widget renders an icon representing a user's status of Available, Away, Busy or Offline.
  *
@@ -16156,10 +16200,14 @@ var _sizeProperty = require('../../../mixins/size-property');
 
 var _sizeProperty2 = _interopRequireDefault(_sizeProperty);
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-presence', {
-  mixins: [_sizeProperty2.default],
+  mixins: [_sizeProperty2.default, _clickable2.default],
 
   /**
    * The user has clicked on the `<layer-presence />` widget
@@ -16226,7 +16274,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   },
   methods: {
     onCreate: function onCreate() {
-      this.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('presence-click', this, this.onClick.bind(this));
     },
 
 
@@ -16277,7 +16325,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-presence", "", "");
   layerUI.buildStyle("layer-presence", "layer-presence {\ndisplay: inline-block;\nborder-radius: 30px;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/size-property":94,"layer-websdk":112}],65:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82,"../../../mixins/size-property":95,"layer-websdk":113}],65:[function(require,module,exports){
 /**
  * The Layer Replaceable Content widget allows for content to be inserted into widgets.
  *
@@ -16426,7 +16474,15 @@ var _component = require('../../../components/component');
 
 var _component = require('../../../components/component');
 
+var _clickable = require('../../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+
 (0, _component.registerComponent)('layer-send-button', {
+  mixins: [_clickable2.default],
   properties: {
     text: {
       value: 'SEND',
@@ -16443,7 +16499,7 @@ var _component = require('../../../components/component');
      * @private
      */
     onCreate: function onCreate() {
-      this.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('send-click', this, this.onClick.bind(this));
     },
 
 
@@ -16457,15 +16513,14 @@ var _component = require('../../../components/component');
       this.trigger('layer-send-click');
     }
   }
-}); 
-
+});
 
 (function () {
   var layerUI = require('../../../base');
   layerUI.buildAndRegisterTemplate("layer-send-button", "<div></div>", "");
   layerUI.buildStyle("layer-send-button", "layer-send-button {\ncursor: pointer;\ndisplay: flex;\nflex-direction: row;\nalign-items: center;\n}\nlayer-send-button div {\ntext-align: center;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35}],67:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/clickable":82}],67:[function(require,module,exports){
 /**
  * The Start of Conversation which renders some customizable welcome message based on the Conversation
  *
@@ -16726,10 +16781,14 @@ var _messageHandler = require('../../mixins/message-handler');
 
 var _messageHandler2 = _interopRequireDefault(_messageHandler);
 
+var _clickable = require('../../mixins/clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var actionHandlers = {}; 
 
-var actionHandlers = {};
 
 module.exports = {
   addActionHandler: function addActionHandler(actionName, handler) {
@@ -16738,7 +16797,7 @@ module.exports = {
 };
 
 (0, _component.registerMessageComponent)('layer-card-view', {
-  mixins: [_messageHandler2.default],
+  mixins: [_messageHandler2.default, _clickable2.default],
   style: 'layer-card-view {\n    display: inline-flex;\n    flex-direction: row;\n    align-items: stretch;\n    position: relative;\n  }\n  ',
 
   // Note that there is also a message property managed by the MessageHandler mixin
@@ -16836,8 +16895,7 @@ module.exports = {
       return this.nodes && this.nodes.ui ? this.nodes.ui.canRenderConcise(message) : false;
     },
     onCreate: function onCreate() {
-      this.addEventListener('click', this.handleSelection.bind(this));
-      this.addEventListener('tap', this.handleSelection.bind(this));
+      this.addClickHandler('card-click', this, this.handleSelection.bind(this));
     },
     onAfterCreate: function onAfterCreate() {
       if (this.message) this.setupMessage();
@@ -16920,7 +16978,7 @@ module.exports = {
     }
   }
 });
-},{"../../components/component":35,"../../mixins/message-handler":92}],71:[function(require,module,exports){
+},{"../../components/component":35,"../../mixins/clickable":82,"../../mixins/message-handler":93}],71:[function(require,module,exports){
 /**
  * The Layer Image MessageHandler renders a single MessagePart image, or an Atlas 3-message-part Image.
  *
@@ -17163,7 +17221,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   layerUI.buildAndRegisterTemplate("layer-message-image", "", "");
   layerUI.buildStyle("layer-message-image", "layer-message-image {\ndisplay: flex;\nflex-direction: column;\nalign-items: center;\n}\nlayer-message-image canvas {\nwidth: 100%;\n}", "");
 })();
-},{"../../../base":4,"../../../components/component":35,"../../../mixins/message-handler":92,"../../../utils/sizing":99,"blueimp-load-image/js/load-image":105,"blueimp-load-image/js/load-image-exif":101,"blueimp-load-image/js/load-image-meta":102,"blueimp-load-image/js/load-image-orientation":103}],72:[function(require,module,exports){
+},{"../../../base":4,"../../../components/component":35,"../../../mixins/message-handler":93,"../../../utils/sizing":100,"blueimp-load-image/js/load-image":106,"blueimp-load-image/js/load-image-exif":102,"blueimp-load-image/js/load-image-meta":103,"blueimp-load-image/js/load-image-orientation":104}],72:[function(require,module,exports){
 /**
  * The Unknown MessageHandler renders unhandled content with a placeholder politely
  * suggesting that a developer should probably handle it.
@@ -17211,7 +17269,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 });
 
 // Do not register this handler
-},{"../../components/component":35,"../../mixins/message-handler":92}],73:[function(require,module,exports){
+},{"../../components/component":35,"../../mixins/message-handler":93}],73:[function(require,module,exports){
 /**
  * The Layer Video MessageHandler renders a single MessagePart Video, or an Atlas 3-message-part Video.
  *
@@ -17326,7 +17384,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   }
 });
-},{"../../base":4,"../../components/component":35,"../../mixins/message-handler":92,"../../utils/sizing":99}],74:[function(require,module,exports){
+},{"../../base":4,"../../components/component":35,"../../mixins/message-handler":93,"../../utils/sizing":100}],74:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -17360,7 +17418,7 @@ _base2.default.registerTextHandler({
     textData.text = autolinker.link(textData.text);
   }
 });
-},{"../../base":4,"autolinker":100}],75:[function(require,module,exports){
+},{"../../base":4,"autolinker":101}],75:[function(require,module,exports){
 /**
  * The Layer Code Block TextHandler replaces all \`\`\` with code blocks, and all \` with inline code blocks.
  *
@@ -17441,7 +17499,7 @@ _base2.default.registerTextHandler({
     textData.text = text;
   }
 }); 
-},{"../../base":4,"remarkable-emoji/setEmoji":109,"twemoji":110}],77:[function(require,module,exports){
+},{"../../base":4,"remarkable-emoji/setEmoji":110,"twemoji":111}],77:[function(require,module,exports){
 /**
  * The Layer Image TextHandler replaces all image URLs with image tags
  *
@@ -17792,7 +17850,7 @@ LayerUI.mixins = {
 // If we don't expose global.layerUI then custom templates can not load and call window.layerUI.registerTemplate()
 module.exports = global.layerUI = LayerUI;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/choice/layer-choice-label-card":13,"./cards/choice/layer-choice-tiles-card":14,"./cards/file/file-model":15,"./cards/file/layer-file-card":16,"./cards/image/image-model":17,"./cards/image/layer-image-card":18,"./cards/layer-standard-card-container":19,"./cards/layer-titled-card-container":20,"./cards/link/layer-link-card":21,"./cards/link/link-model":22,"./cards/location/layer-location-card":23,"./cards/location/location-model":24,"./cards/models/organization-model":25,"./cards/models/person-model":26,"./cards/product/layer-product-card":27,"./cards/product/product-model":28,"./cards/receipt/layer-receipt-card":29,"./cards/receipt/receipt-model":30,"./cards/response/layer-response-card":31,"./cards/response/response-model":32,"./cards/text/layer-text-card":33,"./cards/text/text-model":34,"./components/conversation-list/layer-conversation-list/layer-conversation-list":38,"./components/identity-list/layer-identity-list/layer-identity-list":40,"./components/layer-conversation-view/layer-conversation-view":41,"./components/layer-notifier/layer-notifier":42,"./components/membership-list-panel/layer-membership-list/layer-membership-list":44,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":59,"./components/subcomponents/layer-presence/layer-presence":64,"./components/subcomponents/layer-send-button/layer-send-button":66,"./handlers/message/layer-card-view":70,"./handlers/message/layer-message-image/layer-message-image":71,"./handlers/message/layer-message-video":73,"./handlers/text/autolinker":74,"./handlers/text/code-blocks":75,"./handlers/text/emoji":76,"./handlers/text/images":77,"./handlers/text/newline":78,"./handlers/text/youtube":79,"./layer-ui":81,"./mixins/focus-on-keydown":84,"./mixins/has-query":85,"./mixins/list":90,"./mixins/list-item":87,"./mixins/list-item-selection":86,"./mixins/list-selection":89,"./mixins/main-component":91,"./mixins/message-handler":92,"./utils/animated-scroll":97,"./utils/date-separator":98}],81:[function(require,module,exports){
+},{"./adapters/angular":1,"./adapters/backbone":2,"./adapters/react":3,"./cards/buttons/buttons-model":5,"./cards/buttons/layer-buttons-card":6,"./cards/carousel/carousel-model":9,"./cards/carousel/layer-carousel-card":10,"./cards/choice/choice-model":11,"./cards/choice/layer-choice-card":12,"./cards/choice/layer-choice-label-card":13,"./cards/choice/layer-choice-tiles-card":14,"./cards/file/file-model":15,"./cards/file/layer-file-card":16,"./cards/image/image-model":17,"./cards/image/layer-image-card":18,"./cards/layer-standard-card-container":19,"./cards/layer-titled-card-container":20,"./cards/link/layer-link-card":21,"./cards/link/link-model":22,"./cards/location/layer-location-card":23,"./cards/location/location-model":24,"./cards/models/organization-model":25,"./cards/models/person-model":26,"./cards/product/layer-product-card":27,"./cards/product/product-model":28,"./cards/receipt/layer-receipt-card":29,"./cards/receipt/receipt-model":30,"./cards/response/layer-response-card":31,"./cards/response/response-model":32,"./cards/text/layer-text-card":33,"./cards/text/text-model":34,"./components/conversation-list/layer-conversation-list/layer-conversation-list":38,"./components/identity-list/layer-identity-list/layer-identity-list":40,"./components/layer-conversation-view/layer-conversation-view":41,"./components/layer-notifier/layer-notifier":42,"./components/membership-list-panel/layer-membership-list/layer-membership-list":44,"./components/subcomponents/layer-file-upload-button/layer-file-upload-button":59,"./components/subcomponents/layer-presence/layer-presence":64,"./components/subcomponents/layer-send-button/layer-send-button":66,"./handlers/message/layer-card-view":70,"./handlers/message/layer-message-image/layer-message-image":71,"./handlers/message/layer-message-video":73,"./handlers/text/autolinker":74,"./handlers/text/code-blocks":75,"./handlers/text/emoji":76,"./handlers/text/images":77,"./handlers/text/newline":78,"./handlers/text/youtube":79,"./layer-ui":81,"./mixins/focus-on-keydown":85,"./mixins/has-query":86,"./mixins/list":91,"./mixins/list-item":88,"./mixins/list-item-selection":87,"./mixins/list-selection":90,"./mixins/main-component":92,"./mixins/message-handler":93,"./utils/animated-scroll":98,"./utils/date-separator":99}],81:[function(require,module,exports){
 'use strict';
 
 require('webcomponents.js/webcomponents-lite');
@@ -17921,7 +17979,35 @@ _base2.default.setupMixins = function setupMixins(mixins) {
 };
 
 module.exports = _base2.default;
-},{"./base":4,"./components/component":35,"./handlers/message/layer-message-unknown":72,"webcomponents.js/webcomponents-lite":111}],82:[function(require,module,exports){
+},{"./base":4,"./components/component":35,"./handlers/message/layer-message-unknown":72,"webcomponents.js/webcomponents-lite":112}],82:[function(require,module,exports){
+/**
+ * Handler that manages click vs tap event handling
+ *
+ * @class layerUI.mixins.Clickable
+ */
+'use strict';
+
+
+module.exports = {
+  methods: {
+    removeClickHandler: function removeClickHandler(name, target) {
+      if (this.properties.onClickFn && this.properties.onClickFn[name]) {
+        target.removeEventListener('click', this.properties.onClickFn[name]);
+        target.removeEventListener('tap', this.properties.onClickFn[name]);
+      }
+    },
+    addClickHandler: function addClickHandler(name, target, fn) {
+      if (!this.properties.onClickFn) this.properties.onClickFn = {};
+      this.properties.onClickFn[name] = function (evt) {
+        evt.preventDefault(); // if tap event, prevent the click handler from firing causing a double event occurance
+        fn(evt);
+      };
+      target.addEventListener('tap', this.properties.onClickFn[name]);
+      target.addEventListener('click', this.properties.onClickFn[name]);
+    }
+  }
+};
+},{}],83:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -17971,7 +18057,7 @@ module.exports = {
     }
   }
 };
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to be a drop target for files.
  *
@@ -18185,7 +18271,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":15,"../cards/image/image-model":17,"../utils/sizing":99,"blueimp-load-image/js/load-image":105,"blueimp-load-image/js/load-image-exif":101,"blueimp-load-image/js/load-image-meta":102,"blueimp-load-image/js/load-image-orientation":103,"layer-websdk":112}],84:[function(require,module,exports){
+},{"../base":4,"../cards/carousel/carousel-model":9,"../cards/file/file-model":15,"../cards/image/image-model":17,"../utils/sizing":100,"blueimp-load-image/js/load-image":106,"blueimp-load-image/js/load-image-exif":102,"blueimp-load-image/js/load-image-meta":103,"blueimp-load-image/js/load-image-orientation":104,"layer-websdk":113}],85:[function(require,module,exports){
 /**
  * A helper mixin for any widget that wants to refocus when keyboard input is received.
  *
@@ -18240,7 +18326,7 @@ module.exports = {
     }
   }
 };
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 /**
  * A Mixin for main components that can receive or generate a Query
  *
@@ -18391,7 +18477,7 @@ module.exports = {
     }
   }
 };
-},{"layer-websdk":112}],86:[function(require,module,exports){
+},{"layer-websdk":113}],87:[function(require,module,exports){
 /**
  * A List Item Mixin that add an `isSelected` property to a List.
  *
@@ -18426,7 +18512,7 @@ module.exports = {
     }
   }
 };
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /**
  * A List Item Mixin that provides common properties, shortcuts and code.
  *
@@ -18633,7 +18719,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":35}],88:[function(require,module,exports){
+},{"../base":4,"../components/component":35}],89:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that data is currently loading.
  *
@@ -18658,7 +18744,7 @@ module.exports = {
 
   }
 }; 
-},{"../components/subcomponents/layer-loading-indicator/layer-loading-indicator":60}],89:[function(require,module,exports){
+},{"../components/subcomponents/layer-loading-indicator/layer-loading-indicator":60}],90:[function(require,module,exports){
 /**
  * A List Mixin that add a `selectedId` property to a List.
  *
@@ -18669,8 +18755,15 @@ module.exports = {
  */
 'use strict';
 
+var _clickable = require('./clickable');
+
+var _clickable2 = _interopRequireDefault(_clickable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 
 module.exports = {
+  mixins: [_clickable2.default],
   properties: {
     /**
      * Get/Set the selected Conversation by ID.
@@ -18712,7 +18805,7 @@ module.exports = {
   },
   methods: {
     onCreate: function onCreate() {
-      this.addEventListener('click', this._onClick.bind(this));
+      this.addClickHandler('selection-click', this, this._onClick.bind(this));
     },
     onAfterCreate: function onAfterCreate() {
       if (!this.properties._selectedItemEventName) this.properties._selectedItemEventName = 'layer-item-selected';
@@ -18771,7 +18864,7 @@ module.exports = {
     }
   }
 };
-},{}],90:[function(require,module,exports){
+},{"./clickable":82}],91:[function(require,module,exports){
 /**
  * A List Mixin that provides common list patterns
  *
@@ -19331,7 +19424,7 @@ module.exports = {
     }
   }
 };
-},{"../base":4,"../components/component":35,"./has-query":85,"./throttler":96,"layer-websdk":112}],91:[function(require,module,exports){
+},{"../base":4,"../components/component":35,"./has-query":86,"./throttler":97,"layer-websdk":113}],92:[function(require,module,exports){
 /**
  * A Mixin for main components (not needed for subcomponents) that provides common properties, shortcuts and code.
  *
@@ -19438,7 +19531,7 @@ module.exports = {
     }
   }
 }; 
-},{"../base":4,"../components/component":35,"layer-websdk":112}],92:[function(require,module,exports){
+},{"../base":4,"../components/component":35,"layer-websdk":113}],93:[function(require,module,exports){
 /**
  * A Message Handler Mixin that provides common properties and behaviors for implementing a Card.
  *
@@ -19592,7 +19685,7 @@ module.exports = {
     onSent: function onSent() {}
   }
 }; 
-},{"../components/component":35}],93:[function(require,module,exports){
+},{"../components/component":35}],94:[function(require,module,exports){
 /**
  * A helper mixin for Lists that want an indicator to render when paging through data, that there is no more data to page in.
  *
@@ -19653,7 +19746,7 @@ module.exports = {
     }
   }
 }; 
-},{"layer-websdk":112}],94:[function(require,module,exports){
+},{"layer-websdk":113}],95:[function(require,module,exports){
 /**
  * A helper mixin to add a size property components; adding a layer-size-small, layer-size-medium or layer-size-large css class.
  *
@@ -19686,7 +19779,7 @@ module.exports = {
     }
   }
 }; 
-},{"../components/component":35}],95:[function(require,module,exports){
+},{"../components/component":35}],96:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -19737,7 +19830,7 @@ module.exports = {
     }
   }
 };
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 /**
  * A helper mixin for Lists that render alternate text in the event that the list is Empty.
  *
@@ -19781,7 +19874,7 @@ module.exports = {
     }
   }
 };
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 "use strict";
 
 var requestAnimFrame = function () {
@@ -19877,7 +19970,7 @@ module.exports = {
     animatedScrollTo: animatedScrollTo,
     animatedScrollLeftTo: animatedScrollLeftTo
 };
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 /**
  * Use this module to put a date separator between Messages from different dates in your Messages List.
  *
@@ -19929,7 +20022,7 @@ module.exports = _base.utils.dateSeparator = function (widget, messages, index) 
     _base2.default.addListItemSeparator(widget, '', dateClassName, true);
   }
 };
-},{"../base":4}],99:[function(require,module,exports){
+},{"../base":4}],100:[function(require,module,exports){
 "use strict";
 
 // NOTE: dimensions must contains width and height properties.
@@ -19960,7 +20053,7 @@ module.exports = function (dimensions, maxSizes) {
     height: Math.round(size.height)
   };
 };
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 /*!
  * Autolinker.js
  * 1.4.2
@@ -24138,7 +24231,7 @@ Autolinker.truncate.TruncateSmart = function(url, truncateLen, ellipsisChars){
 return Autolinker;
 }));
 
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 /*
  * JavaScript Load Image Exif Parser
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -24440,7 +24533,7 @@ return Autolinker;
   // * disableExifGps: Disables parsing of the Exif GPS Info IFD.
 }))
 
-},{"./load-image":105,"./load-image-meta":102}],102:[function(require,module,exports){
+},{"./load-image":106,"./load-image-meta":103}],103:[function(require,module,exports){
 /*
  * JavaScript Load Image Meta
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -24601,7 +24694,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":105}],103:[function(require,module,exports){
+},{"./load-image":106}],104:[function(require,module,exports){
 /*
  * JavaScript Load Image Orientation
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -24788,7 +24881,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":105,"./load-image-meta":102,"./load-image-scale":104}],104:[function(require,module,exports){
+},{"./load-image":106,"./load-image-meta":103,"./load-image-scale":105}],105:[function(require,module,exports){
 /*
  * JavaScript Load Image Scaling
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -25072,7 +25165,7 @@ return Autolinker;
   }
 }))
 
-},{"./load-image":105}],105:[function(require,module,exports){
+},{"./load-image":106}],106:[function(require,module,exports){
 /*
  * JavaScript Load Image
  * https://github.com/blueimp/JavaScript-Load-Image
@@ -25212,9 +25305,9 @@ return Autolinker;
   }
 }(window))
 
-},{}],106:[function(require,module,exports){
-
 },{}],107:[function(require,module,exports){
+
+},{}],108:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -25420,7 +25513,7 @@ return Autolinker;
   exports['default'] = Notify;
 
 }));
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 /* jshint node:true */
 
 module.exports = {
@@ -26327,7 +26420,7 @@ module.exports = {
     ":yum:": "😋",
     ":zzz:": "💤"
 };
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /* jshint node:true */
 var emojiMap = require('./emoji-map.js');
 
@@ -26345,7 +26438,7 @@ module.exports = function (text) {
     });
     return text;
 };
-},{"./emoji-map.js":108}],110:[function(require,module,exports){
+},{"./emoji-map.js":109}],111:[function(require,module,exports){
 (function (global){
 var location = global.location || {};
 /*jslint indent: 2, browser: true, bitwise: true, plusplus: true */
@@ -26942,7 +27035,7 @@ if (!location.protocol) {
 }
 module.exports = twemoji;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 /**
  * @license
  * Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
@@ -29448,7 +29541,7 @@ window.CustomElements.addModule(function(scope) {
   var head = document.querySelector("head");
   head.insertBefore(style, head.firstChild);
 })(window.WebComponents);
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 (function (global){
 /* istanbul ignore next */
 if (global.layer && global.layer.Client) {
@@ -29459,7 +29552,7 @@ if (global.layer && global.layer.Client) {
 module.exports = global.layer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/layer":121}],113:[function(require,module,exports){
+},{"./lib/layer":122}],114:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -31150,7 +31243,7 @@ Root.initClass.apply(ClientAuthenticator, [ClientAuthenticator, 'ClientAuthentic
 
 module.exports = ClientAuthenticator;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":115,"./const":117,"./db-manager":118,"./layer-error":119,"./logger":122,"./models/identity":139,"./online-state-manager":144,"./root":153,"./sync-event":154,"./sync-manager":155,"./websockets/change-manager":163,"./websockets/request-manager":164,"./websockets/socket-manager":165,"./xhr":166}],114:[function(require,module,exports){
+},{"./client-utils":116,"./const":118,"./db-manager":119,"./layer-error":120,"./logger":123,"./models/identity":140,"./online-state-manager":145,"./root":154,"./sync-event":155,"./sync-manager":156,"./websockets/change-manager":164,"./websockets/request-manager":165,"./websockets/socket-manager":166,"./xhr":167}],115:[function(require,module,exports){
 'use strict';
 
 /**
@@ -31252,7 +31345,7 @@ module.exports = {
   addListener: addListener,
   removeListener: removeListener
 };
-},{"./client-utils":115}],115:[function(require,module,exports){
+},{"./client-utils":116}],116:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -31675,7 +31768,7 @@ exports.asciiInit = function (version) {
   return '\n    /hNMMMMMMMMMMMMMMMMMMMms.\n  hMMy+/////////////////omMN-\n  MMN                    oMMo\n  MMN        Layer       oMMo\n  MMN       Web SDK      oMMo\n  MMM-                   oMMo\n  MMMy      v' + line1 + 'oMMo\n  MMMMo     ' + line2 + 'oMMo\n  MMMMMy.                oMMo\n  MMMMMMNy:\'             oMMo\n  NMMMMMMMMmy+:-.\'      \'yMM/\n  :dMMMMMMMMMMMMNNNNNNNNNMNs\n   -/+++++++++++++++++++:\'';
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils/defer":161,"./utils/layer-parser":162,"uuid":170}],116:[function(require,module,exports){
+},{"./utils/defer":162,"./utils/layer-parser":163,"uuid":171}],117:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -32477,7 +32570,7 @@ Client._supportedEvents = [
 Client.mixins = [require('./mixins/client-queries'), require('./mixins/client-identities'), require('./mixins/client-members'), require('./mixins/client-conversations'), require('./mixins/client-channels'), require('./mixins/client-messages'), require('./mixins/websocket-operations'), require('./mixins/client-card-models')];
 Root.initClass.apply(Client, [Client, 'Client']);
 module.exports = Client;
-},{"./client-authenticator":113,"./client-registry":114,"./client-utils":115,"./layer-error":119,"./logger":122,"./mixins/client-card-models":123,"./mixins/client-channels":124,"./mixins/client-conversations":125,"./mixins/client-identities":126,"./mixins/client-members":127,"./mixins/client-messages":128,"./mixins/client-queries":129,"./mixins/websocket-operations":130,"./models/announcement":131,"./models/channel":134,"./models/channel-message":133,"./models/conversation":138,"./models/conversation-message":137,"./models/identity":139,"./models/membership":140,"./models/message-part":141,"./root":153,"./telemetry-monitor":156,"./typing-indicators/typing-indicator-listener":157,"./typing-indicators/typing-listener":159,"./typing-indicators/typing-publisher":160}],117:[function(require,module,exports){
+},{"./client-authenticator":114,"./client-registry":115,"./client-utils":116,"./layer-error":120,"./logger":123,"./mixins/client-card-models":124,"./mixins/client-channels":125,"./mixins/client-conversations":126,"./mixins/client-identities":127,"./mixins/client-members":128,"./mixins/client-messages":129,"./mixins/client-queries":130,"./mixins/websocket-operations":131,"./models/announcement":132,"./models/channel":135,"./models/channel-message":134,"./models/conversation":139,"./models/conversation-message":138,"./models/identity":140,"./models/membership":141,"./models/message-part":142,"./root":154,"./telemetry-monitor":157,"./typing-indicators/typing-indicator-listener":158,"./typing-indicators/typing-listener":160,"./typing-indicators/typing-publisher":161}],118:[function(require,module,exports){
 'use strict';
 
 /**
@@ -32573,7 +32666,7 @@ module.exports = {
     MY_DEVICES: 'my_devices'
   }
 };
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34176,7 +34269,7 @@ DbManager._supportedEvents = ['open', 'error'].concat(Root._supportedEvents);
 
 Root.initClass.apply(DbManager, [DbManager, 'DbManager']);
 module.exports = DbManager;
-},{"./client-utils":115,"./const":117,"./logger":122,"./models/announcement":131,"./root":153,"./sync-event":154}],119:[function(require,module,exports){
+},{"./client-utils":116,"./const":118,"./logger":123,"./models/announcement":132,"./root":154,"./sync-event":155}],120:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -34384,7 +34477,7 @@ LayerError.dictionary = {
 };
 
 module.exports = LayerError;
-},{"./logger":122}],120:[function(require,module,exports){
+},{"./logger":123}],121:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -34593,7 +34686,7 @@ LayerEvent.prototype.target = null;
 LayerEvent.prototype.eventName = '';
 
 module.exports = LayerEvent;
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict';
 
 var layer = {};
@@ -34636,7 +34729,7 @@ layer.Util = require('./client-utils');
 layer.TypingIndicators = require('./typing-indicators/typing-indicators');
 layer.TypingIndicators.TypingListener = require('./typing-indicators/typing-listener');
 layer.TypingIndicators.TypingPublisher = require('./typing-indicators/typing-publisher');
-},{"./client":116,"./client-authenticator":113,"./client-utils":115,"./const":117,"./db-manager":118,"./layer-error":119,"./layer-event":120,"./models/announcement":131,"./models/card-model":132,"./models/channel":134,"./models/channel-message":133,"./models/container":135,"./models/content":136,"./models/conversation":138,"./models/conversation-message":137,"./models/identity":139,"./models/membership":140,"./models/message":142,"./models/message-part":141,"./models/syncable":143,"./online-state-manager":144,"./queries/query":152,"./queries/query-builder":151,"./root":153,"./sync-event":154,"./sync-manager":155,"./typing-indicators/typing-indicators":158,"./typing-indicators/typing-listener":159,"./typing-indicators/typing-publisher":160,"./websockets/change-manager":163,"./websockets/request-manager":164,"./websockets/socket-manager":165,"./xhr":166}],122:[function(require,module,exports){
+},{"./client":117,"./client-authenticator":114,"./client-utils":116,"./const":118,"./db-manager":119,"./layer-error":120,"./layer-event":121,"./models/announcement":132,"./models/card-model":133,"./models/channel":135,"./models/channel-message":134,"./models/container":136,"./models/content":137,"./models/conversation":139,"./models/conversation-message":138,"./models/identity":140,"./models/membership":141,"./models/message":143,"./models/message-part":142,"./models/syncable":144,"./online-state-manager":145,"./queries/query":153,"./queries/query-builder":152,"./root":154,"./sync-event":155,"./sync-manager":156,"./typing-indicators/typing-indicators":159,"./typing-indicators/typing-listener":160,"./typing-indicators/typing-publisher":161,"./websockets/change-manager":164,"./websockets/request-manager":165,"./websockets/socket-manager":166,"./xhr":167}],123:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -34748,7 +34841,7 @@ Logger.prototype.level = typeof jasmine === 'undefined' ? ERROR : NONE;
 var logger = new Logger();
 
 module.exports = logger;
-},{"./const":117}],123:[function(require,module,exports){
+},{"./const":118}],124:[function(require,module,exports){
 'use strict';
 
 /**
@@ -34883,7 +34976,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":115,"../layer-error":119,"../models/card-model":132}],124:[function(require,module,exports){
+},{"../client-utils":116,"../layer-error":120,"../models/card-model":133}],125:[function(require,module,exports){
 'use strict';
 
 /**
@@ -35299,7 +35392,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":119,"../models/channel":134}],125:[function(require,module,exports){
+},{"../layer-error":120,"../models/channel":135}],126:[function(require,module,exports){
 'use strict';
 
 /**
@@ -35715,7 +35808,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":119,"../models/conversation":138}],126:[function(require,module,exports){
+},{"../layer-error":120,"../models/conversation":139}],127:[function(require,module,exports){
 'use strict';
 
 /**
@@ -36020,7 +36113,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":115,"../layer-error":119,"../models/identity":139,"../sync-event":154}],127:[function(require,module,exports){
+},{"../client-utils":116,"../layer-error":120,"../models/identity":140,"../sync-event":155}],128:[function(require,module,exports){
 'use strict';
 
 /**
@@ -36181,7 +36274,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":119,"../models/membership":140,"../models/syncable":143}],128:[function(require,module,exports){
+},{"../layer-error":120,"../models/membership":141,"../models/syncable":144}],129:[function(require,module,exports){
 'use strict';
 
 /**
@@ -36540,7 +36633,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":119,"../models/message":142,"../models/syncable":143}],129:[function(require,module,exports){
+},{"../layer-error":120,"../models/message":143,"../models/syncable":144}],130:[function(require,module,exports){
 'use strict';
 
 /**
@@ -36691,7 +36784,7 @@ module.exports = {
     }
   }
 };
-},{"../layer-error":119,"../queries/announcements-query":145,"../queries/channels-query":146,"../queries/conversations-query":147,"../queries/identities-query":148,"../queries/members-query":149,"../queries/messages-query":150,"../queries/query":152}],130:[function(require,module,exports){
+},{"../layer-error":120,"../queries/announcements-query":146,"../queries/channels-query":147,"../queries/conversations-query":148,"../queries/identities-query":149,"../queries/members-query":150,"../queries/messages-query":151,"../queries/query":153}],131:[function(require,module,exports){
 'use strict';
 
 /**
@@ -36791,7 +36884,7 @@ module.exports = {
     }
   }
 };
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../models/identity":139,"../sync-event":154}],131:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../models/identity":140,"../sync-event":155}],132:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -36967,7 +37060,7 @@ Announcement.inObjectIgnore = ConversationMessage.inObjectIgnore;
 Root.initClass.apply(Announcement, [Announcement, 'Announcement']);
 Syncable.subclasses.push(Announcement);
 module.exports = Announcement;
-},{"../layer-error":119,"../root":153,"./conversation-message":137,"./syncable":143}],132:[function(require,module,exports){
+},{"../layer-error":120,"../root":154,"./conversation-message":138,"./syncable":144}],133:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37462,7 +37555,7 @@ CardModel.prefixUUID = 'layer:///cardmodels/';
 CardModel._supportedEvents = ['change'].concat(Root._supportedEvents);
 Root.initClass.apply(CardModel, [CardModel, 'CardModel']);
 module.exports = CardModel;
-},{"../client-utils":115,"../models/message":142,"../models/message-part":141,"../root":153}],133:[function(require,module,exports){
+},{"../client-utils":116,"../models/message":143,"../models/message-part":142,"../root":154}],134:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -37642,7 +37735,7 @@ ChannelMessage.inObjectIgnore = Message.inObjectIgnore;
 ChannelMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ChannelMessage, [ChannelMessage, 'ChannelMessage']);
 module.exports = ChannelMessage;
-},{"../client-registry":114,"../const":117,"../layer-error":119,"../logger":122,"../root":153,"./message":142}],134:[function(require,module,exports){
+},{"../client-registry":115,"../const":118,"../layer-error":120,"../logger":123,"../root":154,"./message":143}],135:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -38331,7 +38424,7 @@ Channel._supportedEvents = [
 Root.initClass.apply(Channel, [Channel, 'Channel']);
 Syncable.subclasses.push(Channel);
 module.exports = Channel;
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../layer-event":120,"../root":153,"./channel-message":133,"./container":135,"./syncable":143}],135:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../layer-event":121,"../root":154,"./channel-message":134,"./container":136,"./syncable":144}],136:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -38973,7 +39066,7 @@ Container.FOUND_WITHOUT_REQUESTED_METADATA = 'FoundMismatch';
 Root.initClass.apply(Container, [Container, 'Container']);
 Syncable.subclasses.push(Container);
 module.exports = Container;
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../root":153,"./syncable":143}],136:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../root":154,"./syncable":144}],137:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39172,7 +39265,7 @@ Content.prototype.expiration = null;
 
 Root.initClass.apply(Content, [Content, 'Content']);
 module.exports = Content;
-},{"../root":153,"../xhr":166}],137:[function(require,module,exports){
+},{"../root":154,"../xhr":167}],138:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -39719,7 +39812,7 @@ ConversationMessage.inObjectIgnore = Message.inObjectIgnore;
 ConversationMessage._supportedEvents = [].concat(Message._supportedEvents);
 Root.initClass.apply(ConversationMessage, [ConversationMessage, 'ConversationMessage']);
 module.exports = ConversationMessage;
-},{"../client-registry":114,"../client-utils":115,"../const":117,"../layer-error":119,"../root":153,"./message":142}],138:[function(require,module,exports){
+},{"../client-registry":115,"../client-utils":116,"../const":118,"../layer-error":120,"../root":154,"./message":143}],139:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40852,7 +40945,7 @@ Conversation._supportedEvents = [
 Root.initClass.apply(Conversation, [Conversation, 'Conversation']);
 Syncable.subclasses.push(Conversation);
 module.exports = Conversation;
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../layer-event":120,"../logger":122,"../root":153,"./container":135,"./conversation-message":137,"./syncable":143}],139:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../layer-event":121,"../logger":123,"../root":154,"./container":136,"./conversation-message":138,"./syncable":144}],140:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41517,7 +41610,7 @@ Root.initClass.apply(Identity, [Identity, 'Identity']);
 Syncable.subclasses.push(Identity);
 
 module.exports = Identity;
-},{"../const":117,"../layer-error":119,"../root":153,"./syncable":143}],140:[function(require,module,exports){
+},{"../const":118,"../layer-error":120,"../root":154,"./syncable":144}],141:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41751,7 +41844,7 @@ Root.initClass.apply(Membership, [Membership, 'Membership']);
 Syncable.subclasses.push(Membership);
 
 module.exports = Membership;
-},{"../const":117,"../layer-error":119,"../root":153,"./syncable":143}],141:[function(require,module,exports){
+},{"../const":118,"../layer-error":120,"../root":154,"./syncable":144}],142:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -42725,7 +42818,7 @@ MessagePart._supportedEvents = ['parts:send', 'content-loaded', 'url-loaded', 'c
 Root.initClass.apply(MessagePart, [MessagePart, 'MessagePart']);
 
 module.exports = MessagePart;
-},{"../client-registry":114,"../client-utils":115,"../layer-error":119,"../logger":122,"../root":153,"../xhr":166,"./content":136}],142:[function(require,module,exports){
+},{"../client-registry":115,"../client-utils":116,"../layer-error":120,"../logger":123,"../root":154,"../xhr":167,"./content":137}],143:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -44030,7 +44123,7 @@ Message._supportedEvents = [
 Root.initClass.apply(Message, [Message, 'Message']);
 Syncable.subclasses.push(Message);
 module.exports = Message;
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../root":153,"./identity":139,"./message-part":141,"./syncable":143}],143:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../root":154,"./identity":140,"./message-part":142,"./syncable":144}],144:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -44592,7 +44685,7 @@ Syncable.subclasses = [];
 Syncable._supportedEvents = [].concat(Root._supportedEvents);
 Syncable.inObjectIgnore = Root.inObjectIgnore;
 module.exports = Syncable;
-},{"../client-registry":114,"../const":117,"../layer-error":119,"../root":153}],144:[function(require,module,exports){
+},{"../client-registry":115,"../const":118,"../layer-error":120,"../root":154}],145:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -45001,7 +45094,7 @@ OnlineStateManager._supportedEvents = [
 Root.initClass.apply(OnlineStateManager, [OnlineStateManager, 'OnlineStateManager']);
 module.exports = OnlineStateManager;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":115,"./const":117,"./logger":122,"./root":153,"./xhr":166}],145:[function(require,module,exports){
+},{"./client-utils":116,"./const":118,"./logger":123,"./root":154,"./xhr":167}],146:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45094,7 +45187,7 @@ AnnouncementsQuery.prototype.model = Query.Announcement;
 Root.initClass.apply(AnnouncementsQuery, [AnnouncementsQuery, 'AnnouncementsQuery']);
 
 module.exports = AnnouncementsQuery;
-},{"../root":153,"./messages-query":150,"./query":152}],146:[function(require,module,exports){
+},{"../root":154,"./messages-query":151,"./query":153}],147:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45391,7 +45484,7 @@ ChannelsQuery.prototype.model = Query.Channel;
 Root.initClass.apply(ChannelsQuery, [ChannelsQuery, 'ChannelsQuery']);
 
 module.exports = ChannelsQuery;
-},{"../const":117,"../root":153,"./conversations-query":147,"./query":152}],147:[function(require,module,exports){
+},{"../const":118,"../root":154,"./conversations-query":148,"./query":153}],148:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45721,7 +45814,7 @@ ConversationsQuery.prototype.model = Query.Conversation;
 Root.initClass.apply(ConversationsQuery, [ConversationsQuery, 'ConversationsQuery']);
 
 module.exports = ConversationsQuery;
-},{"../client-utils":115,"../const":117,"../root":153,"./query":152}],148:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../root":154,"./query":153}],149:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -45840,7 +45933,7 @@ IdentitiesQuery.prototype.model = Query.Identity;
 Root.initClass.apply(IdentitiesQuery, [IdentitiesQuery, 'IdentitiesQuery']);
 
 module.exports = IdentitiesQuery;
-},{"../root":153,"./query":152}],149:[function(require,module,exports){
+},{"../root":154,"./query":153}],150:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46015,7 +46108,7 @@ MembersQuery.prototype.model = Query.Membership;
 Root.initClass.apply(MembersQuery, [MembersQuery, 'MembersQuery']);
 
 module.exports = MembersQuery;
-},{"../layer-error":119,"../logger":122,"../root":153,"./query":152}],150:[function(require,module,exports){
+},{"../layer-error":120,"../logger":123,"../root":154,"./query":153}],151:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46499,7 +46592,7 @@ MessagesQuery.prototype.model = Query.Message;
 Root.initClass.apply(MessagesQuery, [MessagesQuery, 'MessagesQuery']);
 
 module.exports = MessagesQuery;
-},{"../client-utils":115,"../layer-error":119,"../logger":122,"../root":153,"./query":152}],151:[function(require,module,exports){
+},{"../client-utils":116,"../layer-error":120,"../logger":123,"../root":154,"./query":153}],152:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -47185,7 +47278,7 @@ var QueryBuilder = {
 };
 
 module.exports = QueryBuilder;
-},{"./query":152}],152:[function(require,module,exports){
+},{"./query":153}],153:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48361,7 +48454,7 @@ Query._supportedEvents = [
 Root.initClass.apply(Query, [Query, 'Query']);
 
 module.exports = Query;
-},{"../client-utils":115,"../layer-error":119,"../logger":122,"../root":153}],153:[function(require,module,exports){
+},{"../client-utils":116,"../layer-error":120,"../logger":123,"../root":154}],154:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -49196,7 +49289,7 @@ Root._supportedEvents = ['destroy', 'all'];
 Root._ignoredEvents = [];
 module.exports = Root;
 module.exports.initClass = initClass;
-},{"./client-utils":115,"./layer-error":119,"./layer-event":120,"./logger":122,"backbone-events-standalone/backbone-events-standalone":167}],154:[function(require,module,exports){
+},{"./client-utils":116,"./layer-error":120,"./layer-event":121,"./logger":123,"backbone-events-standalone/backbone-events-standalone":168}],155:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -49596,7 +49689,7 @@ var WebsocketSyncEvent = function (_SyncEvent2) {
 WebsocketSyncEvent.prototype.returnChangesArray = false;
 
 module.exports = { SyncEvent: SyncEvent, XHRSyncEvent: XHRSyncEvent, WebsocketSyncEvent: WebsocketSyncEvent };
-},{"./client-utils":115}],155:[function(require,module,exports){
+},{"./client-utils":116}],156:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50599,7 +50692,7 @@ SyncManager._supportedEvents = [
 
 Root.initClass(SyncManager);
 module.exports = SyncManager;
-},{"./client-utils":115,"./logger":122,"./root":153,"./sync-event":154,"./xhr":166}],156:[function(require,module,exports){
+},{"./client-utils":116,"./logger":123,"./root":154,"./sync-event":155,"./xhr":167}],157:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -51111,7 +51204,7 @@ TelemetryMonitor._supportedEvents = Root._supportedEvents.concat(['telemetry-env
 Root.initClass.apply(TelemetryMonitor, [TelemetryMonitor, 'TelemetryMonitor']);
 module.exports = TelemetryMonitor;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./client-utils":115,"./root":153,"./xhr":166}],157:[function(require,module,exports){
+},{"./client-utils":116,"./root":154,"./xhr":167}],158:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -51434,7 +51527,7 @@ TypingIndicatorListener._supportedEvents = [
 
 Root.initClass.apply(TypingIndicatorListener, [TypingIndicatorListener, 'TypingIndicatorListener']);
 module.exports = TypingIndicatorListener;
-},{"../client-registry":114,"../root":153,"./typing-indicators":158}],158:[function(require,module,exports){
+},{"../client-registry":115,"../root":154,"./typing-indicators":159}],159:[function(require,module,exports){
 'use strict';
 
 /**
@@ -51469,7 +51562,7 @@ module.exports = {
    */
   FINISHED: 'finished'
 };
-},{}],159:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -51689,7 +51782,7 @@ var TypingListener = function () {
 }();
 
 module.exports = TypingListener;
-},{"./typing-indicators":158,"./typing-publisher":160}],160:[function(require,module,exports){
+},{"./typing-indicators":159,"./typing-publisher":161}],161:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -51954,7 +52047,7 @@ var TypingPublisher = function () {
 }();
 
 module.exports = TypingPublisher;
-},{"../client-registry":114,"./typing-indicators":158}],161:[function(require,module,exports){
+},{"../client-registry":115,"./typing-indicators":159}],162:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -52052,7 +52145,7 @@ if (setImmediate) {
   });
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],162:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 'use strict';
 
 /**
@@ -52143,7 +52236,7 @@ module.exports = function (request) {
   if (!parser) createParser(request);
   parser.parse(request);
 };
-},{"layer-patch":168}],163:[function(require,module,exports){
+},{"layer-patch":169}],164:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -52356,7 +52449,7 @@ var WebsocketChangeManager = function () {
 WebsocketChangeManager.prototype.client = null;
 
 module.exports = WebsocketChangeManager;
-},{"../client-utils":115,"../logger":122,"../models/channel":134,"../models/conversation":138,"../models/message":142}],164:[function(require,module,exports){
+},{"../client-utils":116,"../logger":123,"../models/channel":135,"../models/conversation":139,"../models/message":143}],165:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -52725,7 +52818,7 @@ WebsocketRequestManager.prototype._callbackCleanupId = 0;
 WebsocketRequestManager.prototype.socketManager = null;
 
 module.exports = WebsocketRequestManager;
-},{"../client-utils":115,"../layer-error":119,"../logger":122}],165:[function(require,module,exports){
+},{"../client-utils":116,"../layer-error":120,"../logger":123}],166:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -53665,7 +53758,7 @@ SocketManager._supportedEvents = [
 'synced'].concat(Root._supportedEvents);
 Root.initClass.apply(SocketManager, [SocketManager, 'SocketManager']);
 module.exports = SocketManager;
-},{"../client-utils":115,"../const":117,"../layer-error":119,"../logger":122,"../root":153,"websocket":106}],166:[function(require,module,exports){
+},{"../client-utils":116,"../const":118,"../layer-error":120,"../logger":123,"../root":154,"websocket":107}],167:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -53901,7 +53994,7 @@ module.exports.trigger = function (evt) {
     return func(evt);
   });
 };
-},{"xhr2":106}],167:[function(require,module,exports){
+},{"xhr2":107}],168:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -54179,7 +54272,7 @@ module.exports.trigger = function (evt) {
   }
 })(this);
 
-},{}],168:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 /**
  * The layer.js.LayerPatchParser method will parse
  *
@@ -54414,7 +54507,7 @@ module.exports.trigger = function (evt) {
   }
 })();
 
-},{}],169:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -54450,7 +54543,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],170:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -54635,5 +54728,5 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":169}]},{},[80])(80)
+},{"./rng":170}]},{},[80])(80)
 });

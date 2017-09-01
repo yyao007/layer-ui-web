@@ -20,8 +20,10 @@
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
 import '../layer-menu/layer-menu';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-menu-button', {
+  mixins: [Clickable],
   properties: {
     getMenuOptions: {
       type: Function,
@@ -57,7 +59,7 @@ registerComponent('layer-menu-button', {
      * @private
      */
     onCreate() {
-      this.addEventListener('click', this.onButtonClick, this);
+      this.addClickHandler('menu-click', this, this.onButtonClick.bind(this));
     },
 
     /**

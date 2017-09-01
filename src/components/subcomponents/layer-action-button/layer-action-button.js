@@ -4,8 +4,10 @@
  * @extends layerUI.components.Component
  */
 import { registerComponent } from '../../component';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-action-button', {
+  mixins: [Clickable],
   template: '<button class="layer-button" layer-id="button" tab-index="0"></button>',
   style: `layer-action-button {
     display: flex;
@@ -58,7 +60,7 @@ registerComponent('layer-action-button', {
      * @method
      */
     onCreate() {
-      this.addEventListener('click', this._onClick.bind(this));
+      this.addClickHandler('button-click', this, this._onClick.bind(this));
     },
 
     /**

@@ -4,8 +4,10 @@
  * @extends layerUI.components.Component
  */
 import { registerComponent } from '../../component';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-choice-button', {
+  mixins: [Clickable],
   style: `layer-choice-button {
     display: flex;
     flex-direction: row;
@@ -60,7 +62,8 @@ registerComponent('layer-choice-button', {
 
         const def = { widget, choice };
         this.properties.buttons.push(def);
-        widget.addEventListener('click', this._onClick.bind(this, def));
+        this.addClickHandler('button-click', widget, this._onClick.bind(this, def));
+
       });
     },
 

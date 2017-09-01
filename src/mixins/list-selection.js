@@ -1,3 +1,5 @@
+import Clickable from './clickable';
+
 /**
  * A List Mixin that add a `selectedId` property to a List.
  *
@@ -7,6 +9,7 @@
  * @class layerUI.mixins.ListSelection
  */
 module.exports = {
+  mixins: [Clickable],
   properties: {
     /**
      * Get/Set the selected Conversation by ID.
@@ -48,7 +51,7 @@ module.exports = {
   },
   methods: {
     onCreate() {
-      this.addEventListener('click', this._onClick.bind(this));
+      this.addClickHandler('selection-click', this, this._onClick.bind(this));
     },
     onAfterCreate() {
       if (!this.properties._selectedItemEventName) this.properties._selectedItemEventName = 'layer-item-selected';

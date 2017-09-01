@@ -24,8 +24,10 @@
  * @extends layerUI.components.Component
  */
 import { registerComponent } from '../../../components/component';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-send-button', {
+  mixins: [Clickable],
   properties: {
     text: {
       value: 'SEND',
@@ -42,7 +44,7 @@ registerComponent('layer-send-button', {
      * @private
      */
     onCreate() {
-      this.addEventListener('click', this.onClick.bind(this));
+      this.addClickHandler('send-click', this, this.onClick.bind(this));
     },
 
     /**

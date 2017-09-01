@@ -25,8 +25,10 @@
 import Layer, { MessagePart } from 'layer-websdk';
 import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-file-upload-button', {
+  mixins: [Clickable],
   properties: {
     /**
      * Set the `accept` attribute of the file upload widget.
@@ -58,7 +60,7 @@ registerComponent('layer-file-upload-button', {
 
       // This causes test to fail by causing the click event to fire twice.
       // but without this, the click event is not received at all.
-      this.addEventListener('click', (evt) => {
+      this.addClickHandler('button-click', this, (evt) => {
         if (evt.target !== this.nodes.input) this.nodes.input.click();
       });
     },

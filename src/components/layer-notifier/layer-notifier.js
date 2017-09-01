@@ -32,13 +32,14 @@ import NotifyLib from 'notifyjs';
 import { isInBackground as IsInBackground, getHandler as GetHandler } from '../../base';
 import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
+import Clickable from '../../mixins/clickable';
 import '../subcomponents/layer-avatar/layer-avatar';
 
 let Notify = NotifyLib;
 if ('default' in Notify) Notify = Notify.default; // Annoying difference between webpack and browserify...
 
 registerComponent('layer-notifier', {
-  mixins: [MainComponent],
+  mixins: [MainComponent, Clickable],
 
   /**
    * Before showing any notification, this event will be triggered.
@@ -308,7 +309,7 @@ registerComponent('layer-notifier', {
      * @private
      */
     onCreate() {
-      this.addEventListener('click', this.onClickToast.bind(this));
+      this.addClickHandler('item-click', this, this.onClickToast.bind(this));
       this.addEventListener('transitionend', this._afterTransition.bind(this), true);
     },
 

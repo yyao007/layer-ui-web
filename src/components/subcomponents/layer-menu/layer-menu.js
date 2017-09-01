@@ -14,8 +14,10 @@
  */
 import Layer from 'layer-websdk';
 import { registerComponent } from '../../../components/component';
+import Clickable from '../../../mixins/clickable';
 
 registerComponent('layer-menu', {
+  mixins: [Clickable],
   properties: {
     options: {
       set(value) {
@@ -25,7 +27,7 @@ registerComponent('layer-menu', {
           const menuItem = document.createElement('div');
           menuItem.classList.add('layer-menu-button-menu-item');
           menuItem.innerHTML = option.text;
-          menuItem.addEventListener('click', evt => option.method());
+          this.addClickHandler('menu-item-click', menuItem, evt => option.method());
           menu.appendChild(menuItem);
         });
         if (this.firstChild) {
@@ -73,12 +75,11 @@ registerComponent('layer-menu', {
      * @private
      */
     onCreate() {
-      this.onDocumentClick = this.onDocumentClick.bind(this);
-      document.addEventListener('click', this.onDocumentClick);
+      this.addClickHandler('background-click', document, this.onDocumentClick.bind(this));
     },
 
     onDestroy() {
-      document.removeEventListener('click', this.onDocumentClick);
+      this.removeClickHandler('background-click', document);
     },
 
     onDocumentClick(evt) {
