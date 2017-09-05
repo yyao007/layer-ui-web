@@ -87,7 +87,7 @@
  * @mixin layerUI.mixins.ListLoadIndicator
  * @mixin layerUI.mixins.QueryEndIndicator
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import LayerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';

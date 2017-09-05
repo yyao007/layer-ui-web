@@ -77,6 +77,12 @@ registerComponent('layer-carousel-card', {
     onCreate() {
       this.addClickHandler('click-next', this.nodes.next, this._scroll.bind(this, true));
       this.addClickHandler('click-prev', this.nodes.prev, this._scroll.bind(this, false));
+      this.properties.startX = this.properties.startY = null;
+      this.properties.touching = false;
+      this.properties.dx = 0;
+      this.addEventListener('touchstart', this.touchstart.bind(this));
+      this.addEventListener('touchend', this.touchend.bind(this));
+      this.addEventListener('touchmove', this.touchmove.bind(this));
 
       this.properties.onResize = this._onResize.bind(this);
       window.addEventListener('resize', this.properties.onResize);
@@ -140,7 +146,8 @@ registerComponent('layer-carousel-card', {
     },
 
     _updateScrollButtons() {
-      this.toggleClass('layer-carousel-start', this.nodes.items.scrollLeft === 0);
+      const root = this.nodes.items;
+      this.toggleClass('layer-carousel-start', root.scrollLeft <= root.firstElementChild.offsetLeft);
 
       const lastVisible = this._findLastFullyVisibleCard();
       const children = this.nodes.items.childNodes;
@@ -207,6 +214,15 @@ registerComponent('layer-carousel-card', {
       }
     },
 
+    _findFirstPartiallyVisibleCard() {
+      const root = this.nodes.items;
+      const nodes = root.childNodes;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (node.offsetLeft + node.clientWidth >= root.offsetLeft + root.scrollLeft) return node;
+      }
+    },
+
     /**
      *
      * @method
@@ -214,6 +230,66 @@ registerComponent('layer-carousel-card', {
     onRender() {
 
     },
+
+    touchstart(evt) {
+      this.properties.touching = true;
+      const touch = evt.touches ? evt.touches[0] : evt;
+      this.properties.dx = 0;
+      this.properties.startScrollX = this.nodes.items.scrollLeft;
+      this.properties.startX = touch.pageX;
+      this.properties.startY = touch.pageY;
+      //this.width = this.$element.width()
+    },
+
+    touchmove(evt) {
+      if (!this.properties.touching) return;
+      const touch = evt.touches ? evt.touches[0] : evt;
+      const dx = touch.pageX - this.properties.startX;
+      const dy = touch.pageY - this.properties.startY;
+      if (Math.abs(dx) < Math.abs(dy)) return; // vertical scroll
+
+      evt.preventDefault(); // prevent vertical scroll
+
+      const scrollLeft = -dx;
+      this.nodes.items.scrollLeft = this.properties.startScrollX + scrollLeft;
+      if (document.activeElement.tagName === 'TEXTAREA') document.activeElement.blur();
+    },
+
+    touchend(evt) {
+      if (!this.properties.touching) return;
+      const root = this.nodes.items;
+
+      const touch = evt.changedTouches ? evt.changedTouches[0] : evt;
+
+      // If finger ended on a larger X than it started, then it moved right
+      // If finger moved right, we are decreasing our scrollLeft value
+      const fingerDirection = touch.pageX - this.properties.startX > 0 ? 'right' : 'left';
+
+      const firstPartialCard = this._findFirstPartiallyVisibleCard();
+      const cardWidth = firstPartialCard.clientWidth;
+      const visibleCardWidth = firstPartialCard.offsetLeft + firstPartialCard.clientWidth - root.scrollLeft;
+      const percentShown = visibleCardWidth / cardWidth;
+      const distanceToEnd = root.scrollWidth - root.scrollLeft - root.clientWidth;
+      const percentDistanceToEnd = distanceToEnd / cardWidth;
+
+      if (fingerDirection === 'left') {
+        if (percentDistanceToEnd < 0.6) {
+          animatedScrollLeftTo(root, root.lastChild.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        } else if (percentShown > 0.6) {
+          animatedScrollLeftTo(root, firstPartialCard.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        } else {
+          animatedScrollLeftTo(root, firstPartialCard.nextElementSibling.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        }
+      } else {
+        if (percentDistanceToEnd < 0.4) {
+          animatedScrollLeftTo(root, root.lastChild.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        } else if (percentShown < 0.4) {
+          animatedScrollLeftTo(root, firstPartialCard.nextElementSibling.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        } else {
+          animatedScrollLeftTo(root, firstPartialCard.offsetLeft, 200, this._updateScrollButtons.bind(this));
+        }
+      }
+      this.properties.touching = false;
+    },
   },
 });
-

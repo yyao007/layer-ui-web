@@ -9,7 +9,7 @@
  * @mixin layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 import ListItem from '../../../mixins/list-item';
 import SizeProperty from '../../../mixins/size-property';

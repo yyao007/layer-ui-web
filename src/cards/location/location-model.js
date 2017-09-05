@@ -54,8 +54,7 @@
     }).generateMessage($("layer-conversation-view").conversation, message => message.send());;
 
  */
-import { xhr } from 'layer-websdk';
-import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel, xhr }  from '@layerhq/layer-websdk';
 
 
 class LocationModel extends CardModel {

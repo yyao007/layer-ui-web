@@ -26,7 +26,7 @@
  *
  * While there are many other methods defined here, for new projects ignore everything except layerUI.settings, layerUI.init and layerUI.adapters.
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 
 /*
  * NOTES TO MAINTAINER:
@@ -566,7 +566,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '3.0.3';
+layerUI.version = '3.0.5';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

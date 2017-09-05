@@ -2,7 +2,7 @@
  * TODO: Location Model should be able to use one of these
  */
 
-import { Client, MessagePart, CardModel, Util }  from 'layer-websdk';
+import { Client, MessagePart, CardModel, Util }  from '@layerhq/layer-websdk';
 
 class OrganizationModel extends CardModel {
 

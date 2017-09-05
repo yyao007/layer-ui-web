@@ -51,7 +51,7 @@
  * @mixin layerUI.mixins.HasQuery
  * @mixin layerUI.mixins.FileDropTarget
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../components/component';
 import MainComponent from '../../mixins/main-component';
 import HasQuery from '../../mixins/has-query';

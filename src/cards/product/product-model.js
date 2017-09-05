@@ -107,7 +107,7 @@ model = new ButtonsModel({
  * A Product model, typically used within a Recipt Model, but usable anywhere that you want to display simple product information.
  */
 
-import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';
 
 class ProductModel extends CardModel {
   _generateParts(callback) {

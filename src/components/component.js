@@ -477,7 +477,7 @@
  * @param {Mixed} template     A `<template />` node or a template string such as `<div><button /></div>`
  * @param {String} style       A String with CSS styles for this widget
  */
-import Layer, { Util } from 'layer-websdk';
+import Layer, { Util } from '@layerhq/layer-websdk';
 import layerUI from '../base';
 import stateManagerMixin from '../mixins/state-manager';
 

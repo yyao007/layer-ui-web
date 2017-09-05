@@ -15,7 +15,7 @@
  * @class layerUI.components.subcomponents.Composer
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 import { settings } from '../../../base';
 

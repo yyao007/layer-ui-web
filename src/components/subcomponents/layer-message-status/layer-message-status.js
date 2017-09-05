@@ -32,7 +32,7 @@
  * @class layerUI.components.subcomponents.MessageStatus
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-message-status', {

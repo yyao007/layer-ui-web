@@ -10,7 +10,7 @@
  *
  * @class layerUI.mixins.QueryEndIndicator
  */
-import { Util } from 'layer-websdk';
+import { Util } from '@layerhq/layer-websdk';
 module.exports = {
   properties: {
     /**

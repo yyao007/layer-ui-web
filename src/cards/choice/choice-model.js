@@ -39,7 +39,7 @@
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
  */
-import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';
 import ResponseModel from '../response/response-model';
 import TextModel from '../text/text-model';
 

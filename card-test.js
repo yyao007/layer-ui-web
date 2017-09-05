@@ -1,4 +1,4 @@
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 
 import LayerUI from './lib-es6/index';
 

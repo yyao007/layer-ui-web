@@ -49,7 +49,7 @@
  * @mixin layerUI.mixins.ListLoadIndicator
  * @mixin layerUI.mixins.EmptyList
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 import List from '../../../mixins/list';
 import ListLoadIndicator from '../../../mixins/list-load-indicator';

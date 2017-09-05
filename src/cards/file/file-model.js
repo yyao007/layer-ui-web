@@ -35,7 +35,7 @@
 */
 
 
-import { Client, MessagePart, CardModel } from 'layer-websdk';
+import { Client, MessagePart, CardModel } from '@layerhq/layer-websdk';
 
 
 class FileModel extends CardModel {

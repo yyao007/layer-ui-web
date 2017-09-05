@@ -3,7 +3,7 @@
  *
  * @class layerUI.mixins.MainComponent
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { settings, version } from '../base';
 import { registerComponent } from '../components/component';
 

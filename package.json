@@ -1,12 +1,11 @@
 {
   "name": "@layerhq/layer-ui-web",
-  "version": "2.0.4",
+  "version": "3.0.5",
   "description": "The Layer UI for Web provides a library of widgets to simplify adding chat capabilities into your application.",
   "main": "lib-es5/index.js",
   "scripts": {
     "prepublish": "grunt prepublish",
     "test": "grunt test",
-
     "aws:html": "aws s3 cp cards.html s3://static.layer.com/carddemo/index.html",
     "aws:build": "aws s3 cp build s3://static.layer.com/carddemo/build --recursive",
     "aws:layer-ui-web-theme": "aws s3 cp themes/build s3://static.layer.com/carddemo/themes/build --recursive",
@@ -15,9 +14,9 @@
   "author": "Layer developers <helpdesk@layer.com> (https://layer.com)",
   "license": "Apache-2.0",
   "dependencies": {
+    "@layerhq/layer-websdk": "^3.4.4",
     "autolinker": "^1.2.1",
     "blueimp-load-image": "^2.9.0",
-    "layer-websdk": "^3.2",
     "leaflet": "^1.2.0",
     "notifyjs": "^2.0.3",
     "remarkable-emoji": "^0.1.3",

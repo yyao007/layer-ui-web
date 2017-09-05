@@ -415,7 +415,7 @@ client.getConversation($("layer-conversation-list").selectedId).createMessage({p
   },
 ]}).send();
 */
-import { Client, MessagePart, Util, CardModel }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel }  from '@layerhq/layer-websdk';
 
 
 class CarouselModel extends CardModel {

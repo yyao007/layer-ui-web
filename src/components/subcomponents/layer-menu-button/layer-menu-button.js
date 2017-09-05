@@ -17,7 +17,7 @@
  * @class layerUI.components.subcomponents.MenuButton
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 import '../layer-menu/layer-menu';
 import Clickable from '../../../mixins/clickable';

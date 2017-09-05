@@ -148,7 +148,7 @@ message = conversation.createMessage({parts: [
   }
 ]});
 */
-import { Client, MessagePart, CardModel } from 'layer-websdk';
+import { Client, MessagePart, CardModel } from '@layerhq/layer-websdk';
 
 
 class ButtonsModel extends CardModel {

@@ -4,7 +4,7 @@
  * @class layerUI.mixins.List
  * @mixin layerUI.mixins.HasQuery
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { animatedScrollTo, components } from '../base';
 import { registerComponent } from '../components/component';
 import HasQuery from './has-query';

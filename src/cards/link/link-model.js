@@ -67,7 +67,7 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
-import { Client, MessagePart, Util, CardModel, xhr }  from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel, xhr }  from '@layerhq/layer-websdk';
 
 const TitleRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:title['"].*?\/>/);
 const DescriptionRegEx = new RegExp(/<meta [^>]*property\s*=\s*['"]og:description['"].*?\/>/);

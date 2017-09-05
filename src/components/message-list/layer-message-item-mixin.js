@@ -97,7 +97,7 @@
  * @mixins layerUI.mixins.ListItem
  * @extends layerUI.components.Component
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import '../subcomponents/layer-replaceable-content/layer-replaceable-content';
 
 module.exports = {

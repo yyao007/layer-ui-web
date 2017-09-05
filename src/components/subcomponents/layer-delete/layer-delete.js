@@ -31,7 +31,7 @@
  * @extends layerUI.components.Component
  * @deprecated
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 
 registerComponent('layer-delete', {

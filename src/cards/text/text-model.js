@@ -29,7 +29,7 @@
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
  */
-import { Client, MessagePart, Root, CardModel } from 'layer-websdk';
+import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';
 import { registerMessageHandler } from '../../base';
 
 class TextModel extends CardModel {

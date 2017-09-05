@@ -21,7 +21,7 @@
  * @mixin layerUI.mixins.MainComponent
  * @mixin layerUI.mixins.ListSelection
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../component';
 import List from '../../../mixins/list';
 import MainComponent from '../../../mixins/main-component';

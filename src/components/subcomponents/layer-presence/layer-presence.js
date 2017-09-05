@@ -39,7 +39,7 @@
  * @extends layerUI.components.Component
  * @mixin layerUI.mixins.MainComponent
  */
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 import { registerComponent } from '../../../components/component';
 import SizeProperty from '../../../mixins/size-property';
 import Clickable from '../../../mixins/clickable';

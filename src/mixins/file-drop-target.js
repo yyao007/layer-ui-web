@@ -2,7 +2,7 @@ import ImageManager from 'blueimp-load-image/js/load-image';
 import 'blueimp-load-image/js/load-image-orientation';
 import 'blueimp-load-image/js/load-image-meta';
 import 'blueimp-load-image/js/load-image-exif';
-import Layer, { MessagePart } from 'layer-websdk';
+import Layer, { MessagePart } from '@layerhq/layer-websdk';
 import { settings } from '../base';
 import normalizeSize from '../utils/sizing';
 import ImageModel from '../cards/image/image-model';

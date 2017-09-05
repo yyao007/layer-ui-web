@@ -3,7 +3,7 @@
  * TODO: Look at vcard fields
  */
 
-import { Client, MessagePart, CardModel, Util }  from 'layer-websdk';
+import { Client, MessagePart, CardModel, Util }  from '@layerhq/layer-websdk';
 
 class PersonModel extends CardModel {
 

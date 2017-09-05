@@ -3,7 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var version = require('./package.json').version;
-var websdkVersion = require('layer-websdk/package.json').version;
+var websdkVersion = require('@layerhq/layer-websdk/package.json').version;
 var HTML_HEAD = fs.readFileSync('./jsduck-config/head.html').toString();
 var CSS = fs.readFileSync('./jsduck-config/style.css').toString();
 var babel = require('babel-core');
@@ -244,15 +244,15 @@ module.exports = function (grunt) {
   */
   grunt.registerTask('before-browserify', 'Swap layer-websdk for global', function() {
     var newcode = 'module.exports = global.layer;';
-    var contents = grunt.file.read('node_modules/layer-websdk/index.js');
+    var contents = grunt.file.read('node_modules/@layerhq/layer-websdk/index.js');
     if (contents != newcode) {
-      grunt.file.write('node_modules/layer-websdk/index-stashed.js', contents);
+      grunt.file.write('node_modules/@layerhq/layer-websdk/index-stashed.js', contents);
     }
-    grunt.file.write('node_modules/layer-websdk/index.js', newcode);
+    grunt.file.write('node_modules/@layerhq/layer-websdk/index.js', newcode);
   });
 
   grunt.registerTask('after-browserify', 'Swap layer-websdk back', function() {
-    grunt.file.copy('node_modules/layer-websdk/index-stashed.js', 'node_modules/layer-websdk/index.js');
+    grunt.file.copy('node_modules/@layerhq/layer-websdk/index-stashed.js', 'node_modules/@layerhq/layer-websdk/index.js');
   });
 
 

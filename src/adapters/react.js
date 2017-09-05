@@ -1,5 +1,5 @@
 import layerUI from '../base';
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 
 /**
  * Call this function to initialize all of the react components needed to handle the Layer UI for Web widgets.

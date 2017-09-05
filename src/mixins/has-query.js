@@ -1,4 +1,4 @@
-import Layer from 'layer-websdk';
+import Layer from '@layerhq/layer-websdk';
 
 /**
  * A Mixin for main components that can receive or generate a Query

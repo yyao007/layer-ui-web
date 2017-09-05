@@ -22,7 +22,7 @@
  * @class layerUI.components.subcomponents.FileUploadButton
  * @extends layerUI.components.Component
  */
-import Layer, { MessagePart } from 'layer-websdk';
+import Layer, { MessagePart } from '@layerhq/layer-websdk';
 import layerUI from '../../../base';
 import { registerComponent } from '../../../components/component';
 import Clickable from '../../../mixins/clickable';

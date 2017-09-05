@@ -181,7 +181,7 @@ new ReceiptModel({
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
 */
-import { Client, MessagePart, Util, CardModel } from 'layer-websdk';
+import { Client, MessagePart, Util, CardModel } from '@layerhq/layer-websdk';
 
 class ReceiptModel extends CardModel {
   _generateParts(callback) {
