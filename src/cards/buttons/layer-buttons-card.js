@@ -63,7 +63,12 @@ registerComponent('layer-buttons-card', {
       }
 
       this.model.buttons.forEach((button) => {
-        let widget;
+        let widget, model;
+
+        if ('choices' in button && button.choices.length > 1) {
+          this.parentComponent.classList.add('layer-button-card-with-choices');
+        }
+
         switch (button.type) {
           case 'action':
             widget = this.createElement('layer-action-button', {
@@ -80,27 +85,14 @@ registerComponent('layer-buttons-card', {
             });
             break;
           case 'choice':
-            const obj = {
-              parentNodeId: this.model.nodeId,
-              choices: button.choices,
-              message: this.model.message,
-              responseName: button.data.responseName,
-              responses: this.model.responses,
-            };
-            if ('allowDeselect' in button.data) obj.allowDeselect = button.data.allowDeselect;
-            if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
-            if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
-            const model = new ChoiceModel(obj);
-            // Update the selectedAnswer based on any responses
-            if (this.model.responses) {
-              model._processNewResponses();
-            } else if (this.model.selectedAnswer) {
-              this.model.selectAnswer({ id: this.model.selectedAnswer });
+            model = this.model.choices[button.data.responseName || 'selected'];
+            if (model) {
+              widget = this.createElement('layer-choice-button', {
+                model,
+              });
+            } else {
+              console.error('Failed to find a Choice Model to render');
             }
-
-            widget = this.createElement('layer-choice-button', {
-              model,
-            });
             break;
         }
         this.nodes.buttons.appendChild(widget);

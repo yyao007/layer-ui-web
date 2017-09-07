@@ -69,11 +69,25 @@ registerComponent('layer-choice-card', {
 
     onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
+      let selectedAnswer;
+      if (this.model.selectedAnswer) {
+        if (this.model.allowMultiselect) {
+          selectedAnswer = (this.model.selectedAnswer || '').split(/,/);
+        } else {
+          selectedAnswer = [ this.model.selectedAnswer ];
+        }
+      }
       for (let i = 0; i < this.nodes.answers.childNodes.length; i++) {
         const child = this.nodes.answers.childNodes[i];
-        child.disabled = this.model.selectedAnswer &&
-          (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
-        child.selected = this.model.selectedAnswer === child.data.id;
+        const isSelected = selectedAnswer.indexOf(child.data.id) !== -1;
+        if (this.model.allowDeselect || !selectedAnswer || this.allowReselect && !isSelected) {
+          child.disabled = false;
+        } else if (this.allowReselect && isSelected || !this.allowReselect && selectedAnswer.length) {
+          child.disabled = true;
+        } else {
+          child.disabled = false;
+        }
+        child.selected = isSelected;
       }
     },
 

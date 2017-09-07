@@ -28,6 +28,9 @@
     subtitle: 'This quote totally blows'
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+ * @class layerUI.cards.TextModel
+ * @extends layer.model
  */
 import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';
 import { registerMessageHandler } from '../../base';

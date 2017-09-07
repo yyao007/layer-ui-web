@@ -26,6 +26,10 @@ registerComponent('layer-file-card', {
     widthType: {
       value: 'flex-card',
     },
+    preferredMinWidth: {
+      type: Number,
+      value: 250,
+    },
   },
   methods: {
     /**

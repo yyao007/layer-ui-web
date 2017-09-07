@@ -566,7 +566,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '3.0.5';
+layerUI.version = '3.0.8';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

@@ -87,6 +87,9 @@ img = layer.Util.base64ToBlob('iVBORw0KGgoAAAANSUhEUgAAAyAAAAGQCAYAAABWJQQ0AAAHJ
     height: 400,
     title: "Wider and taller than card but much wider than tall"
   }).generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+* @class layerUI.cards.ImageModel
+* @extends layer.model
 */
 import ImageManager from 'blueimp-load-image/js/load-image';
 import 'blueimp-load-image/js/load-image-orientation';

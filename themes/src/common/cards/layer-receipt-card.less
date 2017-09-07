@@ -3,7 +3,7 @@ layer-product-card-mini {
   border-bottom: solid 1px @color-g3;
 
   .layer-receipt-card-quantity:not(:empty)::before {
-    content: "Quantity: "
+    content: "Quantity: ";
   }
 
   .layer-receipt-card-name {
@@ -18,6 +18,9 @@ layer-product-card-mini {
     padding: 4px 0px;
   }
 
+  .layer-receipt-card-options:not(:empty)::before {
+    content: "Options: ";
+  }
   & > img {
     max-width: 50px;
     max-height: 80px;

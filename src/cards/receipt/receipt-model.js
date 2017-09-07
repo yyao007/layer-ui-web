@@ -180,6 +180,9 @@ new ReceiptModel({
     },
   ]
 }).generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+* @class layerUI.cards.ReceiptModel
+* @extends layer.model
 */
 import { Client, MessagePart, Util, CardModel } from '@layerhq/layer-websdk';
 

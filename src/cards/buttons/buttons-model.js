@@ -87,69 +87,11 @@ model = new ButtonModel({
 });
 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
 
-
-// Basic List
-message = conversation.createMessage({parts: [
-  {
-    mimeType: "application/vnd.layer.card.buttons+json; role=root; node-id=root",
-    body: '{"buttons": [{"type": "action", "text": "hello", "event": "doit"}, {"type": "url", "text": "layer.com", "url": "https://layer.com"} ]}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.list+json; role=content; node-id=list; parent-node-id=root",
-    body: '{}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=list-item; parent-node-id=list",
-    body: '{"text": "hello world 1"}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=list-item; parent-node-id=list",
-    body: '{"text": "hello world 2"}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=list-item; parent-node-id=list",
-    body: '{"text": "hello world 3"}'
-  }
-]});
-
-// List of Buttons with Text Items
-message = conversation.createMessage({parts: [
-  {
-    mimeType: "application/vnd.layer.card.buttons+json; role=root; node-id=root",
-    body: '{"buttons": [{"type": "action", "text": "hello", "event": "doit"} ]}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.list+json; role=content; node-id=list; parent-node-id=root",
-    body: '{}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.buttons+json; role=list-item; node-id=item1; parent-node-id=list",
-    body: '{"buttons": [{"type": "action", "text": "hello 1", "event": "doit"} ]}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=content; parent-node-id=item1",
-    body: '{"text": "hello world 1"}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.buttons+json; role=list-item; node-id=item2; parent-node-id=list",
-    body: '{"buttons": [{"type": "action", "text": "hello 2", "event": "doit"} ]}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=content; parent-node-id=item2",
-    body: '{"text": "hello world 2"}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.buttons+json; role=list-item; node-id=item3; parent-node-id=list",
-    body: '{"buttons": [{"type": "action", "text": "hello 3", "event": "doit"} ]}'
-  },
-  {
-    mimeType: "application/vnd.layer.card.text+json; role=content; parent-node-id=item3",
-    body: '{"text": "hello world 3"}'
-  }
-]});
+* @class layerUI.cards.ButtonsModel
+* @extends layer.model
 */
 import { Client, MessagePart, CardModel } from '@layerhq/layer-websdk';
-
+import ChoiceModel from '../choice/choice-model';
 
 class ButtonsModel extends CardModel {
   _generateParts(callback) {
@@ -158,6 +100,7 @@ class ButtonsModel extends CardModel {
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
     });
+    this._setupButtonModels();
     if (this.contentModel) {
       this._addModel(this.contentModel, 'content', (parts) => {
         callback([this.part].concat(parts));
@@ -172,6 +115,39 @@ class ButtonsModel extends CardModel {
 
     const contentPart = this.childParts.filter(part => part.mimeAttributes.role === 'content')[0];
     if (contentPart) this.contentModel = this.getClient().createCardModel(this.message, contentPart);
+    this._setupButtonModels();
+  }
+
+  _setupButtonModels() {
+    if (!this.choices) this.choices = {};
+    const choices = this.buttons.filter(button => button.type === 'choice');
+    choices.forEach((button) => {
+      const obj = {
+        parentNodeId: this.nodeId,
+        choices: button.choices,
+        message: this.message,
+        responses: this.responses,
+      };
+      if ('responseName' in button.data) obj.responseName = button.data.responseName;
+      if ('allowDeselect' in button.data) obj.allowDeselect = button.data.allowDeselect;
+      if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
+      if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
+      const model = new ChoiceModel(obj);
+      if (!this.choices[model.responseName]) {
+        this.choices[model.responseName] = model;
+        model.on('change', () => this.on('change'));
+
+        // Update the selectedAnswer based on any responses
+        if (model.responses) {
+          model._processNewResponses();
+        }
+      } else {
+        // the ChoiceModel already exists; lets update its properties
+        Object.keys(obj).forEach((prop) => {
+          this.choices[model.responseName][prop] = obj[prop];
+        });
+      }
+    });
   }
 
   getTitle() { return this.contentModel ? this.contentModel.getTitle() : ''; }
@@ -186,6 +162,7 @@ class ButtonsModel extends CardModel {
 }
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
+ButtonsModel.prototype.choices = null;
 
 ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';

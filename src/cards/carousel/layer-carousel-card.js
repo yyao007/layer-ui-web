@@ -103,15 +103,16 @@ registerComponent('layer-carousel-card', {
           model: item,
           parentNode: this.nodes.items,
         });
+        const preferedMinWidth = card.nodes.ui.preferredMinWidth;
         switch (card.widthType) {
           case 'full-card':
             card.style.width = card.style.minWidth = maxCardWidth + 'px';
             break;
           case 'flex-card':
-            if (maxCardWidth < 600) {
-              card.style.width = card.style.minWidth = maxCardWidth + 'px';
+            if (maxCardWidth < preferedMinWidth) {
+              card.style.maxWidth = card.style.minWidth = card.style.width = maxCardWidth + 'px';
             } else {
-              card.style.width = card.style.minWidth = '350px';
+              card.style.maxWidth = card.style.minWidth = card.style.width = preferedMinWidth + 'px';
             }
             break;
         }

@@ -101,10 +101,11 @@ model = new ButtonsModel({
       })
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
-  */
 
-/**
  * A Product model, typically used within a Recipt Model, but usable anywhere that you want to display simple product information.
+ *
+ * @class layerUI.cards.ProductModel
+ * @extends layer.model
  */
 
 import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';

@@ -71,7 +71,7 @@ registerComponent('layer-link-card', {
       if (this.widthType) {
         const isLinkOnly = this.widthType === 'chat-bubble';
         this.parentComponent.classList[isLinkOnly ? 'remove' : 'add']('layer-arrow-next-container');
-        this.parentComponent.classList[!isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
+        this.parentComponent.classList[this.model.imageUrl || isLinkOnly ? 'remove' : 'add']('layer-no-core-ui');
       }
     },
   },

@@ -11,8 +11,9 @@ registerComponent('layer-product-card-mini', {
     <img layer-id='img' />
     <div class='layer-product-card-mini-right'>
       <div layer-id="name" class="layer-receipt-card-name"></div>
-      <div layer-id="price" class="layer-receipt-card-price"></div>
+      <div layer-id="options" class="layer-receipt-card-options"></div>
       <div layer-id="quantity" class="layer-receipt-card-quantity"></div>
+      <div layer-id="price" class="layer-receipt-card-price"></div>
     </div>
   `,
   style: `layer-product-card-mini {
@@ -33,6 +34,14 @@ registerComponent('layer-product-card-mini', {
       this.nodes.name.innerHTML = this.item.name;
       this.nodes.price.innerHTML = this.item.getFormattedPrice();
       this.nodes.quantity.innerHTML = this.item.quantity !== 1 ? this.item.quantity : '';
+      if (this.item.options) {
+        const selectedOptions = this.item.options.map((choiceModel) => {
+          if (choiceModel.selectedAnswer) {
+            return choiceModel.choices.filter(choice => choice.id === choiceModel.selectedAnswer)[0].text;
+          }
+        }).filter(selectedText => selectedText).join(', ');
+        this.nodes.options.innerHTML = selectedOptions;
+      }
     },
   },
 });

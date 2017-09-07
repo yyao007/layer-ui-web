@@ -16,6 +16,10 @@ module.exports = {
     // "chat-bubble": No minimum, maximum is all available width; generallay does not look like a card
     // "flex-card": card that has a minimum and a maximum but tries for an optimal size for its contents
     widthType: {},
+    preferredWidth: {
+      type: Number,
+      value: 350,
+    },
     isHeightAllocated: {
       value: true,
       set(value) {

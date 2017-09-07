@@ -1,5 +1,5 @@
 /**
- *
+
    ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
    model = new ChoiceModel({
      question: "What is the airspeed velocity of an unladen swallow?",
@@ -27,6 +27,20 @@
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
+  ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
+   model = new ChoiceModel({
+     question: "Pick a color",
+     responseName: 'color',
+     selectedAnswer: 'black',
+     allowMultiselect: true,
+     choices: [
+        {text:  "red", id: "red"},
+        {text:  "blue", id: "blue"},
+        {text:  "black", id: "black"},
+      ],
+   });
+   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+
 
   model = new ChoiceModel({
     allowReselect: true,
@@ -38,6 +52,10 @@
       ]
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+ *
+ *
+ * @class layerUI.cards.ChoiceModel
+ * @extends layer.model
  */
 import { Client, MessagePart, Root, CardModel } from '@layerhq/layer-websdk';
 import ResponseModel from '../response/response-model';
@@ -45,7 +63,10 @@ import TextModel from '../text/text-model';
 
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['question', 'choices', 'selectedAnswer', 'allowReselect', 'allowDeselect', 'label', 'type']);
+    const body = this._initBodyWithMetadata([
+      'question', 'choices', 'selectedAnswer', 'label', 'type',
+      'allowReselect', 'allowDeselect', 'allowMultiselect',
+    ]);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
@@ -56,6 +77,7 @@ class ChoiceModel extends CardModel {
   }
 
   _parseMessage(payload) {
+    if (this.selectedAnswer) delete payload.selected_answer;
     super._parseMessage(payload);
     this._buildActionModels();
     if (this.responses) {
@@ -74,6 +96,55 @@ class ChoiceModel extends CardModel {
   }
 
   selectAnswer(answerData) {
+    if (this.allowMultiselect) {
+      this._selectMultipleAnswers(answerData);
+    } else {
+      this._selectSingleAnswer(answerData);
+    }
+  }
+
+  _selectMultipleAnswers(answerData) {
+    let selectionText;
+    let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
+    let selectedAnswers = (this.selectedAnswer || '').split(/,/);
+    const answerDataIndex = selectedAnswers.indexOf(answerData.id);
+
+    // Deselect it
+    if (answerDataIndex !== -1) {
+      selectedAnswers.splice(answerDataIndex, 1);
+      selectionText = ' deselected ';
+    } else {
+      selectedAnswers.push(id);
+      selectionText = ' selected ';
+    }
+
+    const responseModel = new ResponseModel({
+      responseToMessage: this.message,
+      responseToNodeId: this.parentNodeId || this.nodeId,
+      participantData: {
+        [this.responseName]: selectedAnswers.join(','),
+      },
+      messageModel: new TextModel({
+        text: this.getClient().user.displayName + selectionText + text,
+      }),
+    });
+    if (!this.message.isNew()) {
+      responseModel.send();
+    }
+    this.selectedAnswer = selectedAnswers.join(',');
+    this.trigger('change');
+    if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
+
+    // We generate local changes, we generate more local changes then the server sends us the first changes
+    // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
+    // from the server after a user change.
+    this.pauseUpdateTimeout = setTimeout(() => {
+      this.pauseUpdateTimeout = 0;
+      this._processNewResponses();
+    }, 6000);
+  }
+
+  _selectSingleAnswer(answerData) {
     if (!this.selectedAnswer || this.allowReselect) {
       let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
       let selectionText = ' selected ';
@@ -92,7 +163,9 @@ class ChoiceModel extends CardModel {
           text: this.getClient().user.displayName + selectionText + text,
         }),
       });
-      responseModel.send();
+      if (!this.message.isNew()) {
+        responseModel.send();
+      }
       this.selectedAnswer = id;
       this.trigger('change');
       if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
@@ -106,7 +179,6 @@ class ChoiceModel extends CardModel {
       }, 6000);
     }
   }
-
 
   _processNewResponses() {
     if (!this.pauseUpdateTimeout) {
@@ -133,10 +205,17 @@ class ChoiceModel extends CardModel {
     switch (this.type) {
       case 'standard':
         return 'layer-choice-card';
-      //case 'TiledChoices':
-      //  return 'layer-choice-tiles-card';
+      // case 'TiledChoices':
+      // return 'layer-choice-tiles-card';
       case 'Label':
         return 'layer-choice-label-card';
+    }
+  }
+
+  __updateAllowMultiselect(newValue) {
+    if (newValue) {
+      this.allowReselect = true;
+      this.allowDeselect = true;
     }
   }
 }
@@ -144,6 +223,7 @@ class ChoiceModel extends CardModel {
 ChoiceModel.prototype.pauseUpdateTimeout = 0;
 ChoiceModel.prototype.allowReselect = false;
 ChoiceModel.prototype.allowDeselect = true; // ignored if !allowReselect
+ChoiceModel.prototype.allowMultiselect = false; // if true, allowReselect is forced to true and allowDeselect is forced to true
 ChoiceModel.prototype.label = '';
 ChoiceModel.prototype.type = 'standard';
 ChoiceModel.prototype.title = 'Choose One';
