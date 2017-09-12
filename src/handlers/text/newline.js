@@ -41,6 +41,6 @@ layerUI.registerTextHandler({
         return '<br/>';
       }
     });
-    textData.text = body;
+    textData.text = '<p>' + body.split('<br/>').join('</p><p>') + '</p>';
   },
 });

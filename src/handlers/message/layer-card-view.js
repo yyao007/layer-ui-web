@@ -160,7 +160,7 @@ registerMessageComponent('layer-card-view', {
           ui: cardUI,
           parentNode: this,
           name: 'cardContainer',
-          noCreate: true,
+          noCreate: true, // tells createElement not to call _onAfterCreate just yet
         });
         cardContainer.ui = cardUI;
         cardUI.parentComponent = cardContainer;
@@ -203,7 +203,7 @@ registerMessageComponent('layer-card-view', {
       const actionData = options && options.data ? options.data : this.model.actionData; // TODO: perhaps merge options.data with actionData?
 
       if (actionHandlers[event]) return actionHandlers[event].apply(this, [actionData]);
-      const rootPart = this.message.getPartsMatchingAttribute({'role': 'root'})[0];
+      const rootPart = this.message.getPartsMatchingAttribute({ role: 'root' })[0];
       const rootModel = this.client.getCardModel(rootPart.id);
       this.nodes.ui.trigger(event, {
         model: this.model,

@@ -80,7 +80,7 @@ registerComponent('layer-text-card', {
     _processText() {
       if (!Base.textHandlersOrdered) this._setupOrderedHandlers();
 
-      const text = this.model.text;
+      const text = (this.model.text || '').trim();
       const textData = {
         text: this._fixHtml(text),
       };

@@ -70,7 +70,6 @@ const layerUI = {};
  * @property {Object} [settings.defaultHandler]    The default message renderer for messages not matching any other handler
  * @property {String[]} [settings.textHandlers=['autolinker', 'emoji', 'newline']] Specify which text handlers you want
  *    Note that any custom handlers you add do not need to be in the settings, they can be called after calling `init()` using layerUI.registerTextHandler.
- * @property {Object} [settings.maxSizes]  The maximum width/height for image and video previews
  * @property {Object} [settings.verticalMessagePadding=0]  Message handlers that must hard code a height into their dom nodes can be
  *     hard to add borders and padding around.  Use this property to offset any hardcoded height by this number of pixels
  */
@@ -566,7 +565,7 @@ layerUI.init = function init(settings) {
  *
  * @type {String}
  */
-layerUI.version = '3.0.8';
+layerUI.version = '3.0.11';
 
 const clientVersions = Layer.Client.version.split('.').map(value => Number(value));
 if (clientVersions[0] !== 3 && Layer.Client.version !== '3.1.1') {

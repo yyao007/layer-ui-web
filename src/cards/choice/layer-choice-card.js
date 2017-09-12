@@ -69,7 +69,7 @@ registerComponent('layer-choice-card', {
 
     onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
-      let selectedAnswer;
+      let selectedAnswer = [];
       if (this.model.selectedAnswer) {
         if (this.model.allowMultiselect) {
           selectedAnswer = (this.model.selectedAnswer || '').split(/,/);
@@ -80,7 +80,7 @@ registerComponent('layer-choice-card', {
       for (let i = 0; i < this.nodes.answers.childNodes.length; i++) {
         const child = this.nodes.answers.childNodes[i];
         const isSelected = selectedAnswer.indexOf(child.data.id) !== -1;
-        if (this.model.allowDeselect || !selectedAnswer || this.allowReselect && !isSelected) {
+        if (this.model.allowDeselect || !selectedAnswer.length || this.allowReselect && !isSelected) {
           child.disabled = false;
         } else if (this.allowReselect && isSelected || !this.allowReselect && selectedAnswer.length) {
           child.disabled = true;

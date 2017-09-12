@@ -140,7 +140,7 @@ class ChoiceModel extends CardModel {
     // from the server after a user change.
     this.pauseUpdateTimeout = setTimeout(() => {
       this.pauseUpdateTimeout = 0;
-      this._processNewResponses();
+      if (this.message && !this.message.isNew()) this._processNewResponses();
     }, 6000);
   }
 

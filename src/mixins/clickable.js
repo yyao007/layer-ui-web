@@ -14,6 +14,8 @@ module.exports = {
     addClickHandler(name, target, fn) {
       if (!this.properties.onClickFn) this.properties.onClickFn = {};
       this.properties.onClickFn[name] = function(evt) {
+        const clickableTargets = ['A', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT'];
+        if (clickableTargets.indexOf(evt.target.tagName) !== -1)  return;
         evt.preventDefault(); // if tap event, prevent the click handler from firing causing a double event occurance
         fn(evt);
       };

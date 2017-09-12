@@ -79,7 +79,7 @@ registerComponent('layer-standard-card-container', {
       noGetterFromSetter: true,
       get() {
         return this.properties.cardBorderStyle || this.properties.ui.cardBorderStyle || '';
-      }
+      },
     },
   },
   methods: {
