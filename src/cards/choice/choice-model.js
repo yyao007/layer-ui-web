@@ -64,7 +64,7 @@ import TextModel from '../text/text-model';
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata([
-      'question', 'choices', 'selectedAnswer', 'label', 'type',
+      'question', 'choices', 'selectedAnswer', 'type',
       'allowReselect', 'allowDeselect', 'allowMultiselect',
     ]);
     this.part = new MessagePart({
@@ -79,6 +79,8 @@ class ChoiceModel extends CardModel {
   _parseMessage(payload) {
     if (this.selectedAnswer) delete payload.selected_answer;
     super._parseMessage(payload);
+    if (this.allowMultiselect) this.allowDeselect = true;
+    if (this.allowDeselect) this.allowReselect = true;
     this._buildActionModels();
     if (this.responses) {
       this._processNewResponses();
@@ -212,9 +214,14 @@ class ChoiceModel extends CardModel {
     }
   }
 
-  __updateAllowMultiselect(newValue) {
+  __updateAllowDeselect(newValue) {
     if (newValue) {
       this.allowReselect = true;
+    }
+  }
+
+  __updateAllowMultiselect(newValue) {
+    if (newValue) {
       this.allowDeselect = true;
     }
   }
@@ -222,9 +229,8 @@ class ChoiceModel extends CardModel {
 
 ChoiceModel.prototype.pauseUpdateTimeout = 0;
 ChoiceModel.prototype.allowReselect = false;
-ChoiceModel.prototype.allowDeselect = true; // ignored if !allowReselect
+ChoiceModel.prototype.allowDeselect = true; // if true, allowReselect is forced to true
 ChoiceModel.prototype.allowMultiselect = false; // if true, allowReselect is forced to true and allowDeselect is forced to true
-ChoiceModel.prototype.label = '';
 ChoiceModel.prototype.type = 'standard';
 ChoiceModel.prototype.title = 'Choose One';
 ChoiceModel.prototype.question = '';

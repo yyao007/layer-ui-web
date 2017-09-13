@@ -21,9 +21,6 @@ registerComponent('layer-standard-card-container', {
       flex-direction: column;
       align-items: center;
     }
-    layer-standard-card-container .layer-card-top > layer-image-card img {
-      width: 100%;
-    }
     layer-standard-card-container .layer-card-body-outer {
       display: flex;
       flex-direction: row;

@@ -191,7 +191,6 @@ registerMessageComponent('layer-card-view', {
 
 
     handleSelection(evt) {
-      evt.preventDefault();
       evt.stopPropagation();
       this.runAction();
     },
