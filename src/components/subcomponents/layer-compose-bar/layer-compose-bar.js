@@ -212,15 +212,19 @@ registerComponent('layer-compose-bar', {
      * ```
      *
      * @method
-     * @param {layer.MessagePart[]} optionalParts
+     * @param {layer.CardModels[]} optionalModels
      */
-    send(optionalParts) {
+    send(optionalModels) {
 
-      let parts = [];
-      if (optionalParts) {
-        parts = optionalParts;
-        const message = this.conversation ? this.conversation.createMessage({ parts }) : null;
-        this._send(message, parts);
+      if (optionalModels) {
+        if (optionalModels.length === 1) {
+          optionalModels[0].generateMessage(this.conversation, message => this._send(message, message.parts));
+        } else {
+          const CarouselModel = Layer.Client.getCardModelClass('CarouselModel');
+          new CarouselModel({
+            items: optionalModels,
+          }).generateMessage(this.conversation, message => this._send(message, message.parts));
+        }
       } else if (this.nodes.input.value) {
         const TextModel = Layer.Client.getCardModelClass('TextModel');
         new TextModel({
@@ -382,7 +386,7 @@ registerComponent('layer-compose-bar', {
      * @private
      */
     _handleAttachments(evt) {
-      this.send(evt.detail.parts);
+      this.send(evt.detail.models);
     },
   },
 });

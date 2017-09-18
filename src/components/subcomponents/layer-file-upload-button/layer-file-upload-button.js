@@ -75,9 +75,19 @@ registerComponent('layer-file-upload-button', {
      */
     onChange() {
       const files = this.nodes.input.files;
+      const imageTypes = ['image/gif', 'image/png', 'image/jpeg', 'image/svg'];
 
-      /* istanbul ignore next */
-      const inputParts = Array.prototype.map.call(files, file => new MessagePart(file));
+      const models = files.map((file) => {
+        if (imageTypes.indexOf(file.type) !== -1) {
+          return new ImageModel({
+            source: file,
+          });
+        } else {
+          return new FileModel({
+            source: file,
+          });
+        }
+      });
 
       /**
        * This widget triggers a `layer-file-selected` event when the user selects files.
@@ -88,11 +98,9 @@ registerComponent('layer-file-upload-button', {
        * @event layer-file-selected
        * @param {Object} evt
        * @param {Object} evt.detail
-       * @[aram {layer.MessagePart[]} evt.detail.parts
+       * @param {layer.CardModel[]} evt.detail.models
        */
-      layerUI.files.processAttachments(inputParts, (parts) => {
-        this.trigger('layer-file-selected', { parts });
-      });
+      this.trigger('layer-file-selected', { models });
     },
   },
 });

@@ -63,6 +63,39 @@ ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.p
 
 
 
+ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+   ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+   ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+  model = new ButtonModel({
+    buttons: [
+      {
+        "type": "choice",
+        "choices": [{"text": "like", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "dislike", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+        "data": {"responseName": "satisfaction", selectedAnswer: 'dislike', allowReselect: true}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "\uD83D\uDC4D", "id": "like", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "dislike", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+        "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false, customResponseData: {howdy: "ho der"}}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+        "data": {"responseName": "helpfulness", allowReselect: false}
+      },
+    ],
+    contentModel: new ProductModel({
+      currency: 'USD',
+      price: 175,
+      quantity: 3,
+      brand: "randomcrap.com",
+      name: "A pretty picture",
+      imageUrls: [ "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg" ],
+    })
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
+
 
   model = new ButtonModel({
     buttons: [
@@ -132,6 +165,7 @@ class ButtonsModel extends CardModel {
       if ('allowDeselect' in button.data) obj.allowDeselect = button.data.allowDeselect;
       if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
       if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
+      if ('customResponseData' in button.data) obj.customResponseData = button.data.customResponseData;
       const model = new ChoiceModel(obj);
       if (!this.choices[model.responseName]) {
         this.choices[model.responseName] = model;

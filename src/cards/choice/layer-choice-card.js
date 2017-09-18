@@ -57,7 +57,7 @@ registerComponent('layer-choice-card', {
     onAfterCreate() {
       this.nodes.question.innerHTML = this.model.question;
       this.model.choices.forEach((choice) => {
-        const button = this.createElement('layer-action-button', {
+        this.createElement('layer-action-button', {
           text: choice.text,
           event: 'layer-choice-select',
           data: { id: choice.id },
@@ -98,6 +98,14 @@ registerComponent('layer-choice-card', {
     runAction({ event, data }) {
       if (event === 'layer-choice-select') {
         this.onChoiceSelect(data);
+
+        const rootPart = this.model.message.getPartsMatchingAttribute({ role: 'root' })[0];
+        const rootModel = this.client.getCardModel(rootPart.id);
+        this.trigger(this.model.responseName, {
+          model: this.model,
+          data: this.model,
+          rootModel,
+        });
       }
     },
   },

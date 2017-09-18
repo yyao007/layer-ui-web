@@ -262,6 +262,7 @@ ReceiptModel.prototype.order = null;
 
 // Expected fields: subtitle, shipping_cost, total_tax, total_cost
 ReceiptModel.prototype.summary = null;
+ReceiptModel.prototype.title = '';
 
 ReceiptModel.Label = 'Receipt';
 ReceiptModel.modelSet = [

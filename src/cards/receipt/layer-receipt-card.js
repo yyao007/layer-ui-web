@@ -70,6 +70,9 @@ registerComponent('layer-receipt-card', {
   layer-card-view.layer-receipt-card {
     padding-bottom: 0px;
   }
+  layer-receipt-card.layer-receipt-no-payment .layer-paid-with {
+    display: none;
+  }
   `,
   mixins: [CardMixin],
   // Note that there is also a message property managed by the MessageHandler mixin
@@ -96,7 +99,7 @@ registerComponent('layer-receipt-card', {
       return 'layer-receipt-card-icon';
     },
     getTitle() {
-      return 'Order Confirmation';
+      return this.model.title || 'Order Confirmation';
     },
 
     /**
@@ -135,6 +138,8 @@ registerComponent('layer-receipt-card', {
           style: 'currency',
         });
       this.nodes.paidWith.innerHTML = this.model.paymentMethod || 'Unknown';
+
+      this.toggleClass('layer-receipt-no-payment', !this.model.paymentMethod);
     },
   },
 });

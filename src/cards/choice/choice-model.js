@@ -13,6 +13,24 @@
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
 
+
+   ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
+   model = new ChoiceModel({
+     question: "What is the airspeed velocity of an unladen swallow?",
+     responseName: 'airselection',
+     selectedAnswer: 'clever bastard',
+     customResponseData: {
+       hey: "ho"
+     },
+     choices: [
+        {text:  "Zero, it can not get off the ground!", id: "zero"},
+        {text:  "Are we using Imperial or Metric units?", id: "clever bastard"},
+        {text:  "What do you mean? African or European swallow?", id: "just a smart ass"},
+      ],
+   });
+   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
+
+
    ChoiceModel = layer.Client.getCardModelClass('ChoiceModel')
    model = new ChoiceModel({
      question: "Pick a color",
@@ -66,6 +84,7 @@ class ChoiceModel extends CardModel {
     const body = this._initBodyWithMetadata([
       'question', 'choices', 'selectedAnswer', 'type',
       'allowReselect', 'allowDeselect', 'allowMultiselect',
+      'title', 'customResponseData',
     ]);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
@@ -155,12 +174,18 @@ class ChoiceModel extends CardModel {
         id = null;
         selectionText = ' deselected ';
       }
+
+      const participantData = {
+        [this.responseName]: id,
+      };
+      if (this.customResponseData) {
+        Object.keys(this.customResponseData).forEach(key => (participantData[key] = this.customResponseData[key]));
+      }
+
       const responseModel = new ResponseModel({
+        participantData,
         responseToMessage: this.message,
         responseToNodeId: this.parentNodeId || this.nodeId,
-        participantData: {
-          [this.responseName]: id,
-        },
         messageModel: new TextModel({
           text: this.getClient().user.displayName + selectionText + text,
         }),
@@ -177,13 +202,14 @@ class ChoiceModel extends CardModel {
       // from the server after a user change.
       this.pauseUpdateTimeout = setTimeout(() => {
         this.pauseUpdateTimeout = 0;
-        this._processNewResponses();
+        if (this._hasPendingResponse) this._processNewResponses();
       }, 6000);
     }
   }
 
   _processNewResponses() {
     if (!this.pauseUpdateTimeout) {
+      this._hasPendingResponse = false;
       const senderId = this.message.sender.userId;
       const data = this.responses.participantData;
       let responseIdentityIds = Object.keys(data).filter(participantId => data[participantId][this.responseName]);
@@ -191,6 +217,8 @@ class ChoiceModel extends CardModel {
         responseIdentityIds = responseIdentityIds.filter(id => senderId !== id);
       }
       this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
+    } else {
+      this._hasPendingResponse = true;
     }
   }
 
@@ -239,6 +267,7 @@ ChoiceModel.prototype.responseName = 'selection';
 ChoiceModel.prototype.responses = null;
 ChoiceModel.prototype.currentCardRenderer = null;
 ChoiceModel.prototype.selectedAnswer = null;
+ChoiceModel.prototype.customResponseData = null;
 
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';

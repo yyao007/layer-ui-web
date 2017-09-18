@@ -23,6 +23,19 @@ window.loadImage = ImageManager;
  * @class layerUI.mixins.FileDropTarget
  */
 module.exports = {
+  properties: {
+    /**
+     * By default, the Conversation View supports dropping Files from your file system to send them as Messages.
+     *
+     * You can turn this off by setting the Conversation View's `isDropTargetEnabled` to `false`.
+     *
+     * @property {Boolean}
+     */
+    isDropTargetEnabled: {
+      type: Boolean,
+      value: true,
+    },
+  },
   methods: {
     onCreate() {
       this.properties.onDragOverBound = this.onDragOver.bind(this);
@@ -74,6 +87,7 @@ module.exports = {
      * @private
      */
     ignoreDrop(evt) {
+      if (!this.isDropTargetEnabled) return;
       if (evt.preventDefault) {
         evt.preventDefault();
         evt.stopPropagation();
@@ -88,6 +102,7 @@ module.exports = {
      * @private
      */
     onDragOver(evt) {
+      if (!this.isDropTargetEnabled) return;
       this.classList.add('layer-file-drag-and-drop-hover');
       evt.preventDefault();
       return false;
@@ -111,6 +126,7 @@ module.exports = {
      * @private
      */
     onFileDrop(evt) {
+      if (!this.isDropTargetEnabled) return;
       this.onDragEnd();
 
       // stops the browser from redirecting off to the image.
