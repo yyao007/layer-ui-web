@@ -74,8 +74,10 @@ registerComponent('layer-file-upload-button', {
      * @method
      */
     onChange() {
-      const files = this.nodes.input.files;
+      const files = Array.prototype.slice.call(this.nodes.input.files);
       const imageTypes = ['image/gif', 'image/png', 'image/jpeg', 'image/svg'];
+      const ImageModel = Layer.Client.getCardModelClass('ImageModel');
+      const FileModel = Layer.Client.getCardModelClass('FileModel');
 
       const models = files.map((file) => {
         if (imageTypes.indexOf(file.type) !== -1) {
