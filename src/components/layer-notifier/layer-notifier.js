@@ -390,7 +390,9 @@ registerComponent('layer-notifier', {
      */
     desktopNotify(message) {
       try {
-        const text = message.getText();
+        const rootPart = message.getPartsMatchingAttribute({ role: 'root' })[0];
+        const model = rootPart ? this.client.createCardModel(message, rootPart) : null;
+        const text = model ? model.text || model.title : '';
         if (this.properties.desktopNotify) this.closeDesktopNotify();
 
         this.properties.desktopMessage = message;

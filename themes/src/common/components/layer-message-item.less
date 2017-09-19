@@ -16,7 +16,9 @@ layer-message-list {
     font-size: @message-item-date-size;
     display: none;
   }
-  .layer-message-item:last-child .layer-list-item layer-date {
+
+  layer-message-item-sent:last-of-type.layer-list-item-last .layer-list-item layer-date,
+  layer-message-item-received.layer-list-item-last .layer-list-item layer-date {
     display: inline-block;
   }
 
