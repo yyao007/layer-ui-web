@@ -5,7 +5,6 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import CardPrimitiveMixin from '../card-primitive-mixin';
 import Base from '../../base';
 
 registerComponent('layer-text-card', {
@@ -13,7 +12,7 @@ registerComponent('layer-text-card', {
     display: block;
   }
   `,
-  mixins: [CardMixin, CardPrimitiveMixin],
+  mixins: [CardMixin],
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
     html: {
@@ -25,6 +24,10 @@ registerComponent('layer-text-card', {
       get() {
         return this.parentComponent.isShowingMetadata ? 'flex-card' : 'chat-bubble';
       },
+    },
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      value: 'layer-standard-card-container',
     },
   },
   methods: {

@@ -1,3 +1,4 @@
+// @deprecated
 import { registerComponent } from '../components/component';
 
 module.exports = {

@@ -6,7 +6,6 @@
 import { registerComponent } from '../../components/component';
 import { settings as UISettings } from '../../base';
 import CardMixin from '../card-mixin';
-import CardPrimitiveMixin from '../card-primitive-mixin';
 
 import ImageManager from 'blueimp-load-image/js/load-image';
 import 'blueimp-load-image/js/load-image-orientation';
@@ -16,7 +15,7 @@ import 'blueimp-load-image/js/load-image-exif';
 import normalizeSize from '../../utils/sizing';
 
 registerComponent('layer-image-card', {
-  mixins: [CardMixin, CardPrimitiveMixin],
+  mixins: [CardMixin],
   style: `layer-image-card {
       display: block;
       overflow: hidden;
@@ -38,6 +37,10 @@ registerComponent('layer-image-card', {
     },
     maxHeight: {
       value: 300,
+    },
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      value: 'layer-standard-card-container',
     },
   },
   methods: {

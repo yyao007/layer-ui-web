@@ -165,14 +165,32 @@ class ChoiceModel extends CardModel {
     }, 6000);
   }
 
+  _getNameOfCard() {
+    const client = this.getClient();
+    if (this.parentNodeId) {
+      const parentNode = this.message.getPartsMatchingAttribute({'parent-node-id': this.parentNodeId })[0];
+      if (parentNode) {
+        const model = client.createCardModel(this.message, parentNode);
+        if (model && model.getChoiceModelResponseTopic && model.getChoiceModelResponseTopic()) {
+          return model.getChoiceModelResponseTopic();
+        }
+      }
+    }
+
+    if (this.question) {
+      return this.question;
+    }
+  }
+
   _selectSingleAnswer(answerData) {
+    const nameOfCard = this._getNameOfCard();
     if (!this.selectedAnswer || this.allowReselect) {
       let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
-      let selectionText = ' selected ';
+      let selectionText = 'selected';
 
       if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
         id = null;
-        selectionText = ' deselected ';
+        selectionText = 'deselected';
       }
 
       const participantData = {
@@ -187,7 +205,7 @@ class ChoiceModel extends CardModel {
         responseToMessage: this.message,
         responseToNodeId: this.parentNodeId || this.nodeId,
         messageModel: new TextModel({
-          text: this.getClient().user.displayName + selectionText + text,
+          text: `${this.getClient().user.displayName} ${selectionText} "${text}"` + (nameOfCard ? ` for "${nameOfCard}"` : ''),
         }),
       });
       if (!this.message.isNew()) {

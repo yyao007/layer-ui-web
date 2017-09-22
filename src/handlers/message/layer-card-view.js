@@ -153,7 +153,9 @@ registerMessageComponent('layer-card-view', {
 
       const cardContainerClass = this.cardContainerTagName;
       if (this.cardContainerTagName) this.classList.add(this.cardContainerTagName);
-      if (cardUI.isCardPrimitive) this.classList.add('layer-card-primitive');
+      if (cardUI.cardContainerTagName === 'layer-standard-card-container') {
+        this.classList.add('layer-card-primitive');
+      }
       if (cardContainerClass) {
         const cardContainer = this.createElement(cardContainerClass, {
           model: this.model,

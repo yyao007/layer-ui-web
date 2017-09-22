@@ -13,11 +13,10 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import CardPrimitiveMixin from '../card-primitive-mixin';
 import { addActionHandler } from '../../handlers/message/layer-card-view';
 
 registerComponent('layer-location-card', {
-  mixins: [CardMixin, CardPrimitiveMixin],
+  mixins: [CardMixin],
   template: '<img layer-id="img" />',
   style: `
   layer-card-view.layer-location-card {
@@ -40,6 +39,10 @@ registerComponent('layer-location-card', {
     },
     widthType: {
       value: 'full-card',
+    },
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      value: 'layer-standard-card-container',
     },
   },
   methods: {

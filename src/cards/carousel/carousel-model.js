@@ -441,7 +441,7 @@ class CarouselModel extends CardModel {
         }
       });
     });
-    this.items.forEach(item => item.mergeAction(this.action));
+    this.items.forEach(item => item._mergeAction(this.action));
   }
 
   _parseMessage(payload) {
@@ -451,11 +451,11 @@ class CarouselModel extends CardModel {
     // Exclucde our main list part that defines the list rather than its list items
     const parts = this.childParts.filter(part => part.mimeAttributes.role === 'carousel-item');
     this.items = parts.map(part => this.getClient().createCardModel(this.message, part));
-    this.items.forEach(item => item.mergeAction(this.action));
+    this.items.forEach(item => item._mergeAction(this.action));
   }
 
   __updateAction(newValue) {
-    if (this.items) this.items.forEach(item => item.mergeAction(newValue));
+    if (this.items) this.items.forEach(item => item._mergeAction(newValue));
   }
 
   getOneLineSummary() {

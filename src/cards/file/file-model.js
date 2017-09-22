@@ -108,7 +108,7 @@ class FileModel extends CardModel {
 
   __getTitle() {
     if (this.__title) return this.__title;
-    if (this.source && this.source.mimeAttributes.name) return this.source.mimeAttributes.name;
+    //if (this.source && this.source.mimeAttributes.name) return this.source.mimeAttributes.name;
     if (this.__sourceUrl) return this._sourceUrl.replace(/.*\/(.*)$/, '$1');
   }
 

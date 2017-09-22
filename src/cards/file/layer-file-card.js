@@ -5,11 +5,10 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import CardPrimitiveMixin from '../card-primitive-mixin';
 import { addActionHandler } from '../../handlers/message/layer-card-view';
 
 registerComponent('layer-file-card', {
-  mixins: [CardMixin, CardPrimitiveMixin],
+  mixins: [CardMixin],
 
   // Adapated from github.com/picturepan2/fileicon.css
   style: `layer-card-view.layer-file-card > * {
@@ -29,6 +28,10 @@ registerComponent('layer-file-card', {
     preferredMinWidth: {
       type: Number,
       value: 250,
+    },
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      value: 'layer-standard-card-container',
     },
   },
   methods: {

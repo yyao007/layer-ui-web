@@ -175,6 +175,10 @@ class ProductModel extends CardModel {
       style: 'currency',
     });
   }
+
+  getChoiceModelResponseTopic() {
+    return this.name;
+  }
 }
 
 // Naming properties

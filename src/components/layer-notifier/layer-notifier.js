@@ -515,4 +515,3 @@ registerComponent('layer-notifier', {
     },
   },
 });
-

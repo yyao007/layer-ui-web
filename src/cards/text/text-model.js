@@ -71,6 +71,12 @@ MessagePart.TextualMimeTypes.push(TextModel.MIMEType);
 // Register the Card Model Class with the Client
 Client.registerCardModelClass(TextModel, 'TextModel');
 
+
+/*
+ * This Message Handler is NOT the main "layer-card-view" Message Handler;
+ * rather, this Viewer detects text/plain messages, converts them to
+ * Text Cards, and THEN lets the <layer-card-view /> component handle it from there
+ */
 registerMessageHandler({
   tagName: 'layer-card-view',
   canRenderConcise() { return true; },

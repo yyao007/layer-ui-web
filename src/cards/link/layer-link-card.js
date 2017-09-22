@@ -5,11 +5,10 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import CardPrimitiveMixin from '../card-primitive-mixin';
 import { addActionHandler } from '../../handlers/message/layer-card-view';
 
 registerComponent('layer-link-card', {
-  mixins: [CardMixin, CardPrimitiveMixin],
+  mixins: [CardMixin],
 
   // This style contains rules that impacts the container that contains the url card
   // This will not translate well to shadow-dom.
@@ -35,6 +34,10 @@ registerComponent('layer-link-card', {
       get() {
         return this.model.imageUrl || this.parentComponent.isShowingMetadata ? 'flex-card' : 'chat-bubble';
       },
+    },
+    cardContainerTagName: {
+      noGetterFromSetter: true,
+      value: 'layer-standard-card-container',
     },
   },
   methods: {
