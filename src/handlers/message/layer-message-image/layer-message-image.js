@@ -86,15 +86,6 @@ registerMessageComponent('layer-message-image', {
     },
 
     /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
-
-    /**
      * Constructor.
      *
      * @method onCreate

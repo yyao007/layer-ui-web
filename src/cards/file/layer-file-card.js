@@ -5,15 +5,13 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import { addActionHandler } from '../../handlers/message/layer-card-view';
+import { registerMessageActionHandler } from '../../base';
 
 registerComponent('layer-file-card', {
   mixins: [CardMixin],
 
   // Adapated from github.com/picturepan2/fileicon.css
-  style: `layer-card-view.layer-file-card > * {
-    cursor: pointer;
-  }
+  style: `
   layer-file-card {
     display: block;
     width: 100%;
@@ -36,15 +34,6 @@ registerComponent('layer-file-card', {
   },
   methods: {
     /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
-
-    /**
      *
      * @method
      */
@@ -55,16 +44,10 @@ registerComponent('layer-file-card', {
 });
 
 /* Note that this runs with this === <layer-card-view /> */
-addActionHandler('open-file', function openFileHandler(customData) {
-  if (customData.url || customData.sourceUrl) {
-    window.open(customData.url || customData.sourceUrl);
-  } else if (this.model.sourceUrl) {
-    window.open(this.model.sourceUrl);
-  } else if (this.model.source) {
-    if (this.model.source.url) {
-      window.open(this.model.source.url);
-    } else {
-      this.model.source.fetchStream(url => window.open(url));
-    }
+registerMessageActionHandler('open-file', function openFileHandler(customData) {
+  if (customData.url) {
+    window.open(customData.url);
+  } else {
+    this.model.getSourceUrl(url => window.open(url));
   }
 });

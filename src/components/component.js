@@ -1677,13 +1677,11 @@ const standardClassMethods = {
 
 function registerMessageComponent(tagName, componentDefinition) {
   const handlesMessage = componentDefinition.methods.handlesMessage;
-  const canRenderConcise = componentDefinition.methods.canRenderConcise;
   const label = componentDefinition.properties.label.value;
   const order = componentDefinition.properties.order;
   registerComponent(tagName, componentDefinition);
   layerUI.registerMessageHandler({
     handlesMessage,
-    canRenderConcise,
     tagName,
     label,
     order,

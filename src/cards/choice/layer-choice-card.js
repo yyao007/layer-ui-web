@@ -37,14 +37,6 @@ registerComponent('layer-choice-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *s
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
 
     getIconClass() {
       return 'layer-poll-card-icon';
@@ -52,7 +44,6 @@ registerComponent('layer-choice-card', {
     getTitle() {
       return this.model.title;
     },
-
 
     onAfterCreate() {
       this.nodes.question.innerHTML = this.model.question;
@@ -69,26 +60,17 @@ registerComponent('layer-choice-card', {
 
     onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
-      let selectedAnswer = [];
-      if (this.model.selectedAnswer) {
-        if (this.model.allowMultiselect) {
-          selectedAnswer = (this.model.selectedAnswer || '').split(/,/);
+
+      this.model.choices.forEach((choice, index) => {
+        const button = this.nodes.answers.childNodes[index];
+        button.text = this.model.getText(index);
+        button.selected = this.model.isSelectedIndex(index);
+        if (this.model.selectedAnswer && !this.model.allowReselect || this.model.allowDeselect && button.selected) {
+          button.disabled = true;
         } else {
-          selectedAnswer = [ this.model.selectedAnswer ];
+          button.disabled = false;
         }
-      }
-      for (let i = 0; i < this.nodes.answers.childNodes.length; i++) {
-        const child = this.nodes.answers.childNodes[i];
-        const isSelected = selectedAnswer.indexOf(child.data.id) !== -1;
-        if (this.model.allowDeselect || !selectedAnswer.length || this.allowReselect && !isSelected) {
-          child.disabled = false;
-        } else if (this.allowReselect && isSelected || !this.allowReselect && selectedAnswer.length) {
-          child.disabled = true;
-        } else {
-          child.disabled = false;
-        }
-        child.selected = isSelected;
-      }
+      });
     },
 
     onChoiceSelect(data) {

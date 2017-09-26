@@ -31,7 +31,7 @@ registerComponent('layer-action-button', {
     },
     tooltip: {
       set(value) {
-        this.nodes.title = value;
+        this.nodes.button.title = value;
       },
     },
     event: {},

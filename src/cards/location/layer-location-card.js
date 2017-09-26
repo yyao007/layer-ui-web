@@ -13,7 +13,7 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import { addActionHandler } from '../../handlers/message/layer-card-view';
+import { registerMessageActionHandler } from '../../base';
 
 registerComponent('layer-location-card', {
   mixins: [CardMixin],
@@ -46,15 +46,6 @@ registerComponent('layer-location-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
-
 
     onAttach() {
       if (!this.hideMap) this._updateImageSrc();
@@ -87,7 +78,7 @@ registerComponent('layer-location-card', {
   },
 });
 
-addActionHandler('open-map', function openMapHandler(customData) {
+registerMessageActionHandler('open-map', function openMapHandler(customData) {
   let url;
   if (this.model.street1) {
     url = 'http://www.google.com/maps/?q=' +

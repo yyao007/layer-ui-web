@@ -40,14 +40,6 @@ registerComponent('layer-buttons-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
 
     onAfterCreate() {
       if (this.model.contentModel) {

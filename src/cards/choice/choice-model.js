@@ -39,8 +39,24 @@
      allowReselect: true,
      choices: [
         {text:  "red", id: "red"},
-        {text:  "blue", id: "blue"},
-        {text:  "black", id: "black"},
+        {
+          text: "blue",
+          id: "blue",
+          states: {
+            selected: {
+              text: "blueish"
+            }
+          }
+        },
+        {
+          text:  "black",
+          id: "black",
+          states: {
+            default: {
+              text: "darkgray"
+            }
+          }
+        },
       ],
    });
    model.generateMessage($("layer-conversation-view").conversation, message => message.send())
@@ -108,11 +124,11 @@ class ChoiceModel extends CardModel {
   }
 
   _buildActionModels() {
-    this.actionModels = this.choices.map(item => ({
+    this.actionModels = this.choices.map((choice, index) => ({
       type: 'action',
-      text: item.text,
+      text: this.getText(index),
       event: 'layer-choice-select',
-      data: { id: item.id },
+      data: { id: choice.id },
     }));
   }
 
@@ -126,8 +142,8 @@ class ChoiceModel extends CardModel {
 
   _selectMultipleAnswers(answerData) {
     let selectionText;
-    let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
-    let selectedAnswers = (this.selectedAnswer || '').split(/,/);
+    const { id, text } = this.getChoiceById(answerData.id);
+    const selectedAnswers = (this.selectedAnswer || '').split(/\s*,\s*/);
     const answerDataIndex = selectedAnswers.indexOf(answerData.id);
 
     // Deselect it
@@ -183,18 +199,21 @@ class ChoiceModel extends CardModel {
   }
 
   _selectSingleAnswer(answerData) {
+    let selectedIndex = this.getChoiceIndexById(answerData.id);
+    let selectedId = selectedIndex === -1 ? '' : this.choices[selectedIndex].id;
     const nameOfCard = this._getNameOfCard();
     if (!this.selectedAnswer || this.allowReselect) {
-      let { id, text } = this.choices.filter(item => item.id === answerData.id)[0];
-      let selectionText = 'selected';
+      let action = 'selected';
+      const selectedText = this.getText(selectedIndex);
 
-      if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
-        id = null;
-        selectionText = 'deselected';
+      if (this.isSelectedIndex(selectedIndex) && this.allowDeselect) {
+        selectedIndex = -1;
+        selectedId = '';
+        action = 'deselected';
       }
 
       const participantData = {
-        [this.responseName]: id,
+        [this.responseName]: selectedId,
       };
       if (this.customResponseData) {
         Object.keys(this.customResponseData).forEach(key => (participantData[key] = this.customResponseData[key]));
@@ -205,13 +224,13 @@ class ChoiceModel extends CardModel {
         responseToMessage: this.message,
         responseToNodeId: this.parentNodeId || this.nodeId,
         messageModel: new TextModel({
-          text: `${this.getClient().user.displayName} ${selectionText} "${text}"` + (nameOfCard ? ` for "${nameOfCard}"` : ''),
+          text: `${this.getClient().user.displayName} ${action} "${selectedText}"` + (nameOfCard ? ` for "${nameOfCard}"` : ''),
         }),
       });
       if (!this.message.isNew()) {
         responseModel.send();
       }
-      this.selectedAnswer = id;
+      this.selectedAnswer = selectedId;
       this.trigger('change');
       if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
 
@@ -233,8 +252,9 @@ class ChoiceModel extends CardModel {
       let responseIdentityIds = Object.keys(data).filter(participantId => data[participantId][this.responseName]);
       if (responseIdentityIds.length > 1) {
         responseIdentityIds = responseIdentityIds.filter(id => senderId !== id);
+      } else if (responseIdentityIds.length) {
+        this.selectedAnswer = data[responseIdentityIds[0]][this.responseName];
       }
-      this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
     } else {
       this._hasPendingResponse = true;
     }
@@ -269,6 +289,55 @@ class ChoiceModel extends CardModel {
   __updateAllowMultiselect(newValue) {
     if (newValue) {
       this.allowDeselect = true;
+    }
+  }
+
+  getChoiceById(id) {
+    for (let i = 0; i < this.choices.length; i++) {
+      if (this.choices[i].id === id) return this.choices[i];
+    }
+    return null;
+  }
+
+  getChoiceIndexById(id) {
+    const choice = this.getChoiceById(id);
+    return this.choices.indexOf(choice);
+  }
+
+  isSelectedIndex(choiceIndex) {
+    if (choiceIndex >= this.choices.length) return false;
+    const indexId = this.choices[choiceIndex].id;
+    if (this.allowMultiselect) {
+      const selectedAnswers = (this.selectedAnswer || '').split(/\s*,\s*/);
+      return selectedAnswers.indexOf(indexId) !== -1;
+    } else {
+      return indexId === this.selectedAnswer;
+    }
+  }
+
+  getText(choiceIndex) {
+    const choice = this.choices[choiceIndex];
+    let text = choice.text;
+    const state = this.getState(choiceIndex);
+    if (choice.states && choice.states[state] && choice.states[state].text) {
+      text = choice.states[state].text;
+    }
+    return text;
+  }
+  getTooltip(choiceIndex) {
+    const choice = this.choices[choiceIndex];
+    let tooltip = choice.tooltip;
+    const state = this.getState(choiceIndex);
+    if (choice.states && choice.states[state] && choice.states[state].tooltip) {
+      tooltip = choice.states[state].tooltip;
+    }
+    return tooltip;
+  }
+  getState(choiceIndex) {
+    if (this.isSelectedIndex(choiceIndex)) {
+      return 'selected';
+    } else {
+      return 'default';
     }
   }
 }

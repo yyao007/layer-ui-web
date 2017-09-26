@@ -63,6 +63,7 @@ class FileModel extends CardModel {
       sourcePart = new MessagePart(this.source);
       sourcePart.mimeAttributes.role = 'source';
       sourcePart.mimeAttributes['parent-node-id'] = this.nodeId;
+      this.childParts.push(sourcePart);
     }
 
     callback(this.source ? [this.part, sourcePart] : [this.part]);
@@ -90,19 +91,17 @@ class FileModel extends CardModel {
 
   }
 
-  fetchSourceUrl(callback) {
-    if (this.sourceUrl) callback(this.sourceUrl);
-    else {
-      this.source.fetchStream(url => callback(url));
-    }
-  }
-
-  __getSourceUrl() {
-    if (this.__sourceUrl) return this.__sourceUrl;
-    if (this.source) {
+  getSourceUrl(callback) {
+    if (this.sourceUrl) {
+      callback(this.sourceUrl);
+    } else if (this.source) {
       if (this.source.url) {
-        return this.source.url;
+        callback(this.source.url);
+      } else {
+        this.source.fetchStream(url => callback(url));
       }
+    } else {
+      callback('');
     }
   }
 

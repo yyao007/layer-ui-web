@@ -539,10 +539,7 @@ layerUI.settings = {
   disableTabAsWhiteSpace: false,
   markReadDelay: 2500,
   defaultHandler: {
-    tagName: 'layer-message-unknown',
-    canRenderConcise: function canRenderConcise() {
-      return true;
-    }
+    tagName: 'layer-message-unknown'
   },
   textHandlers: ['autolinker', 'emoji', 'newline'],
   maxSizes: { width: 512, height: 512 },
@@ -564,6 +561,14 @@ layerUI.handlers = [];
  * @private
  */
 layerUI.textHandlers = {};
+
+/**
+ * Hash of Message Action Handlers, indexed by action name
+ *
+ * @property {Object} handler
+ * @private
+ */
+layerUI.messageActionHandlers = {};
 
 /**
  * Hash of components defined using layerUI.components.Component.
@@ -847,6 +852,10 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
   }
 };
 
+layerUI.registerMessageActionHandler = function registerMessageActionHandler(actionName, handler) {
+  layerUI.messageActionHandlers[actionName] = handler;
+};
+
 /**
  * Register your template for use by an existing Component.
  *
@@ -1070,6 +1079,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  TODO: use of selectedAnswer within a choice causes problems when combined with allowDeselect
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   TextModel = layer.Client.getCardModelClass('TextModel')
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
@@ -1166,6 +1176,63 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model = new ButtonModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   buttons: [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "text": "like",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "id": "like",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "tooltip": "like",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "style": "style name supported by UI Framework or provided by customer",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "states": {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "default": {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "text": "love",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "tooltip": "love",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "style": "override the base style"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "selected": {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "text": "please deselect me"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "disabled": {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "text": "Feature not enabled",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "style": "warning_button"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "text": "dislike",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "id": "dislike",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           "tooltip": "dislike"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         }],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "satisfaction", allowReselect: true}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "\uD83D\uDC4D", "id": "up", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "down", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false, customResponseData: {howdy: "ho der"}}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "type": "choice",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "data": {"responseName": "helpfulness", allowReselect: false}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   contentModel: new ProductModel({
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     currency: 'USD',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     price: 175,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     quantity: 3,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     brand: "randomcrap.com",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     name: "A pretty picture",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     imageUrls: [ "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg" ],
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   })
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 });
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  model = new ButtonModel({
@@ -1210,7 +1277,7 @@ var ButtonsModel = function (_CardModel) {
     value: function _generateParts(callback) {
       var _this2 = this;
 
-      var body = this._initBodyWithMetadata(['buttons']);
+      var body = this._initBodyWithMetadata(['buttons', 'states']);
       this.part = new _layerWebsdk.MessagePart({
         mimeType: this.constructor.MIMEType,
         body: JSON.stringify(body)
@@ -1256,6 +1323,9 @@ var ButtonsModel = function (_CardModel) {
         if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
         if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
         if ('customResponseData' in button.data) obj.customResponseData = button.data.customResponseData;
+        if ('states' in button.data) obj.states = button.data.states;
+
+        // Generate the model and add it to this.choices[model.responseName]
         var model = new _choiceModel2.default(obj);
         if (!_this3.choices[model.responseName]) {
           _this3.choices[model.responseName] = model;
@@ -1305,6 +1375,7 @@ var ButtonsModel = function (_CardModel) {
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
 ButtonsModel.prototype.choices = null;
+ButtonsModel.prototype.states = null;
 
 ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';
@@ -1315,8 +1386,6 @@ _layerWebsdk.MessagePart.TextualMimeTypes.push(ButtonsModel.MIMEType);
 _layerWebsdk.Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 
 module.exports = ButtonsModel;
-
-window.PollModel = ButtonsModel; // debug stuff
 },{"../choice/choice-model":10,"@layerhq/layer-websdk":112}],6:[function(require,module,exports){
 /**
  *
@@ -1356,14 +1425,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
-    },
     onAfterCreate: function onAfterCreate() {
       var _this = this;
 
@@ -2349,8 +2410,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     allowReselect: true,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     choices: [
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {text:  "red", id: "red"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "blue", id: "blue"},
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {text:  "black", id: "black"},
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         text: "blue",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         id: "blue",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         states: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           selected: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             text: "blueish"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       },
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         text:  "black",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         id: "black",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         states: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           default: {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             text: "darkgray"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       },
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ],
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   });
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   model.generateMessage($("layer-conversation-view").conversation, message => message.send())
@@ -2449,12 +2526,14 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_buildActionModels',
     value: function _buildActionModels() {
-      this.actionModels = this.choices.map(function (item) {
+      var _this2 = this;
+
+      this.actionModels = this.choices.map(function (choice, index) {
         return {
           type: 'action',
-          text: item.text,
+          text: _this2.getText(index),
           event: 'layer-choice-select',
-          data: { id: item.id }
+          data: { id: choice.id }
         };
       });
     }
@@ -2470,16 +2549,15 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_selectMultipleAnswers',
     value: function _selectMultipleAnswers(answerData) {
-      var _this2 = this;
+      var _this3 = this;
 
       var selectionText = void 0;
-      var _choices$filter$ = this.choices.filter(function (item) {
-        return item.id === answerData.id;
-      })[0],
-          id = _choices$filter$.id,
-          text = _choices$filter$.text;
 
-      var selectedAnswers = (this.selectedAnswer || '').split(/,/);
+      var _getChoiceById = this.getChoiceById(answerData.id),
+          id = _getChoiceById.id,
+          text = _getChoiceById.text;
+
+      var selectedAnswers = (this.selectedAnswer || '').split(/\s*,\s*/);
       var answerDataIndex = selectedAnswers.indexOf(answerData.id);
 
       // Deselect it
@@ -2510,8 +2588,8 @@ var ChoiceModel = function (_CardModel) {
       // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
       // from the server after a user change.
       this.pauseUpdateTimeout = setTimeout(function () {
-        _this2.pauseUpdateTimeout = 0;
-        if (_this2.message && !_this2.message.isNew()) _this2._processNewResponses();
+        _this3.pauseUpdateTimeout = 0;
+        if (_this3.message && !_this3.message.isNew()) _this3._processNewResponses();
       }, 6000);
     }
   }, {
@@ -2535,27 +2613,25 @@ var ChoiceModel = function (_CardModel) {
   }, {
     key: '_selectSingleAnswer',
     value: function _selectSingleAnswer(answerData) {
-      var _this3 = this;
+      var _this4 = this;
 
+      var selectedIndex = this.getChoiceIndexById(answerData.id);
+      var selectedId = selectedIndex === -1 ? '' : this.choices[selectedIndex].id;
       var nameOfCard = this._getNameOfCard();
       if (!this.selectedAnswer || this.allowReselect) {
-        var _choices$filter$2 = this.choices.filter(function (item) {
-          return item.id === answerData.id;
-        })[0],
-            id = _choices$filter$2.id,
-            text = _choices$filter$2.text;
+        var action = 'selected';
+        var selectedText = this.getText(selectedIndex);
 
-        var selectionText = 'selected';
-
-        if (this.selectedAnswer && id === this.selectedAnswer && this.allowDeselect) {
-          id = null;
-          selectionText = 'deselected';
+        if (this.isSelectedIndex(selectedIndex) && this.allowDeselect) {
+          selectedIndex = -1;
+          selectedId = '';
+          action = 'deselected';
         }
 
-        var participantData = _defineProperty({}, this.responseName, id);
+        var participantData = _defineProperty({}, this.responseName, selectedId);
         if (this.customResponseData) {
           Object.keys(this.customResponseData).forEach(function (key) {
-            return participantData[key] = _this3.customResponseData[key];
+            return participantData[key] = _this4.customResponseData[key];
           });
         }
 
@@ -2564,13 +2640,13 @@ var ChoiceModel = function (_CardModel) {
           responseToMessage: this.message,
           responseToNodeId: this.parentNodeId || this.nodeId,
           messageModel: new _textModel2.default({
-            text: this.getClient().user.displayName + ' ' + selectionText + ' "' + text + '"' + (nameOfCard ? ' for "' + nameOfCard + '"' : '')
+            text: this.getClient().user.displayName + ' ' + action + ' "' + selectedText + '"' + (nameOfCard ? ' for "' + nameOfCard + '"' : '')
           })
         });
         if (!this.message.isNew()) {
           responseModel.send();
         }
-        this.selectedAnswer = id;
+        this.selectedAnswer = selectedId;
         this.trigger('change');
         if (this.pauseUpdateTimeout) clearTimeout(this.pauseUpdateTimeout);
 
@@ -2578,29 +2654,30 @@ var ChoiceModel = function (_CardModel) {
         // which we need to ignore. Pause 6 seconds and wait for all changes to come in before rendering changes
         // from the server after a user change.
         this.pauseUpdateTimeout = setTimeout(function () {
-          _this3.pauseUpdateTimeout = 0;
-          if (_this3._hasPendingResponse) _this3._processNewResponses();
+          _this4.pauseUpdateTimeout = 0;
+          if (_this4._hasPendingResponse) _this4._processNewResponses();
         }, 6000);
       }
     }
   }, {
     key: '_processNewResponses',
     value: function _processNewResponses() {
-      var _this4 = this;
+      var _this5 = this;
 
       if (!this.pauseUpdateTimeout) {
         this._hasPendingResponse = false;
         var senderId = this.message.sender.userId;
         var data = this.responses.participantData;
         var responseIdentityIds = Object.keys(data).filter(function (participantId) {
-          return data[participantId][_this4.responseName];
+          return data[participantId][_this5.responseName];
         });
         if (responseIdentityIds.length > 1) {
           responseIdentityIds = responseIdentityIds.filter(function (id) {
             return senderId !== id;
           });
+        } else if (responseIdentityIds.length) {
+          this.selectedAnswer = data[responseIdentityIds[0]][this.responseName];
         }
-        this.selectedAnswer = responseIdentityIds.length ? data[responseIdentityIds[0]][this.responseName] : null;
       } else {
         this._hasPendingResponse = true;
       }
@@ -2639,6 +2716,63 @@ var ChoiceModel = function (_CardModel) {
     value: function __updateAllowMultiselect(newValue) {
       if (newValue) {
         this.allowDeselect = true;
+      }
+    }
+  }, {
+    key: 'getChoiceById',
+    value: function getChoiceById(id) {
+      for (var i = 0; i < this.choices.length; i++) {
+        if (this.choices[i].id === id) return this.choices[i];
+      }
+      return null;
+    }
+  }, {
+    key: 'getChoiceIndexById',
+    value: function getChoiceIndexById(id) {
+      var choice = this.getChoiceById(id);
+      return this.choices.indexOf(choice);
+    }
+  }, {
+    key: 'isSelectedIndex',
+    value: function isSelectedIndex(choiceIndex) {
+      if (choiceIndex >= this.choices.length) return false;
+      var indexId = this.choices[choiceIndex].id;
+      if (this.allowMultiselect) {
+        var selectedAnswers = (this.selectedAnswer || '').split(/\s*,\s*/);
+        return selectedAnswers.indexOf(indexId) !== -1;
+      } else {
+        return indexId === this.selectedAnswer;
+      }
+    }
+  }, {
+    key: 'getText',
+    value: function getText(choiceIndex) {
+      var choice = this.choices[choiceIndex];
+      var text = choice.text;
+      var state = this.getState(choiceIndex);
+      if (choice.states && choice.states[state] && choice.states[state].text) {
+        text = choice.states[state].text;
+      }
+      return text;
+    }
+  }, {
+    key: 'getTooltip',
+    value: function getTooltip(choiceIndex) {
+      var choice = this.choices[choiceIndex];
+      var tooltip = choice.tooltip;
+      var state = this.getState(choiceIndex);
+      if (choice.states && choice.states[state] && choice.states[state].tooltip) {
+        tooltip = choice.states[state].tooltip;
+      }
+      return tooltip;
+    }
+  }, {
+    key: 'getState',
+    value: function getState(choiceIndex) {
+      if (this.isSelectedIndex(choiceIndex)) {
+        return 'selected';
+      } else {
+        return 'default';
       }
     }
   }]);
@@ -2710,14 +2844,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *s
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
-    },
     getIconClass: function getIconClass() {
       return 'layer-poll-card-icon';
     },
@@ -2739,27 +2865,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       });
     },
     onRerender: function onRerender() {
+      var _this2 = this;
+
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
-      var selectedAnswer = [];
-      if (this.model.selectedAnswer) {
-        if (this.model.allowMultiselect) {
-          selectedAnswer = (this.model.selectedAnswer || '').split(/,/);
+
+      this.model.choices.forEach(function (choice, index) {
+        var button = _this2.nodes.answers.childNodes[index];
+        button.text = _this2.model.getText(index);
+        button.selected = _this2.model.isSelectedIndex(index);
+        if (_this2.model.selectedAnswer && !_this2.model.allowReselect || _this2.model.allowDeselect && button.selected) {
+          button.disabled = true;
         } else {
-          selectedAnswer = [this.model.selectedAnswer];
+          button.disabled = false;
         }
-      }
-      for (var i = 0; i < this.nodes.answers.childNodes.length; i++) {
-        var child = this.nodes.answers.childNodes[i];
-        var isSelected = selectedAnswer.indexOf(child.data.id) !== -1;
-        if (this.model.allowDeselect || !selectedAnswer.length || this.allowReselect && !isSelected) {
-          child.disabled = false;
-        } else if (this.allowReselect && isSelected || !this.allowReselect && selectedAnswer.length) {
-          child.disabled = true;
-        } else {
-          child.disabled = false;
-        }
-        child.selected = isSelected;
-      }
+      });
     },
     onChoiceSelect: function onChoiceSelect(data) {
       this.model.selectAnswer(data);
@@ -2974,6 +3093,7 @@ var FileModel = function (_CardModel) {
         sourcePart = new _layerWebsdk.MessagePart(this.source);
         sourcePart.mimeAttributes.role = 'source';
         sourcePart.mimeAttributes['parent-node-id'] = this.nodeId;
+        this.childParts.push(sourcePart);
       }
 
       callback(this.source ? [this.part, sourcePart] : [this.part]);
@@ -3005,22 +3125,20 @@ var FileModel = function (_CardModel) {
       }
     }
   }, {
-    key: 'fetchSourceUrl',
-    value: function fetchSourceUrl(callback) {
-      if (this.sourceUrl) callback(this.sourceUrl);else {
-        this.source.fetchStream(function (url) {
-          return callback(url);
-        });
-      }
-    }
-  }, {
-    key: '__getSourceUrl',
-    value: function __getSourceUrl() {
-      if (this.__sourceUrl) return this.__sourceUrl;
-      if (this.source) {
+    key: 'getSourceUrl',
+    value: function getSourceUrl(callback) {
+      if (this.sourceUrl) {
+        callback(this.sourceUrl);
+      } else if (this.source) {
         if (this.source.url) {
-          return this.source.url;
+          callback(this.source.url);
+        } else {
+          this.source.fetchStream(function (url) {
+            return callback(url);
+          });
         }
+      } else {
+        callback('');
       }
     }
   }, {
@@ -3082,7 +3200,7 @@ var _cardMixin = require('../card-mixin');
 
 var _cardMixin2 = _interopRequireDefault(_cardMixin);
 
-var _layerCardView = require('../../handlers/message/layer-card-view');
+var _base = require('../../base');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3090,7 +3208,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   mixins: [_cardMixin2.default],
 
   // Adapated from github.com/picturepan2/fileicon.css
-  style: 'layer-card-view.layer-file-card > * {\n    cursor: pointer;\n  }\n  layer-file-card {\n    display: block;\n    width: 100%;\n  }\n',
+  style: '\n  layer-file-card {\n    display: block;\n    width: 100%;\n  }\n',
 
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -3108,16 +3226,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   },
   methods: {
     /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return true;
-    },
-
-
-    /**
      *
      * @method
      */
@@ -3129,22 +3237,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* Note that this runs with this === <layer-card-view /> */
 
-(0, _layerCardView.addActionHandler)('open-file', function openFileHandler(customData) {
-  if (customData.url || customData.sourceUrl) {
-    window.open(customData.url || customData.sourceUrl);
-  } else if (this.model.sourceUrl) {
-    window.open(this.model.sourceUrl);
-  } else if (this.model.source) {
-    if (this.model.source.url) {
-      window.open(this.model.source.url);
-    } else {
-      this.model.source.fetchStream(function (url) {
-        return window.open(url);
-      });
-    }
+(0, _base.registerMessageActionHandler)('open-file', function openFileHandler(customData) {
+  if (customData.url) {
+    window.open(customData.url);
+  } else {
+    this.model.getSourceUrl(function (url) {
+      return window.open(url);
+    });
   }
 });
-},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7}],16:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../card-mixin":7}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3851,7 +3953,7 @@ var _cardMixin = require('../card-mixin');
 
 var _cardMixin2 = _interopRequireDefault(_cardMixin);
 
-var _layerCardView = require('../../handlers/message/layer-card-view');
+var _base = require('../../base');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3875,14 +3977,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return true;
-    },
     onCreate: function onCreate() {},
     onRender: function onRender() {
       this.onRerender();
@@ -3910,11 +4004,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 }); 
 
 
-(0, _layerCardView.addActionHandler)('open-url', function openUrlHandler(customData) {
+(0, _base.registerMessageActionHandler)('open-url', function openUrlHandler(customData) {
   var url = customData.url || this.model.url;
   if (url) window.open(url);
 });
-},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7}],21:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../card-mixin":7}],21:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4118,7 +4212,7 @@ var _cardMixin = require('../card-mixin');
 
 var _cardMixin2 = _interopRequireDefault(_cardMixin);
 
-var _layerCardView = require('../../handlers/message/layer-card-view');
+var _base = require('../../base');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -4146,14 +4240,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
-    },
     onAttach: function onAttach() {
       if (!this.hideMap) this._updateImageSrc();
     },
@@ -4191,7 +4277,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
 
-(0, _layerCardView.addActionHandler)('open-map', function openMapHandler(customData) {
+(0, _base.registerMessageActionHandler)('open-map', function openMapHandler(customData) {
   var url = void 0;
   if (this.model.street1) {
     url = 'http://www.google.com/maps/?q=' + escape(this.model.street1 + (this.model.street2 ? ' ' + this.model.street2 : '') + (' ' + this.model.city + ' ' + this.model.state + ', ' + this.model.postalCode + ' ' + this.model.country));
@@ -4200,7 +4286,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   }
   if (url) window.open(url);
 });
-},{"../../components/component":34,"../../handlers/message/layer-card-view":69,"../card-mixin":7}],23:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../card-mixin":7}],23:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -4940,14 +5026,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
-    },
     getIconClass: function getIconClass() {
       return 'layer-receipt-card-icon';
     },
@@ -5349,14 +5427,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     }
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return true;
-    },
     onAfterCreate: function onAfterCreate() {
       if (this.model.messageModel) {
         this.properties.contentView = this.createElement('layer-card-view', {
@@ -5500,7 +5570,7 @@ var _base2 = _interopRequireDefault(_base);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _component.registerComponent)('layer-text-card', {
-  style: 'layer-text-card {\n    display: block;\n  }\n  ',
+  style: 'layer-text-card {\n    display: block;\n  }\n  .layer-text-card > * > .layer-card-top {\n    display: block;\n  }\n  ',
   mixins: [_cardMixin2.default],
   // Note that there is also a message property managed by the MessageHandler mixin
   properties: {
@@ -5702,9 +5772,6 @@ _layerWebsdk.Client.registerCardModelClass(TextModel, 'TextModel');
  */
 (0, _base.registerMessageHandler)({
   tagName: 'layer-card-view',
-  canRenderConcise: function canRenderConcise() {
-    return true;
-  },
   handlesMessage: function handlesMessage(message, container) {
     var isCard = Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     if (!isCard && message.parts[0].mimeType === 'text/plain') {
@@ -7457,13 +7524,11 @@ var standardClassMethods = {
 
 function registerMessageComponent(tagName, componentDefinition) {
   var handlesMessage = componentDefinition.methods.handlesMessage;
-  var canRenderConcise = componentDefinition.methods.canRenderConcise;
   var label = componentDefinition.properties.label.value;
   var order = componentDefinition.properties.order;
   registerComponent(tagName, componentDefinition);
   _base2.default.registerMessageHandler({
     handlesMessage: handlesMessage,
-    canRenderConcise: canRenderConcise,
     tagName: tagName,
     label: label,
     order: order
@@ -11888,7 +11953,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     },
     tooltip: {
       set: function set(value) {
-        this.nodes.title = value;
+        this.nodes.button.title = value;
       }
     },
     event: {},
@@ -12356,12 +12421,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         }
       }
     },
-    selected: {
-      type: Boolean,
-      set: function set(value) {
-        //this.toggleClass('layer-action-button-selected', value);
-      }
-    },
     model: {}
   },
 
@@ -12375,10 +12434,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
       this.model.on('change', this.onRerender, this);
       this.properties.buttons = [];
-      this.model.choices.forEach(function (choice) {
+      this.model.choices.forEach(function (choice, index) {
         var widget = _this.createElement('layer-action-button', {
-          text: choice.text,
-          tooltip: choice.tooltip,
+          text: _this.model.getText(index),
+          tooltip: _this.model.getTooltip(index),
           parentNode: _this,
           data: { id: choice.id },
           icon: choice.icon
@@ -12400,11 +12459,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
      */
     onRerender: function onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
+
       for (var i = 0; i < this.childNodes.length; i++) {
         var child = this.childNodes[i];
-        child.disabled = this.model.selectedAnswer && (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
+        var isSelected = this.model.isSelectedIndex(i);
+        child.disabled = this.model.selectedAnswer && !this.model.allowReselect || isSelected && !this.model.allowDeselect;
+        child.selected = isSelected;
 
-        child.selected = this.model.selectedAnswer === child.data.id;
+        this.childNodes[i].text = this.model.getText(i);
+        this.childNodes[i].tooltip = this.model.getTooltip(i);
       }
     },
     _onClick: function _onClick(_ref, evt) {
@@ -14592,16 +14655,10 @@ var _clickable = require('../../mixins/clickable');
 
 var _clickable2 = _interopRequireDefault(_clickable);
 
+var _base = require('../../base');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var actionHandlers = {}; 
-
-
-module.exports = {
-  addActionHandler: function addActionHandler(actionName, handler) {
-    actionHandlers[actionName] = handler;
-  }
-};
 
 (0, _component.registerMessageComponent)('layer-card-view', {
   mixins: [_messageHandler2.default, _clickable2.default],
@@ -14691,16 +14748,6 @@ module.exports = {
     handlesMessage: function handlesMessage(message, container) {
       return Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     },
-
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return this.nodes && this.nodes.ui ? this.nodes.ui.canRenderConcise(message) : false;
-    },
     onCreate: function onCreate() {
       this.addClickHandler('card-click', this, this.handleSelection.bind(this));
     },
@@ -14774,7 +14821,7 @@ module.exports = {
       var event = options && options.event ? options.event : this.model.actionEvent;
       var actionData = options && options.data ? options.data : this.model.actionData; // TODO: perhaps merge options.data with actionData?
 
-      if (actionHandlers[event]) return actionHandlers[event].apply(this, [actionData]);
+      if (_base.messageActionHandlers[event]) return _base.messageActionHandlers[event].apply(this, [actionData]);
       var rootPart = this.message.getPartsMatchingAttribute({ role: 'root' })[0];
       var rootModel = this.client.getCardModel(rootPart.id);
       this.nodes.ui.trigger(event, {
@@ -14785,7 +14832,7 @@ module.exports = {
     }
   }
 });
-},{"../../components/component":34,"../../mixins/clickable":81,"../../mixins/message-handler":92}],70:[function(require,module,exports){
+},{"../../base":4,"../../components/component":34,"../../mixins/clickable":81,"../../mixins/message-handler":92}],70:[function(require,module,exports){
 /**
  * The Layer Image MessageHandler renders a single MessagePart image, or an Atlas 3-message-part Image.
  *
@@ -14895,16 +14942,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
       // We handle 1 part images or 3 part images.
       return message.parts.length === 1 && imageParts || message.parts.length === 3 && imageParts === 1 && previewParts === 1 && metaParts === 1;
-    },
-
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
     },
 
 
@@ -15061,16 +15098,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         return part.mimeType;
       }).join(', ');
       this.innerHTML = 'Message with mimeTypes ' + mimeTypes + ' has been received but has no renderer';
-    },
-
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return true;
     }
   }
 });
@@ -15159,16 +15186,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
         return part.mimeType === 'application/json+imageSize';
       }).length;
       return message.parts.length === 1 && videoParts || message.parts.length === 3 && videoParts === 1 && previewParts === 1 && metaParts === 1;
-    },
-
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise: function canRenderConcise(message) {
-      return false;
     },
 
 
@@ -34974,6 +34991,7 @@ var CardModel = function (_Root) {
 
     if (!_this.customData) _this.customData = {};
     _this.currentCardRenderer = _this.constructor.cardRenderer;
+    _this.childParts = [];
 
     if (_this.message) {
       _this._setupMessage();

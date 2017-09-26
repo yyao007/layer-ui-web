@@ -5,7 +5,7 @@
  */
 import { registerComponent } from '../../components/component';
 import CardMixin from '../card-mixin';
-import { addActionHandler } from '../../handlers/message/layer-card-view';
+import { registerMessageActionHandler } from '../../base';
 
 registerComponent('layer-link-card', {
   mixins: [CardMixin],
@@ -41,14 +41,6 @@ registerComponent('layer-link-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
 
     onCreate() {
 
@@ -80,7 +72,7 @@ registerComponent('layer-link-card', {
   },
 });
 
-addActionHandler('open-url', function openUrlHandler(customData) {
+registerMessageActionHandler('open-url', function openUrlHandler(customData) {
   const url = customData.url || this.model.url;
   if (url) window.open(url);
 });

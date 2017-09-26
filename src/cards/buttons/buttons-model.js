@@ -1,4 +1,5 @@
 /*
+   TODO: use of selectedAnswer within a choice causes problems when combined with allowDeselect
 
    TextModel = layer.Client.getCardModelClass('TextModel')
    ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
@@ -95,6 +96,63 @@ ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.p
   });
   model.generateMessage($("layer-conversation-view").conversation, message => message.send());
 
+  ProductModel = client.getCardModelClassForMimeType('application/vnd.layer.card.product+json')
+   ImageModel = client.getCardModelClassForMimeType('application/vnd.layer.card.image+json')
+   ButtonModel = layer.Client.getCardModelClass('ButtonsModel')
+  model = new ButtonModel({
+    buttons: [
+      {
+        "type": "choice",
+        "choices": [
+          {
+            "text": "like",
+            "id": "like",
+            "tooltip": "like",
+            "style": "style name supported by UI Framework or provided by customer",
+            "states": {
+              "default": {
+                "text": "love",
+                "tooltip": "love",
+                "style": "override the base style"
+              },
+              "selected": {
+                "text": "please deselect me"
+              },
+              "disabled": {
+                "text": "Feature not enabled",
+                "style": "warning_button"
+              }
+            }
+          },
+          {
+            "text": "dislike",
+            "id": "dislike",
+            "tooltip": "dislike"
+          }],
+        "data": {"responseName": "satisfaction", allowReselect: true}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "\uD83D\uDC4D", "id": "up", "tooltip": "like", "icon": "custom-like-button"}, {"text": "\uD83D\uDC4E", "id": "down", "tooltip": "dislike", "icon": "custom-dislike-button"}],
+        "data": {"responseName": "thumborientation", allowReselect: true, allowDeselect: false, customResponseData: {howdy: "ho der"}}
+      },
+      {
+        "type": "choice",
+        "choices": [{"text": "helpful", "id": "helpful", "tooltip": "helpful"}, {"text": "unhelpful", "id": "unhelpful", "tooltip": "unhelpful"}],
+        "data": {"responseName": "helpfulness", allowReselect: false}
+      },
+    ],
+    contentModel: new ProductModel({
+      currency: 'USD',
+      price: 175,
+      quantity: 3,
+      brand: "randomcrap.com",
+      name: "A pretty picture",
+      imageUrls: [ "https://farm5.staticflickr.com/4272/34912460025_be2700d3e7_k.jpg" ],
+    })
+  });
+  model.generateMessage($("layer-conversation-view").conversation, message => message.send());
+
 
 
   model = new ButtonModel({
@@ -128,7 +186,7 @@ import ChoiceModel from '../choice/choice-model';
 
 class ButtonsModel extends CardModel {
   _generateParts(callback) {
-    const body = this._initBodyWithMetadata(['buttons']);
+    const body = this._initBodyWithMetadata(['buttons', 'states']);
     this.part = new MessagePart({
       mimeType: this.constructor.MIMEType,
       body: JSON.stringify(body),
@@ -166,6 +224,9 @@ class ButtonsModel extends CardModel {
       if ('allowReselect' in button.data) obj.allowReselect = button.data.allowReselect;
       if ('selectedAnswer' in button.data) obj.selectedAnswer = button.data.selectedAnswer;
       if ('customResponseData' in button.data) obj.customResponseData = button.data.customResponseData;
+      if ('states' in button.data) obj.states = button.data.states;
+
+      // Generate the model and add it to this.choices[model.responseName]
       const model = new ChoiceModel(obj);
       if (!this.choices[model.responseName]) {
         this.choices[model.responseName] = model;
@@ -197,6 +258,7 @@ class ButtonsModel extends CardModel {
 ButtonsModel.prototype.buttons = null;
 ButtonsModel.prototype.contentModel = null;
 ButtonsModel.prototype.choices = null;
+ButtonsModel.prototype.states = null;
 
 ButtonsModel.Label = 'Buttons';
 ButtonsModel.cardRenderer = 'layer-buttons-card';
@@ -208,4 +270,3 @@ Client.registerCardModelClass(ButtonsModel, 'ButtonsModel');
 
 module.exports = ButtonsModel;
 
-window.PollModel = ButtonsModel; // debug stuff

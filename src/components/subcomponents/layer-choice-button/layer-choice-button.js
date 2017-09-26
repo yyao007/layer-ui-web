@@ -31,12 +31,6 @@ registerComponent('layer-choice-button', {
         for (let i = 0; i < this.childNodes.length; i++) this.childNodes[i].disabled = value;
       },
     },
-    selected: {
-      type: Boolean,
-      set(value) {
-        //this.toggleClass('layer-action-button-selected', value);
-      },
-    },
     model: {},
   },
 
@@ -51,10 +45,10 @@ registerComponent('layer-choice-button', {
     onAfterCreate() {
       this.model.on('change', this.onRerender, this);
       this.properties.buttons = [];
-      this.model.choices.forEach((choice) => {
+      this.model.choices.forEach((choice, index) => {
         const widget = this.createElement('layer-action-button', {
-          text: choice.text,
-          tooltip: choice.tooltip,
+          text: this.model.getText(index),
+          tooltip: this.model.getTooltip(index),
           parentNode: this,
           data: { id: choice.id },
           icon: choice.icon,
@@ -77,12 +71,16 @@ registerComponent('layer-choice-button', {
      */
     onRerender() {
       this.toggleClass('layer-choice-card-complete', this.model.selectedAnswer);
+
       for (let i = 0; i < this.childNodes.length; i++) {
         const child = this.childNodes[i];
-        child.disabled = this.model.selectedAnswer &&
-          (!this.model.allowReselect || this.model.selectedAnswer === child.data.id && !this.model.allowDeselect);
+        const isSelected = this.model.isSelectedIndex(i);
+        child.disabled = this.model.selectedAnswer && !this.model.allowReselect ||
+          isSelected && !this.model.allowDeselect;
+        child.selected = isSelected;
 
-        child.selected = this.model.selectedAnswer === child.data.id;
+        this.childNodes[i].text = this.model.getText(i);
+        this.childNodes[i].tooltip = this.model.getTooltip(i);
       }
     },
 

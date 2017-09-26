@@ -86,14 +86,6 @@ registerComponent('layer-receipt-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return false;
-    },
 
     getIconClass() {
       return 'layer-receipt-card-icon';

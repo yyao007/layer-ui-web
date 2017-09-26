@@ -22,15 +22,6 @@ registerComponent('layer-message-unknown', {
       .join(', ');
       this.innerHTML = `Message with mimeTypes ${mimeTypes} has been received but has no renderer`;
     },
-
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
   },
 });
 

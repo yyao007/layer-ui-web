@@ -42,15 +42,6 @@ registerMessageComponent('layer-message-text-plain', {
     },
 
     /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
-
-    /**
      * Replaces any html tags with escaped html tags so that the recipient
      * sees tags rather than rendered html.
      *

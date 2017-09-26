@@ -7,13 +7,8 @@ import { registerMessageComponent } from '../../components/component';
 import MessageHandler from '../../mixins/message-handler';
 import Clickable from '../../mixins/clickable';
 
-const actionHandlers = {};
+import { messageActionHandlers } from '../../base';
 
-module.exports = {
-  addActionHandler(actionName, handler) {
-    actionHandlers[actionName] = handler;
-  },
-};
 
 registerMessageComponent('layer-card-view', {
   mixins: [MessageHandler, Clickable],
@@ -110,15 +105,6 @@ registerMessageComponent('layer-card-view', {
       return Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     },
 
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return this.nodes && this.nodes.ui ? this.nodes.ui.canRenderConcise(message) : false;
-    },
-
     onCreate() {
       this.addClickHandler('card-click', this, this.handleSelection.bind(this));
     },
@@ -203,7 +189,7 @@ registerMessageComponent('layer-card-view', {
       const event = options && options.event ? options.event : this.model.actionEvent;
       const actionData = options && options.data ? options.data : this.model.actionData; // TODO: perhaps merge options.data with actionData?
 
-      if (actionHandlers[event]) return actionHandlers[event].apply(this, [actionData]);
+      if (messageActionHandlers[event]) return messageActionHandlers[event].apply(this, [actionData]);
       const rootPart = this.message.getPartsMatchingAttribute({ role: 'root' })[0];
       const rootModel = this.client.getCardModel(rootPart.id);
       this.nodes.ui.trigger(event, {

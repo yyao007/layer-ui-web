@@ -80,7 +80,6 @@ layerUI.settings = {
   markReadDelay: 2500,
   defaultHandler: {
     tagName: 'layer-message-unknown',
-    canRenderConcise: () => true,
   },
   textHandlers: ['autolinker', 'emoji', 'newline'],
   maxSizes: { width: 512, height: 512 },
@@ -103,6 +102,14 @@ layerUI.handlers = [];
  */
 layerUI.textHandlers = {};
 
+
+/**
+ * Hash of Message Action Handlers, indexed by action name
+ *
+ * @property {Object} handler
+ * @private
+ */
+layerUI.messageActionHandlers = {};
 
 /**
  * Hash of components defined using layerUI.components.Component.
@@ -385,6 +392,10 @@ layerUI.registerTextHandler = function registerTextHandler(options) {
     layerUI.textHandlers[options.name] = options;
   }
 };
+
+layerUI.registerMessageActionHandler = function registerMessageActionHandler(actionName, handler) {
+  layerUI.messageActionHandlers[actionName] = handler;
+}
 
 /**
  * Register your template for use by an existing Component.

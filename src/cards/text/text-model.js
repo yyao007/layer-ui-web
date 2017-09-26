@@ -79,7 +79,6 @@ Client.registerCardModelClass(TextModel, 'TextModel');
  */
 registerMessageHandler({
   tagName: 'layer-card-view',
-  canRenderConcise() { return true; },
   handlesMessage(message, container) {
     const isCard = Boolean(message.getPartsMatchingAttribute({ role: 'root' })[0]);
     if (!isCard && message.parts[0].mimeType === 'text/plain') {

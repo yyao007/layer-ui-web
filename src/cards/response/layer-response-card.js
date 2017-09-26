@@ -26,14 +26,6 @@ registerComponent('layer-response-card', {
     },
   },
   methods: {
-    /**
-     * Can be rendered in a concise format required for Conversation Last Message and Layer Notifier
-     *
-     * @method
-     */
-    canRenderConcise(message) {
-      return true;
-    },
 
     onAfterCreate() {
       if (this.model.messageModel) {
@@ -45,6 +37,6 @@ registerComponent('layer-response-card', {
           cardBorderStyle: 'none',
         });
       }
-    }
+    },
   },
 });
