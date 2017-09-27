@@ -12,6 +12,9 @@ registerComponent('layer-text-card', {
   style: `layer-text-card {
     display: block;
   }
+  .layer-text-card > * > .layer-card-top {
+    display: block;
+  }
   `,
   mixins: [CardMixin, CardPrimitiveMixin],
   // Note that there is also a message property managed by the MessageHandler mixin
