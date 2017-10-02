@@ -56,12 +56,15 @@ var animatedScrollLeftTo = function (element, to, duration, callback) {
     change = to - start,
     animationStart = +new Date();
     var animating = true;
+    var callbackCalled = false;
     var lastpos = null;
 
     if (element.scrollLeft === to) return callback();
 
     var animateScroll = function() {
         if (!animating) {
+            if (callback && !callbackCalled) callback();
+            callbackCalled = true;
             return;
         }
         requestAnimFrame(animateScroll);
@@ -81,7 +84,10 @@ var animatedScrollLeftTo = function (element, to, duration, callback) {
         if (now > animationStart + duration) {
             element.scrollLeft = to;
             animating = false;
-            if (callback) { callback(); }
+            if (callback) {
+                callbackCalled = true;
+                callback();
+            }
         }
     };
     requestAnimFrame(animateScroll);

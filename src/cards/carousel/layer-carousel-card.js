@@ -150,7 +150,7 @@ registerComponent('layer-carousel-card', {
       const root = this.nodes.items;
       this.toggleClass('layer-carousel-start', root.scrollLeft <= root.firstElementChild.offsetLeft);
 
-      const lastVisible = this._findLastFullyVisibleCard();
+      const lastVisible = this._findLastFullyVisibleCard() || this._findFirstPartiallyVisibleCard();
       const children = this.nodes.items.childNodes;
       this.toggleClass('layer-carousel-end', lastVisible === children[children.length - 1]);
     },
@@ -167,30 +167,41 @@ registerComponent('layer-carousel-card', {
       const currentScroll = root.scrollLeft;
 
       if (isForward) {
-        const lastVisible = this._findLastFullyVisibleCard();
+        const lastVisible = this._findLastFullyVisibleCard() || this._findFirstPartiallyVisibleCard();
         const lastVisibleIndex = Array.prototype.indexOf.call(root.childNodes, lastVisible);
         if (lastVisible && lastVisibleIndex !== -1 && lastVisibleIndex < root.childNodes.length - 1) {
-          const scrollTo = nodes[lastVisibleIndex + 1].offsetLeft;
-          animatedScrollLeftTo(root, scrollTo, 200);
+          const scrollToNode = nodes[lastVisibleIndex + 1];
+          const scrollTo = scrollToNode.offsetLeft;
+          animatedScrollLeftTo(root, scrollTo, 200, this._updateScrollButtons.bind(this));
           this.classList.remove('layer-carousel-start');
-          const lastChild = nodes[nodes.length - 1];
-          this.toggleClass('layer-carousel-end', this._findLastFullyVisibleCard(scrollTo) === lastChild);
         }
       } else {
         this.classList.remove('layer-carousel-end');
         const firstVisible = this._findFirstFullyVisibleCard();
         const firstVisibleIndex = Array.prototype.indexOf.call(nodes, firstVisible);
+
+        // If we aren't already at the left most item, process the scroll request
         if (firstVisibleIndex > 0) {
+
+          // Starting with one item left of the first fully visible item, look for the right amont to scroll
           const rightMostCard = nodes[firstVisibleIndex - 1];
           const minScrollLeft = rightMostCard.offsetLeft - root.clientWidth + rightMostCard.clientWidth + 10;
-          for (let i = 0; i <= firstVisibleIndex; i++) {
+          let found = false;
+          for (let i = 0; i <= firstVisibleIndex - 1; i++) {
             const node = nodes[i];
             const scrollTo = node.offsetLeft;
             if (scrollTo > minScrollLeft) {
-              animatedScrollLeftTo(root, scrollTo, 200);
+              animatedScrollLeftTo(root, scrollTo, 200, this._updateScrollButtons.bind(this));
               this.toggleClass('layer-carousel-start', scrollTo <= nodes[0].offsetLeft);
+              found = true;
               break;
             }
+          }
+          if (!found) {
+            const scrollTo = nodes[firstVisibleIndex - 1].offsetLeft;
+            animatedScrollLeftTo(root, scrollTo, 200, this._updateScrollButtons.bind(this));
+            this.toggleClass('layer-carousel-start', scrollTo <= nodes[0].offsetLeft);
+            found = true;
           }
         }
       }
@@ -202,7 +213,8 @@ registerComponent('layer-carousel-card', {
       const nodes = root.childNodes;
       for (let i = nodes.length - 1; i >= 0; i--) {
         const node = nodes[i];
-        if ((node.offsetLeft + node.clientWidth) <= (root.offsetLeft + root.clientWidth + optionalScroll)) return node;
+        if ((node.offsetLeft + node.clientWidth) <= (root.offsetLeft + root.clientWidth + optionalScroll) &&
+            node.offsetLeft >= root.offsetLeft + optionalScroll) return node;
       }
     },
 
