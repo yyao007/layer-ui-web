@@ -82,7 +82,7 @@ import TextModel from '../text/text-model';
 class ChoiceModel extends CardModel {
   _generateParts(callback) {
     const body = this._initBodyWithMetadata([
-      'question', 'choices', 'selectedAnswer', 'type',
+      'question', 'choices', 'selectedAnswer', 'type', 'responseName',
       'allowReselect', 'allowDeselect', 'allowMultiselect',
       'title', 'customResponseData',
     ]);

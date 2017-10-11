@@ -148,6 +148,7 @@ registerComponent('layer-carousel-card', {
 
     _updateScrollButtons() {
       const root = this.nodes.items;
+      if (!root.childNodes.length) return;
       this.toggleClass('layer-carousel-start', root.scrollLeft <= root.firstElementChild.offsetLeft);
 
       const lastVisible = this._findLastFullyVisibleCard() || this._findFirstPartiallyVisibleCard();
