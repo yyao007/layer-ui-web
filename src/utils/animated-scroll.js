@@ -12,6 +12,13 @@ var easeInOutQuad = function (t, b, c, d) {
     return -c/2 * (t*(t-2) - 1) + b;
 };
 
+var scrollTo = function (element, property, to, callback) {
+    element[property] = to;
+    setTimeout(function() {
+        callback();
+    }, 200);
+};
+
 var animatedScrollTo = function (element, to, duration, callback) {
     var start = element.scrollTop,
     change = to - start,
@@ -46,9 +53,20 @@ var animatedScrollTo = function (element, to, duration, callback) {
         }
     };
     requestAnimFrame(animateScroll);
-    return function cancel() {
+    var cancel = function() {
         animating = false;
     };
+
+    // Some environments are failing to process the animated scroll some of the time.
+    // Add a fallback to force the issue should the scroll fail to have occurred
+    var cancelFallbackTimeoutId = setTimeout(function() {
+        if (animating) cancel();
+        if (Math.abs(to - element.scrollTop) > 10) {
+            scrollTo(element, 'scrollTop', to, callback);
+        }
+    }, duration + 20);
+
+    return cancel;
 };
 
 var animatedScrollLeftTo = function (element, to, duration, callback) {
@@ -91,9 +109,20 @@ var animatedScrollLeftTo = function (element, to, duration, callback) {
         }
     };
     requestAnimFrame(animateScroll);
-    return function cancel() {
+    var cancel = function() {
         animating = false;
     };
+
+    // Some environments are failing to process the animated scroll some of the time.
+    // Add a fallback to force the issue should the scroll fail to have occurred
+    const cancelFallbackTimeoutId = setTimeout(function() {
+        if (animating) cancel();
+        if (Math.abs(to - element.scrollTop) > 10) {
+            scrollTo(element, 'scrollLeft', to, callback);
+        }
+    }, duration + 20);
+
+    return cancel;
 };
 
 module.exports = {
