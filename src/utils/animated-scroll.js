@@ -37,14 +37,14 @@ var animatedScrollTo = function (element, to, duration, callback) {
         var val = Math.floor(easeInOutQuad(now - animationStart, start, change, duration));
         if (lastpos) {
             if (lastpos === element.scrollTop) {
-                lastpos = val;
                 element.scrollTop = val;
+                lastpos = element.scrollTop;
             } else {
                 animating = false;
             }
         } else {
-            lastpos = val;
             element.scrollTop = val;
+            lastpos = element.scrollTop;
         }
         if (now > animationStart + duration) {
             element.scrollTop = to;
@@ -90,14 +90,18 @@ var animatedScrollLeftTo = function (element, to, duration, callback) {
         var val = Math.floor(easeInOutQuad(now - animationStart, start, change, duration));
         if (lastpos) {
             if (lastpos === element.scrollLeft) {
-                lastpos = val;
+                console.log(`lastpost === element.scrollLeft: ${lastpos}; val=${val}`);
                 element.scrollLeft = val;
+                lastpos = element.scrollLeft;
+                console.log(`Updated to ${element.scrollLeft}`);
             } else {
+                console.log("ScrollLeft has moved; canceling");
                 animating = false;
             }
         } else {
-            lastpos = val;
             element.scrollLeft = val;
+            lastpos = element.scrollLeft;
+            console.log(`Scrolling to ${val}; actual value ${element.scrollLeft}`);
         }
         if (now > animationStart + duration) {
             element.scrollLeft = to;
