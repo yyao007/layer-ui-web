@@ -139,7 +139,7 @@ registerComponent('layer-carousel-card', {
 
     _getMaxCardWidth() {
       const parent = this.parentComponent.parentNode;
-      if (!parent || !parent.clientWidth) return 0;
+      if (!parent || !parent.clientWidth) return 350;
       let width = parent.clientWidth;
       if (width > 600) width = width * 0.6;
       else width = width * 0.8;
