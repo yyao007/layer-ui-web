@@ -170,6 +170,7 @@ class ProductModel extends CardModel {
     return this.name;
   }
   getFormattedPrice() {
+    if (!this.price) return '';
     return new Number(this.price).toLocaleString(navigator.language, {
       currency: this.currency,
       style: 'currency',
