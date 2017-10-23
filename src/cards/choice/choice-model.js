@@ -139,12 +139,17 @@ class ChoiceModel extends CardModel {
       selectionText = ' selected ';
     }
 
+    const participantData = {
+      [this.responseName]: selectedAnswers.join(','),
+    };
+    if (this.customResponseData) {
+      Object.keys(this.customResponseData).forEach(key => (participantData[key] = this.customResponseData[key]));
+    }
+
     const responseModel = new ResponseModel({
+      participantData,
       responseToMessage: this.message,
       responseToNodeId: this.parentNodeId || this.nodeId,
-      participantData: {
-        [this.responseName]: selectedAnswers.join(','),
-      },
       messageModel: new TextModel({
         text: this.getClient().user.displayName + selectionText + text,
       }),
@@ -272,7 +277,7 @@ ChoiceModel.prototype.customResponseData = null;
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
 ChoiceModel.cardRenderer = 'layer-choice-card';
-ChoiceModel.MIMEType = 'application/vnd.layer.card.choice+json';
+ChoiceModel.MIMEType = 'application/vnd.layer.choice+json';
 MessagePart.TextualMimeTypes.push(ChoiceModel.MIMEType);
 
 Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
