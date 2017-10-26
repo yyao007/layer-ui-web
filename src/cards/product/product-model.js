@@ -115,7 +115,6 @@ class ProductModel extends CardModel {
     const body = this._initBodyWithMetadata([
       'name', 'brand',  // naming
       'description', 'imageUrls', // Rendering
-      'options',
       'currency', 'price', 'quantity', // Purchasing
       'url', // Action properties
     ]);

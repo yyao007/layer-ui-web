@@ -277,7 +277,7 @@ ChoiceModel.prototype.customResponseData = null;
 ChoiceModel.Label = 'Choose One';
 ChoiceModel.defaultAction = 'layer-choice-select';
 ChoiceModel.cardRenderer = 'layer-choice-card';
-ChoiceModel.MIMEType = 'application/vnd.layer.choice+json';
+ChoiceModel.MIMEType = 'application/vnd.layer.card.choice+json';
 MessagePart.TextualMimeTypes.push(ChoiceModel.MIMEType);
 
 Root.initClass.apply(ChoiceModel, [ChoiceModel, 'ChoiceModel']);
