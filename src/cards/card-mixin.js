@@ -20,6 +20,11 @@ module.exports = {
       type: Number,
       value: 350,
     },
+    preferredMaxWidth: {
+      get() {
+        return this.properties.preferredMaxWidth || 1000;
+      },
+    },
     isHeightAllocated: {
       value: true,
       set(value) {

@@ -16,6 +16,7 @@ registerComponent('layer-action-button', {
   }
   layer-action-button button {
     cursor: pointer;
+    margin: 0px;
   }
   .layer-button-content > * {
     max-width: 100%;

@@ -253,6 +253,12 @@ registerComponent('layer-message-list', {
       value: {
         messageRowLeftSide: function messageRowLeftSide(widget) {
           const item = widget.item;
+          const rootPart = item.parts.filter(part => part.mimeAttributes.role === 'root')[0];
+          if (rootPart) {
+            const model = this.client.createCardModel(item, rootPart);
+            if (model && model.constructor.cardRenderer === 'layer-carousel-card') return null;
+          }
+
           if (item.sender.sessionOwner) {
             return null;
           } else {
@@ -268,6 +274,12 @@ registerComponent('layer-message-list', {
         },
         messageRowRightSide: function messageRowRightSide(widget) {
           const item = widget.item;
+          const rootPart = item.parts.filter(part => part.mimeAttributes.role === 'root')[0];
+          if (rootPart) {
+            const model = this.client.createCardModel(item, rootPart);
+            if (model && model.constructor.cardRenderer === 'layer-carousel-card') return null;
+          }
+
           const div = document.createElement('div');
           div.classList.add('layer-replaceable-inner');
           if (item.sender.sessionOwner) {
