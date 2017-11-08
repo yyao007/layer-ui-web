@@ -39,6 +39,9 @@ registerComponent('layer-product-card', {
     widthType: {
       value: 'full-card',
     },
+    preferredMaxWidth: {
+      value: 500,
+    },
   },
   methods: {
     onRerender() {

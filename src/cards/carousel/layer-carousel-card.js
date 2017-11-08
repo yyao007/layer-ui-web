@@ -95,6 +95,7 @@ registerComponent('layer-carousel-card', {
       // TODO: Assign items ids so we don't need to blow away and then recreate them
       this.nodes.items.innerHTML = '';
       const maxCardWidth = this._getMaxCardWidth();
+
       this.model.items.forEach((item) => {
         // console.log('GENERATE: ' + item.id + '    ' + item.title);
         const card = this.createElement('layer-card-view', {
@@ -145,7 +146,7 @@ registerComponent('layer-carousel-card', {
       let width = parent.clientWidth;
       if (width > 600) width = width * 0.6;
       else width = width * 0.8;
-      return width;
+      return Math.floor(width);
     },
 
 

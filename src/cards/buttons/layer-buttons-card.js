@@ -38,6 +38,11 @@ registerComponent('layer-buttons-card', {
         return this.properties.contentView ? this.properties.contentView.widthType : 'flex-card';
       },
     },
+    preferredMaxWidth: {
+      get() {
+        return this.properties.contentView ? this.properties.contentView.nodes.ui.preferredMaxWidth : 350;
+      },
+    },
   },
   methods: {
     /**
