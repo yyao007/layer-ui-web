@@ -807,26 +807,41 @@ registerComponent('layer-message-list', {
       if (this.properties.insertEvents) this.properties.insertEvents.forEach(anEvt => this._renderInsertedData(anEvt));
       delete this.properties.insertEvents;
 
-      const cards = this.querySelectorAllArray('layer-card-view').map(card => card.nodes.ui).filter(ui => ui);
+      // more than just lastMessage
+      if (this.query.data.length > 1) {
+        Layer.Util.defer(() => this.onPagedData(firstVisibleItem, evt, initialOffset));
+      }
+    },
 
-      Layer.Util.defer(() => {
-        if (this.properties.stuckToBottom) {
-          this.scrollTo(this.scrollHeight - this.clientHeight);
-          let unfinishedCards = cards.filter(card => !card.isHeightAllocated);
-          if (unfinishedCards.length) {
-            const onCardFinished = () => {
-              unfinishedCards = unfinishedCards.filter(card => !card.isHeightAllocated);
-              if (unfinishedCards.length === 0) {
-                this.scrollTo(this.scrollHeight - this.clientHeight);
-                this.removeEventListener('message-height-change', onCardFinished);
-              }
-            };
-            this.addEventListener('message-height-change', onCardFinished);
-          }
-        } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
-          this.scrollTo(firstVisibleItem.offsetTop - this.offsetTop - initialOffset);
+    /**
+     * MIXIN HOOK: Replace this with your own customization if needed
+     */
+    onPagedData(firstVisibleItem, evt, initialOffset) {
+      let needsPagedDataDone = true;
+
+      if (this.properties.stuckToBottom) {
+        this.scrollTo(this.scrollHeight - this.clientHeight);
+        const cards = this.querySelectorAllArray('layer-message-viewer').map(card => card.nodes.ui).filter(ui => ui);
+        let unfinishedCards = cards.filter(card => !card.isHeightAllocated);
+        if (unfinishedCards.length) {
+          const onCardFinished = () => {
+            unfinishedCards = unfinishedCards.filter(card => !card.isHeightAllocated);
+            if (unfinishedCards.length === 0) {
+              this.removeEventListener('message-height-change', onCardFinished);
+            }
+            this.onPagedDataDone();
+          };
+          this.addEventListener('message-height-change', onCardFinished);
+          needsPagedDataDone = false;
         }
-      });
+      } else if (firstVisibleItem && evt.type === 'data' && evt.data.length !== 0) {
+        this.scrollTo(firstVisibleItem.offsetTop - this.offsetTop - initialOffset);
+      }
+      if (needsPagedDataDone) this.onPagedDataDone();
+    },
+
+    onPagedDataDone() {
+      this.scrollTo(this.scrollHeight - this.clientHeight);
     },
   },
 });
