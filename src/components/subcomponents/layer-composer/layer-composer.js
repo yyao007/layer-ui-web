@@ -356,7 +356,6 @@ registerComponent('layer-composer', {
      * @private
      */
     _handleAttachments(evt) {
-      console.log(evt.detail.parts);
       this.send(evt.detail.parts);
     },
   },
