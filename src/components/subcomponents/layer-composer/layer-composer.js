@@ -125,6 +125,7 @@ registerComponent('layer-composer', {
       // Event handlers
       this.addEventListener('layer-file-selected', this._handleAttachments.bind(this));
       this.addEventListener('layer-send-click', this.send.bind(this, null));
+      this.addEventListener('layer-sound-recorded', this._handleAttachments.bind(this));
     },
 
     /**
@@ -355,8 +356,8 @@ registerComponent('layer-composer', {
      * @private
      */
     _handleAttachments(evt) {
+      console.log(evt.detail.parts);
       this.send(evt.detail.parts);
     },
   },
 });
-
